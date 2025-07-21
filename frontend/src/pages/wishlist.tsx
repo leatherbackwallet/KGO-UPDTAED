@@ -39,9 +39,22 @@ export default function Wishlist() {
   const fetchServerWishlist = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/wishlist');
-      const data = response.data as { products: Product[] };
-      setServerWishlist(data.products || []);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No authentication token found');
+        setLoading(false);
+        return;
+      }
+
+      const response = await api.get('/wishlist', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data.success) {
+        setServerWishlist(response.data.data.products || []);
+      } else {
+        console.error('Error fetching wishlist:', response.data.error);
+      }
     } catch (error) {
       console.error('Error fetching wishlist:', error);
       // Fallback to local wishlist if server fails
@@ -149,13 +162,13 @@ export default function Wishlist() {
             <div className="flex gap-3">
               <button
                 onClick={() => router.push('/products')}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="btn-outline"
               >
                 Continue Shopping
               </button>
               <button
                 onClick={() => setShowClearConfirm(true)}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="btn-primary"
               >
                 Clear All
               </button>
@@ -178,7 +191,7 @@ export default function Wishlist() {
             <p className="text-gray-600 mb-6">Start adding products you love to your wishlist</p>
             <button
               onClick={() => router.push('/products')}
-              className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="btn-primary px-8 py-3"
             >
               Browse Products
             </button>
@@ -268,9 +281,9 @@ export default function Wishlist() {
                       {productName}
                     </h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-blue-600">
-                        ${productPrice.toFixed(2)}
-                      </span>
+                                          <span className="text-lg font-bold text-kgo-red">
+                      ₹{productPrice.toFixed(2)}
+                    </span>
                       <span className="text-sm text-gray-500">
                         Stock: {productStock}
                       </span>

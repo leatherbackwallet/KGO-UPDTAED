@@ -16,25 +16,25 @@ interface AdminTabsProps {
 }
 
 const AdminTabs: React.FC<AdminTabsProps> = ({ tabs, activeTab, onTabChange, className }) => (
-  <div
-    className={`inline-flex bg-gray-50 rounded-full p-1 transition-colors ${className || ''}`}
-    role="tablist"
-  >
-    {tabs.map((tab) => (
-      <button
-        key={tab}
-        type="button"
-        className={`
-          px-6 py-2 rounded-full text-sm font-medium transition-all duration-200
-          ${activeTab === tab
-            ? 'bg-white text-black shadow-sm font-semibold'
-            : 'bg-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-100'}
-        `}
-        style={{ minWidth: 90 }}
-        aria-selected={activeTab === tab}
-        onClick={() => onTabChange(tab)}
-        role="tab"
-      >
+          <div
+          className={`inline-flex bg-gray-50 rounded-full p-1 transition-colors ${className || ''}`}
+          role="tablist"
+        >
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              className={`
+                px-6 py-2 rounded-full text-sm font-medium transition-all duration-200
+                ${activeTab === tab
+                  ? 'bg-kgo-red text-white shadow-sm font-semibold'
+                  : 'bg-transparent text-gray-400 hover:text-kgo-red hover:bg-red-50'}
+              `}
+              style={{ minWidth: 90 }}
+              aria-selected={activeTab === tab}
+              onClick={() => onTabChange(tab)}
+              role="tab"
+            >
         {tab}
       </button>
     ))}

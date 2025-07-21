@@ -92,7 +92,7 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
             <button
               onClick={handleAddToCart}
               disabled={(product.stock || 0) === 0}
-              className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center hover:bg-blue-700 transition-all duration-200 hover:scale-110 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-12 h-12 rounded-full bg-kgo-red flex items-center justify-center hover:bg-red-700 transition-all duration-200 hover:scale-110 disabled:bg-gray-400 disabled:cursor-not-allowed"
               aria-label="Add to cart"
             >
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

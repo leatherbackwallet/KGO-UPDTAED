@@ -11,30 +11,32 @@ export default function Navbar() {
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200">
+    <nav className="header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-kgo-red rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">KGO</span>
             </div>
-            /
-            <span className="text-xl font-bold text-gray-900">KeralGiftsOnline</span>
+            <span className="text-xl font-bold">
+              <span className="text-kgo-green">Kerala</span>
+              <span className="text-kgo-red">GiftsOnline</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/products" className="text-gray-700 hover:text-purple-600 transition-colors">
+            <Link href="/products" className="nav-link">
               Products
             </Link>
-            <Link href="/celebration" className="text-gray-700 hover:text-purple-600 transition-colors">
+            <Link href="/celebration" className="nav-link">
               Celebration Cakes
             </Link>
-            <Link href="/categories" className="text-gray-700 hover:text-purple-600 transition-colors">
+            <Link href="/categories" className="nav-link">
               Categories
             </Link>
-            <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors">
+            <Link href="/about" className="nav-link">
               About
             </Link>
           </div>
@@ -42,12 +44,12 @@ export default function Navbar() {
           {/* Right side - Cart, User */}
           <div className="flex items-center space-x-4">
             {/* Cart */}
-            <Link href="/cart" className="relative p-2 text-gray-700 hover:text-purple-600 transition-colors">
+            <Link href="/cart" className="relative p-2 nav-link">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
               </svg>
               {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-kgo-red text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {cartItemCount}
                 </span>
               )}
@@ -58,13 +60,13 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex items-center space-x-2 text-gray-700 hover:text-purple-600 transition-colors"
+                  className="flex items-center space-x-2 nav-link"
                 >
-                                     <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-                     <span className="text-white text-sm font-medium">
-                       {user.firstName?.charAt(0) || user.email?.charAt(0) || 'U'}
-                     </span>
-                   </div>
+                  <div className="w-8 h-8 bg-kgo-red rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-medium">
+                      {user.firstName?.charAt(0) || user.email?.charAt(0) || 'U'}
+                    </span>
+                  </div>
                    <span className="hidden sm:block">{`${user.firstName} ${user.lastName}` || user.email}</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

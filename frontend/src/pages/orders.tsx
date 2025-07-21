@@ -5,10 +5,20 @@ import api from '../utils/api';
 
 interface Order {
   _id: string;
-  products?: { product: { name: string; price: number }; quantity: number }[];
-  totalAmount: number;
-  shippingAddress: string;
-  status: string;
+  orderItems?: { productId: { name: { en: string; de: string }; price: number }; quantity: number; price: number }[];
+  totalPrice: number;
+  shippingDetails?: {
+    recipientName: string;
+    recipientPhone: string;
+    address: {
+      streetName: string;
+      houseNumber: string;
+      postalCode: string;
+      city: string;
+      countryCode: string;
+    };
+  };
+  orderStatus: string;
   createdAt: string;
 }
 
@@ -55,17 +65,17 @@ export default function Orders() {
                   <div className="font-semibold">Order #{order._id.slice(-6)}</div>
                   <div className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleString()}</div>
                 </div>
-                <div className="mb-2">Status: <span className="font-semibold">{order.status}</span></div>
-                <div className="mb-2">Shipping: {order.shippingAddress}</div>
+                <div className="mb-2">Status: <span className="font-semibold">{order.orderStatus}</span></div>
+                <div className="mb-2">Shipping: {order.shippingDetails ? `${order.shippingDetails.address.streetName}, ${order.shippingDetails.address.city}` : 'N/A'}</div>
                 <ul className="mb-2">
-                  {order.products?.map((item, i) => (
+                  {order.orderItems?.map((item, i) => (
                     <li key={i} className="flex justify-between">
-                      <span>{item.product.name} x {item.quantity}</span>
-                      <span>${(item.product.price * item.quantity).toFixed(2)}</span>
+                      <span>{item.productId?.name?.en || 'Unknown Product'} x {item.quantity}</span>
+                      <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="text-right font-bold">Total: ${order.totalAmount.toFixed(2)}</div>
+                <div className="text-right font-bold">Total: ₹{(order.totalPrice || 0).toFixed(2)}</div>
               </div>
             ))}
           </div>

@@ -4,11 +4,21 @@ import { useAuth } from '../context/AuthContext';
 
 interface Order {
   _id: string;
-  user?: { name: string; email: string };
-  products?: { product: { name: string }; quantity: number }[];
-  totalAmount: number;
-  shippingAddress: string;
-  status: string;
+  userId?: { firstName: string; lastName: string; email: string };
+  orderItems?: { productId: { name: { en: string; de: string } }; quantity: number; price: number }[];
+  totalPrice: number;
+  shippingDetails?: {
+    recipientName: string;
+    recipientPhone: string;
+    address: {
+      streetName: string;
+      houseNumber: string;
+      postalCode: string;
+      city: string;
+      countryCode: string;
+    };
+  };
+  orderStatus: string;
   createdAt: string;
 }
 
@@ -93,23 +103,28 @@ export default function AdminOrders() {
             {orders.map(order => (
               <tr key={order._id} className="border-t">
                 <td className="p-2">{order._id.slice(-6)}</td>
-                <td className="p-2">{order.user?.name || 'N/A'}<br /><span className="text-xs text-gray-500">{order.user?.email || 'N/A'}</span></td>
+                <td className="p-2">{order.userId ? `${order.userId.firstName} ${order.userId.lastName}` : 'Guest User'}<br /><span className="text-xs text-gray-500">{order.userId?.email || 'N/A'}</span></td>
                 <td className="p-2">
                   <ul>
-                    {order.products?.map((item, i) => (
-                      <li key={i}>{item.product?.name || 'Unknown Product'} x {item.quantity}</li>
+                    {order.orderItems?.map((item, i) => (
+                      <li key={i}>{item.productId?.name?.en || 'Unknown Product'} x {item.quantity} ₹{(item.price * item.quantity).toFixed(2)}</li>
                     )) || <li>No products</li>}
                   </ul>
                 </td>
-                <td className="p-2">€{order.totalAmount.toFixed(2)}</td>
-                <td className="p-2">{order.shippingAddress}</td>
-                <td className="p-2">{order.status}</td>
+                <td className="p-2">₹{(order.totalPrice || 0).toFixed(2)}</td>
+                <td className="p-2">{order.shippingDetails ? `${order.shippingDetails.address.streetName}, ${order.shippingDetails.address.city}` : 'N/A'}</td>
                 <td className="p-2">
-                  <select value={order.status} onChange={e => updateStatus(order._id, e.target.value)} className="border rounded px-2 py-1">
-                    <option value="Pending">Pending</option>
-                    <option value="Shipped">Shipped</option>
-                    <option value="Delivered">Delivered</option>
-                    <option value="Cancelled">Cancelled</option>
+                  <span className={`status-${order.orderStatus}`}>
+                    {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+                  </span>
+                </td>
+                <td className="p-2">
+                  <select value={order.orderStatus} onChange={e => updateStatus(order._id, e.target.value)} className="form-input text-sm">
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                 </td>
               </tr>
