@@ -4,10 +4,10 @@ import { useAuth } from '../context/AuthContext';
 
 interface Product {
   _id: string;
-  name: string;
-  description: string;
+  name: string | { en: string; de: string };
+  description: string | { en: string; de: string };
   price?: number;
-  category: string | { _id: string; name: string; slug: string };
+  category: string | { _id: string; name: string | { en: string; de: string }; slug: string };
   celebrationType?: string;
   stock?: number;
   images: string[];
@@ -20,9 +20,18 @@ interface Product {
 export default function AdminProducts() {
   const { token } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Array<{_id: string, name: string, slug: string}>>([]);
+  const [categories, setCategories] = useState<Array<{_id: string, name: string | { en: string; de: string }, slug: string}>>([]);
   const [editing, setEditing] = useState<Product | null>(null);
-  const [form, setForm] = useState<Partial<Product>>({});
+  const [form, setForm] = useState<{
+    name?: string;
+    description?: string;
+    price?: number;
+    category?: string | { _id: string; name: string | { en: string; de: string }; slug: string };
+    stock?: number;
+    defaultImage?: string;
+    tags?: string[];
+    isFeatured?: boolean;
+  }>({});
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -39,7 +48,7 @@ export default function AdminProducts() {
   const fetchCategories = async () => {
     try {
       const res = await api.get('/categories');
-      setCategories(res.data as Array<{_id: string, name: string, slug: string}>);
+      setCategories(res.data as Array<{_id: string, name: string | { en: string; de: string }, slug: string}>);
     } catch (err) {
       console.error('Error fetching categories:', err);
     }
@@ -49,6 +58,8 @@ export default function AdminProducts() {
     setEditing(product);
     setForm({
       ...product,
+      name: getText(product.name),
+      description: getText(product.description),
       category: typeof product.category === 'object' ? product.category._id : product.category
     });
   };
@@ -81,7 +92,9 @@ export default function AdminProducts() {
     try {
       const productData = {
         ...form,
-        slug: form.name ? generateSlug(form.name) : undefined,
+        name: { en: (form.name as string) || '', de: (form.name as string) || '' },
+        description: { en: (form.description as string) || '', de: (form.description as string) || '' },
+        slug: form.name ? generateSlug(form.name as string) : undefined,
         images: form.defaultImage ? [form.defaultImage] : [],
         category: form.category,
         price: form.price || 0,
@@ -127,7 +140,7 @@ export default function AdminProducts() {
           <select value={typeof form.category === 'string' ? form.category : form.category?._id || ''} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="px-3 py-2 border rounded" required>
             <option value="">Select Category</option>
             {categories.map(category => (
-              <option key={category._id} value={category._id}>{category.name}</option>
+              <option key={category._id} value={category._id}>{getText(category.name)}</option>
             ))}
           </select>
 
@@ -162,7 +175,7 @@ export default function AdminProducts() {
         <tbody>
           {products.map(product => (
             <tr key={product._id} className="border-t">
-              <td className="p-2">{product.name}</td>
+              <td className="p-2">{getText(product.name)}</td>
               <td className="p-2">${product.price ? product.price.toFixed(2) : '0.00'}</td>
               <td className="p-2">{typeof product.category === 'object' ? getText(product.category.name) : product.category}</td>
               <td className="p-2">{product.stock || 0}</td>

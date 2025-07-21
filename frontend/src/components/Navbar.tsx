@@ -39,19 +39,8 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Right side - Cart, User, Language */}
+          {/* Right side - Cart, User */}
           <div className="flex items-center space-x-4">
-            {/* Language Selector */}
-            <div className="hidden sm:flex items-center space-x-2">
-              <button className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                EN
-              </button>
-              <span className="text-gray-300">|</span>
-              <button className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                DE
-              </button>
-            </div>
-
             {/* Cart */}
             <Link href="/cart" className="relative p-2 text-gray-700 hover:text-purple-600 transition-colors">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,16 +136,6 @@ export default function Navbar() {
               <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors">
                 About
               </Link>
-              <div className="flex items-center space-x-4 pt-2">
-                <span className="text-sm text-gray-500">Language:</span>
-                <button className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                  EN
-                </button>
-                <span className="text-gray-300">|</span>
-                <button className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
-                  DE
-                </button>
-              </div>
             </div>
           </div>
         )}

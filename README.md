@@ -9,7 +9,7 @@ KeralGiftsOnline.com is a comprehensive e-commerce platform designed for the Ger
 ## ✨ Features
 
 ### 🎯 Core Features
-- **Multi-language Support**: English and German localization
+- **English Language**: Clean, simple English interface
 - **Role-Based Access Control**: Admin, Customer, Vendor, Support Agent, Delivery Agent
 - **Advanced Product Management**: Extensible attribute system for product variations
 - **Promotions Engine**: Complex rule-based promotions and discounts
@@ -134,8 +134,8 @@ keralagiftsonline/
 ### Core Collections
 - `roles` - Role-based access control
 - `users` - User management with schedules and addresses
-- `categories` - Product categorization (i18n)
-- `products` - Product templates (i18n)
+- `categories` - Product categorization
+- `products` - Product templates
 - `attributes` - Extensible product attribute system
 - `productAttributes` - Product-attribute value mappings
 
@@ -175,7 +175,7 @@ The system uses JWT-based authentication with role-based access control:
 
 ## 🌐 Internationalization
 
-Full support for English and German languages:
+Clean English interface:
 - Product names and descriptions
 - Category names and descriptions
 - Attribute labels and options

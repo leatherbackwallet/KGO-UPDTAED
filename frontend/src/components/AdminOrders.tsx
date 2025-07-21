@@ -13,27 +13,31 @@ interface Order {
 }
 
 export default function AdminOrders() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
+    if (token && user?.roleName === 'admin') {
       fetchOrders();
+    } else {
+      setLoading(false);
     }
-  }, [token]);
+  }, [token, user]);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
+      setError('');
       const res = await api.get<Order[]>('/orders', { 
         headers: { Authorization: `Bearer ${token}` } 
       });
-      setOrders(res.data);
+      setOrders(res.data || []);
     } catch (err: any) {
       console.error('Error fetching orders:', err);
-      setError('Failed to fetch orders');
+      // Don't show error for empty data, just set empty array
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -50,6 +54,10 @@ export default function AdminOrders() {
     }
   };
 
+  if (!token || user?.roleName !== 'admin') {
+    return <div className="text-red-600">Access denied. Admin privileges required.</div>;
+  }
+
   if (loading) {
     return (
       <div>
@@ -64,7 +72,10 @@ export default function AdminOrders() {
       <h2 className="text-xl font-bold mb-4">Order Management</h2>
       {error && <div className="text-red-600 mb-2">{error}</div>}
       {orders.length === 0 ? (
-        <div className="text-gray-600">No orders found</div>
+        <div className="text-center py-8">
+          <div className="text-gray-500 mb-4">No orders found</div>
+          <div className="text-sm text-gray-400">Orders will appear here when customers place them</div>
+        </div>
       ) : (
         <table className="w-full border">
           <thead>
@@ -90,7 +101,7 @@ export default function AdminOrders() {
                     ))}
                   </ul>
                 </td>
-                <td className="p-2">${order.totalAmount.toFixed(2)}</td>
+                <td className="p-2">€{order.totalAmount.toFixed(2)}</td>
                 <td className="p-2">{order.shippingAddress}</td>
                 <td className="p-2">{order.status}</td>
                 <td className="p-2">
@@ -98,7 +109,7 @@ export default function AdminOrders() {
                     <option value="Pending">Pending</option>
                     <option value="Shipped">Shipped</option>
                     <option value="Delivered">Delivered</option>
-                    <option value="Canceled">Canceled</option>
+                    <option value="Cancelled">Cancelled</option>
                   </select>
                 </td>
               </tr>

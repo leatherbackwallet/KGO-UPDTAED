@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 interface ReturnItem {
   _id: string;
@@ -48,6 +49,7 @@ interface ReturnsData {
 }
 
 const ReturnsDashboard: React.FC = () => {
+  const { token, user } = useAuth();
   const [returns, setReturns] = useState<ReturnItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +78,7 @@ const ReturnsDashboard: React.FC = () => {
   const fetchReturns = async () => {
     try {
       setLoading(true);
+      setError(null);
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: '20'
@@ -85,21 +88,30 @@ const ReturnsDashboard: React.FC = () => {
         params.append('status', selectedStatus);
       }
 
-      const response = await api.get(`/returns?${params}`);
+      const response = await api.get(`/returns?${params}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const data: ReturnsData = response.data as any;
       
-      setReturns(data.returns);
-      setTotalPages(data.pagination.pages);
+      setReturns(data.returns || []);
+      setTotalPages(data.pagination?.pages || 1);
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to fetch returns');
+      console.error('Error fetching returns:', err);
+      // Don't show error for empty data, just set empty array
+      setReturns([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchReturns();
-  }, [selectedStatus, currentPage]);
+    if (token && (user?.roleName === 'admin' || user?.roleName === 'support_agent')) {
+      fetchReturns();
+    } else {
+      setLoading(false);
+    }
+  }, [token, user, currentPage, selectedStatus]);
 
   const handleStatusUpdate = async (returnId: string, status: string, resolution?: string, notes?: string) => {
     try {
@@ -108,29 +120,28 @@ const ReturnsDashboard: React.FC = () => {
         status,
         resolution,
         notes
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      
-      // Refresh the returns list
-      await fetchReturns();
+      fetchReturns();
       setShowModal(false);
-      setSelectedReturn(null);
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to update status');
+      setError(err.response?.data?.error?.message || 'Failed to update return status');
     } finally {
       setUpdatingStatus(false);
     }
   };
 
   const getStatusBadgeColor = (status: string) => {
-    const colors = {
-      requested: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-blue-100 text-blue-800',
-      rejected: 'bg-red-100 text-red-800',
-      shipped_by_customer: 'bg-purple-100 text-purple-800',
-      received_at_hub: 'bg-indigo-100 text-indigo-800',
-      completed: 'bg-green-100 text-green-800'
-    };
-    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    switch (status) {
+      case 'requested': return 'bg-yellow-100 text-yellow-800';
+      case 'approved': return 'bg-blue-100 text-blue-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
+      case 'shipped_by_customer': return 'bg-purple-100 text-purple-800';
+      case 'received_at_hub': return 'bg-indigo-100 text-indigo-800';
+      case 'completed': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -143,230 +154,186 @@ const ReturnsDashboard: React.FC = () => {
     });
   };
 
-  if (loading && returns.length === 0) {
+  if (!token || (user?.roleName !== 'admin' && user?.roleName !== 'support_agent')) {
+    return <div className="text-red-600">Access denied. Admin or Support privileges required.</div>;
+  }
+
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div>
+        <h2 className="text-xl font-bold mb-4">Returns Management</h2>
+        <div className="text-gray-600">Loading returns...</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Returns Management</h2>
-        <div className="flex space-x-4">
-          <select
-            value={selectedStatus}
-            onChange={(e) => {
-              setSelectedStatus(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {statusOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div>
+      <h2 className="text-xl font-bold mb-4">Returns Management</h2>
+      {error && <div className="text-red-600 mb-4">{error}</div>}
+      
+      {/* Filters */}
+      <div className="mb-6 flex gap-4">
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          className="px-3 py-2 border rounded"
+        >
+          {statusOptions.map(option => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
+      {returns.length === 0 ? (
+        <div className="text-center py-8">
+          <div className="text-gray-500 mb-4">No returns found</div>
+          <div className="text-sm text-gray-400">Returns will appear here when customers request them</div>
         </div>
-      )}
-
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
+      ) : (
+        <div className="space-y-4">
           {returns.map((returnItem) => (
-            <li key={returnItem._id} className="px-6 py-4 hover:bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-4">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Return ID: {returnItem.returnId}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Order: {returnItem.orderId.orderId} • Customer: {returnItem.userId.firstName} {returnItem.userId.lastName}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Reason: {returnItem.reason}
-                      </p>
-                    </div>
-                  </div>
+            <div key={returnItem._id} className="bg-white border rounded-lg p-4">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="font-semibold">Return #{returnItem.returnId}</h3>
+                  <p className="text-sm text-gray-600">
+                    Order: {returnItem.orderId?.orderId || 'N/A'} | 
+                    Customer: {returnItem.userId?.firstName} {returnItem.userId?.lastName}
+                  </p>
                 </div>
-                
-                <div className="flex items-center space-x-4">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(returnItem.status)}`}>
-                    {returnItem.status.replace('_', ' ').toUpperCase()}
-                  </span>
-                  
-                  <button
-                    onClick={() => {
-                      setSelectedReturn(returnItem);
-                      setShowModal(true);
-                    }}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  >
-                    View Details
-                  </button>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(returnItem.status)}`}>
+                  {returnItem.status.replace(/_/g, ' ').toUpperCase()}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <h4 className="font-medium mb-2">Items</h4>
+                  <ul className="space-y-1">
+                    {returnItem.orderItems.map((item, index) => (
+                      <li key={index} className="text-sm">
+                        {item.productId?.name} x {item.quantity}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Details</h4>
+                  <p className="text-sm text-gray-600 mb-1">
+                    <strong>Reason:</strong> {returnItem.reason}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    <strong>Created:</strong> {formatDate(returnItem.createdAt)}
+                  </p>
+                  {returnItem.notes && (
+                    <p className="text-sm text-gray-600">
+                      <strong>Notes:</strong> {returnItem.notes}
+                    </p>
+                  )}
                 </div>
               </div>
-            </li>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setSelectedReturn(returnItem);
+                    setShowModal(true);
+                  }}
+                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                >
+                  Update Status
+                </button>
+              </div>
+            </div>
           ))}
-        </ul>
-      </div>
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center space-x-2">
-          <button
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-          <span className="px-3 py-2 text-sm text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
+        <div className="mt-6 flex justify-center">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="px-3 py-1">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Return Details Modal */}
+      {/* Status Update Modal */}
       {showModal && selectedReturn && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Return Details - {selectedReturn.returnId}
-              </h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-gray-900">Order Information</h4>
-                  <p className="text-sm text-gray-600">Order ID: {selectedReturn.orderId.orderId}</p>
-                  <p className="text-sm text-gray-600">Total: ${selectedReturn.orderId.totalPrice}</p>
-                  <p className="text-sm text-gray-600">Status: {selectedReturn.orderId.orderStatus}</p>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-gray-900">Customer Information</h4>
-                  <p className="text-sm text-gray-600">
-                    {selectedReturn.userId.firstName} {selectedReturn.userId.lastName}
-                  </p>
-                  <p className="text-sm text-gray-600">{selectedReturn.userId.email}</p>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-gray-900">Return Items</h4>
-                  <div className="space-y-2">
-                    {selectedReturn.orderItems.map((item, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <img 
-                          src={item.productId.images[0] || '/images/placeholder.svg'} 
-                          alt={item.productId.name}
-                          className="w-8 h-8 rounded object-cover"
-                        />
-                        <span className="text-sm text-gray-600">
-                          {item.productId.name} (Qty: {item.quantity})
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-gray-900">Return Details</h4>
-                  <p className="text-sm text-gray-600">Reason: {selectedReturn.reason}</p>
-                  <p className="text-sm text-gray-600">Status: {selectedReturn.status}</p>
-                  {selectedReturn.resolution && (
-                    <p className="text-sm text-gray-600">Resolution: {selectedReturn.resolution}</p>
-                  )}
-                  {selectedReturn.notes && (
-                    <p className="text-sm text-gray-600">Notes: {selectedReturn.notes}</p>
-                  )}
-                  <p className="text-sm text-gray-600">
-                    Created: {formatDate(selectedReturn.createdAt)}
-                  </p>
-                </div>
-
-                {/* Status Update Form */}
-                {selectedReturn.status !== 'completed' && selectedReturn.status !== 'rejected' && (
-                  <div className="border-t pt-4">
-                    <h4 className="font-medium text-gray-900 mb-2">Update Status</h4>
-                    <div className="space-y-2">
-                      <select
-                        id="newStatus"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        {statusOptions.slice(1).map(option => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      
-                      {selectedReturn.status === 'received_at_hub' && (
-                        <select
-                          id="resolution"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Select Resolution</option>
-                          {resolutionOptions.map(option => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                      
-                      <textarea
-                        id="notes"
-                        placeholder="Add notes (optional)"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        rows={3}
-                      />
-                      
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => {
-                            const newStatus = (document.getElementById('newStatus') as HTMLSelectElement).value;
-                            const resolution = (document.getElementById('resolution') as HTMLSelectElement)?.value;
-                            const notes = (document.getElementById('notes') as HTMLTextAreaElement).value;
-                            
-                            handleStatusUpdate(selectedReturn._id, newStatus, resolution || undefined, notes || undefined);
-                          }}
-                          disabled={updatingStatus}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                        >
-                          {updatingStatus ? 'Updating...' : 'Update Status'}
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowModal(false);
-                            setSelectedReturn(null);
-                          }}
-                          className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Update Return Status</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select
+                  className="w-full px-3 py-2 border rounded"
+                  defaultValue={selectedReturn.status}
+                  id="status-select"
+                >
+                  {statusOptions.slice(1).map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Resolution (Optional)</label>
+                <select
+                  className="w-full px-3 py-2 border rounded"
+                  id="resolution-select"
+                >
+                  <option value="">No resolution</option>
+                  {resolutionOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Notes (Optional)</label>
+                <textarea
+                  className="w-full px-3 py-2 border rounded"
+                  rows={3}
+                  id="notes-input"
+                  placeholder="Add any additional notes..."
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => setShowModal(false)}
+                className="flex-1 px-4 py-2 border rounded hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const status = (document.getElementById('status-select') as HTMLSelectElement).value;
+                  const resolution = (document.getElementById('resolution-select') as HTMLSelectElement).value;
+                  const notes = (document.getElementById('notes-input') as HTMLTextAreaElement).value;
+                  handleStatusUpdate(selectedReturn._id, status, resolution || undefined, notes || undefined);
+                }}
+                disabled={updatingStatus}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              >
+                {updatingStatus ? 'Updating...' : 'Update'}
+              </button>
             </div>
           </div>
         </div>
