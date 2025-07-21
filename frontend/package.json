@@ -1,35 +1,50 @@
 {
-  "name": "onyourbehalf-frontend",
-  "version": "1.0.0",
+  "name": "keralagiftsonline-frontend",
+  "version": "3.0.0",
+  "description": "KeralGiftsOnline.com Frontend - Modern React marketplace with promotions and logistics",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "build:prod": "next build && npm prune --production",
+    "start": "next start -p $PORT",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit"
   },
+  "keywords": [
+    "keralagiftsonline",
+    "react",
+    "nextjs",
+    "marketplace",
+    "frontend",
+    "ui"
+  ],
+  "author": "KeralGiftsOnline Team",
+  "license": "MIT",
   "dependencies": {
-    "@headlessui/react": "^1.7.0",
-    "@heroicons/react": "^2.0.0",
-    "@stripe/stripe-js": "^2.0.0",
-    "axios": "^1.6.0",
-    "jwt-decode": "^3.1.2",
+    "axios": "^1.10.0",
+    "critters": "^0.0.23",
+    "date-fns": "^4.1.0",
+    "jwt-decode": "^4.0.0",
     "next": "14.0.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react": "^18",
+    "react-dom": "^18",
+    "recharts": "^3.1.0"
   },
   "devDependencies": {
-    "@types/axios": "^0.9.36",
-    "@types/jwt-decode": "^2.2.1",
-    "@types/next": "^8.0.7",
-    "@types/node": "^24.0.10",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "autoprefixer": "^10.4.0",
-    "eslint": "^8.0.0",
-    "eslint-config-next": "^14.0.0",
-    "postcss": "^8.4.0",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.0",
+    "postcss": "^8",
     "tailwindcss": "^3.3.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }

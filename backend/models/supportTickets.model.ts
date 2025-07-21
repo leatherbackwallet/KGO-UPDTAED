@@ -128,11 +128,13 @@ supportTicketSchema.virtual('isClosed').get(function(this: ISupportTicket) {
 supportTicketSchema.virtual('lastMessage').get(function(this: ISupportTicket) {
   if (this.conversation.length > 0) {
     const lastMsg = this.conversation[this.conversation.length - 1];
-    return {
-      message: lastMsg.message,
-      timestamp: lastMsg.timestamp,
-      byUser: lastMsg.byUser
-    };
+    if (lastMsg) {
+      return {
+        message: lastMsg.message,
+        timestamp: lastMsg.timestamp,
+        byUser: lastMsg.byUser
+      };
+    }
   }
   return null;
 });

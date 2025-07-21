@@ -92,7 +92,7 @@ vendorDocumentSchema.pre('save', async function(next) {
 // Pre-save middleware to clear rejection reason when status changes to approved
 vendorDocumentSchema.pre('save', function(next) {
   if (this.status === DocumentStatus.APPROVED && this.rejectionReason) {
-    this.rejectionReason = undefined;
+    this.rejectionReason = '';
   }
   next();
 });

@@ -5,8 +5,8 @@ import { getProductImage } from '../utils/imageUtils';
 
 interface Product {
   _id: string;
-  name: string;
-  description: string;
+  name: string | { en: string; de: string };
+  description: string | { en: string; de: string };
   price?: number;
   category: string | { _id: string; name: string; slug: string };
   stock?: number;
@@ -25,12 +25,18 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
+  // Helper function to get text from multilingual object or string
+  const getText = (text: string | { en: string; de: string }): string => {
+    if (typeof text === 'string') return text;
+    return text.en || text.de || '';
+  };
+
   if (!product || !isOpen) return null;
 
   const handleAddToCart = () => {
     addToCart({
       product: product._id,
-      name: product.name,
+      name: getText(product.name),
       price: product.price || 0,
       image: getProductImage(product.images[0], product.slug),
       quantity,
@@ -76,12 +82,18 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
             <div className="relative">
               <img
                 src={getProductImage(product.images[selectedImage], product.slug)}
-                alt={product.name}
+                alt={getText(product.name)}
                 className="w-full h-80 object-cover rounded-lg"
                 onError={handleImageError}
               />
               <WishlistButton 
-                product={product} 
+                product={{
+                  _id: product._id,
+                  name: getText(product.name),
+                  price: product.price,
+                  images: product.images,
+                  slug: product.slug
+                }} 
                 className="absolute top-4 right-4"
               />
             </div>
@@ -101,7 +113,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                   >
                     <img
                       src={getProductImage(image, product.slug)}
-                      alt={`${product.name} ${index + 1}`}
+                      alt={`${getText(product.name)} ${index + 1}`}
                       className="w-full h-full object-cover"
                       onError={handleImageError}
                     />
@@ -114,7 +126,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
           {/* Details Section */}
           <div className="lg:w-1/2 p-6 flex flex-col">
             <div className="flex-1">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">{getText(product.name)}</h3>
               <p className="text-3xl font-bold text-blue-600 mb-4">${(product.price || 0).toFixed(2)}</p>
               
               <div className="mb-4">
@@ -133,7 +145,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                 </span>
               </div>
               
-              <p className="text-gray-600 mb-6 leading-relaxed">{product.description}</p>
+              <p className="text-gray-600 mb-6 leading-relaxed">{getText(product.description)}</p>
             </div>
 
             {/* Actions */}

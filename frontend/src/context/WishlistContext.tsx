@@ -39,7 +39,8 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   const addToWishlist = (item: WishlistItem) => {
     const existing = wishlist.find(i => i.product === item.product);
     if (!existing) {
-      saveWishlist([...wishlist, item]);
+      const newWishlist = [...wishlist, item];
+      saveWishlist(newWishlist);
     }
   };
 

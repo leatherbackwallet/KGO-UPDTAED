@@ -30,9 +30,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
     const products = [
       // Celebration Cakes
       {
-        name: 'Classic Chocolate Celebration Cake',
+        name: { en: 'Classic Chocolate Celebration Cake', de: 'Classic Chocolate Celebration Cake' },
         slug: 'classic-chocolate-celebration-cake',
-        description: 'A rich and moist chocolate cake perfect for any celebration. Made with premium cocoa and topped with chocolate ganache.',
+        description: { en: 'A rich and moist chocolate cake perfect for any celebration. Made with premium cocoa and topped with chocolate ganache.', de: 'A rich and moist chocolate cake perfect for any celebration. Made with premium cocoa and topped with chocolate ganache.' },
         category: celebrationCakes?._id,
         defaultImage: '/images/products/chocolate-celebration-cake.jpg',
         tags: ['chocolate', 'celebration', 'birthday', 'party'],
@@ -44,9 +44,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
         isActive: true
       },
       {
-        name: 'Vanilla Bean Celebration Cake',
+        name: { en: 'Vanilla Bean Celebration Cake', de: 'Vanilla Bean Celebration Cake' },
         slug: 'vanilla-bean-celebration-cake',
-        description: 'Light and fluffy vanilla cake with real vanilla bean specks. Perfect for elegant celebrations.',
+        description: { en: 'Light and fluffy vanilla cake with real vanilla bean specks. Perfect for elegant celebrations.', de: 'Light and fluffy vanilla cake with real vanilla bean specks. Perfect for elegant celebrations.' },
         category: celebrationCakes?._id,
         defaultImage: '/images/products/vanilla-celebration-cake.jpg',
         tags: ['vanilla', 'celebration', 'elegant', 'classic'],
@@ -59,9 +59,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
       },
       // Wedding Cakes
       {
-        name: 'Traditional 3-Tier Wedding Cake',
+        name: { en: 'Traditional 3-Tier Wedding Cake', de: 'Traditional 3-Tier Wedding Cake' },
         slug: 'traditional-3-tier-wedding-cake',
-        description: 'Elegant 3-tier wedding cake with classic white fondant and delicate sugar flowers.',
+        description: { en: 'Elegant 3-tier wedding cake with classic white fondant and delicate sugar flowers.', de: 'Elegant 3-tier wedding cake with classic white fondant and delicate sugar flowers.' },
         category: weddingCakes?._id,
         defaultImage: '/images/products/traditional-wedding-cake.jpg',
         tags: ['wedding', 'traditional', 'elegant', 'fondant'],
@@ -74,9 +74,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
         isActive: true
       },
       {
-        name: 'Modern Naked Wedding Cake',
+        name: { en: 'Modern Naked Wedding Cake', de: 'Modern Naked Wedding Cake' },
         slug: 'modern-naked-wedding-cake',
-        description: 'Contemporary naked cake with fresh flowers and rustic charm. Perfect for modern weddings.',
+        description: { en: 'Contemporary naked cake with fresh flowers and rustic charm. Perfect for modern weddings.', de: 'Contemporary naked cake with fresh flowers and rustic charm. Perfect for modern weddings.' },
         category: weddingCakes?._id,
         defaultImage: '/images/products/naked-wedding-cake.jpg',
         tags: ['wedding', 'modern', 'naked', 'rustic'],
@@ -89,9 +89,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
       },
       // Birthday Cakes
       {
-        name: 'Rainbow Birthday Cake',
+        name: { en: 'Rainbow Birthday Cake', de: 'Rainbow Birthday Cake' },
         slug: 'rainbow-birthday-cake',
-        description: 'Colorful rainbow cake with vibrant layers and fun sprinkles. Perfect for kids and adults alike.',
+        description: { en: 'Colorful rainbow cake with vibrant layers and fun sprinkles. Perfect for kids and adults alike.', de: 'Colorful rainbow cake with vibrant layers and fun sprinkles. Perfect for kids and adults alike.' },
         category: birthdayCakes?._id,
         defaultImage: '/images/products/rainbow-birthday-cake.jpg',
         tags: ['birthday', 'rainbow', 'colorful', 'fun'],
@@ -103,9 +103,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
         isActive: true
       },
       {
-        name: 'Chocolate Truffle Birthday Cake',
+        name: { en: 'Chocolate Truffle Birthday Cake', de: 'Chocolate Truffle Birthday Cake' },
         slug: 'chocolate-truffle-birthday-cake',
-        description: 'Decadent chocolate cake with chocolate truffle filling and chocolate ganache frosting.',
+        description: { en: 'Decadent chocolate cake with chocolate truffle filling and chocolate ganache frosting.', de: 'Decadent chocolate cake with chocolate truffle filling and chocolate ganache frosting.' },
         category: birthdayCakes?._id,
         defaultImage: '/images/products/chocolate-truffle-cake.jpg',
         tags: ['birthday', 'chocolate', 'truffle', 'decadent'],
@@ -117,9 +117,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
       },
       // Cupcakes
       {
-        name: 'Vanilla Cupcakes with Buttercream',
+        name: { en: 'Vanilla Cupcakes with Buttercream', de: 'Vanilla Cupcakes with Buttercream' },
         slug: 'vanilla-cupcakes-buttercream',
-        description: 'Classic vanilla cupcakes topped with smooth buttercream frosting and sprinkles.',
+        description: { en: 'Classic vanilla cupcakes topped with smooth buttercream frosting and sprinkles.', de: 'Classic vanilla cupcakes topped with smooth buttercream frosting and sprinkles.' },
         category: cupcakes?._id,
         defaultImage: '/images/products/vanilla-cupcakes.jpg',
         tags: ['cupcakes', 'vanilla', 'buttercream', 'classic'],
@@ -131,9 +131,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
         isActive: true
       },
       {
-        name: 'Red Velvet Cupcakes',
+        name: { en: 'Red Velvet Cupcakes', de: 'Red Velvet Cupcakes' },
         slug: 'red-velvet-cupcakes',
-        description: 'Moist red velvet cupcakes with cream cheese frosting and red velvet crumbs.',
+        description: { en: 'Moist red velvet cupcakes with cream cheese frosting and red velvet crumbs.', de: 'Moist red velvet cupcakes with cream cheese frosting and red velvet crumbs.' },
         category: cupcakes?._id,
         defaultImage: '/images/products/red-velvet-cupcakes.jpg',
         tags: ['cupcakes', 'red-velvet', 'cream-cheese', 'elegant'],
@@ -145,9 +145,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
       },
       // Pastries
       {
-        name: 'Chocolate Croissants',
+        name: { en: 'Chocolate Croissants', de: 'Chocolate Croissants' },
         slug: 'chocolate-croissants',
-        description: 'Flaky croissants filled with rich chocolate. Perfect for breakfast or dessert.',
+        description: { en: 'Flaky croissants filled with rich chocolate. Perfect for breakfast or dessert.', de: 'Flaky croissants filled with rich chocolate. Perfect for breakfast or dessert.' },
         category: pastries?._id,
         defaultImage: '/images/products/chocolate-croissants.jpg',
         tags: ['pastries', 'croissants', 'chocolate', 'breakfast'],
@@ -157,9 +157,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
         isActive: true
       },
       {
-        name: 'Apple Turnovers',
+        name: { en: 'Apple Turnovers', de: 'Apple Turnovers' },
         slug: 'apple-turnovers',
-        description: 'Golden puff pastry filled with sweet apple filling and cinnamon.',
+        description: { en: 'Golden puff pastry filled with sweet apple filling and cinnamon.', de: 'Golden puff pastry filled with sweet apple filling and cinnamon.' },
         category: pastries?._id,
         defaultImage: '/images/products/apple-turnovers.jpg',
         tags: ['pastries', 'turnovers', 'apple', 'cinnamon'],
@@ -170,9 +170,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
       },
       // Cookies
       {
-        name: 'Chocolate Chip Cookies',
+        name: { en: 'Chocolate Chip Cookies', de: 'Chocolate Chip Cookies' },
         slug: 'chocolate-chip-cookies',
-        description: 'Classic chocolate chip cookies with crispy edges and chewy centers.',
+        description: { en: 'Classic chocolate chip cookies with crispy edges and chewy centers.', de: 'Classic chocolate chip cookies with crispy edges and chewy centers.' },
         category: cookies?._id,
         defaultImage: '/images/products/chocolate-chip-cookies.jpg',
         tags: ['cookies', 'chocolate-chip', 'classic', 'chewy'],
@@ -183,9 +183,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
         isActive: true
       },
       {
-        name: 'Sugar Cookies',
+        name: { en: 'Sugar Cookies', de: 'Sugar Cookies' },
         slug: 'sugar-cookies',
-        description: 'Buttery sugar cookies decorated with royal icing and colorful sprinkles.',
+        description: { en: 'Buttery sugar cookies decorated with royal icing and colorful sprinkles.', de: 'Buttery sugar cookies decorated with royal icing and colorful sprinkles.' },
         category: cookies?._id,
         defaultImage: '/images/products/sugar-cookies.jpg',
         tags: ['cookies', 'sugar', 'decorated', 'buttery'],
@@ -198,9 +198,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
       },
       // Breads
       {
-        name: 'Sourdough Bread',
+        name: { en: 'Sourdough Bread', de: 'Sourdough Bread' },
         slug: 'sourdough-bread',
-        description: 'Artisan sourdough bread with a crispy crust and tangy flavor.',
+        description: { en: 'Artisan sourdough bread with a crispy crust and tangy flavor.', de: 'Artisan sourdough bread with a crispy crust and tangy flavor.' },
         category: breads?._id,
         defaultImage: '/images/products/sourdough-bread.jpg',
         tags: ['bread', 'sourdough', 'artisan', 'crusty'],
@@ -210,9 +210,9 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
         isActive: true
       },
       {
-        name: 'Whole Wheat Bread',
+        name: { en: 'Whole Wheat Bread', de: 'Whole Wheat Bread' },
         slug: 'whole-wheat-bread',
-        description: 'Nutritious whole wheat bread made with stone-ground flour.',
+        description: { en: 'Nutritious whole wheat bread made with stone-ground flour.', de: 'Nutritious whole wheat bread made with stone-ground flour.' },
         category: breads?._id,
         defaultImage: '/images/products/whole-wheat-bread.jpg',
         tags: ['bread', 'whole-wheat', 'healthy', 'nutritious'],
@@ -229,14 +229,14 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
     // Log products by category
     console.log('   📦 Products by Category:');
     const categoryMap = new Map();
-    categories.forEach(cat => categoryMap.set(cat._id.toString(), cat.name));
+    categories.forEach(cat => categoryMap.set((cat._id as any).toString(), cat.name.en));
     
     createdProducts.forEach(product => {
-      const categoryName = categoryMap.get(product.category.toString());
-      console.log(`      - ${categoryName}: ${product.name}`);
+      const categoryName = categoryMap.get((product.category as any).toString());
+      console.log(`      - ${categoryName}: ${product.name.en}`);
     });
 
-    return createdProducts;
+    return createdProducts as IProduct[];
   } catch (error) {
     console.error('   ❌ Error seeding products:', error);
     throw error;

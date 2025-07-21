@@ -12,6 +12,8 @@ export interface IVendorProduct extends Document {
   price: number;
   hsnCode: string;
   taxRate: number;
+  stockType: 'infinite' | 'finite' | 'daily_capacity';
+  stockLevel?: number;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -49,6 +51,15 @@ const vendorProductSchema = new Schema<IVendorProduct>(
       min: [0, 'Tax rate cannot be negative'],
       max: [100, 'Tax rate cannot exceed 100%'],
       enum: [0, 5, 12, 18, 28] // Common GST rates in India
+    },
+    stockType: {
+      type: String,
+      enum: ['infinite', 'finite', 'daily_capacity'],
+      default: 'infinite'
+    },
+    stockLevel: {
+      type: Number,
+      min: [0, 'Stock level cannot be negative']
     },
     isActive: {
       type: Boolean,

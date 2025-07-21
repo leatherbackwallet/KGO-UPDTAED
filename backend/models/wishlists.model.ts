@@ -20,14 +20,12 @@ const wishlistSchema = new Schema<IWishlist>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'User ID is required'],
-      unique: true,
-      index: true
+      unique: true
     },
     products: {
       type: [Schema.Types.ObjectId],
       ref: 'Product',
-      default: [],
-      index: true
+      default: []
     }
   },
   {

@@ -1,34 +1,49 @@
 /**
- * Models Index - Central export for all Mongoose models
- * Provides easy access to all database models and their TypeScript interfaces
+ * Models Index - Central export for all database models
+ * Version 3.0 - Enterprise-grade schema with promotions, shipments, and attributes
  */
 
-// Core Collections
-export { User, IUser, UserRole } from './users.model';
+// Core models
+export { User, IUser } from './users.model';
+export { Role, IRole } from './roles.model';
+
+// Product and catalog models
+export { Product, IProduct } from './products.model';
 export { Category, ICategory } from './categories.model';
-export { Product, IProduct, IPersonalizationOption } from './products.model';
+export { Attribute, IAttribute } from './attributes.model';
+export { ProductAttribute, IProductAttribute } from './productAttributes.model';
 
-// Vendor & Marketplace Collections
-export { Vendor, IVendor, VendorStatus, IVendorAddress } from './vendors.model';
+// Order and fulfillment models
+export { Order, IOrder } from './orders.model';
+export { Shipment, IShipment } from './shipments.model';
+
+// Promotions and marketing
+export { Promotion, IPromotion } from './promotions.model';
+
+// Vendor and marketplace models
+export { Vendor, IVendor } from './vendors.model';
 export { VendorProduct, IVendorProduct } from './vendorProducts.model';
-export { VendorDocument, IVendorDocument, DocumentType, DocumentStatus } from './vendorDocuments.model';
 
-// Order & Transaction Collections
-export { Order, IOrder, OrderStatus, ItemStatus, IShippingDetails, IOrderItem, ITaxDetails, IPaymentDetails } from './orders.model';
-export { Review, IReview, ReviewType, IReply } from './reviews.model';
+// Logistics models
+export { Hub, IHub } from './hubs.model';
+export { DeliveryRun, IDeliveryRun } from './deliveryRuns.model';
 
-// Financial & Marketing Collections
-export { Coupon, ICoupon, CouponType } from './coupons.model';
-export { Transaction, ITransaction, TransactionType, TransactionStatus } from './transactions.model';
-export { Payout, IPayout, PayoutStatus } from './payouts.model';
-export { Ledger, ILedger, LedgerType, LedgerCategory, IRelatedDocument } from './ledger.model';
+// Customer service models
+export { Return, IReturn } from './returns.model';
+export { SupportTicket, ISupportTicket } from './supportTickets.model';
 
-// User Engagement & Support Collections
+// Financial models
+export { Transaction, ITransaction } from './transactions.model';
+export { Payout, IPayout } from './payouts.model';
+export { Ledger, ILedger } from './ledger.model';
+
+// User engagement models
+export { Review, IReview } from './reviews.model';
 export { Wishlist, IWishlist } from './wishlists.model';
 export { Notification, INotification } from './notifications.model';
-export { SupportTicket, ISupportTicket, TicketStatus, IConversationMessage } from './supportTickets.model';
 
-// Admin & Analytics Collections
-export { Page, IPage, PageStatus } from './pages.model';
-export { ActivityLog, IActivityLog, ITarget } from './activityLogs.model';
-export { DailyStats, IDailyStats, ITopSellingProduct, ITopPerformingVendor } from './dailyStats.model'; 
+// System models
+export { ActivityLog, IActivityLog } from './activityLogs.model';
+export { DailyStats, IDailyStats } from './dailyStats.model';
+export { Page, IPage } from './pages.model';
+export { VendorDocument, IVendorDocument } from './vendorDocuments.model'; 

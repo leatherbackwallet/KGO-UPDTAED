@@ -1,72 +1,165 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
-import { useWishlist } from '../context/WishlistContext';
+import { useCart } from '../context/CartContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
-  const { wishlist } = useWishlist();
+  const { cart } = useCart();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-100 px-4 py-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="font-bold text-2xl text-blue-600">
-            OnYourBehalf
+    <nav className="bg-white shadow-lg border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">KGO</span>
+            </div>
+            /
+            <span className="text-xl font-bold text-gray-900">KeralGiftsOnline</span>
           </Link>
-          <Link href="/products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-            Products
-          </Link>
-          <Link href="/celebration" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-            Celebrations
-          </Link>
-        </div>
-        
-        <div className="flex items-center gap-6">
-          {/* Wishlist Icon */}
-          <Link href="/wishlist" className="relative text-gray-700 hover:text-red-500 transition-colors">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            {typeof window !== 'undefined' && wishlist.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {wishlist.length}
-              </span>
-            )}
-          </Link>
-          
-          {/* Cart Icon */}
-          <Link href="/cart" className="relative text-gray-700 hover:text-blue-600 transition-colors">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-            </svg>
-          </Link>
-          
-          {user ? (
-            <div className="flex items-center gap-4">
-              {user.role === 'Admin' && (
-                <Link href="/admin" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                  Admin
-                </Link>
-              )}
-              <button 
-                onClick={logout} 
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors"
-              >
-                Logout
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link href="/products" className="text-gray-700 hover:text-purple-600 transition-colors">
+              Products
+            </Link>
+            <Link href="/celebration" className="text-gray-700 hover:text-purple-600 transition-colors">
+              Celebration Cakes
+            </Link>
+            <Link href="/categories" className="text-gray-700 hover:text-purple-600 transition-colors">
+              Categories
+            </Link>
+            <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors">
+              About
+            </Link>
+          </div>
+
+          {/* Right side - Cart, User, Language */}
+          <div className="flex items-center space-x-4">
+            {/* Language Selector */}
+            <div className="hidden sm:flex items-center space-x-2">
+              <button className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                EN
+              </button>
+              <span className="text-gray-300">|</span>
+              <button className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                DE
               </button>
             </div>
-          ) : (
-            <div className="flex items-center gap-4">
-              <Link href="/login" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                Login
-              </Link>
-              <Link href="/register" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                Register
-              </Link>
-            </div>
-          )}
+
+            {/* Cart */}
+            <Link href="/cart" className="relative p-2 text-gray-700 hover:text-purple-600 transition-colors">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+              </svg>
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
+
+            {/* User Menu */}
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="flex items-center space-x-2 text-gray-700 hover:text-purple-600 transition-colors"
+                >
+                                     <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                     <span className="text-white text-sm font-medium">
+                       {user.firstName?.charAt(0) || user.email?.charAt(0) || 'U'}
+                     </span>
+                   </div>
+                   <span className="hidden sm:block">{`${user.firstName} ${user.lastName}` || user.email}</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {isMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                    <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      Profile
+                    </Link>
+                    <Link href="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      My Orders
+                    </Link>
+                    <Link href="/wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      Wishlist
+                    </Link>
+                    {user.roleName === 'admin' && (
+                      <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Admin Dashboard
+                      </Link>
+                    )}
+                    <hr className="my-1" />
+                    <button
+                      onClick={logout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Link href="/login" className="text-gray-700 hover:text-purple-600 transition-colors">
+                  Login
+                </Link>
+                <Link href="/register" className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                  Register
+                </Link>
+              </div>
+            )}
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2 text-gray-700 hover:text-purple-600 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 py-4">
+            <div className="flex flex-col space-y-4">
+              <Link href="/products" className="text-gray-700 hover:text-purple-600 transition-colors">
+                Products
+              </Link>
+              <Link href="/celebration" className="text-gray-700 hover:text-purple-600 transition-colors">
+                Celebration Cakes
+              </Link>
+              <Link href="/categories" className="text-gray-700 hover:text-purple-600 transition-colors">
+                Categories
+              </Link>
+              <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors">
+                About
+              </Link>
+              <div className="flex items-center space-x-4 pt-2">
+                <span className="text-sm text-gray-500">Language:</span>
+                <button className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                  EN
+                </button>
+                <span className="text-gray-300">|</span>
+                <button className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                  DE
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

@@ -1,214 +1,221 @@
-# OnYourBehalf E-Commerce Platform
+# KeralGiftsOnline.com
 
-A full-stack e-commerce application built with Next.js (React, TypeScript, Tailwind CSS) frontend and Express.js (Node.js, MongoDB) backend.
+**Enterprise-grade hyperlocal marketplace with promotions engine and advanced logistics**
 
-## 🚀 Features
+## 🚀 Overview
 
-- **User Authentication**: JWT-based login/register system
-- **Role-based Access**: Customer and Admin roles
-- **Product Management**: CRUD operations for products (Admin only)
-- **Shopping Cart**: Persistent cart with localStorage
-- **Order Management**: Create and track orders
-- **Admin Dashboard**: Manage products, orders, and users
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
+KeralGiftsOnline.com is a comprehensive e-commerce platform designed for the German market, specializing in gifts, cakes, flowers, and celebration items. Built with modern technologies and enterprise-grade architecture.
 
-## 🛠️ Tech Stack
+## ✨ Features
 
-### Frontend
-- **Next.js 14** - React framework
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Axios** - HTTP client
-- **JWT Decode** - Token handling
+### 🎯 Core Features
+- **Multi-language Support**: English and German localization
+- **Role-Based Access Control**: Admin, Customer, Vendor, Support Agent, Delivery Agent
+- **Advanced Product Management**: Extensible attribute system for product variations
+- **Promotions Engine**: Complex rule-based promotions and discounts
+- **Partial Fulfillment**: Shipment management for split orders
+- **Real-time Logistics**: Hub management and delivery run optimization
 
-### Backend
-- **Express.js** - Node.js framework
-- **MongoDB** - Database
-- **Mongoose** - ODM
-- **JWT** - Authentication
-- **Bcrypt** - Password hashing
-- **CORS** - Cross-origin requests
+### 🛍️ E-commerce Features
+- Product catalog with categories and attributes
+- Shopping cart and wishlist management
+- Order management with status tracking
+- Return merchandise authorization (RMA)
+- Payment processing and transaction tracking
+- Vendor management and payouts
 
-## 📋 Prerequisites
+### 📊 Business Intelligence
+- Daily statistics and reporting
+- Activity logging and audit trails
+- Customer support ticket system
+- Notification management
+- Financial ledger tracking
 
-- Node.js (v16 or higher)
-- npm or yarn
-- MongoDB database (local or cloud)
+## 🏗️ Architecture
+
+### Database Schema (v3.0)
+- **25 Collections** with enterprise-grade design
+- **Promotions Engine** with complex rule-based logic
+- **Shipments System** for partial fulfillment
+- **Attributes System** for extensible product management
+- **RBAC** with granular permissions
+- **Soft Deletes** for data integrity
+
+### Tech Stack
+- **Backend**: Node.js + Express + TypeScript + MongoDB
+- **Frontend**: Next.js + React + TypeScript + Tailwind CSS
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT-based with role management
 
 ## 🚀 Quick Start
 
-### 1. Clone the repository
-```bash
-git clone <repository-url>
-cd onYourBehlf
-```
+### Prerequisites
+- Node.js 18+ 
+- MongoDB 6+
+- npm or yarn
 
-### 2. Install dependencies
-```bash
-npm run install:all
-```
+### Installation
 
-### 3. Environment Setup
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd keralagiftsonline
+   ```
 
-#### Backend (.env file in backend directory)
-```env
-MONGODB_URI=mongodb+srv://your_username:your_password@your_cluster.mongodb.net/your_database
-JWT_SECRET=your_super_secret_key_here
-PORT=5001
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-#### Frontend (.env.local file in frontend directory - optional)
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5001/api
-```
+3. **Environment Setup**
+   ```bash
+   # Backend
+   cd backend
+   cp .env.example .env
+   # Edit .env with your MongoDB URI and JWT secret
+   ```
 
-### 4. Start the application
+4. **Database Setup**
+   ```bash
+   # Seed the database with initial data
+   npm run seed:v3
+   ```
 
-#### Option 1: Start both frontend and backend together
-```bash
-npm run dev
-```
-
-#### Option 2: Start separately
-```bash
-# Terminal 1 - Backend
-npm run dev:backend
-
-# Terminal 2 - Frontend  
-npm run dev:frontend
-```
-
-### 5. Access the application
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5001/api
-
-## 🔧 Available Scripts
-
-### Root Directory
-- `npm run dev` - Start both frontend and backend in development mode
-- `npm run dev:backend` - Start only the backend server
-- `npm run dev:frontend` - Start only the frontend server
-- `npm run install:all` - Install dependencies for all packages
-- `npm run build` - Build the frontend for production
-- `npm run start` - Start the backend in production mode
-
-### Backend Directory
-- `npm run dev` - Start development server with nodemon
-- `npm start` - Start production server
-
-### Frontend Directory
-- `npm run dev` - Start Next.js development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
-
-## 👤 Default Admin Account
-
-The application automatically creates a superuser account on first run:
-
-- **Email**: admin@onyourbehalf.com
-- **Password**: SuperSecure123!
-- **Role**: Admin
-
-## 🗄️ Database Schema
-
-### Users
-- name, email, password, role (Customer/Admin)
-
-### Products
-- name, description, price, category, stock, images
-
-### Orders
-- user, products[], totalAmount, shippingAddress, status
-
-## 🔐 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-
-### Products
-- `GET /api/products` - Get all products (with filters)
-- `GET /api/products/:id` - Get single product
-- `POST /api/products` - Create product (Admin only)
-- `PUT /api/products/:id` - Update product (Admin only)
-- `DELETE /api/products/:id` - Delete product (Admin only)
-
-### Orders
-- `POST /api/orders` - Create order
-- `GET /api/orders` - Get all orders (Admin only)
-- `GET /api/orders/my` - Get user's orders
-- `PUT /api/orders/:id/status` - Update order status (Admin only)
-
-### Users
-- `GET /api/users` - Get all users (Admin only)
-- `PUT /api/users/:id/grant` - Grant admin role (Admin only)
-- `PUT /api/users/:id/revoke` - Revoke admin role (Admin only)
-
-## 🐛 Troubleshooting
-
-### Port 5000 Already in Use
-The backend now uses port 5001 by default to avoid conflicts with macOS ControlCenter. If you need to use a different port:
-
-1. Update `backend/server.js` line 45
-2. Update `frontend/src/utils/api.ts` line 3
-3. Update your environment variables
-
-### MongoDB Connection Issues
-1. Verify your MongoDB URI is correct
-2. Ensure your IP is whitelisted (if using MongoDB Atlas)
-3. Check network connectivity
-
-### Frontend Build Issues
-1. Clear Next.js cache: `rm -rf frontend/.next`
-2. Reinstall dependencies: `cd frontend && npm install`
-
-### Backend Issues
-1. Check if MongoDB is running
-2. Verify environment variables
-3. Check server logs for specific errors
+5. **Start Development**
+   ```bash
+   # Start both backend and frontend
+   npm run dev
+   
+   # Or start individually
+   npm run dev:backend  # Backend on port 5001
+   npm run dev:frontend # Frontend on port 3000
+   ```
 
 ## 📁 Project Structure
 
 ```
-onYourBehlf/
-├── backend/
-│   ├── middleware/     # Authentication & authorization
-│   ├── models/         # MongoDB schemas
-│   ├── routes/         # API endpoints
-│   ├── utils/          # Helper functions
-│   ├── server.js       # Main server file
-│   └── package.json
-├── frontend/
+keralagiftsonline/
+├── backend/                 # Node.js + Express API
+│   ├── models/             # MongoDB schemas (v3)
+│   ├── routes/             # API endpoints
+│   ├── seeds/              # Database seeders
+│   ├── migration/          # Database migration scripts
+│   └── server.ts           # Main server file
+├── frontend/               # Next.js + React app
 │   ├── src/
-│   │   ├── components/ # React components
-│   │   ├── context/    # React contexts
-│   │   ├── pages/      # Next.js pages
-│   │   ├── styles/     # Global styles
-│   │   └── utils/      # Helper functions
-│   └── package.json
-└── package.json        # Root package.json
+│   │   ├── components/     # React components
+│   │   ├── pages/          # Next.js pages
+│   │   ├── context/        # React context providers
+│   │   └── utils/          # Utility functions
+│   └── public/             # Static assets
+└── database_schema_v3.json # Complete schema documentation
 ```
+
+## 🔧 Available Scripts
+
+### Root Level
+- `npm run dev` - Start both backend and frontend in development
+- `npm run build` - Build both backend and frontend
+- `npm run start` - Start both in production mode
+- `npm run seed:v3` - Seed the database with v3 schema
+
+### Backend
+- `npm run dev` - Start with nodemon and ts-node
+- `npm run build` - Compile TypeScript
+- `npm run seed` - Run database seeder
+
+### Frontend
+- `npm run dev` - Start Next.js development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+
+## 🗄️ Database Collections
+
+### Core Collections
+- `roles` - Role-based access control
+- `users` - User management with schedules and addresses
+- `categories` - Product categorization (i18n)
+- `products` - Product templates (i18n)
+- `attributes` - Extensible product attribute system
+- `productAttributes` - Product-attribute value mappings
+
+### Order Management
+- `orders` - Parent order management
+- `shipments` - Partial fulfillment and split shipments
+- `returns` - RMA workflow management
+
+### Business Features
+- `promotions` - Advanced promotions engine
+- `vendors` - Vendor management
+- `vendorProducts` - Vendor-specific pricing
+- `transactions` - Payment tracking
+- `payouts` - Vendor payout management
+
+### Logistics
+- `hubs` - Physical packing stations
+- `deliveryRuns` - Delivery route management
+
+### Support & Analytics
+- `supportTickets` - Customer support
+- `notifications` - User notifications
+- `activityLogs` - Audit trails
+- `dailyStats` - Business intelligence
+- `reviews` - Multi-faceted reviews
+- `wishlists` - User wishlists
+
+## 🔐 Authentication & Authorization
+
+The system uses JWT-based authentication with role-based access control:
+
+- **Admin**: Full system access
+- **Customer**: Product browsing, ordering, wishlist
+- **Vendor**: Product management, order viewing
+- **Support Agent**: Customer support, order management
+- **Delivery Agent**: Delivery management, status updates
+
+## 🌐 Internationalization
+
+Full support for English and German languages:
+- Product names and descriptions
+- Category names and descriptions
+- Attribute labels and options
+- User interface elements
+
+## 📈 Promotions Engine
+
+Advanced rule-based promotions system:
+- **Conditions**: Cart total, product presence, customer type
+- **Actions**: Percentage discounts, fixed discounts, free shipping
+- **Scheduling**: Start/end dates for campaigns
+- **Coupon Codes**: Optional activation codes
+
+## 🚚 Logistics System
+
+Comprehensive logistics management:
+- **Hubs**: Physical packing stations with geolocation
+- **Delivery Runs**: Optimized delivery routes
+- **Shipments**: Partial fulfillment tracking
+- **Status Tracking**: Real-time delivery updates
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🆘 Support
 
-If you encounter any issues:
+For support and questions:
+- Email: support@keralagiftsonline.com
+- Documentation: [docs.keralagiftsonline.com](https://docs.keralagiftsonline.com)
+- Issues: [GitHub Issues](https://github.com/keralagiftsonline/issues)
 
-1. Check the troubleshooting section above
-2. Review the console logs for error messages
-3. Ensure all dependencies are installed
-4. Verify your environment variables are correct
+---
 
-For additional help, please open an issue in the repository.
+**Built with ❤️ by the KeralGiftsOnline Team**

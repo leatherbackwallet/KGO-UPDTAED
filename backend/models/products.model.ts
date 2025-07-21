@@ -1,111 +1,102 @@
 /**
- * Product Model - Product templates with personalization options
- * Defines base product information, categories, and customization capabilities
+ * Products Model - Product templates with internationalized content
+ * Specific characteristics are managed via the attributes system
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
 
-// Personalization option interface
-export interface IPersonalizationOption {
-  type: string;
-  label: string;
-}
-
-// TypeScript interface for Product document
 export interface IProduct extends Document {
-  name: string;
+  name: {
+    en: string;
+    de: string;
+  };
+  description: {
+    en: string;
+    de: string;
+  };
   slug: string;
-  description: string;
   category: mongoose.Types.ObjectId;
+  images?: string[];
   defaultImage?: string;
-  tags: string[];
-  personalizationOptions: IPersonalizationOption[];
-  isActive: boolean;
+  isFeatured: boolean;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// Product schema definition
-const productSchema = new Schema<IProduct>(
-  {
-    name: {
+const productSchema = new Schema<IProduct>({
+  name: {
+    en: {
       type: String,
-      required: [true, 'Product name is required'],
-      unique: true,
-      trim: true,
-      maxlength: [200, 'Product name cannot exceed 200 characters']
-    },
-    slug: {
-      type: String,
-      required: [true, 'Product slug is required'],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens']
-    },
-    description: {
-      type: String,
-      required: [true, 'Product description is required'],
-      trim: true,
-      maxlength: [2000, 'Product description cannot exceed 2000 characters']
-    },
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: 'Category',
-      required: [true, 'Product category is required'],
-      index: true
-    },
-    defaultImage: {
-      type: String,
+      required: true,
       trim: true
     },
-    tags: {
-      type: [String],
-      index: true,
-      default: []
-    },
-    personalizationOptions: {
-      type: [{
-        type: {
-          type: String,
-          required: true,
-          enum: ['text', 'image', 'color', 'size', 'font', 'custom']
-        },
-        label: {
-          type: String,
-          required: true,
-          trim: true
-        }
-      }],
-      default: []
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-      index: true
+    de: {
+      type: String,
+      required: true,
+      trim: true
     }
   },
-  {
-    timestamps: true
+  description: {
+    en: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    de: {
+      type: String,
+      required: true,
+      trim: true
+    }
+  },
+  slug: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
+  },
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: 'Category',
+    required: true
+  },
+  images: [{
+    type: String,
+    trim: true
+  }],
+  defaultImage: {
+    type: String,
+    trim: true
+  },
+  isFeatured: {
+    type: Boolean,
+    default: false
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   }
-);
+}, {
+  timestamps: true
+});
 
-// Indexes for performance
-productSchema.index({ slug: 1 });
-productSchema.index({ name: 'text', description: 'text' });
-productSchema.index({ category: 1, isActive: 1 });
-
-// Pre-save middleware to generate slug if not provided
+// Generate slug from name before saving
 productSchema.pre('save', function(next) {
-  if (!this.slug && this.name) {
-    this.slug = this.name
+  if (this.isModified('name') && !this.slug) {
+    const englishName = this.name.en || this.name.de;
+    this.slug = englishName
       .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
   next();
 });
+
+// Indexes
+productSchema.index({ slug: 1 }, { unique: true });
+productSchema.index({ category: 1 });
+productSchema.index({ isFeatured: 1, isDeleted: 1 });
+productSchema.index({ 'name.en': 'text', 'name.de': 'text', 'description.en': 'text', 'description.de': 'text' });
 
 export const Product = mongoose.model<IProduct>('Product', productSchema); 

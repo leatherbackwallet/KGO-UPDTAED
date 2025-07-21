@@ -17,11 +17,16 @@ export default function Login() {
     setError('');
     try {
       const res = await api.post('/auth/login', { email, password });
-      const data = res.data as { token: string };
-      login(data.token);
-      router.push('/');
+      const data = res.data as { success: boolean; data: { token: string; user: any } };
+      
+      if (data.success && data.data.token) {
+        login(data.data.token, data.data.user);
+        router.push('/');
+      } else {
+        setError('Login failed - invalid response');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.error?.message || 'Login failed');
     }
   };
 

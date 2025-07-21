@@ -25,12 +25,15 @@ import { seedSupportTickets } from './supportTickets.seed';
 import { seedPages } from './pages.seed';
 import { seedActivityLogs } from './activityLogs.seed';
 import { seedDailyStats } from './dailyStats.seed';
+import { seedHubs } from './hubs.seed';
+import { seedDeliveryRuns } from './deliveryRuns.seed';
+import { seedReturns } from './returns.seed';
 
 // Load environment variables
 dotenv.config();
 
 // Database connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/onYourBehlf';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 /**
  * Main seeding function
@@ -38,6 +41,10 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/onYour
 async function seedDatabase() {
   try {
     console.log('🌱 Starting database seeding...');
+    
+    if (!MONGODB_URI) {
+      throw new Error('MONGODB_URI environment variable is required');
+    }
     
     // Connect to MongoDB
     await mongoose.connect(MONGODB_URI);
@@ -98,6 +105,15 @@ async function seedDatabase() {
     console.log('\n📝 Seeding activity logs...');
     await seedActivityLogs(users);
     
+    console.log('\n📝 Seeding hubs...');
+    const hubs = await seedHubs();
+    
+    console.log('\n📝 Seeding delivery runs...');
+    await seedDeliveryRuns(users, hubs, orders);
+    
+    console.log('\n📝 Seeding returns...');
+    await seedReturns();
+    
     console.log('\n📝 Seeding daily stats...');
     await seedDailyStats(products, vendors);
     
@@ -108,6 +124,7 @@ async function seedDatabase() {
     console.log(`   - Products: ${products.length}`);
     console.log(`   - Vendors: ${vendors.length}`);
     console.log(`   - Orders: ${orders.length}`);
+    console.log(`   - Hubs: ${hubs.length}`);
     
   } catch (error) {
     console.error('❌ Seeding failed:', error);

@@ -4,9 +4,12 @@ import { useAuth } from '../context/AuthContext';
 
 interface User {
   _id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  role: string;
+  roleId: {
+    name: string;
+  };
 }
 
 export default function AdminUsers() {
@@ -86,11 +89,11 @@ export default function AdminUsers() {
           <tbody>
             {users.map(user => (
               <tr key={user._id} className="border-t">
-                <td className="p-2">{user.name}</td>
+                <td className="p-2">{user.firstName} {user.lastName}</td>
                 <td className="p-2">{user.email}</td>
-                <td className="p-2">{user.role}</td>
+                <td className="p-2">{user.roleId.name}</td>
                 <td className="p-2">
-                  {user.role === 'Admin' ? (
+                  {user.roleId.name === 'admin' ? (
                     <button onClick={() => revokeAdmin(user._id)} className="text-red-600">Revoke Admin</button>
                   ) : (
                     <button onClick={() => grantAdmin(user._id)} className="text-blue-600">Grant Admin</button>

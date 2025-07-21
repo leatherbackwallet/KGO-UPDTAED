@@ -1,78 +1,95 @@
 /**
- * Category Model - Product categorization with hierarchical structure
- * Supports nested categories and SEO-friendly slugs for better navigation
+ * Categories Model - Product categorization with internationalized content
+ * Supports hierarchical categories and multilingual content
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
 
-// TypeScript interface for Category document
 export interface ICategory extends Document {
-  name: string;
+  name: {
+    en: string;
+    de: string;
+  };
   slug: string;
+  description?: {
+    en: string;
+    de: string;
+  };
   parentCategory?: mongoose.Types.ObjectId;
-  image?: string;
+  sortOrder: number;
+  isActive: boolean;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// Category schema definition
-const categorySchema = new Schema<ICategory>(
-  {
-    name: {
+const categorySchema = new Schema<ICategory>({
+  name: {
+    en: {
       type: String,
-      required: [true, 'Category name is required'],
-      unique: true,
-      trim: true,
-      maxlength: [100, 'Category name cannot exceed 100 characters']
+      required: true,
+      trim: true
     },
-    slug: {
+    de: {
       type: String,
-      required: [true, 'Category slug is required'],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens']
+      required: true,
+      trim: true
+    }
+  },
+  slug: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
+  },
+  description: {
+    en: {
+      type: String,
+      trim: true
     },
-    parentCategory: {
-      type: Schema.Types.ObjectId,
-      ref: 'Category',
-      default: null
-    },
-    image: {
+    de: {
       type: String,
       trim: true
     }
   },
-  {
-    timestamps: true
+  parentCategory: {
+    type: Schema.Types.ObjectId,
+    ref: 'Category'
+  },
+  sortOrder: {
+    type: Number,
+    default: 0
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   }
-);
-
-// Index for hierarchical queries
-categorySchema.index({ parentCategory: 1 });
-
-// Index for slug-based lookups
-categorySchema.index({ slug: 1 });
-
-// Virtual for full category path
-categorySchema.virtual('fullPath').get(function() {
-  return this.name; // Simplified for now - full path would require population
+}, {
+  timestamps: true
 });
 
-// Ensure virtual fields are serialized
-categorySchema.set('toJSON', { virtuals: true });
-
-// Pre-save middleware to generate slug if not provided
+// Generate slug from name before saving
 categorySchema.pre('save', function(next) {
-  if (!this.slug && this.name) {
-    this.slug = this.name
+  if (this.isModified('name') && !this.slug) {
+    const englishName = this.name.en || this.name.de;
+    this.slug = englishName
       .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
   next();
 });
+
+// Indexes
+categorySchema.index({ slug: 1 }, { unique: true });
+categorySchema.index({ parentCategory: 1 });
+categorySchema.index({ sortOrder: 1 });
+categorySchema.index({ isActive: 1, isDeleted: 1 });
+categorySchema.index({ 'name.en': 'text', 'name.de': 'text' });
 
 export const Category = mongoose.model<ICategory>('Category', categorySchema); 

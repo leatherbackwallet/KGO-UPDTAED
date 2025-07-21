@@ -23,7 +23,7 @@ export async function seedLedger(users: any[], orders: any[]) {
           modelName: 'Order',
           docId: orders[0]._id
         },
-        recordedBy: users.find(u => u.role === 'admin')._id
+        recordedBy: users.find(u => u.roleId?.name === 'admin')._id
       }
     ];
 

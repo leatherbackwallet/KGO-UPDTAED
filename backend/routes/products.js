@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
-const Category = require('../models/Category');
+const { Product } = require('../models/products.model');
+const { Category } = require('../models/categories.model');
 const auth = require('../middleware/auth');
 const role = require('../middleware/role');
 const mongoose = require('mongoose');
@@ -62,7 +62,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create product (admin only)
-router.post('/', auth, role('Admin'), async (req, res) => {
+router.post('/', auth, role('admin'), async (req, res) => {
   try {
     const { name, description, price, category, stock, images, tags, isFeatured, slug, defaultImage } = req.body;
     
@@ -96,7 +96,7 @@ router.post('/', auth, role('Admin'), async (req, res) => {
 });
 
 // Update product (admin only)
-router.put('/:id', auth, role('Admin'), async (req, res) => {
+router.put('/:id', auth, role('admin'), async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!product) return res.status(404).json({ message: 'Product not found' });
@@ -107,7 +107,7 @@ router.put('/:id', auth, role('Admin'), async (req, res) => {
 });
 
 // Delete product (admin only)
-router.delete('/:id', auth, role('Admin'), async (req, res) => {
+router.delete('/:id', auth, role('admin'), async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ message: 'Product not found' });

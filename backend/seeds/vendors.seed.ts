@@ -18,8 +18,8 @@ export async function seedVendors(users: IUser[]): Promise<IVendor[]> {
       return await Vendor.find();
     }
 
-    // Get vendor users
-    const vendorUsers = users.filter(user => user.role === 'vendor');
+    // Get vendor users (for now, use first few users as vendors)
+    const vendorUsers = users.slice(0, 3);
 
     const vendors = [
       {
@@ -71,7 +71,7 @@ export async function seedVendors(users: IUser[]): Promise<IVendor[]> {
       console.log(`      - ${vendor.storeName} (${vendor.status}) - ${vendor.address.city}`);
     });
 
-    return createdVendors;
+    return createdVendors as IVendor[];
   } catch (error) {
     console.error('   ❌ Error seeding vendors:', error);
     throw error;

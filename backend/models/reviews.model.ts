@@ -8,7 +8,8 @@ import mongoose, { Document, Schema } from 'mongoose';
 // Review type enum
 export enum ReviewType {
   PRODUCT = 'product',
-  VENDOR = 'vendor'
+  VENDOR = 'vendor',
+  DELIVERY = 'delivery'
 }
 
 // Reply interface
@@ -23,6 +24,7 @@ export interface IReview extends Document {
   reviewType: ReviewType;
   productId?: mongoose.Types.ObjectId;
   vendorId?: mongoose.Types.ObjectId;
+  deliveryAgentId?: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   orderId: mongoose.Types.ObjectId;
   rating: number;
@@ -55,6 +57,14 @@ const reviewSchema = new Schema<IReview>(
       index: true,
       required: function(this: IReview) {
         return this.reviewType === ReviewType.VENDOR;
+      }
+    },
+    deliveryAgentId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+      required: function(this: IReview) {
+        return this.reviewType === ReviewType.DELIVERY;
       }
     },
     userId: {
@@ -143,6 +153,9 @@ reviewSchema.pre('save', function(next) {
   }
   if (this.reviewType === ReviewType.VENDOR && !this.vendorId) {
     return next(new Error('Vendor ID is required for vendor reviews'));
+  }
+  if (this.reviewType === ReviewType.DELIVERY && !this.deliveryAgentId) {
+    return next(new Error('Delivery agent ID is required for delivery reviews'));
   }
   next();
 });

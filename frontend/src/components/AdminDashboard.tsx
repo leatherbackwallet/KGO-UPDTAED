@@ -34,7 +34,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (token && user?.role === 'Admin') {
+    if (token && user?.roleName === 'admin') {
       fetchStats();
     } else {
       setLoading(false);
@@ -71,7 +71,7 @@ export default function AdminDashboard() {
 
   if (loading) return <div>Loading dashboard...</div>;
 
-  if (!token || user?.role !== 'Admin') {
+      if (!token || user?.roleName !== 'admin') {
     return <div className="text-red-600">Access denied. Admin privileges required.</div>;
   }
 

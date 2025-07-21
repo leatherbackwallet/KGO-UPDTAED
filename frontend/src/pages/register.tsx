@@ -5,13 +5,18 @@ import Navbar from '../components/Navbar';
 import api from '../utils/api';
 
 interface AuthResponse {
-  token: string;
+  success: boolean;
+  data: {
+    token: string;
+    user: any;
+  };
 }
 
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const { login } = useAuth();
   const router = useRouter();
@@ -20,11 +25,16 @@ export default function Register() {
     e.preventDefault();
     setError('');
     try {
-      const res = await api.post<AuthResponse>('/auth/register', { name, email, password });
-      login(res.data.token);
-      router.push('/');
+      const res = await api.post<AuthResponse>('/auth/register', { name, email, password, phone });
+      
+      if (res.data.success && res.data.data.token) {
+        login(res.data.data.token, res.data.data.user);
+        router.push('/');
+      } else {
+        setError('Registration failed - invalid response');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.error?.message || 'Registration failed');
     }
   };
 
@@ -48,6 +58,14 @@ export default function Register() {
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
+            className="w-full mb-4 px-4 py-2 border rounded"
+            required
+          />
+          <input
+            type="tel"
+            placeholder="Phone Number"
+            value={phone}
+            onChange={e => setPhone(e.target.value)}
             className="w-full mb-4 px-4 py-2 border rounded"
             required
           />

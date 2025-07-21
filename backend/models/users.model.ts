@@ -1,91 +1,185 @@
 /**
- * User Model - Core user management for customers, vendors, admins, and support agents
- * Handles authentication, role-based access, and user profile information
+ * Users Model - Core user management with roles, schedules, and recipient address book
+ * Supports RBAC, delivery agent locations, and customer address management
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
 
-// User role enum
-export enum UserRole {
-  CUSTOMER = 'customer',
-  VENDOR = 'vendor',
-  ADMIN = 'admin',
-  SUPPORT_AGENT = 'support_agent'
+export interface IUserLocation {
+  type: 'Point';
+  coordinates: number[];
 }
 
-// TypeScript interface for User document
+export interface IUserSchedule {
+  type: 'work_shift' | 'time_off';
+  startDate: Date;
+  endDate: Date;
+  isRecurring: boolean;
+}
+
+export interface IRecipientAddress {
+  name: string;
+  phone: string;
+  address: {
+    streetName: string;
+    houseNumber: string;
+    postalCode: string;
+    city: string;
+    countryCode: string;
+  };
+  isDefault: boolean;
+}
+
 export interface IUser extends Document {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
-  role: UserRole;
-  phone?: string;
+  roleId: mongoose.Types.ObjectId;
+  phone: string;
+  location?: IUserLocation;
+  schedules?: IUserSchedule[];
+  recipientAddresses?: IRecipientAddress[];
+  isActive: boolean;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// User schema definition
-const userSchema = new Schema<IUser>(
-  {
-    firstName: {
+const userLocationSchema = new Schema<IUserLocation>({
+  type: {
+    type: String,
+    enum: ['Point'],
+    default: 'Point'
+  },
+  coordinates: [{
+    type: Number
+  }]
+});
+
+const userScheduleSchema = new Schema<IUserSchedule>({
+  type: {
+    type: String,
+    enum: ['work_shift', 'time_off'],
+    required: true
+  },
+  startDate: {
+    type: Date,
+    required: true
+  },
+  endDate: {
+    type: Date,
+    required: true
+  },
+  isRecurring: {
+    type: Boolean,
+    default: false
+  }
+});
+
+const recipientAddressSchema = new Schema<IRecipientAddress>({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  phone: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  address: {
+    streetName: {
       type: String,
-      required: [true, 'First name is required'],
-      trim: true,
-      maxlength: [50, 'First name cannot exceed 50 characters']
+      required: true,
+      trim: true
     },
-    lastName: {
+    houseNumber: {
       type: String,
-      required: [true, 'Last name is required'],
-      trim: true,
-      maxlength: [50, 'Last name cannot exceed 50 characters']
+      required: true,
+      trim: true
     },
-    email: {
+    postalCode: {
       type: String,
-      required: [true, 'Email is required'],
-      unique: true,
-      index: true,
-      lowercase: true,
-      trim: true,
-      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+      required: true,
+      trim: true
     },
-    password: {
+    city: {
       type: String,
-      required: [true, 'Password is required'],
-      minlength: [6, 'Password must be at least 6 characters long']
+      required: true,
+      trim: true
     },
-    role: {
+    countryCode: {
       type: String,
-      enum: Object.values(UserRole),
-      required: [true, 'User role is required'],
-      default: UserRole.CUSTOMER
-    },
-    phone: {
-      type: String,
-      trim: true,
-      match: [/^[+]?[\d\s\-\(\)]+$/, 'Please enter a valid phone number']
+      required: true,
+      default: 'DE'
     }
   },
-  {
-    timestamps: true,
-    toJSON: {
-      transform: function(doc, ret) {
-        delete ret.password;
-        return ret;
-      }
-    }
+  isDefault: {
+    type: Boolean,
+    default: false
   }
-);
+});
 
-// Compound index for search optimization
-userSchema.index({ firstName: 1, lastName: 1 });
+const userSchema = new Schema<IUser>({
+  firstName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  lastName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  roleId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Role',
+    required: true
+  },
+  phone: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  location: userLocationSchema,
+  schedules: [userScheduleSchema],
+  recipientAddresses: [recipientAddressSchema],
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  }
+}, {
+  timestamps: true
+});
+
+// Indexes
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ location: '2dsphere' });
+userSchema.index({ roleId: 1 });
+userSchema.index({ isActive: 1, isDeleted: 1 });
 
 // Virtual for full name
 userSchema.virtual('fullName').get(function() {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// Ensure virtual fields are serialized
+// Ensure virtuals are serialized
 userSchema.set('toJSON', { virtuals: true });
 
 export const User = mongoose.model<IUser>('User', userSchema); 

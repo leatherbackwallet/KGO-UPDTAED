@@ -1,24 +1,35 @@
 {
-  "name": "onyourbehalf",
-  "version": "1.0.0",
-  "description": "Full-stack e-commerce platform",
+  "name": "keralagiftsonline",
+  "version": "3.0.0",
+  "description": "KeralGiftsOnline.com - Enterprise-grade hyperlocal marketplace with promotions engine and advanced logistics",
+  "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
-    "build": "cd frontend && npm run build",
-    "start": "cd backend && npm start"
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "seed": "cd backend && npm run seed",
+    "seed:v3": "cd backend && node seeds/v3-seeder.js"
   },
-  "dependencies": {
-    "bcryptjs": "^3.0.2",
-    "concurrently": "^8.2.2",
-    "dotenv": "^17.2.0",
-    "mongodb": "^6.17.0",
-    "mongoose": "^8.16.4"
-  },
+  "keywords": [
+    "keralagiftsonline",
+    "marketplace",
+    "hyperlocal",
+    "gifts",
+    "cakes",
+    "flowers",
+    "promotions",
+    "logistics",
+    "enterprise"
+  ],
+  "author": "KeralGiftsOnline Team",
+  "license": "MIT",
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^24.0.14"
+    "concurrently": "^8.2.2"
   }
 }

@@ -7,8 +7,8 @@ import { ProductSkeletonGrid } from '../components/ProductSkeleton';
 
 interface Product {
   _id: string;
-  name: string;
-  description: string;
+  name: string | { en: string; de: string };
+  description: string | { en: string; de: string };
   price?: number;
   category: string | { _id: string; name: string; slug: string };
   stock?: number;
@@ -72,10 +72,7 @@ export default function Products() {
       <main className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Our Products</h1>
-            <p className="text-gray-600">Discover amazing products at great prices</p>
-          </div>
+      
 
           {/* Filters */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
@@ -164,13 +161,29 @@ export default function Products() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map(product => (
-                <ProductCard 
-                  key={product._id} 
-                  product={product} 
-                  onQuickView={handleQuickView}
-                />
-              ))}
+              {products.map(product => {
+                // Helper function to get text from multilingual object or string
+                const getText = (text: string | { en: string; de: string }): string => {
+                  if (typeof text === 'string') return text;
+                  return text.en || text.de || '';
+                };
+
+                // Transform the product data to ensure proper rendering
+                const transformedProduct = {
+                  ...product,
+                  name: getText(product.name),
+                  description: getText(product.description),
+                  category: typeof product.category === 'object' ? getText(product.category.name) : product.category
+                };
+
+                return (
+                  <ProductCard 
+                    key={product._id} 
+                    product={transformedProduct} 
+                    onQuickView={handleQuickView}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

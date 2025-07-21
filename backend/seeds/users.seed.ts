@@ -4,18 +4,30 @@
  */
 
 import bcrypt from 'bcryptjs';
-import { User, UserRole, IUser } from '../models/users.model';
+import { User, IUser } from '../models/users.model';
+import { Role } from '../models/roles.model';
 
 /**
  * Seed users with different roles
  */
-export async function seedUsers(): Promise<IUser[]> {
+export async function seedUsers(): Promise<any[]> {
   try {
     // Check if users already exist
     const existingUsers = await User.countDocuments();
     if (existingUsers > 0) {
       console.log('   ⏭️  Users already exist, skipping...');
       return await User.find();
+    }
+
+    // Get role IDs
+    const adminRole = await Role.findOne({ name: 'admin' });
+    const customerRole = await Role.findOne({ name: 'customer' });
+    const vendorRole = await Role.findOne({ name: 'vendor' });
+    const supportRole = await Role.findOne({ name: 'support_agent' });
+    const deliveryRole = await Role.findOne({ name: 'delivery_agent' });
+
+    if (!adminRole || !customerRole || !vendorRole || !supportRole || !deliveryRole) {
+      throw new Error('Required roles not found. Please seed roles first.');
     }
 
     // Hash password for all users
@@ -26,9 +38,9 @@ export async function seedUsers(): Promise<IUser[]> {
       {
         firstName: 'Admin',
         lastName: 'User',
-        email: 'admin@onyourbehlf.com',
+        email: 'admin@keralagiftsonline.com',
         password: hashedPassword,
-        role: UserRole.ADMIN,
+        roleId: adminRole._id,
         phone: '+91-9876543210'
       },
       // Customer User
@@ -37,7 +49,7 @@ export async function seedUsers(): Promise<IUser[]> {
         lastName: 'Customer',
         email: 'customer@example.com',
         password: hashedPassword,
-        role: UserRole.CUSTOMER,
+        roleId: customerRole._id,
         phone: '+91-9876543211'
       },
       // Vendor User
@@ -46,16 +58,16 @@ export async function seedUsers(): Promise<IUser[]> {
         lastName: 'Vendor',
         email: 'vendor@example.com',
         password: hashedPassword,
-        role: UserRole.VENDOR,
+        roleId: vendorRole._id,
         phone: '+91-9876543212'
       },
       // Support Agent User
       {
         firstName: 'Mike',
         lastName: 'Support',
-        email: 'support@onyourbehlf.com',
+        email: 'support@keralagiftsonline.com',
         password: hashedPassword,
-        role: UserRole.SUPPORT_AGENT,
+        roleId: supportRole._id,
         phone: '+91-9876543213'
       },
       // Additional Customer Users
@@ -64,7 +76,7 @@ export async function seedUsers(): Promise<IUser[]> {
         lastName: 'Wilson',
         email: 'emma@example.com',
         password: hashedPassword,
-        role: UserRole.CUSTOMER,
+        roleId: customerRole._id,
         phone: '+91-9876543214'
       },
       {
@@ -72,7 +84,7 @@ export async function seedUsers(): Promise<IUser[]> {
         lastName: 'Brown',
         email: 'david@example.com',
         password: hashedPassword,
-        role: UserRole.CUSTOMER,
+        roleId: customerRole._id,
         phone: '+91-9876543215'
       },
       // Additional Vendor Users
@@ -81,7 +93,7 @@ export async function seedUsers(): Promise<IUser[]> {
         lastName: 'Sharma',
         email: 'priya@vendor.com',
         password: hashedPassword,
-        role: UserRole.VENDOR,
+        roleId: vendorRole._id,
         phone: '+91-9876543216'
       },
       {
@@ -89,8 +101,25 @@ export async function seedUsers(): Promise<IUser[]> {
         lastName: 'Kumar',
         email: 'raj@vendor.com',
         password: hashedPassword,
-        role: UserRole.VENDOR,
+        roleId: vendorRole._id,
         phone: '+91-9876543217'
+      },
+      // Delivery Agent Users
+      {
+        firstName: 'Alex',
+        lastName: 'Delivery',
+        email: 'alex@delivery.com',
+        password: hashedPassword,
+        roleId: deliveryRole._id,
+        phone: '+49-1234567890'
+      },
+      {
+        firstName: 'Maria',
+        lastName: 'Logistics',
+        email: 'maria@delivery.com',
+        password: hashedPassword,
+        roleId: deliveryRole._id,
+        phone: '+49-1234567891'
       }
     ];
 
@@ -99,7 +128,7 @@ export async function seedUsers(): Promise<IUser[]> {
     
     // Log user details
     createdUsers.forEach(user => {
-      console.log(`      - ${user.role}: ${user.email} (${user.firstName} ${user.lastName})`);
+      console.log(`      - ${user.email} (${user.firstName} ${user.lastName})`);
     });
 
     return createdUsers;

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Storage</title>
+</head>
+<body>
+    <h1>Clearing Browser Storage...</h1>
+    <p>This will clear all localStorage and sessionStorage data.</p>
+    <button onclick="clearStorage()">Clear Storage</button>
+    <div id="result"></div>
+
+    <script>
+        function clearStorage() {
+            try {
+                // Clear localStorage
+                localStorage.clear();
+                console.log('localStorage cleared');
+                
+                // Clear sessionStorage
+                sessionStorage.clear();
+                console.log('sessionStorage cleared');
+                
+                // Clear any cookies
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                console.log('cookies cleared');
+                
+                document.getElementById('result').innerHTML = 
+                    '<p style="color: green;">✅ Storage cleared successfully!</p>' +
+                    '<p>You can now close this tab and return to your app.</p>';
+                
+            } catch (error) {
+                console.error('Error clearing storage:', error);
+                document.getElementById('result').innerHTML = 
+                    '<p style="color: red;">❌ Error clearing storage: ' + error.message + '</p>';
+            }
+        }
+        
+        // Auto-clear on page load
+        window.onload = function() {
+            clearStorage();
+        };
+    </script>
+</body>
+</html> 

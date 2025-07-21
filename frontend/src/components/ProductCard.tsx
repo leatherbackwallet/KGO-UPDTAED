@@ -6,8 +6,8 @@ import { getProductImage } from '../utils/imageUtils';
 
 interface Product {
   _id: string;
-  name: string;
-  description: string;
+  name: string | { en: string; de: string };
+  description: string | { en: string; de: string };
   price?: number;
   category: string | { _id: string; name: string; slug: string };
   celebrationType?: string;
@@ -27,13 +27,19 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
   const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
 
+  // Helper function to get text from multilingual object or string
+  const getText = (text: string | { en: string; de: string }): string => {
+    if (typeof text === 'string') return text;
+    return text.en || text.de || '';
+  };
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
     addToCart({
       product: product._id,
-      name: product.name,
+      name: getText(product.name),
       price: product.price || 0,
       image: getProductImage(product.images[0], product.slug),
       quantity: 1,
@@ -51,7 +57,7 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
       <div className="relative overflow-hidden">
         <img
           src={getProductImage(product.images[0], product.slug)}
-          alt={product.name}
+          alt={getText(product.name)}
           className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
@@ -65,7 +71,11 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
         }`}>
           <div className="flex gap-3">
             <button
-              onClick={() => onQuickView(product)}
+              onClick={() => onQuickView({
+                ...product,
+                name: getText(product.name),
+                description: getText(product.description)
+              })}
               className="w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all duration-200 hover:scale-110"
               aria-label="Quick view"
             >
@@ -90,7 +100,13 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
 
         {/* Wishlist Button */}
         <div className="absolute top-3 right-3">
-          <WishlistButton product={product} />
+          <WishlistButton product={{
+            _id: product._id,
+            name: getText(product.name),
+            price: product.price,
+            images: product.images,
+            slug: product.slug
+          }} />
         </div>
 
         {/* Stock Badge */}
@@ -122,11 +138,11 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
         </div>
         
         <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-          {product.name}
+          {getText(product.name)}
         </h3>
         
         <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-          {product.description}
+          {getText(product.description)}
         </p>
         
         <div className="flex items-center justify-between">
