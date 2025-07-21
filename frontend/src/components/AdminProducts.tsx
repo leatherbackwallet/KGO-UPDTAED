@@ -69,6 +69,12 @@ export default function AdminProducts() {
       .trim();
   };
 
+  // Helper function to get text from multilingual object or string
+  const getText = (text: string | { en: string; de: string }): string => {
+    if (typeof text === 'string') return text;
+    return text.en || text.de || '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -158,7 +164,7 @@ export default function AdminProducts() {
             <tr key={product._id} className="border-t">
               <td className="p-2">{product.name}</td>
               <td className="p-2">${product.price ? product.price.toFixed(2) : '0.00'}</td>
-              <td className="p-2">{typeof product.category === 'object' ? product.category.name : product.category}</td>
+              <td className="p-2">{typeof product.category === 'object' ? getText(product.category.name) : product.category}</td>
               <td className="p-2">{product.stock || 0}</td>
               <td className="p-2">{product.isFeatured ? '✓' : '-'}</td>
               <td className="p-2">

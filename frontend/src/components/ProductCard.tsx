@@ -132,7 +132,7 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
       <div className="p-6">
         <div className="mb-2">
           <span className="text-xs text-gray-500 uppercase tracking-wide">
-            {typeof product.category === 'object' ? product.category.name : product.category}
+            {typeof product.category === 'object' ? getText(product.category.name) : product.category}
             {product.celebrationType && ` • ${product.celebrationType}`}
           </span>
         </div>
