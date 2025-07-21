@@ -4,8 +4,8 @@ import { useAuth } from '../context/AuthContext';
 
 interface Order {
   _id: string;
-  user: { name: string; email: string };
-  products: { product: { name: string }; quantity: number }[];
+  user?: { name: string; email: string };
+  products?: { product: { name: string }; quantity: number }[];
   totalAmount: number;
   shippingAddress: string;
   status: string;
@@ -93,12 +93,12 @@ export default function AdminOrders() {
             {orders.map(order => (
               <tr key={order._id} className="border-t">
                 <td className="p-2">{order._id.slice(-6)}</td>
-                <td className="p-2">{order.user?.name || 'N/A'}<br /><span className="text-xs text-gray-500">{order.user?.email}</span></td>
+                <td className="p-2">{order.user?.name || 'N/A'}<br /><span className="text-xs text-gray-500">{order.user?.email || 'N/A'}</span></td>
                 <td className="p-2">
                   <ul>
-                    {order.products.map((item, i) => (
-                      <li key={i}>{item.product.name} x {item.quantity}</li>
-                    ))}
+                    {order.products?.map((item, i) => (
+                      <li key={i}>{item.product?.name || 'Unknown Product'} x {item.quantity}</li>
+                    )) || <li>No products</li>}
                   </ul>
                 </td>
                 <td className="p-2">€{order.totalAmount.toFixed(2)}</td>

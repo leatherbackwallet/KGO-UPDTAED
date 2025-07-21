@@ -16,6 +16,8 @@ export interface IProduct extends Document {
   };
   slug: string;
   category: mongoose.Types.ObjectId;
+  price: number;
+  stock: number;
   images?: string[];
   defaultImage?: string;
   isFeatured: boolean;
@@ -60,6 +62,16 @@ const productSchema = new Schema<IProduct>({
     type: Schema.Types.ObjectId,
     ref: 'Category',
     required: true
+  },
+  price: {
+    type: Number,
+    required: true,
+    min: [0, 'Price cannot be negative']
+  },
+  stock: {
+    type: Number,
+    required: true,
+    min: [0, 'Stock cannot be negative']
   },
   images: [{
     type: String,

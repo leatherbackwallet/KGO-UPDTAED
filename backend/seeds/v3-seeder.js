@@ -261,8 +261,8 @@ async function seedProducts(categories) {
       description: { en: 'Delicious birthday cake with cream and fruits', de: 'Leckerer Geburtstagskuchen mit Sahne und Früchten' },
       slug: 'birthday-cake',
       category: categories[0]._id,
-      images: ['/images/products/birthday-cake.jpg'],
-      defaultImage: '/images/products/birthday-cake.jpg',
+      images: [],
+      defaultImage: '',
       isFeatured: true
     },
     {
@@ -270,8 +270,8 @@ async function seedProducts(categories) {
       description: { en: 'Elegant wedding cake with white frosting', de: 'Elegante Hochzeitstorte mit weißer Glasur' },
       slug: 'wedding-cake',
       category: categories[0]._id,
-      images: ['/images/products/wedding-cake.jpg'],
-      defaultImage: '/images/products/wedding-cake.jpg',
+      images: [],
+      defaultImage: '',
       isFeatured: true
     },
     {
@@ -279,8 +279,8 @@ async function seedProducts(categories) {
       description: { en: 'Premium gift basket with chocolates and wine', de: 'Premium Geschenkkorb mit Schokoladen und Wein' },
       slug: 'gift-basket-premium',
       category: categories[1]._id,
-      images: ['/images/products/gift-basket.jpg'],
-      defaultImage: '/images/products/gift-basket.jpg',
+      images: [],
+      defaultImage: '',
       isFeatured: false
     },
     {
@@ -288,8 +288,8 @@ async function seedProducts(categories) {
       description: { en: 'Beautiful red rose bouquet', de: 'Schöner roter Rosenstrauß' },
       slug: 'rose-bouquet',
       category: categories[2]._id,
-      images: ['/images/products/roses.jpg'],
-      defaultImage: '/images/products/roses.jpg',
+      images: [],
+      defaultImage: '',
       isFeatured: true
     }
   ];

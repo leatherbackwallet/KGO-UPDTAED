@@ -147,7 +147,37 @@ router.post('/guest', async (req, res) => {
     let user = await User.findOne({ email }).populate('roleId');
     
     if (user) {
-      // If user exists, return their token (they can complete checkout as existing user)
+      // If user exists, add delivery address if not already present
+      const addressExists = user.recipientAddresses?.some(addr => 
+        addr.address.streetName === deliveryAddress.street &&
+        addr.address.houseNumber === deliveryAddress.houseNumber &&
+        addr.address.city === deliveryAddress.city
+      );
+
+      if (!addressExists) {
+        const nameParts = name.trim().split(' ');
+        const firstName = nameParts[0] || name;
+        const lastName = nameParts.slice(1).join(' ') || 'Guest';
+
+        const newAddress = {
+          name: `${firstName} ${lastName}`,
+          phone: phone,
+          address: {
+            streetName: deliveryAddress.street,
+            houseNumber: deliveryAddress.houseNumber,
+            postalCode: deliveryAddress.zipCode,
+            city: deliveryAddress.city,
+            countryCode: deliveryAddress.country || 'IN'
+          },
+          isDefault: user.recipientAddresses?.length === 0
+        };
+
+        user.recipientAddresses = user.recipientAddresses || [];
+        user.recipientAddresses.push(newAddress);
+        await user.save();
+      }
+
+      // Return their token (they can complete checkout as existing user)
       const token = jwt.sign({ 
         id: user._id, 
         roleId: user.roleId
@@ -196,7 +226,19 @@ router.post('/guest', async (req, res) => {
       email, 
       phone,
       password: hashedPassword,
-      roleId: guestRole._id
+      roleId: guestRole._id,
+      recipientAddresses: [{
+        name: `${firstName} ${lastName}`,
+        phone: phone,
+        address: {
+          streetName: deliveryAddress.street,
+          houseNumber: deliveryAddress.houseNumber,
+          postalCode: deliveryAddress.zipCode,
+          city: deliveryAddress.city,
+          countryCode: deliveryAddress.country || 'IN'
+        },
+        isDefault: true
+      }]
     });
 
     const token = jwt.sign({ 

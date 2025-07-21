@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import AdminTabs from './AdminTabs';
 
 interface Hub {
   _id: string;
@@ -62,55 +62,56 @@ interface DeliveryRun {
 }
 
 export default function LogisticsDashboard() {
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'hubs' | 'delivery-runs'>('hubs');
   const [hubs, setHubs] = useState<Hub[]>([]);
   const [deliveryRuns, setDeliveryRuns] = useState<DeliveryRun[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showCreateHub, setShowCreateHub] = useState(false);
   const [showCreateRun, setShowCreateRun] = useState(false);
 
-  useEffect(() => {
-    if (user?.roleName === 'admin') {
-      fetchHubs();
-      fetchDeliveryRuns();
-    }
-  }, [user]);
+  const tabs = [
+    { id: 'hubs', label: `Hubs (${hubs.length})` },
+    { id: 'delivery-runs', label: `Delivery Runs (${deliveryRuns.length})` }
+  ];
 
   const fetchHubs = async () => {
-    setLoading(true);
     try {
       const response = await api.get('/hubs');
-      setHubs((response.data as any).data || []);
-    } catch (error) {
-      console.error('Error fetching hubs:', error);
-    } finally {
-      setLoading(false);
+      setHubs(response.data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to load hubs');
     }
   };
 
   const fetchDeliveryRuns = async () => {
-    setLoading(true);
     try {
       const response = await api.get('/delivery-runs');
-      setDeliveryRuns((response.data as any).data || []);
-    } catch (error) {
-      console.error('Error fetching delivery runs:', error);
-    } finally {
-      setLoading(false);
+      setDeliveryRuns(response.data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to load delivery runs');
     }
   };
 
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchHubs(), fetchDeliveryRuns()]);
+      setLoading(false);
+    };
+    loadData();
+  }, []);
+
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'planning': return 'bg-blue-100 text-blue-800';
-      case 'collecting_items': return 'bg-yellow-100 text-yellow-800';
-      case 'at_hub_packing': return 'bg-purple-100 text-purple-800';
-      case 'out_for_delivery': return 'bg-orange-100 text-orange-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+    const colors = {
+      planning: 'bg-yellow-100 text-yellow-800',
+      collecting_items: 'bg-blue-100 text-blue-800',
+      at_hub_packing: 'bg-purple-100 text-purple-800',
+      out_for_delivery: 'bg-orange-100 text-orange-800',
+      completed: 'bg-green-100 text-green-800',
+      cancelled: 'bg-red-100 text-red-800'
+    };
+    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
   const formatDate = (dateString: string) => {
@@ -123,48 +124,24 @@ export default function LogisticsDashboard() {
     });
   };
 
-      if (user?.roleName !== 'admin') {
-    return (
-      <div className="max-w-7xl mx-auto py-8 px-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600">You don't have permission to access the logistics dashboard.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4">
-      <div className="mb-8">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
         <h1 className="text-3xl font-bold text-gray-900">Logistics Dashboard</h1>
         <p className="text-gray-600 mt-2">Manage hubs and delivery runs for hyperlocal logistics</p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('hubs')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'hubs'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Hubs ({hubs.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('delivery-runs')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'delivery-runs'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Delivery Runs ({deliveryRuns.length})
-          </button>
-        </nav>
+      <div className="mb-6">
+        <AdminTabs
+          tabs={tabs.map(t => t.label)}
+          activeTab={tabs.find(t => t.id === activeTab)?.label || `Hubs (${hubs.length})`}
+          onTabChange={(tabLabel) => {
+            const tabId = tabs.find(t => t.label === tabLabel)?.id as any;
+            setActiveTab(tabId);
+          }}
+        />
       </div>
 
       {/* Hubs Tab */}

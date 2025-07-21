@@ -10,7 +10,7 @@ interface Product {
   price?: number;
   category: string | { _id: string; name: string; slug: string };
   stock?: number;
-  images: string[];
+  images?: string[];
   slug?: string;
 }
 
@@ -38,7 +38,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
       product: product._id,
       name: getText(product.name),
       price: product.price || 0,
-      image: getProductImage(product.images[0], product.slug),
+      image: getProductImage(product.images?.[0] || '', product.slug),
       quantity,
       stock: product.stock || 0
     });
@@ -81,7 +81,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
           <div className="lg:w-1/2 p-6">
             <div className="relative">
               <img
-                src={getProductImage(product.images[selectedImage], product.slug)}
+                src={getProductImage(product.images?.[selectedImage] || '', product.slug)}
                 alt={getText(product.name)}
                 className="w-full h-80 object-cover rounded-lg"
                 onError={handleImageError}
@@ -91,7 +91,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                   _id: product._id,
                   name: getText(product.name),
                   price: product.price,
-                  images: product.images,
+                  images: product.images || [],
                   slug: product.slug
                 }} 
                 className="absolute top-4 right-4"
@@ -99,7 +99,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
             </div>
             
             {/* Image Thumbnails */}
-            {product.images.length > 1 && (
+            {product.images && product.images.length > 1 && (
               <div className="flex gap-2 mt-4">
                 {product.images.map((image, index) => (
                   <button

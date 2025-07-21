@@ -5,7 +5,7 @@ import api from '../utils/api';
 
 interface Order {
   _id: string;
-  products: { product: { name: string; price: number }; quantity: number }[];
+  products?: { product: { name: string; price: number }; quantity: number }[];
   totalAmount: number;
   shippingAddress: string;
   status: string;
@@ -58,7 +58,7 @@ export default function Orders() {
                 <div className="mb-2">Status: <span className="font-semibold">{order.status}</span></div>
                 <div className="mb-2">Shipping: {order.shippingAddress}</div>
                 <ul className="mb-2">
-                  {order.products.map((item, i) => (
+                  {order.products?.map((item, i) => (
                     <li key={i} className="flex justify-between">
                       <span>{item.product.name} x {item.quantity}</span>
                       <span>${(item.product.price * item.quantity).toFixed(2)}</span>

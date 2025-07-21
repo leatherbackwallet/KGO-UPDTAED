@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from '../context/CartContext';
 import WishlistButton from './WishlistButton';
-import { getProductImage } from '../utils/imageUtils';
+import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 
 interface Product {
   _id: string;
@@ -32,6 +32,9 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
     if (typeof text === 'string') return text;
     return text.en || text.de || '';
   };
+  
+  // Get image path
+  const imagePath = getProductImage(product.images[0], product.slug);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -56,12 +59,13 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
       {/* Image Container */}
       <div className="relative overflow-hidden">
         <img
-          src={getProductImage(product.images[0], product.slug)}
+          src={imagePath}
           alt={getText(product.name)}
           className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = '/images/products/placeholder.svg';
+            console.error('Image failed to load:', target.src);
+            target.src = DEFAULT_PRODUCT_IMAGE;
           }}
         />
         

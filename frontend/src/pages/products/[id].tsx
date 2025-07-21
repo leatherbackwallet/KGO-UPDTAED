@@ -11,7 +11,7 @@ interface Product {
   price?: number;
   category: string | { _id: string; name: string; slug: string };
   stock?: number;
-  images: string[];
+  images?: string[];
   slug?: string;
 }
 
@@ -45,12 +45,12 @@ export default function ProductDetail() {
         <div className="flex flex-col md:flex-row gap-8">
           <div className="flex-1">
             <img
-              src={getProductImage(product.images[0], product.slug)}
+              src={getProductImage(product.images?.[0] || '', product.slug)}
               alt={product.name}
               className="w-full h-96 object-cover rounded mb-4"
             />
             <div className="flex gap-2">
-              {product.images.map((img, i) => (
+              {product.images?.map((img, i) => (
                 <img key={i} src={getProductImage(img, product.slug)} alt="" className="w-20 h-20 object-cover rounded" />
               ))}
             </div>

@@ -1,47 +1,44 @@
 /**
- * Image Utilities - Local image management for products
- * Handles image paths, fallbacks, and validation for local image storage
+ * Image Utilities - Product images are now served from MongoDB GridFS via the backend API.
+ * This utility handles both GridFS images (with ObjectId URLs) and legacy images (with slug names).
  */
 
-// Base path for product images
-export const PRODUCT_IMAGES_PATH = '/images/products';
+// Backend API base URL for API calls
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
-// Default placeholder image
+// Backend base URL for static files (legacy images) - remove /api suffix
+const STATIC_BASE_URL = API_BASE_URL.replace('/api', '');
+
+export const PRODUCT_IMAGES_PATH = `${STATIC_BASE_URL}/images/products`;
 export const DEFAULT_PRODUCT_IMAGE = `${PRODUCT_IMAGES_PATH}/placeholder.svg`;
 
 /**
- * Generate product image path from product slug
- * @param slug - Product slug
- * @param extension - Image extension (default: svg)
- * @returns Full path to the product image
- */
-export function getProductImagePath(slug: string, extension: string = 'svg'): string {
-  return `${PRODUCT_IMAGES_PATH}/${slug}.${extension}`;
-}
-
-/**
- * Get product image with fallback to placeholder
- * @param imagePath - Image path from database
- * @param slug - Product slug for fallback
- * @returns Valid image path
+ * Get product image path - handles both GridFS images and legacy images
+ * @param imagePath - GridFS URL (/api/images/fileId) or relative path from database
+ * @param slug - Product slug for fallback image filename
+ * @returns Image path string
  */
 export function getProductImage(imagePath?: string, slug?: string): string {
+  // If we have a GridFS URL (starts with /api/images/), use it directly
+  if (imagePath && imagePath.startsWith('/api/images/')) {
+    return `${STATIC_BASE_URL}${imagePath}`;
+  }
+  
+  // If we have a full URL (uploaded image), use it directly
   if (imagePath && imagePath.startsWith('http')) {
-    // External URL (AWS, etc.)
     return imagePath;
   }
   
-  if (imagePath && imagePath.startsWith('/')) {
-    // Local path - return as is, don't convert to SVG
-    return imagePath;
+  // If we have a relative path starting with /images/products/ (from database)
+  if (imagePath && imagePath.startsWith('/images/products/')) {
+    return `${STATIC_BASE_URL}${imagePath}`;
   }
   
+  // Fallback to slug-based naming (legacy images)
   if (slug) {
-    // Try to generate path from slug
-    return getProductImagePath(slug);
+    return `${PRODUCT_IMAGES_PATH}/${slug}.jpg`;
   }
   
-  // Fallback to placeholder
   return DEFAULT_PRODUCT_IMAGE;
 }
 
@@ -60,7 +57,7 @@ export async function imageExists(imagePath: string): Promise<boolean> {
 }
 
 /**
- * Get optimized image path with size suffix
+ * Get optimized image path with size suffix (for future use)
  * @param basePath - Base image path
  * @param size - Size suffix (thumb, small, medium, large)
  * @returns Optimized image path

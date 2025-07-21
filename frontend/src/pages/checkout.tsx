@@ -9,6 +9,7 @@ import Navbar from '../components/Navbar';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
+import AdminTabs from '../components/AdminTabs';
 import api from '../utils/api';
 
 type TabType = 'login' | 'guest';
@@ -556,27 +557,12 @@ export default function Checkout() {
               </div>
 
               {/* Tab Navigation */}
-              <div className="flex border-b border-gray-200 mb-4">
-                <button
-                  onClick={() => setIsRegistering(false)}
-                  className={`flex-1 py-2 font-medium transition-colors ${
-                    !isRegistering
-                      ? 'border-b-2 border-blue-600 text-blue-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Login
-                </button>
-                <button
-                  onClick={() => setIsRegistering(true)}
-                  className={`flex-1 py-2 font-medium transition-colors ${
-                    isRegistering
-                      ? 'border-b-2 border-blue-600 text-blue-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Register
-                </button>
+              <div className="mb-4">
+                <AdminTabs
+                  tabs={['Login', 'Register']}
+                  activeTab={isRegistering ? 'Register' : 'Login'}
+                  onTabChange={(tab) => setIsRegistering(tab === 'Register')}
+                />
               </div>
 
               {!isRegistering ? (

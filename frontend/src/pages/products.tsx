@@ -173,7 +173,8 @@ export default function Products() {
                   ...product,
                   name: getText(product.name),
                   description: getText(product.description),
-                  category: typeof product.category === 'object' ? getText(product.category.name) : product.category
+                  category: typeof product.category === 'object' ? getText(product.category.name) : product.category,
+                  slug: product.slug // Ensure slug is passed through
                 };
 
                 return (

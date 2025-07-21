@@ -63,7 +63,7 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
         slug: 'traditional-3-tier-wedding-cake',
         description: { en: 'Elegant 3-tier wedding cake with classic white fondant and delicate sugar flowers.', de: 'Elegant 3-tier wedding cake with classic white fondant and delicate sugar flowers.' },
         category: weddingCakes?._id,
-        defaultImage: '/images/products/traditional-wedding-cake.jpg',
+        defaultImage: '',
         tags: ['wedding', 'traditional', 'elegant', 'fondant'],
         personalizationOptions: [
           { type: 'text', label: 'Couple Names' },
@@ -78,7 +78,7 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
         slug: 'modern-naked-wedding-cake',
         description: { en: 'Contemporary naked cake with fresh flowers and rustic charm. Perfect for modern weddings.', de: 'Contemporary naked cake with fresh flowers and rustic charm. Perfect for modern weddings.' },
         category: weddingCakes?._id,
-        defaultImage: '/images/products/naked-wedding-cake.jpg',
+        defaultImage: '',
         tags: ['wedding', 'modern', 'naked', 'rustic'],
         personalizationOptions: [
           { type: 'text', label: 'Couple Names' },
@@ -93,7 +93,7 @@ export async function seedProducts(categories: ICategory[]): Promise<IProduct[]>
         slug: 'rainbow-birthday-cake',
         description: { en: 'Colorful rainbow cake with vibrant layers and fun sprinkles. Perfect for kids and adults alike.', de: 'Colorful rainbow cake with vibrant layers and fun sprinkles. Perfect for kids and adults alike.' },
         category: birthdayCakes?._id,
-        defaultImage: '/images/products/rainbow-birthday-cake.jpg',
+        defaultImage: '',
         tags: ['birthday', 'rainbow', 'colorful', 'fun'],
         personalizationOptions: [
           { type: 'text', label: 'Birthday Message' },

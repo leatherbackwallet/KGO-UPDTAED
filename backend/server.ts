@@ -2,10 +2,12 @@ import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import path from 'path';
 import { User } from './models/users.model';
 import { Role } from './models/roles.model';
 import { Category } from './models/categories.model';
 import { hashPassword } from './utils/hash';
+import { initializeGridFS, getImageStream } from './utils/gridfs';
 
 dotenv.config();
 
@@ -14,6 +16,9 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from public directory (for legacy images)
+app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
 // Create default superuser if not exists
 async function createSuperUser() {
@@ -56,9 +61,38 @@ async function createSuperUser() {
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI!).then(async () => {
   console.log('MongoDB connected');
+  
+  // Initialize GridFS for image storage
+  initializeGridFS();
+  console.log('GridFS initialized for product images');
+  
   await createSuperUser();
 })
   .catch((err) => console.error('MongoDB connection error:', err));
+
+// GridFS image serving route
+app.get('/api/images/:fileId', async (req, res): Promise<void> => {
+  try {
+    const { fileId } = req.params;
+    
+    if (!fileId || !mongoose.Types.ObjectId.isValid(fileId)) {
+      res.status(400).json({ success: false, error: 'Invalid file ID' });
+      return;
+    }
+
+    const stream = getImageStream(fileId);
+    
+    stream.on('error', (error) => {
+      console.error('Error streaming image:', error);
+      res.status(404).json({ success: false, error: 'Image not found' });
+    });
+
+    stream.pipe(res);
+  } catch (error) {
+    console.error('Error serving image:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
 
 // Add error handling for uncaught exceptions
 process.on('uncaughtException', (err) => {
@@ -73,10 +107,13 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Routes
 import authRoutes from './routes/auth';
+import uploadRoutes from './routes/upload';
+import ordersRoutes from './routes/orders';
 app.use('/api/auth', authRoutes);
+app.use('/api/upload', uploadRoutes);
 app.use('/api/products', require('./routes/products'));
 app.use('/api/categories', require('./routes/categories'));
-app.use('/api/orders', require('./routes/orders'));
+app.use('/api/orders', ordersRoutes);
 app.use('/api/users', require('./routes/users'));
 app.use('/api/wishlist', require('./routes/wishlist'));
 app.use('/api/cart', require('./routes/cart'));

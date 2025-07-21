@@ -5,6 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import api from '../utils/api';
+import AdminTabs from './AdminTabs';
 
 interface FinancialData {
   summary: {
@@ -68,28 +69,24 @@ export default function FinanceDashboard() {
   const [endDate, setEndDate] = useState('');
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [orderBreakdown, setOrderBreakdown] = useState<OrderBreakdown[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const tabs = [
+    { id: 'aggregates', label: 'Aggregates Dashboard' },
+    { id: 'orders', label: 'Order-wise Breakdown' }
+  ];
 
   // Load financial data
   const loadFinancialData = async () => {
-    setLoading(true);
-    setError('');
-    
     try {
-      const params = new URLSearchParams();
-      if (startDate && endDate) {
-        params.append('startDate', startDate);
-        params.append('endDate', endDate);
-      } else {
-        params.append('period', period);
-      }
-      
-      const response = await api.get(`/finance/aggregates?${params}`);
-      const data = response.data as { success: boolean; data: FinancialData };
-      setFinancialData(data.data);
+      setLoading(true);
+      const response = await api.get('/finance/aggregates', {
+        params: { period, startDate, endDate }
+      });
+      setFinancialData(response.data);
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to load financial data');
+      setError(err.response?.data?.message || 'Failed to load financial data');
     } finally {
       setLoading(false);
     }
@@ -97,33 +94,20 @@ export default function FinanceDashboard() {
 
   // Load order breakdown
   const loadOrderBreakdown = async () => {
-    setLoading(true);
-    setError('');
-    
     try {
-      const params = new URLSearchParams();
-      if (startDate && endDate) {
-        params.append('startDate', startDate);
-        params.append('endDate', endDate);
-      }
-      
-      const response = await api.get(`/finance/orders?${params}`);
-      const data = response.data as { success: boolean; data: { orders: OrderBreakdown[] } };
-      setOrderBreakdown(data.data.orders);
+      const response = await api.get('/finance/orders', {
+        params: { period, startDate, endDate }
+      });
+      setOrderBreakdown(response.data);
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to load order breakdown');
-    } finally {
-      setLoading(false);
+      console.error('Failed to load order breakdown:', err);
     }
   };
 
   useEffect(() => {
-    if (activeTab === 'aggregates') {
-      loadFinancialData();
-    } else {
-      loadOrderBreakdown();
-    }
-  }, [activeTab, period, startDate, endDate]);
+    loadFinancialData();
+    loadOrderBreakdown();
+  }, [period, startDate, endDate]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -146,37 +130,22 @@ export default function FinanceDashboard() {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
+      {/* Header */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Income & Expenditure</h1>
         <p className="text-gray-600">Comprehensive financial analytics and reporting</p>
       </div>
 
       {/* Tab Navigation */}
       <div className="mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            <button
-              onClick={() => setActiveTab('aggregates')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'aggregates'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Aggregates Dashboard
-            </button>
-            <button
-              onClick={() => setActiveTab('orders')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'orders'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Order-wise Breakdown
-            </button>
-          </nav>
-        </div>
+        <AdminTabs
+          tabs={tabs.map(t => t.label)}
+          activeTab={tabs.find(t => t.id === activeTab)?.label || 'Aggregates Dashboard'}
+          onTabChange={(tabLabel) => {
+            const tabId = tabs.find(t => t.label === tabLabel)?.id as any;
+            setActiveTab(tabId);
+          }}
+        />
       </div>
 
       {/* Date Filters */}

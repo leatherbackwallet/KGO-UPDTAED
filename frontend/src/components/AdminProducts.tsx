@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import FileUpload from './FileUpload';
 
 interface Product {
   _id: string;
@@ -121,12 +122,12 @@ export default function AdminProducts() {
         <h3 className="font-semibold text-blue-800 mb-2">📝 How to Add Products:</h3>
         <ul className="text-blue-700 text-sm space-y-1">
           <li>• <strong>Name:</strong> Enter the product name (slug will be auto-generated)</li>
-          <li>• <strong>Image:</strong> Enter just the filename (e.g., "chocolate-cake.jpg") - the image should be in your sd-images folder</li>
+          <li>• <strong>Image:</strong> Upload directly from your computer using the file upload area below</li>
           <li>• <strong>Category:</strong> Select from bakery categories</li>
           <li>• <strong>Tags:</strong> Add relevant tags separated by commas</li>
         </ul>
         <p className="text-blue-600 text-sm mt-2">
-          💡 <strong>Tip:</strong> After creating a product, run <code className="bg-blue-100 px-1 rounded">node scripts/organize-images.js</code> to copy your images to the right location.
+          💡 <strong>Tip:</strong> Images are automatically optimized and stored in the correct location. Supported formats: JPG, PNG, GIF, WEBP (max 5MB).
         </p>
       </div>
       <form onSubmit={handleSubmit} className="mb-6 bg-gray-50 p-4 rounded">
@@ -146,8 +147,31 @@ export default function AdminProducts() {
 
           <input type="number" placeholder="Stock quantity" value={form.stock || ''} onChange={e => setForm(f => ({ ...f, stock: Number(e.target.value) }))} className="px-3 py-2 border rounded" />
         </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+          <FileUpload
+            onUploadSuccess={(fileData) => {
+              setForm(f => ({ ...f, defaultImage: fileData.url }));
+            }}
+            onUploadError={(error) => {
+              setError(error);
+            }}
+            className="mb-2"
+          />
+          {form.defaultImage && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>✓ Image uploaded successfully</span>
+              <button
+                type="button"
+                onClick={() => setForm(f => ({ ...f, defaultImage: undefined }))}
+                className="text-red-600 hover:text-red-800"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <input type="text" placeholder="Default image filename (e.g., chocolate-cake.jpg)" value={form.defaultImage?.replace('/images/products/', '') || ''} onChange={e => setForm(f => ({ ...f, defaultImage: e.target.value ? `/images/products/${e.target.value}` : undefined }))} className="px-3 py-2 border rounded" />
           <input type="text" placeholder="Tags (comma separated)" value={form.tags?.join(',') || ''} onChange={e => setForm(f => ({ ...f, tags: e.target.value.split(',').map(s => s.trim()) }))} className="px-3 py-2 border rounded" />
         </div>
         <div className="flex items-center gap-4 mb-4">

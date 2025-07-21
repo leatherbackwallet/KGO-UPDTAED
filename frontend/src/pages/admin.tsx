@@ -8,10 +8,21 @@ import AdminUsers from '../components/AdminUsers';
 import FinanceDashboard from '../components/FinanceDashboard';
 import LogisticsDashboard from '../components/LogisticsDashboard';
 import ReturnsDashboard from '../components/ReturnsDashboard';
+import AdminTabs from '../components/AdminTabs';
 
 export default function Admin() {
   const { user } = useAuth();
   const [tab, setTab] = useState<'dashboard' | 'products' | 'orders' | 'users' | 'finance' | 'logistics' | 'returns'>('dashboard');
+
+  const tabs = [
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'products', label: 'Products' },
+    { id: 'orders', label: 'Orders' },
+    { id: 'users', label: 'Users' },
+    { id: 'finance', label: 'Finance' },
+    { id: 'logistics', label: 'Logistics' },
+    { id: 'returns', label: 'Returns' }
+  ];
 
   if (!user || user.roleName !== 'admin') {
     return (
@@ -29,15 +40,19 @@ export default function Admin() {
       <Navbar />
       <main className="max-w-6xl mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
-        <div className="flex gap-4 mb-6 flex-wrap">
-          <button onClick={() => setTab('dashboard')} className={`px-4 py-2 rounded ${tab === 'dashboard' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Dashboard</button>
-          <button onClick={() => setTab('products')} className={`px-4 py-2 rounded ${tab === 'products' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Products</button>
-          <button onClick={() => setTab('orders')} className={`px-4 py-2 rounded ${tab === 'orders' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Orders</button>
-          <button onClick={() => setTab('users')} className={`px-4 py-2 rounded ${tab === 'users' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Users</button>
-          <button onClick={() => setTab('finance')} className={`px-4 py-2 rounded ${tab === 'finance' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Income & Expenditure</button>
-          <button onClick={() => setTab('logistics')} className={`px-4 py-2 rounded ${tab === 'logistics' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Logistics</button>
-          <button onClick={() => setTab('returns')} className={`px-4 py-2 rounded ${tab === 'returns' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Returns</button>
+        
+        <div className="mb-8">
+          <AdminTabs
+            tabs={tabs.map(t => t.label)}
+            activeTab={tabs.find(t => t.id === tab)?.label || 'Dashboard'}
+            onTabChange={(tabLabel) => {
+              const tabId = tabs.find(t => t.label === tabLabel)?.id as any;
+              setTab(tabId);
+            }}
+            className="mb-6"
+          />
         </div>
+
         {tab === 'dashboard' && <AdminDashboard />}
         {tab === 'products' && <AdminProducts />}
         {tab === 'orders' && <AdminOrders />}

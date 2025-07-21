@@ -135,7 +135,6 @@ const statusHistorySchema = new Schema<IStatusHistory>({
 const orderSchema = new Schema<IOrder>({
   orderId: {
     type: String,
-    required: true,
     unique: true
   },
   userId: {
