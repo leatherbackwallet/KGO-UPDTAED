@@ -109,8 +109,10 @@ process.on('unhandledRejection', (reason, promise) => {
 import authRoutes from './routes/auth';
 import uploadRoutes from './routes/upload';
 import ordersRoutes from './routes/orders';
+import profileRoutes from './routes/profile';
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/profile', profileRoutes);
 app.use('/api/products', require('./routes/products'));
 app.use('/api/categories', require('./routes/categories'));
 app.use('/api/orders', ordersRoutes);

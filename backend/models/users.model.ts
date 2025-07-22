@@ -37,6 +37,7 @@ export interface IUser extends Document {
   password: string;
   roleId: mongoose.Types.ObjectId;
   phone: string;
+  avatar?: string; // GridFS file ID for avatar image
   location?: IUserLocation;
   schedules?: IUserSchedule[];
   recipientAddresses?: IRecipientAddress[];
@@ -152,6 +153,11 @@ const userSchema = new Schema<IUser>({
     type: String,
     required: true,
     trim: true
+  },
+  avatar: {
+    type: String,
+    trim: true,
+    required: false
   },
   location: userLocationSchema,
   schedules: [userScheduleSchema],
