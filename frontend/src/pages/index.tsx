@@ -53,10 +53,13 @@ export default function Home() {
       }
       const data = await response.json();
       console.log('Products data:', data);
-      setProducts(data || []);
+      // Handle both old and new API response formats
+      const productsData = data.data || data || [];
+      setProducts(Array.isArray(productsData) ? productsData : []);
     } catch (err) {
       console.error('Error fetching products:', err);
       setError(`Failed to load products: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setProducts([]); // Ensure products is always an array
     } finally {
       setLoading(false);
     }
@@ -97,6 +100,8 @@ export default function Home() {
         <Head>
           <title>KeralGiftsOnline.com - Premium Gifts & Celebrations</title>
           <meta name="description" content="Discover beautiful gifts, cakes, flowers, and celebration items. Premium quality with fast delivery across Germany." />
+          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+          <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         </Head>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -125,6 +130,8 @@ export default function Home() {
         <title>KeralGiftsOnline.com - Premium Gifts & Celebrations</title>
         <meta name="description" content="Discover beautiful gifts, cakes, flowers, and celebration items. Premium quality with fast delivery across Germany." />
         <meta name="keywords" content="gifts, cakes, flowers, celebrations, Germany, online shopping" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
 
       {/* Hero Section */}
@@ -215,7 +222,7 @@ export default function Home() {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
+            {Array.isArray(products) && products.map((product) => (
               <ProductCard
                 key={product._id}
                 product={{
@@ -233,7 +240,7 @@ export default function Home() {
             ))}
           </div>
 
-          {products.length === 0 && !error && (
+          {(!Array.isArray(products) || products.length === 0) && !error && (
             <div className="text-center text-gray-500">
               No products available at the moment.
             </div>

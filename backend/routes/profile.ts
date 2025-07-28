@@ -6,15 +6,12 @@ import express from 'express';
 import multer from 'multer';
 import { User } from '../models/index';
 import { hashPassword, comparePassword } from '../utils/hash';
-import { initializeGridFS, uploadImage, deleteImage } from '../utils/gridfs';
+import { uploadImage, deleteImage } from '../utils/gridfs';
 
 const router = express.Router();
 
 // Import auth middleware with proper typing
 const auth = require('../middleware/auth') as express.RequestHandler;
-
-// Initialize GridFS
-initializeGridFS();
 
 // Configure multer for file uploads
 const upload = multer({
@@ -314,12 +311,30 @@ router.post('/addresses', auth, async (req: AuthenticatedRequest, res) => {
       });
     }
 
-    const { name, phone, address, city, state, pincode, isDefault = false } = req.body;
+    const { 
+      name, 
+      phone, 
+      streetName, 
+      houseNumber, 
+      postalCode, 
+      city, 
+      countryCode = 'DE',
+      additionalInstructions = '',
+      isDefault = false 
+    } = req.body;
     
-    if (!name || !phone || !address || !city || !state || !pincode) {
+    if (!name || !phone || !streetName || !houseNumber || !postalCode || !city) {
       return res.status(400).json({
         success: false,
         error: { message: 'All address fields are required', code: 'MISSING_FIELDS' }
+      });
+    }
+
+    // Validate postal code format (basic validation for international addresses)
+    if (postalCode && !/^[A-Z0-9\s-]{3,10}$/i.test(postalCode)) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Invalid postal code format', code: 'INVALID_POSTAL_CODE' }
       });
     }
 
@@ -348,12 +363,13 @@ router.post('/addresses', auth, async (req: AuthenticatedRequest, res) => {
       name,
       phone,
       address: {
-        streetName: address,
-        houseNumber: '',
-        postalCode: pincode,
+        streetName,
+        houseNumber,
+        postalCode,
         city,
-        countryCode: 'IN'
+        countryCode
       },
+      additionalInstructions,
       isDefault: isDefault || user.recipientAddresses.length === 0
     });
 
@@ -361,7 +377,10 @@ router.post('/addresses', auth, async (req: AuthenticatedRequest, res) => {
 
     return res.json({
       success: true,
-      data: { message: 'Address added successfully' }
+      data: { 
+        message: 'Address added successfully',
+        address: user.recipientAddresses[user.recipientAddresses.length - 1]
+      }
     });
   } catch (err) {
     console.error('Add address error:', err);
@@ -389,12 +408,30 @@ router.put('/addresses/:index', auth, async (req: AuthenticatedRequest, res) => 
         error: { message: 'Index parameter is required', code: 'MISSING_PARAMETER' }
       });
     }
-    const { name, phone, address, city, state, pincode, isDefault = false } = req.body;
+    const { 
+      name, 
+      phone, 
+      streetName, 
+      houseNumber, 
+      postalCode, 
+      city, 
+      countryCode = 'IN',
+      additionalInstructions = '',
+      isDefault = false 
+    } = req.body;
     
-    if (!name || !phone || !address || !city || !state || !pincode) {
+    if (!name || !phone || !streetName || !houseNumber || !postalCode || !city) {
       return res.status(400).json({
         success: false,
         error: { message: 'All address fields are required', code: 'MISSING_FIELDS' }
+      });
+    }
+
+    // Validate postal code format (basic validation for international addresses)
+    if (postalCode && !/^[A-Z0-9\s-]{3,10}$/i.test(postalCode)) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Invalid postal code format', code: 'INVALID_POSTAL_CODE' }
       });
     }
 
@@ -426,12 +463,13 @@ router.put('/addresses/:index', auth, async (req: AuthenticatedRequest, res) => 
       name,
       phone,
       address: {
-        streetName: address,
-        houseNumber: '',
-        postalCode: pincode,
+        streetName,
+        houseNumber,
+        postalCode,
         city,
-        countryCode: 'IN'
+        countryCode
       },
+      additionalInstructions,
       isDefault
     };
 

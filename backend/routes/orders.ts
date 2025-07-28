@@ -13,10 +13,17 @@ const router = express.Router();
 // Create order (customer)
 router.post('/', auth, async (req: any, res) => {
   try {
-    const { products, deliveryAddress, shippingAddress, paymentMethod } = req.body;
+    const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod } = req.body;
     
-    // Use deliveryAddress if provided, otherwise use shippingAddress
-    const address = deliveryAddress || shippingAddress;
+    // Use recipientAddress if provided, otherwise fall back to other address formats
+    const address = recipientAddress || deliveryAddress || shippingAddress;
+    
+    if (!address) {
+      return res.status(400).json({ 
+        success: false, 
+        error: { message: 'Recipient address is required', code: 'MISSING_ADDRESS' } 
+      });
+    }
     
     // Calculate total and prepare order items
     let totalPrice = 0;
@@ -40,17 +47,18 @@ router.post('/', auth, async (req: any, res) => {
       });
     }
     
-    // Prepare shipping details
+    // Prepare shipping details - handle both new recipientAddress format and legacy formats
     const shippingDetails = {
       recipientName: address.name || `${req.user.firstName} ${req.user.lastName}`,
       recipientPhone: address.phone || req.user.phone,
       address: {
-        streetName: address.street,
-        houseNumber: address.houseNumber,
-        postalCode: address.zipCode,
-        city: address.city,
-        countryCode: address.country || 'IN'
-      }
+        streetName: address.address?.streetName || address.street || address.streetName,
+        houseNumber: address.address?.houseNumber || address.houseNumber || '',
+        postalCode: address.address?.postalCode || address.postalCode || address.zipCode,
+        city: address.address?.city || address.city,
+        countryCode: address.address?.countryCode || address.countryCode || address.country || 'DE'
+      },
+      specialInstructions: address.additionalInstructions || address.specialInstructions || ''
     };
     
     // Create order
@@ -60,7 +68,12 @@ router.post('/', auth, async (req: any, res) => {
       shippingDetails,
       orderItems,
       totalPrice,
-      orderStatus: 'pending'
+      orderStatus: 'payment_done',
+      statusHistory: [{
+        status: 'payment_done',
+        timestamp: new Date(),
+        notes: 'Order created and payment received'
+      }]
     });
     
     return res.status(201).json({
@@ -89,7 +102,14 @@ router.get('/', auth, role('admin'), async (req: any, res) => {
   try {
     const orders = await Order.find({ isDeleted: false })
       .populate('userId', 'firstName lastName email phone')
-      .populate('orderItems.productId', 'name price images')
+      .populate({
+        path: 'orderItems.productId',
+        select: 'name price images description categories',
+        populate: {
+          path: 'categories',
+          select: 'name'
+        }
+      })
       .sort({ createdAt: -1 });
     return res.json(orders || []);
   } catch (err) {
@@ -102,7 +122,14 @@ router.get('/', auth, role('admin'), async (req: any, res) => {
 router.get('/my', auth, async (req: any, res) => {
   try {
     const orders = await Order.find({ userId: req.user.id, isDeleted: false })
-      .populate('orderItems.productId', 'name price images')
+      .populate({
+        path: 'orderItems.productId',
+        select: 'name price images description categories',
+        populate: {
+          path: 'categories',
+          select: 'name'
+        }
+      })
       .sort({ createdAt: -1 });
     return res.json(orders || []);
   } catch (err) {
@@ -111,16 +138,154 @@ router.get('/my', auth, async (req: any, res) => {
   }
 });
 
-// Update order status (admin)
+// Update order status with timeline tracking (admin)
 router.put('/:id/status', auth, role('admin'), async (req: any, res) => {
   try {
-    const { status } = req.body;
-    const order = await Order.findByIdAndUpdate(req.params.id, { orderStatus: status }, { new: true });
-    if (!order) return res.status(404).json({ message: 'Order not found' });
-    return res.json(order);
+    const { status, notes } = req.body;
+    
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Status is required', code: 'MISSING_STATUS' }
+      });
+    }
+
+    // Validate status
+    const validStatuses = ['payment_done', 'order_received', 'collecting_items', 'packing', 'en_route', 'delivered', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Invalid status', code: 'INVALID_STATUS' }
+      });
+    }
+
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: { message: 'Order not found', code: 'ORDER_NOT_FOUND' }
+      });
+    }
+
+    // Update order status and add to history
+    order.orderStatus = status;
+    order.statusHistory.push({
+      status,
+      timestamp: new Date(),
+      notes: notes || '',
+      updatedBy: req.user.id
+    });
+
+    await order.save();
+
+    // Populate and return updated order
+    const updatedOrder = await Order.findById(req.params.id)
+      .populate('userId', 'firstName lastName email phone')
+      .populate({
+        path: 'orderItems.productId',
+        select: 'name price images description categories',
+        populate: {
+          path: 'categories',
+          select: 'name'
+        }
+      });
+
+    return res.json({
+      success: true,
+      data: {
+        message: 'Order status updated successfully',
+        order: updatedOrder
+      }
+    });
   } catch (err) {
     console.error('Error updating order status:', err);
-    return res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({
+      success: false,
+      error: { message: 'Server error', code: 'SERVER_ERROR' }
+    });
+  }
+});
+
+// Update order recipient (admin or order owner)
+router.put('/:id/recipient', auth, async (req: any, res) => {
+  try {
+    const { recipientAddress } = req.body;
+    
+    if (!recipientAddress || !recipientAddress.name || !recipientAddress.phone || !recipientAddress.address) {
+      return res.status(400).json({ 
+        success: false, 
+        error: { message: 'Recipient address information is required', code: 'MISSING_RECIPIENT_INFO' } 
+      });
+    }
+
+    // Check if order exists and user has permission to update it
+    const existingOrder = await Order.findById(req.params.id);
+    if (!existingOrder) {
+      return res.status(404).json({ 
+        success: false, 
+        error: { message: 'Order not found', code: 'ORDER_NOT_FOUND' } 
+      });
+    }
+
+    // Allow admin to update any order, or user to update their own order
+    const isAdmin = req.user.roleName === 'admin';
+    const isOrderOwner = existingOrder.userId.toString() === req.user.id;
+    
+    if (!isAdmin && !isOrderOwner) {
+      return res.status(403).json({ 
+        success: false, 
+        error: { message: 'You can only update your own orders', code: 'UNAUTHORIZED' } 
+      });
+    }
+
+    // Prepare shipping details
+    const shippingDetails = {
+      recipientName: recipientAddress.name,
+      recipientPhone: recipientAddress.phone,
+      address: {
+        streetName: recipientAddress.address.streetName,
+        houseNumber: recipientAddress.address.houseNumber,
+        postalCode: recipientAddress.address.postalCode,
+        city: recipientAddress.address.city,
+        countryCode: recipientAddress.address.countryCode || 'DE'
+      },
+      specialInstructions: recipientAddress.additionalInstructions || ''
+    };
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id, 
+      { shippingDetails }, 
+      { new: true }
+    ).populate('userId', 'firstName lastName email phone')
+     .populate({
+       path: 'orderItems.productId',
+       select: 'name price images description categories',
+       populate: {
+         path: 'categories',
+         select: 'name'
+       }
+     });
+
+    if (!updatedOrder) {
+      return res.status(404).json({ 
+        success: false, 
+        error: { message: 'Order not found', code: 'ORDER_NOT_FOUND' } 
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        message: 'Order recipient updated successfully',
+        order: updatedOrder
+      }
+    });
+  } catch (err) {
+    console.error('Error updating order recipient:', err);
+    return res.status(500).json({ 
+      success: false, 
+      error: { message: 'Server error', code: 'SERVER_ERROR' } 
+    });
   }
 });
 

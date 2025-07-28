@@ -20,23 +20,89 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Helper function to safely decode JWT token
+// Cross-browser compatible JWT decode function
 const safeJwtDecode = (token: string): any => {
   try {
     if (!token || typeof token !== 'string') {
       return null;
     }
-    // Simple JWT decode - just split and get the payload
+    
+    // Handle different JWT formats
     const parts = token.split('.');
     if (parts.length !== 3) {
       return null;
     }
+    
     const payload = parts[1];
-    const decoded = JSON.parse(atob(payload));
-    return decoded;
+    
+    // Cross-browser compatible base64 decode
+    let decodedPayload: string;
+    try {
+      // Try native atob first (modern browsers)
+      decodedPayload = atob(payload);
+    } catch (e) {
+      // Fallback for older browsers or special characters
+      try {
+        // Handle URL-safe base64
+        const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+        decodedPayload = atob(normalizedPayload);
+      } catch (e2) {
+        console.error('Failed to decode JWT payload:', e2);
+        return null;
+      }
+    }
+    
+    // Parse the JSON payload
+    try {
+      return JSON.parse(decodedPayload);
+    } catch (e) {
+      console.error('Failed to parse JWT payload:', e);
+      return null;
+    }
   } catch (error) {
     console.error('JWT decode error:', error);
     return null;
+  }
+};
+
+// Cross-browser compatible localStorage functions
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return null;
+      }
+      return window.localStorage.getItem(key);
+    } catch (error) {
+      console.error('localStorage getItem error:', error);
+      return null;
+    }
+  },
+  
+  setItem: (key: string, value: string): boolean => {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return false;
+      }
+      window.localStorage.setItem(key, value);
+      return true;
+    } catch (error) {
+      console.error('localStorage setItem error:', error);
+      return false;
+    }
+  },
+  
+  removeItem: (key: string): boolean => {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return false;
+      }
+      window.localStorage.removeItem(key);
+      return true;
+    } catch (error) {
+      console.error('localStorage removeItem error:', error);
+      return false;
+    }
   }
 };
 
@@ -48,14 +114,23 @@ const extractUserFromToken = (token: string): User | null => {
       return null;
     }
     
+    // Handle different token formats
+    const userId = decoded.id || decoded.userId || decoded.sub || '';
+    const firstName = decoded.firstName || decoded.given_name || '';
+    const lastName = decoded.lastName || decoded.family_name || '';
+    const email = decoded.email || '';
+    const phone = decoded.phone || '';
+    const roleId = decoded.roleId || decoded.role_id || '';
+    const roleName = decoded.roleName || decoded.role_name || '';
+    
     return {
-      id: decoded.id || '',
-      firstName: decoded.firstName || '',
-      lastName: decoded.lastName || '',
-      email: decoded.email || '',
-      phone: decoded.phone || '',
-      roleId: decoded.roleId || '',
-      roleName: decoded.roleName || ''
+      id: userId,
+      firstName,
+      lastName,
+      email,
+      phone,
+      roleId,
+      roleName
     };
   } catch (error) {
     console.error('Error extracting user from token:', error);
@@ -69,10 +144,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    const initializeAuth = () => {
       try {
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
+        const storedToken = safeLocalStorage.getItem('token');
+        const storedUser = safeLocalStorage.getItem('user');
         
         if (storedToken && storedToken.trim() !== '') {
           let userData: User | null = null;
@@ -96,17 +171,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(userData);
           } else {
             // Invalid token, remove it
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            safeLocalStorage.removeItem('token');
+            safeLocalStorage.removeItem('user');
           }
         }
       } catch (error) {
         console.error('Error loading auth state:', error);
         // Clear invalid token
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        safeLocalStorage.removeItem('token');
+        safeLocalStorage.removeItem('user');
       }
-    }
+    };
+
+    // Initialize auth state
+    initializeAuth();
     setIsLoaded(true);
   }, []);
 
@@ -129,10 +207,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         finalUserData = extractedUser;
       }
 
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(finalUserData));
+      // Store in localStorage with error handling
+      const tokenStored = safeLocalStorage.setItem('token', token);
+      const userStored = safeLocalStorage.setItem('user', JSON.stringify(finalUserData));
+      
+      if (!tokenStored || !userStored) {
+        console.warn('Failed to store auth data in localStorage, but continuing with session');
       }
+      
       setToken(token);
       setUser(finalUserData);
     } catch (error) {
@@ -142,10 +224,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     try {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
+      safeLocalStorage.removeItem('token');
+      safeLocalStorage.removeItem('user');
       setToken(null);
       setUser(null);
     } catch (error) {

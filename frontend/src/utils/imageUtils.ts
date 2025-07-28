@@ -79,3 +79,34 @@ export const PRODUCT_IMAGE_SIZES = {
   medium: { width: 600, height: 600 },
   large: { width: 1200, height: 1200 }
 } as const; 
+
+/**
+ * Extract product name from image filename
+ * Converts filename like "birthday-cake-chocolate.jpg" to "Birthday Cake Chocolate"
+ */
+export function extractProductNameFromImage(filename: string): string {
+  if (!filename) return '';
+  
+  // Remove file extension
+  const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
+  
+  // Replace hyphens and underscores with spaces
+  const withSpaces = nameWithoutExt.replace(/[-_]/g, ' ');
+  
+  // Capitalize first letter of each word
+  const capitalized = withSpaces.replace(/\b\w/g, (char) => char.toUpperCase());
+  
+  return capitalized.trim();
+}
+
+/**
+ * Generate slug from product name
+ */
+export function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+} 

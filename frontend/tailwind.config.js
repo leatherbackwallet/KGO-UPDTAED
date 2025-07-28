@@ -9,4 +9,14 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  
+  // Browser compatibility settings
+  corePlugins: {
+    preflight: true,
+  },
+  
+  // Ensure compatibility with older browsers
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
 }; 

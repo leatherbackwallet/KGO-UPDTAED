@@ -39,7 +39,7 @@ export interface IOrder extends Document {
   shippingDetails: IShippingDetails;
   orderItems: IOrderItem[];
   totalPrice: number;
-  orderStatus: 'pending' | 'partially_shipped' | 'shipped' | 'partially_delivered' | 'delivered' | 'cancelled';
+  orderStatus: 'payment_done' | 'order_received' | 'collecting_items' | 'packing' | 'en_route' | 'delivered' | 'cancelled';
   statusHistory: IStatusHistory[];
   promotionId?: mongoose.Types.ObjectId;
   discountAmount: number;
@@ -158,8 +158,8 @@ const orderSchema = new Schema<IOrder>({
   },
   orderStatus: {
     type: String,
-    enum: ['pending', 'partially_shipped', 'shipped', 'partially_delivered', 'delivered', 'cancelled'],
-    default: 'pending'
+    enum: ['payment_done', 'order_received', 'collecting_items', 'packing', 'en_route', 'delivered', 'cancelled'],
+    default: 'payment_done'
   },
   statusHistory: [statusHistorySchema],
   promotionId: {

@@ -3,13 +3,16 @@ import jwt from 'jsonwebtoken';
 import { User, Role } from '../models/index';
 import { hashPassword, comparePassword } from '../utils/hash';
 import { v4 as uuidv4 } from 'uuid';
+const { validate, sanitizeInput, schemas } = require('../middleware/validation');
 
 const router = express.Router();
 
 // Register
-router.post('/register', async (req, res) => {
+router.post('/register', sanitizeInput, validate(schemas.register), async (req, res) => {
   try {
     const { firstName, lastName, email, password, phone } = req.body;
+    
+    // Enhanced validation
     if (!firstName || !lastName || !email || !password || !phone) {
       return res.status(400).json({ 
         success: false, 
@@ -17,41 +20,126 @@ router.post('/register', async (req, res) => {
       });
     }
 
+    // Trim and validate input
+    const trimmedFirstName = firstName.trim();
+    const trimmedLastName = lastName.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPhone = phone.trim();
+
+    if (trimmedFirstName.length < 2) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'First name must be at least 2 characters long', code: 'INVALID_FIRST_NAME' }
+      });
+    }
+
+    if (trimmedLastName.length < 2) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Last name must be at least 2 characters long', code: 'INVALID_LAST_NAME' }
+      });
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Please enter a valid email address', code: 'INVALID_EMAIL' }
+      });
+    }
+
+    // Password validation
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Password must be at least 6 characters long', code: 'INVALID_PASSWORD' }
+      });
+    }
+
+    // Phone validation (basic)
+    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{8,}$/;
+    if (!phoneRegex.test(trimmedPhone)) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Please enter a valid phone number', code: 'INVALID_PHONE' }
+      });
+    }
+
     // Check if user exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: trimmedEmail });
     
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
-        error: { message: 'Email already in use', code: 'EMAIL_EXISTS' } 
+        error: { message: 'Email already in use. Please use a different email or try logging in.', code: 'EMAIL_EXISTS' } 
       });
     }
 
-    // Get customer role
-    const customerRole = await Role.findOne({ name: 'customer' });
+    // Get or create customer role
+    let customerRole = await Role.findOne({ name: 'customer' });
     if (!customerRole) {
-      return res.status(500).json({ 
-        success: false, 
-        error: { message: 'Customer role not found', code: 'ROLE_NOT_FOUND' } 
+      console.log('Customer role not found, creating it...');
+      customerRole = await Role.create({
+        name: 'customer',
+        description: 'Regular customer with basic permissions',
+        permissions: [
+          'view_products',
+          'place_orders',
+          'view_own_orders',
+          'manage_wishlist',
+          'manage_profile',
+          'view_categories'
+        ],
+        isActive: true
+      });
+      console.log('Customer role created successfully');
+    }
+
+    // Hash password
+    const hashedPassword = await hashPassword(password);
+    
+    // Create new user with proper error handling
+    let user;
+    try {
+      user = await User.create({ 
+        firstName: trimmedFirstName, 
+        lastName: trimmedLastName, 
+        email: trimmedEmail, 
+        password: hashedPassword, 
+        phone: trimmedPhone,
+        roleId: customerRole._id,
+        isActive: true
+      });
+      
+      console.log(`New user created successfully: ${user.email} (${user._id})`);
+    } catch (createError: any) {
+      console.error('Error creating user:', createError);
+      
+      // Handle specific MongoDB errors
+      if (createError.code === 11000) {
+        return res.status(400).json({
+          success: false,
+          error: { message: 'Email already in use. Please use a different email.', code: 'EMAIL_EXISTS' }
+        });
+      }
+      
+      return res.status(500).json({
+        success: false,
+        error: { message: 'Failed to create user account. Please try again.', code: 'USER_CREATION_FAILED' }
       });
     }
 
-    // Create new user
-    const hashed = await hashPassword(password);
-    const user = await User.create({ 
-      firstName, 
-      lastName, 
-      email, 
-      password: hashed, 
-      phone,
-      roleId: customerRole._id
-    });
-
+    // Generate JWT token
     const token = jwt.sign({ 
       id: user._id, 
-      roleId: user.roleId
-    }, process.env.JWT_SECRET!, { expiresIn: '7d' });
+      email: user.email,
+      roleId: user.roleId,
+      firstName: user.firstName,
+      lastName: user.lastName
+    }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
 
+    // Return success response
     return res.json({ 
       success: true,
       data: { 
@@ -62,7 +150,8 @@ router.post('/register', async (req, res) => {
           lastName: user.lastName,
           email: user.email, 
           phone: user.phone,
-          roleId: user.roleId
+          roleId: user.roleId,
+          roleName: 'customer'
         }
       }
     });
@@ -70,15 +159,17 @@ router.post('/register', async (req, res) => {
     console.error('Register error:', err);
     return res.status(500).json({ 
       success: false, 
-      error: { message: 'Server error', code: 'SERVER_ERROR' } 
+      error: { message: 'Server error occurred. Please try again later.', code: 'SERVER_ERROR' } 
     });
   }
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', sanitizeInput, validate(schemas.login), async (req, res) => {
   try {
     const { email, password } = req.body;
+    
+    // Enhanced validation
     if (!email || !password) {
       return res.status(400).json({ 
         success: false, 
@@ -86,26 +177,45 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email }).populate<{ roleId: { name: string } }>('roleId');
-    if (!user) {
-      return res.status(400).json({ 
-        success: false, 
-        error: { message: 'Invalid credentials', code: 'INVALID_CREDENTIALS' } 
+    const trimmedEmail = email.trim().toLowerCase();
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Please enter a valid email address', code: 'INVALID_EMAIL' }
       });
     }
 
+    // Find user with populated role
+    const user = await User.findOne({ email: trimmedEmail, isActive: true, isDeleted: false })
+      .populate<{ roleId: { name: string } }>('roleId');
+      
+    if (!user) {
+      return res.status(400).json({ 
+        success: false, 
+        error: { message: 'Invalid email or password', code: 'INVALID_CREDENTIALS' } 
+      });
+    }
+
+    // Verify password
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ 
         success: false, 
-        error: { message: 'Invalid credentials', code: 'INVALID_CREDENTIALS' } 
+        error: { message: 'Invalid email or password', code: 'INVALID_CREDENTIALS' } 
       });
     }
 
+    // Generate JWT token
     const token = jwt.sign({ 
       id: user._id, 
-      roleId: user.roleId
-    }, process.env.JWT_SECRET!, { expiresIn: '7d' });
+      email: user.email,
+      roleId: user.roleId,
+      firstName: user.firstName,
+      lastName: user.lastName
+    }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
 
     return res.json({ 
       success: true,
@@ -118,7 +228,7 @@ router.post('/login', async (req, res) => {
           email: user.email, 
           phone: user.phone,
           roleId: user.roleId,
-          roleName: user.roleId?.name
+          roleName: user.roleId?.name || 'customer'
         }
       }
     });
@@ -126,7 +236,7 @@ router.post('/login', async (req, res) => {
     console.error('Login error:', err);
     return res.status(500).json({ 
       success: false, 
-      error: { message: 'Server error', code: 'SERVER_ERROR' } 
+      error: { message: 'Server error occurred. Please try again later.', code: 'SERVER_ERROR' } 
     });
   }
 });
@@ -181,7 +291,7 @@ router.post('/guest', async (req, res) => {
       const token = jwt.sign({ 
         id: user._id, 
         roleId: user.roleId
-      }, process.env.JWT_SECRET!, { expiresIn: '7d' });
+      }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
 
       return res.json({ 
         success: true,
@@ -244,7 +354,7 @@ router.post('/guest', async (req, res) => {
     const token = jwt.sign({ 
       id: user._id, 
       roleId: user.roleId
-    }, process.env.JWT_SECRET!, { expiresIn: '7d' });
+    }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
 
     return res.json({ 
       success: true,

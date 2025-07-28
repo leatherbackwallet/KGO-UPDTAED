@@ -46,4 +46,10 @@ export { Notification, INotification } from './notifications.model';
 export { ActivityLog, IActivityLog } from './activityLogs.model';
 export { DailyStats, IDailyStats } from './dailyStats.model';
 export { Page, IPage } from './pages.model';
-export { VendorDocument, IVendorDocument } from './vendorDocuments.model'; 
+export { VendorDocument, IVendorDocument } from './vendorDocuments.model';
+
+// Strategic Enhancement Models
+export { UserPreferences, IUserPreferences } from './userPreferences.model';
+export { Subscription, ISubscription, SubscriptionTier, SubscriptionStatus } from './subscriptions.model';
+export { Analytics, IAnalytics } from './analytics.model';
+export { Content, IContent, ContentType, ContentStatus } from './content.model'; 

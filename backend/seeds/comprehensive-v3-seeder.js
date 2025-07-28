@@ -176,7 +176,7 @@ const reviewSchema = new mongoose.Schema({
 const transactionSchema = new mongoose.Schema({
   orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
   amount: { type: Number, required: true },
-  currency: { type: String, default: 'EUR' },
+          currency: { type: String, default: 'INR' },
   paymentMethod: { type: String, required: true },
   status: {
     type: String,
@@ -722,7 +722,7 @@ async function seedTransactions(orders) {
     {
       orderId: orders[0]._id,
       amount: 45.99,
-      currency: 'EUR',
+      currency: 'INR',
       paymentMethod: 'credit_card',
       status: 'completed',
       transactionId: 'TXN-001',
@@ -731,7 +731,7 @@ async function seedTransactions(orders) {
     {
       orderId: orders[1]._id,
       amount: 119.98,
-      currency: 'EUR',
+      currency: 'INR',
       paymentMethod: 'paypal',
       status: 'completed',
       transactionId: 'TXN-002',

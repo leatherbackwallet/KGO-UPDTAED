@@ -14,6 +14,7 @@ interface Address {
     city: string;
     countryCode: string;
   };
+  additionalInstructions?: string;
   isDefault: boolean;
 }
 
@@ -58,7 +59,7 @@ export default function Profile() {
       houseNumber: '',
       postalCode: '',
       city: '',
-      countryCode: 'IN'
+      countryCode: 'DE'
     },
     isDefault: false
   });
@@ -208,7 +209,7 @@ export default function Profile() {
           houseNumber: '',
           postalCode: '',
           city: '',
-          countryCode: 'IN'
+          countryCode: 'DE'
         },
         isDefault: false
       });
@@ -251,7 +252,7 @@ export default function Profile() {
   };
 
   const getAvatarUrl = (avatarId?: string) => {
-    if (!avatarId) return null;
+    if (!avatarId) return undefined;
     return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/images/${avatarId}`;
   };
 

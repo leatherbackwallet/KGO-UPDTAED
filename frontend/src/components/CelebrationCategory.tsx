@@ -96,7 +96,7 @@ export default function CelebrationCategory() {
         {/* Results */}
         <div className="mb-6">
           <p className="text-gray-600">
-            {loading ? 'Loading...' : `${products.length} celebration products found`}
+            {loading ? 'Loading...' : `${Array.isArray(products) ? products.length : 0} celebration products found`}
             {selectedType && ` for ${selectedType}`}
           </p>
         </div>
@@ -104,7 +104,7 @@ export default function CelebrationCategory() {
         {/* Products Grid */}
         {loading ? (
           <ProductSkeletonGrid count={8} />
-        ) : products.length === 0 ? (
+        ) : (!Array.isArray(products) || products.length === 0) ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
               <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +129,7 @@ export default function CelebrationCategory() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map(product => (
+            {Array.isArray(products) && products.map(product => (
               <ProductCard 
                 key={product._id} 
                 product={product} 

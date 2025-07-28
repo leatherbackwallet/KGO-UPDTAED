@@ -8,14 +8,38 @@ import { Role } from './models/roles.model';
 import { Category } from './models/categories.model';
 import { hashPassword } from './utils/hash';
 import { initializeGridFS, getImageStream } from './utils/gridfs';
+const { generalLimiter, authLimiter, apiLimiter } = require('./middleware/rateLimit');
+const { logger, errorLogger } = require('./middleware/logger');
 
 dotenv.config();
 
 const app = express();
 
+// CORS Configuration
+const corsOptions = {
+  origin: [
+    process.env.CORS_ORIGIN || 'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+// Apply rate limiting (disabled in development)
+if (process.env.NODE_ENV === 'production') {
+  app.use(generalLimiter);
+}
+
+// Apply logging
+app.use(logger);
+
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files from public directory (for legacy images)
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
@@ -35,8 +59,8 @@ async function createSuperUser() {
       console.log('Admin role created');
     }
 
-    const email = 'admin@keralagiftsonline.com';
-    const password = 'SuperSecure123!';
+    const email = process.env.ADMIN_EMAIL || 'admin@keralagiftsonline.com';
+    const password = process.env.ADMIN_PASSWORD || 'SuperSecure123!';
     const existing = await User.findOne({ email });
     
     if (!existing) {
@@ -47,9 +71,9 @@ async function createSuperUser() {
         email, 
         password: hashed, 
         roleId: adminRole._id, 
-        phone: '+49123456789' 
+        phone: process.env.ADMIN_PHONE || '+49123456789' 
       });
-      console.log('Superuser created:', email, 'password:', password);
+      console.log('Superuser created:', email);
     } else {
       console.log('Superuser already exists:', email);
     }
@@ -58,9 +82,25 @@ async function createSuperUser() {
   }
 }
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI!).then(async () => {
-  console.log('MongoDB connected');
+// Validate required environment variables
+if (!process.env.MONGODB_URI) {
+  console.error('MONGODB_URI environment variable is required');
+  process.exit(1);
+}
+
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET environment variable is required');
+  process.exit(1);
+}
+
+// Connect to MongoDB with connection pooling
+mongoose.connect(process.env.MONGODB_URI, {
+  maxPoolSize: 10, // Maintain up to 10 socket connections
+  serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+  socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+  bufferCommands: false, // Disable mongoose buffering
+}).then(async () => {
+  console.log('MongoDB connected with connection pooling');
   
   // Initialize GridFS for image storage
   initializeGridFS();
@@ -105,24 +145,77 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-// Routes
+// Routes with rate limiting
 import authRoutes from './routes/auth';
 import uploadRoutes from './routes/upload';
 import ordersRoutes from './routes/orders';
 import profileRoutes from './routes/profile';
-app.use('/api/auth', authRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/profile', profileRoutes);
-app.use('/api/products', require('./routes/products'));
-app.use('/api/categories', require('./routes/categories'));
-app.use('/api/orders', ordersRoutes);
-app.use('/api/users', require('./routes/users'));
-app.use('/api/wishlist', require('./routes/wishlist'));
-app.use('/api/cart', require('./routes/cart'));
-app.use('/api/finance', require('./routes/finance'));
-app.use('/api/hubs', require('./routes/hubs'));
-app.use('/api/delivery-runs', require('./routes/deliveryRuns'));
-app.use('/api/returns', require('./routes/returns'));
+
+// Strategic Enhancement Routes
+import personalizationRoutes from './routes/personalization';
+import analyticsRoutes from './routes/analytics';
+import subscriptionRoutes from './routes/subscriptions';
+import contentRoutes from './routes/content';
+
+// Import other routes
+const productsRoutes = require('./routes/products');
+const categoriesRoutes = require('./routes/categories');
+const vendorsRoutes = require('./routes/vendors');
+const usersRoutes = require('./routes/users');
+const wishlistRoutes = require('./routes/wishlist');
+const cartRoutes = require('./routes/cart');
+const financeRoutes = require('./routes/finance');
+const hubsRoutes = require('./routes/hubs');
+const deliveryRunsRoutes = require('./routes/deliveryRuns');
+const returnsRoutes = require('./routes/returns');
+const healthRoutes = require('./routes/health');
+
+// Apply specific rate limiting to routes (disabled in development)
+if (process.env.NODE_ENV === 'production') {
+  app.use('/api/auth', authLimiter, authRoutes);
+  app.use('/api/upload', apiLimiter, uploadRoutes);
+  app.use('/api/profile', apiLimiter, profileRoutes);
+  app.use('/api/products', apiLimiter, productsRoutes);
+  app.use('/api/categories', apiLimiter, categoriesRoutes);
+  app.use('/api/vendors', apiLimiter, vendorsRoutes);
+  app.use('/api/orders', apiLimiter, ordersRoutes);
+  app.use('/api/users', apiLimiter, usersRoutes);
+  app.use('/api/wishlist', apiLimiter, wishlistRoutes);
+  app.use('/api/cart', apiLimiter, cartRoutes);
+  app.use('/api/finance', apiLimiter, financeRoutes);
+  app.use('/api/hubs', apiLimiter, hubsRoutes);
+  app.use('/api/delivery-runs', apiLimiter, deliveryRunsRoutes);
+  app.use('/api/returns', apiLimiter, returnsRoutes);
+  app.use('/api/health', healthRoutes);
+  app.use('/api/personalization', apiLimiter, personalizationRoutes);
+  app.use('/api/analytics', apiLimiter, analyticsRoutes);
+  app.use('/api/subscriptions', apiLimiter, subscriptionRoutes);
+  app.use('/api/content', apiLimiter, contentRoutes);
+} else {
+  // Development mode - no rate limiting
+  app.use('/api/auth', authRoutes);
+  app.use('/api/upload', uploadRoutes);
+  app.use('/api/profile', profileRoutes);
+  app.use('/api/products', productsRoutes);
+  app.use('/api/categories', categoriesRoutes);
+  app.use('/api/vendors', vendorsRoutes);
+  app.use('/api/orders', ordersRoutes);
+  app.use('/api/users', usersRoutes);
+  app.use('/api/wishlist', wishlistRoutes);
+  app.use('/api/cart', cartRoutes);
+  app.use('/api/finance', financeRoutes);
+  app.use('/api/hubs', hubsRoutes);
+  app.use('/api/delivery-runs', deliveryRunsRoutes);
+  app.use('/api/returns', returnsRoutes);
+  app.use('/api/health', healthRoutes);
+  app.use('/api/personalization', personalizationRoutes);
+  app.use('/api/analytics', analyticsRoutes);
+  app.use('/api/subscriptions', subscriptionRoutes);
+  app.use('/api/content', contentRoutes);
+}
+
+// Apply error logging middleware
+app.use(errorLogger);
 
 // Start server
 const PORT = process.env.PORT || 5001;

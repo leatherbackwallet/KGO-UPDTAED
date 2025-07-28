@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
 // Import all seed functions
+import { seedRoles } from './roles.seed';
 import { seedUsers } from './users.seed';
 import { seedCategories } from './categories.seed';
 import { seedProducts } from './products.seed';
@@ -54,6 +55,9 @@ async function seedDatabase() {
     // await clearDatabase();
     
     // Seed in dependency order
+    console.log('\n📝 Seeding roles...');
+    const roles = await seedRoles();
+    
     console.log('\n📝 Seeding users...');
     const users = await seedUsers();
     
@@ -119,6 +123,7 @@ async function seedDatabase() {
     
     console.log('\n🎉 Database seeding completed successfully!');
     console.log('\n📊 Seeding Summary:');
+    console.log(`   - Roles: ${roles.length}`);
     console.log(`   - Users: ${users.length}`);
     console.log(`   - Categories: ${categories.length}`);
     console.log(`   - Products: ${products.length}`);

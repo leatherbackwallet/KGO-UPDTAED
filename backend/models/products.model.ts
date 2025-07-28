@@ -15,11 +15,13 @@ export interface IProduct extends Document {
     de: string;
   };
   slug: string;
-  category: mongoose.Types.ObjectId;
+  categories: mongoose.Types.ObjectId[]; // Multiple categories
   price: number;
   stock: number;
   images?: string[];
   defaultImage?: string;
+  occasions?: string[]; // Array of occasion tags
+  vendors?: mongoose.Types.ObjectId[]; // Multiple vendors
   isFeatured: boolean;
   isDeleted: boolean;
   createdAt: Date;
@@ -58,11 +60,11 @@ const productSchema = new Schema<IProduct>({
     trim: true,
     lowercase: true
   },
-  category: {
+  categories: [{
     type: Schema.Types.ObjectId,
     ref: 'Category',
     required: true
-  },
+  }],
   price: {
     type: Number,
     required: true,
@@ -81,6 +83,20 @@ const productSchema = new Schema<IProduct>({
     type: String,
     trim: true
   },
+  occasions: [{
+    type: String,
+    trim: true,
+    enum: [
+      'DIWALI', 'ANNIVERSARY', 'BIRTHDAY', 'CONDOLENCES', 'CONGRATULATION',
+      'FATHERS DAY', 'GET WELL SOON', 'HOUSE WARMING', 'JUST BECAUSE',
+      'MISS YOU', 'NEW BORN', 'ONAM', 'SYMPATHY', 'THANK YOU',
+      'TRADITIONAL', 'WEDDING'
+    ]
+  }],
+  vendors: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Vendor'
+  }],
   isFeatured: {
     type: Boolean,
     default: false
@@ -107,8 +123,17 @@ productSchema.pre('save', function(next) {
 
 // Indexes
 productSchema.index({ slug: 1 }, { unique: true });
-productSchema.index({ category: 1 });
+productSchema.index({ categories: 1 });
+productSchema.index({ vendors: 1 });
+productSchema.index({ occasions: 1 });
 productSchema.index({ isFeatured: 1, isDeleted: 1 });
 productSchema.index({ 'name.en': 'text', 'name.de': 'text', 'description.en': 'text', 'description.de': 'text' });
+
+// Additional indexes for better search performance
+productSchema.index({ occasions: 1 });
+productSchema.index({ categories: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ isFeatured: 1, createdAt: -1 });
+productSchema.index({ slug: 1 });
 
 export const Product = mongoose.model<IProduct>('Product', productSchema); 

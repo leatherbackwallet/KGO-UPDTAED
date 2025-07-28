@@ -4,7 +4,7 @@
 
 ## 🚀 Overview
 
-KeralGiftsOnline.com is a comprehensive e-commerce platform designed for the German market, specializing in gifts, cakes, flowers, and celebration items. Built with modern technologies and enterprise-grade architecture.
+KeralGiftsOnline.com is a comprehensive e-commerce platform designed for the global Kerala diaspora, specializing in gifts, cakes, flowers, and celebration items. Built with modern technologies and enterprise-grade architecture.
 
 ## ✨ Features
 

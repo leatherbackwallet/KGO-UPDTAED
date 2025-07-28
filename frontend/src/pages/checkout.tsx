@@ -10,6 +10,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import AdminTabs from '../components/AdminTabs';
+import RecipientAddresses from '../components/RecipientAddresses';
 import api from '../utils/api';
 
 type TabType = 'login' | 'guest';
@@ -49,6 +50,33 @@ interface RegisterFormData {
   };
 }
 
+interface RecipientAddress {
+  name: string;
+  phone: string;
+  address: {
+    streetName: string;
+    houseNumber: string;
+    postalCode: string;
+    city: string;
+    countryCode: string;
+  };
+  additionalInstructions?: string;
+  isDefault: boolean;
+}
+
+interface OrderRecipient {
+  recipientName: string;
+  recipientPhone: string;
+  address: {
+    streetName: string;
+    houseNumber: string;
+    postalCode: string;
+    city: string;
+    countryCode: string;
+  };
+  specialInstructions?: string;
+}
+
 export default function Checkout() {
   const router = useRouter();
   const { cart, clearCart, refreshCart } = useCart();
@@ -61,6 +89,53 @@ export default function Checkout() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [selectedRecipientAddress, setSelectedRecipientAddress] = useState<RecipientAddress | null>(null);
+  const [previousOrderRecipients, setPreviousOrderRecipients] = useState<OrderRecipient[]>([]);
+  const [showPreviousRecipients, setShowPreviousRecipients] = useState(false);
+
+  // Fetch previous order recipients when user is authenticated
+  useEffect(() => {
+    if (token && user) {
+      fetchPreviousOrderRecipients();
+    }
+  }, [token, user]);
+
+  const fetchPreviousOrderRecipients = async () => {
+    try {
+      const res = await api.get('/orders/my', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Extract unique recipients from previous orders
+      const recipients = res.data
+        .filter((order: any) => order.shippingDetails)
+        .map((order: any) => order.shippingDetails)
+        .filter((recipient: OrderRecipient, index: number, self: OrderRecipient[]) => 
+          index === self.findIndex((r: OrderRecipient) => 
+            r.recipientName === recipient.recipientName && 
+            r.recipientPhone === recipient.recipientPhone &&
+            r.address.streetName === recipient.address.streetName &&
+            r.address.houseNumber === recipient.address.houseNumber
+          )
+        );
+      
+      setPreviousOrderRecipients(recipients);
+    } catch (err) {
+      console.error('Error fetching previous recipients:', err);
+    }
+  };
+
+  const handlePreviousRecipientSelect = (recipient: OrderRecipient) => {
+    const convertedRecipient: RecipientAddress = {
+      name: recipient.recipientName,
+      phone: recipient.recipientPhone,
+      address: recipient.address,
+      additionalInstructions: recipient.specialInstructions,
+      isDefault: false
+    };
+    setSelectedRecipientAddress(convertedRecipient);
+    setShowPreviousRecipients(false);
+  };
 
   // Form data
   const [guestData, setGuestData] = useState<GuestFormData>({
@@ -116,12 +191,23 @@ export default function Checkout() {
     setSuccess('');
     setLoading(true);
 
+    if (!selectedRecipientAddress) {
+      setError('Please select a recipient address');
+      setLoading(false);
+      return;
+    }
+
     try {
       // Place order using authenticated user's details
       await api.post('/orders', {
         products: cart.map(item => ({ product: item.product, quantity: item.quantity })),
         paymentMethod: guestData.paymentMethod,
-
+        recipientAddress: {
+          name: selectedRecipientAddress.name,
+          phone: selectedRecipientAddress.phone,
+          address: selectedRecipientAddress.address,
+          additionalInstructions: selectedRecipientAddress.additionalInstructions
+        }
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -321,16 +407,92 @@ export default function Checkout() {
             <h2 className="text-xl font-semibold mb-4">Payment & Delivery</h2>
             
             {user ? (
-              // Authenticated user - show user details and payment
+              // Authenticated user - show recipient selection and payment
               <div>
+                {/* Recipient Address Selection */}
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="font-medium mb-2">Delivery Details</h3>
-                  <div className="text-sm text-gray-600">
-                    <p><strong>Name:</strong> {user.firstName} {user.lastName}</p>
-                    <p><strong>Email:</strong> {user.email}</p>
-                    <p><strong>Phone:</strong> {user.phone || 'Not provided'}</p>
-                    <p><strong>Account Type:</strong> Registered</p>
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900">🎁 Gift Recipient</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Select who will receive this gift, or add a new recipient address.
+                  </p>
+                  
+                  {/* Previous Order Recipients */}
+                  {previousOrderRecipients.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-gray-900">📋 Previously Used Recipients</h4>
+                        <button
+                          type="button"
+                          onClick={() => setShowPreviousRecipients(!showPreviousRecipients)}
+                          className="text-sm text-blue-600 hover:text-blue-800 underline"
+                        >
+                          {showPreviousRecipients ? 'Hide' : 'Show'} ({previousOrderRecipients.length})
+                        </button>
+                      </div>
+                      
+                      {showPreviousRecipients && (
+                        <div className="space-y-2 mb-4">
+                          {previousOrderRecipients.map((recipient, index) => (
+                            <div
+                              key={index}
+                              className="p-3 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
+                              onClick={() => handlePreviousRecipientSelect(recipient)}
+                            >
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <div className="font-medium text-gray-900">{recipient.recipientName}</div>
+                                  <div className="text-sm text-gray-600">{recipient.recipientPhone}</div>
+                                  <div className="text-sm text-gray-700">
+                                    {recipient.address.streetName} {recipient.address.houseNumber}, {recipient.address.postalCode} {recipient.address.city}
+                                  </div>
+                                  {recipient.specialInstructions && (
+                                    <div className="text-sm text-gray-600 italic mt-1">
+                                      📝 {recipient.specialInstructions}
+                                    </div>
+                                  )}
+                                </div>
+                                <button
+                                  type="button"
+                                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                >
+                                  Select
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Saved Recipient Addresses */}
+                  <div className="mb-4">
+                    <h4 className="font-medium text-gray-900 mb-3">💾 Saved Recipient Addresses</h4>
+                    <RecipientAddresses
+                      onAddressSelect={setSelectedRecipientAddress}
+                      selectedAddress={selectedRecipientAddress}
+                      showAddButton={true}
+                      className=""
+                    />
                   </div>
+
+                  {selectedRecipientAddress && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">✅ Selected Recipient:</h4>
+                      <p className="text-sm text-blue-800">
+                        <strong>{selectedRecipientAddress.name}</strong><br />
+                        📞 {selectedRecipientAddress.phone}<br />
+                        📍 {selectedRecipientAddress.address.streetName} {selectedRecipientAddress.address.houseNumber}<br />
+                        {selectedRecipientAddress.address.postalCode} {selectedRecipientAddress.address.city}, {selectedRecipientAddress.address.countryCode}
+                        {selectedRecipientAddress.additionalInstructions && (
+                          <>
+                            <br />
+                            📝 <em>{selectedRecipientAddress.additionalInstructions}</em>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 
                 <form onSubmit={handleAuthenticatedOrder}>
@@ -349,13 +511,21 @@ export default function Checkout() {
                     
                     <button 
                       type="submit" 
-                      disabled={loading}
+                      disabled={loading || !selectedRecipientAddress}
                       className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
                     >
                       {loading ? 'Processing...' : `Pay $${total.toFixed(2)}`}
                     </button>
                   </div>
                 </form>
+
+                {!selectedRecipientAddress && (
+                  <div className="mt-4 text-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-yellow-800 text-sm">
+                      ⚠️ Please select a recipient address to continue with your order.
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               // Non-authenticated user - show authentication options

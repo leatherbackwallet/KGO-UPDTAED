@@ -15,14 +15,17 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-kgo-red rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">KGO</span>
-            </div>
-            <span className="text-xl font-bold">
-              <span className="text-kgo-green">Kerala</span>
-              <span className="text-kgo-red">GiftsOnline</span>
-            </span>
+          <Link href="/" className="flex items-center">
+            <img 
+              src="/images/logo.svg" 
+              alt="KeralaGiftsOnline Logo" 
+              className="h-10 w-auto hidden md:block"
+            />
+            <img 
+              src="/images/logo-mobile.svg" 
+              alt="KeralaGiftsOnline Logo" 
+              className="h-8 w-auto md:hidden"
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -33,8 +36,11 @@ export default function Navbar() {
             <Link href="/celebration" className="nav-link">
               Celebration Cakes
             </Link>
-            <Link href="/categories" className="nav-link">
-              Categories
+            <Link href="/content" className="nav-link">
+              Cultural Content
+            </Link>
+            <Link href="/subscription" className="nav-link">
+              Subscription
             </Link>
             <Link href="/about" className="nav-link">
               About
@@ -132,8 +138,11 @@ export default function Navbar() {
               <Link href="/celebration" className="text-gray-700 hover:text-purple-600 transition-colors">
                 Celebration Cakes
               </Link>
-              <Link href="/categories" className="text-gray-700 hover:text-purple-600 transition-colors">
-                Categories
+              <Link href="/content" className="text-gray-700 hover:text-purple-600 transition-colors">
+                Cultural Content
+              </Link>
+              <Link href="/subscription" className="text-gray-700 hover:text-purple-600 transition-colors">
+                Subscription
               </Link>
               <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors">
                 About

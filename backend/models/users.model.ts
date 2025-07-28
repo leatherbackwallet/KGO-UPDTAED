@@ -27,6 +27,7 @@ export interface IRecipientAddress {
     city: string;
     countryCode: string;
   };
+  additionalInstructions?: string;
   isDefault: boolean;
 }
 
@@ -115,6 +116,11 @@ const recipientAddressSchema = new Schema<IRecipientAddress>({
       required: true,
       default: 'DE'
     }
+  },
+  additionalInstructions: {
+    type: String,
+    trim: true,
+    maxlength: [500, 'Additional instructions cannot exceed 500 characters']
   },
   isDefault: {
     type: Boolean,
