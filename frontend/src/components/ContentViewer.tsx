@@ -88,6 +88,8 @@ const ContentViewer: React.FC<ContentViewerProps> = ({
       }, 1000);
 
       return () => clearInterval(timer);
+    } else {
+      setViewTime(0);
     }
   }, [selectedContent]);
 

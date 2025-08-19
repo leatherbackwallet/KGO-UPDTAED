@@ -525,8 +525,8 @@ async function seedProducts(categories) {
       description: { en: 'Delicious birthday cake with cream and fruits', de: 'Leckerer Geburtstagskuchen mit Sahne und Früchten' },
       slug: 'birthday-cake',
       category: categories[0]._id,
-      images: [],
-      defaultImage: '',
+      images: ['/images/products/birthday-cake.svg'],
+      defaultImage: '/images/products/birthday-cake.svg',
       isFeatured: true
     },
     {
@@ -534,8 +534,8 @@ async function seedProducts(categories) {
       description: { en: 'Elegant wedding cake with white frosting', de: 'Elegante Hochzeitstorte mit weißer Glasur' },
       slug: 'wedding-cake',
       category: categories[0]._id,
-      images: [],
-      defaultImage: '',
+      images: ['/images/products/wedding-cake.svg'],
+      defaultImage: '/images/products/wedding-cake.svg',
       isFeatured: true
     },
     {
@@ -543,8 +543,8 @@ async function seedProducts(categories) {
       description: { en: 'Premium gift basket with chocolates and wine', de: 'Premium Geschenkkorb mit Schokoladen und Wein' },
       slug: 'gift-basket-premium',
       category: categories[1]._id,
-      images: [],
-      defaultImage: '',
+      images: ['/images/products/gift-basket-premium.svg'],
+      defaultImage: '/images/products/gift-basket-premium.svg',
       isFeatured: false
     },
     {
@@ -552,8 +552,8 @@ async function seedProducts(categories) {
       description: { en: 'Beautiful red rose bouquet', de: 'Schöner roter Rosenstrauß' },
       slug: 'rose-bouquet',
       category: categories[2]._id,
-      images: [],
-      defaultImage: '',
+      images: ['/images/products/rose-bouquet.svg'],
+      defaultImage: '/images/products/rose-bouquet.svg',
       isFeatured: true
     },
     {
@@ -561,8 +561,8 @@ async function seedProducts(categories) {
       description: { en: 'Assorted premium chocolates', de: 'Sortierte Premium Schokoladen' },
       slug: 'premium-chocolates',
       category: categories[3]._id,
-      images: ['/images/products/chocolates.jpg'],
-      defaultImage: '/images/products/chocolates.jpg',
+      images: ['/images/products/chocolates.svg'],
+      defaultImage: '/images/products/chocolates.svg',
       isFeatured: true
     }
   ];

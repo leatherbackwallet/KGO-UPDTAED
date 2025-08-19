@@ -1,18 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false, // Keep disabled to prevent double renders
   swcMinify: true,
   compress: true,
   poweredByHeader: false,
   generateEtags: false,
   
-  // Browser compatibility settings
-  experimental: {
-    esmExternals: 'loose',
+  // Completely disable HMR and Fast Refresh
+  webpackDevMiddleware: config => {
+    config.watchOptions = {
+      poll: false,
+      ignored: /node_modules/,
+    };
+    return config;
   },
   
-  // Add polyfills for older browsers
-  webpack: (config, { isServer }) => {
+  // Webpack configuration without HMR
+  webpack: (config, { dev, isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -25,6 +29,12 @@ const nextConfig = {
     return config;
   },
   
+  // Browser compatibility settings - HMR completely disabled
+  experimental: {
+    esmExternals: 'loose',
+    fastRefresh: false,
+  },
+  
   images: {
     domains: ['localhost'],
     formats: ['image/webp', 'image/avif'],
@@ -32,6 +42,7 @@ const nextConfig = {
   
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY || '',
+    FAST_REFRESH: 'false',
   },
   
   // Add security headers for better browser compatibility

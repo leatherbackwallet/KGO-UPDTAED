@@ -4,7 +4,7 @@
   "description": "KeralGiftsOnline.com Frontend - Modern React marketplace with promotions and logistics",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "FAST_REFRESH=false next dev",
     "build": "next build",
     "build:prod": "next build && npm prune --production",
     "start": "next start -p $PORT",
@@ -27,7 +27,7 @@
     "critters": "^0.0.23",
     "date-fns": "^4.1.0",
     "jwt-decode": "^4.0.0",
-    "next": "14.0.0",
+    "next": "^14.2.32",
     "react": "^18",
     "react-dom": "^18",
     "recharts": "^3.1.0"

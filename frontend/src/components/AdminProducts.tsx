@@ -50,6 +50,7 @@ export default function AdminProducts() {
   }>({});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
 
   // Available occasions for tag selection
   const availableOccasions = [
@@ -61,33 +62,52 @@ export default function AdminProducts() {
 
   // Get all used occasions from existing products
   const usedOccasions = Array.from(new Set(
-    products.flatMap(product => product.occasions || [])
+    Array.isArray(products) ? products.flatMap(product => product.occasions || []) : []
   ));
 
   // Combine available and used occasions
   const allOccasions = Array.from(new Set([...availableOccasions, ...usedOccasions]));
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-    fetchVendors();
+    const loadData = async () => {
+      setDataLoading(true);
+      try {
+        await Promise.all([
+          fetchProducts(),
+          fetchCategories(),
+          fetchVendors()
+        ]);
+      } catch (err) {
+        console.error('Error loading data:', err);
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    
+    loadData();
   }, []);
 
   const fetchProducts = async () => {
     try {
       const res = await api.get('/products');
-      setProducts(res.data as Product[]);
+      // Handle the nested data structure from the API
+      const productsData = res.data.data || res.data || [];
+      setProducts(Array.isArray(productsData) ? productsData : []);
     } catch (err) {
       console.error('Error fetching products:', err);
+      setProducts([]); // Ensure products is always an array
     }
   };
 
   const fetchCategories = async () => {
     try {
       const res = await api.get('/categories');
-      setCategories(res.data as Category[]);
+      // Handle the nested data structure from the API
+      const categoriesData = res.data.data || res.data || [];
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (err) {
       console.error('Error fetching categories:', err);
+      setCategories([]); // Ensure categories is always an array
     }
   };
 
@@ -96,9 +116,12 @@ export default function AdminProducts() {
       const res = await api.get('/vendors/all', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setVendors(res.data as Vendor[]);
+      // Handle the nested data structure from the API
+      const vendorsData = res.data.data || res.data || [];
+      setVendors(Array.isArray(vendorsData) ? vendorsData : []);
     } catch (err) {
       console.error('Error fetching vendors:', err);
+      setVendors([]); // Ensure vendors is always an array
     }
   };
 
@@ -218,6 +241,18 @@ export default function AdminProducts() {
     setForm({});
     setError('');
   };
+
+  // Show loading state while data is being fetched
+  if (dataLoading) {
+    return (
+      <div>
+        <h2 className="text-xl font-bold mb-4">Product Management</h2>
+        <div className="flex items-center justify-center py-8">
+          <div className="text-gray-500">Loading products, categories, and vendors...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

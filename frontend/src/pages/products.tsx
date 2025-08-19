@@ -31,6 +31,7 @@ export default function Products() {
   const [max, setMax] = useState('');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Available occasions
   const availableOccasions = [
@@ -40,19 +41,23 @@ export default function Products() {
     'TRADITIONAL', 'WEDDING'
   ];
 
-  // Debounced search effect
+  // Initial load effect
   useEffect(() => {
+    fetchCategories();
+    fetchProducts();
+    setIsInitialLoad(false);
+  }, []);
+
+  // Debounced search effect (only for filters, not initial load)
+  useEffect(() => {
+    if (isInitialLoad) return; // Skip on initial load to prevent double call
+    
     const timeoutId = setTimeout(() => {
       fetchProducts();
     }, 300); // 300ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [search, category, selectedOccasions, min, max]);
-
-  useEffect(() => {
-    fetchCategories();
-    fetchProducts();
-  }, []);
+  }, [search, category, selectedOccasions, min, max]); // Removed isInitialLoad from dependencies
 
   const fetchCategories = async () => {
     try {

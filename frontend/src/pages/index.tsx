@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
@@ -6,6 +6,7 @@ import ProductSkeleton from '@/components/ProductSkeleton';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
+import api from '@/utils/api';
 
 interface Product {
   _id: string;
@@ -39,22 +40,14 @@ export default function Home() {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       console.log('Fetching products...');
-      const response = await fetch('http://localhost:5001/api/products');
+      const response = await api.get('/products');
       console.log('Response status:', response.status);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch products: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log('Products data:', data);
+      console.log('Products data:', response.data);
       // Handle both old and new API response formats
-      const productsData = data.data || data || [];
+      const productsData = response.data.data || response.data || [];
       setProducts(Array.isArray(productsData) ? productsData : []);
     } catch (err) {
       console.error('Error fetching products:', err);
@@ -63,7 +56,11 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAddToCart = (product: Product) => {
     addToCart({

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Category } = require('../models/categories.model.ts');
+const { Category } = require('../models/categories.model');
 
 // GET /api/categories - Get all categories
 router.get('/', async (req, res) => {

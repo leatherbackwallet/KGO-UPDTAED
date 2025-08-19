@@ -36,7 +36,8 @@ export function getProductImage(imagePath?: string, slug?: string): string {
   
   // Fallback to slug-based naming (legacy images)
   if (slug) {
-    return `${PRODUCT_IMAGES_PATH}/${slug}.jpg`;
+    // Try SVG first (since we have SVG placeholders), then JPG as fallback
+    return `${PRODUCT_IMAGES_PATH}/${slug}.svg`;
   }
   
   return DEFAULT_PRODUCT_IMAGE;
