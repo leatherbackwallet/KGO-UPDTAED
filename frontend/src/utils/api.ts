@@ -1,5 +1,21 @@
 import axios from 'axios';
 
+// Utility function to safely extract text from multilingual objects
+export const getMultilingualText = (text: string | { en: string; de: string; ml?: string } | undefined, preferredLanguage: 'en' | 'de' | 'ml' = 'en'): string => {
+  if (!text) return '';
+  
+  if (typeof text === 'string') return text;
+  
+  // Try preferred language first, then fallback to English, then German
+  if (preferredLanguage === 'de' && text.de) return text.de;
+  if (preferredLanguage === 'ml' && text.ml) return text.ml;
+  if (text.en) return text.en;
+  if (text.de) return text.de;
+  if (text.ml) return text.ml;
+  
+  return '';
+};
+
 // Cross-browser compatible localStorage function
 const safeGetToken = (): string | null => {
   try {
@@ -41,6 +57,33 @@ api.interceptors.request.use((config) => {
 // Handle response errors
 api.interceptors.response.use(
   (response) => {
+    // Validate multilingual content structure
+    if (response.data && response.data.data) {
+      const validateMultilingualContent = (obj: any) => {
+        if (obj && typeof obj === 'object') {
+          // Check if it's a multilingual object
+          if (obj.en !== undefined || obj.de !== undefined) {
+            // Ensure both languages are present
+            if (!obj.en && !obj.de) {
+              console.warn('Multilingual content missing both English and German translations:', obj);
+            }
+          }
+          // Recursively check nested objects
+          Object.values(obj).forEach(value => {
+            if (typeof value === 'object' && value !== null) {
+              validateMultilingualContent(value);
+            }
+          });
+        }
+      };
+
+      if (Array.isArray(response.data.data)) {
+        response.data.data.forEach(validateMultilingualContent);
+      } else {
+        validateMultilingualContent(response.data.data);
+      }
+    }
+    
     return response;
   },
   (error) => {
@@ -48,6 +91,18 @@ api.interceptors.response.use(
     if (error.response) {
       // Server responded with error status
       console.error('API Error Response:', error.response.status, error.response.data);
+      
+      // Handle validation errors specifically
+      if (error.response.status === 400 && error.response.data?.error?.code === 'VALIDATION_ERROR') {
+        const details = error.response.data.error.details;
+        if (details) {
+          details.forEach((detail: any) => {
+            if (detail.field && detail.field.includes('de')) {
+              console.error('German language validation error:', detail);
+            }
+          });
+        }
+      }
       
       // Handle authentication errors
       if (error.response.status === 401) {

@@ -35,7 +35,7 @@ export declare class ContentService {
         commented?: boolean;
     }): Promise<void>;
     static getContentAnalytics(): Promise<any>;
-    static searchContent(searchTerm: string, language?: ContentLanguage): Promise<IContent[]>;
+    static searchContent(searchTerm: string, language?: string): Promise<IContent[]>;
     static getRelatedContent(contentId: string, limit?: number): Promise<IContent[]>;
     static createSampleContent(): Promise<void>;
 }

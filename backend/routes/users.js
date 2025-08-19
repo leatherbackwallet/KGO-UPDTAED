@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models/users.model.ts');
-const { Role } = require('../models/roles.model.ts');
+const { User } = require('../models/users.model');
+const { Role } = require('../models/roles.model');
 const auth = require('../middleware/auth');
 const role = require('../middleware/role');
 

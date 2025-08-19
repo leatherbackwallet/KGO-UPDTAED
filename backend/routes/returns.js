@@ -5,8 +5,8 @@
 
 const express = require('express');
 const router = express.Router();
-const { Return } = require('../models/returns.model.ts');
-const { Order } = require('../models/orders.model.ts');
+const { Return } = require('../models/returns.model');
+const { Order } = require('../models/orders.model');
 const auth = require('../middleware/auth');
 const role = require('../middleware/role');
 

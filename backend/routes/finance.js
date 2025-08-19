@@ -6,8 +6,8 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { Order } = require('../models/orders.model.ts');
-const { Product } = require('../models/products.model.ts');
+const { Order } = require('../models/orders.model');
+const { Product } = require('../models/products.model');
 
 // Get aggregated financial data
 router.get('/aggregates', auth, async (req, res) => {

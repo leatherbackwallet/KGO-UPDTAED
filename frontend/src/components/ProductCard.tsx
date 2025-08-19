@@ -1,38 +1,33 @@
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import WishlistButton from './WishlistButton';
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
+import { getMultilingualText } from '../utils/api';
 
 interface Product {
   _id: string;
   name: string | { en: string; de: string };
   description: string | { en: string; de: string };
   price?: number;
-  category: string | { _id: string; name: string; slug: string };
-  celebrationType?: string;
+  category: string | { _id: string; name: string | { en: string; de: string }; slug: string };
   stock?: number;
   images: string[];
-  tags?: string[];
-  isFeatured?: boolean;
   slug?: string;
+  occasions?: string[];
+  isFeatured?: boolean;
 }
 
 interface ProductCardProps {
   product: Product;
   onQuickView: (product: Product) => void;
+  onClick?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, onQuickView }: ProductCardProps) {
+export default function ProductCard({ product, onQuickView, onClick }: ProductCardProps) {
   const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
 
-  // Helper function to get text from multilingual object or string
-  const getText = (text: string | { en: string; de: string }): string => {
-    if (typeof text === 'string') return text;
-    return text.en || text.de || '';
-  };
-  
   // Get image path
   const imagePath = getProductImage(product.images[0], product.slug);
 
@@ -42,7 +37,7 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
     
     addToCart({
       product: product._id,
-      name: getText(product.name),
+      name: getMultilingualText(product.name),
       price: product.price || 0,
       image: getProductImage(product.images[0], product.slug),
       quantity: 1,
@@ -50,17 +45,24 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
     });
   };
 
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick(product);
+    }
+  };
+
   return (
     <div 
-      className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+      className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCardClick}
     >
       {/* Image Container */}
       <div className="relative overflow-hidden">
         <img
           src={imagePath}
-          alt={getText(product.name)}
+          alt={getMultilingualText(product.name)}
           className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
@@ -75,11 +77,10 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
         }`}>
           <div className="flex gap-3">
             <button
-              onClick={() => onQuickView({
-                ...product,
-                name: getText(product.name),
-                description: getText(product.description)
-              })}
+              onClick={(e) => {
+                e.stopPropagation();
+                onQuickView(product);
+              }}
               className="w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all duration-200 hover:scale-110"
               aria-label="Quick view"
             >
@@ -106,7 +107,7 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
         <div className="absolute top-3 right-3">
           <WishlistButton product={{
             _id: product._id,
-            name: getText(product.name),
+            name: getMultilingualText(product.name),
             price: product.price,
             images: product.images,
             slug: product.slug
@@ -121,10 +122,10 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
             </span>
           </div>
         )}
-        
+
         {/* Featured Badge */}
         {product.isFeatured && (
-          <div className="absolute top-3 left-3">
+          <div className="absolute bottom-3 left-3">
             <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-medium">
               Featured
             </span>
@@ -133,34 +134,53 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
       </div>
 
       {/* Content */}
-      <div className="p-6">
+      <div className="p-4">
         <div className="mb-2">
-          <span className="text-xs text-gray-500 uppercase tracking-wide">
-            {typeof product.category === 'object' ? getText(product.category.name) : product.category}
-            {product.celebrationType && ` • ${product.celebrationType}`}
+          <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+            {typeof product.category === 'object' ? getMultilingualText(product.category.name) : product.category}
           </span>
         </div>
         
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-          {getText(product.name)}
+        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+          {getMultilingualText(product.name)}
         </h3>
         
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-          {getText(product.description)}
+        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+          {getMultilingualText(product.description)}
         </p>
-        
+
+        {/* Price */}
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-blue-600">
-            ${(product.price || 0).toFixed(2)}
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold text-gray-900">
+              €{product.price?.toFixed(2) || '0.00'}
+            </span>
+            {product.stock !== undefined && (
+              <span className="text-sm text-gray-500">
+                ({product.stock} in stock)
+              </span>
+            )}
           </div>
-          
-          <Link 
-            href={`/products/${product._id}`}
-            className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
-          >
-            View Details →
-          </Link>
         </div>
+
+        {/* Occasions */}
+        {product.occasions && product.occasions.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1">
+            {product.occasions.slice(0, 3).map((occasion, index) => (
+              <span
+                key={index}
+                className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
+              >
+                {occasion}
+              </span>
+            ))}
+            {product.occasions.length > 3 && (
+              <span className="text-xs text-gray-500">
+                +{product.occasions.length - 3} more
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -73,7 +73,7 @@ export default function Navbar() {
                       {user.firstName?.charAt(0) || user.email?.charAt(0) || 'U'}
                     </span>
                   </div>
-                   <span className="hidden sm:block">{`${user.firstName} ${user.lastName}` || user.email}</span>
+                   <span className="hidden sm:block">{(user.firstName && user.lastName) ? `${user.firstName} ${user.lastName}` : user.email}</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>

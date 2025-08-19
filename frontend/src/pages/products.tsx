@@ -1,47 +1,52 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import api from '../utils/api';
+import React, { useState, useEffect, useCallback } from 'react';
+import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
-import { ProductSkeletonGrid } from '../components/ProductSkeleton';
+import ProductModal from '../components/ProductModal';
 import LoadingSpinner from '../components/LoadingSpinner';
-import performanceMonitor from '../utils/performance';
+import api from '../utils/api';
+import { getMultilingualText } from '../utils/api';
+import { performanceMonitor } from '../utils/performance';
 
 interface Product {
   _id: string;
   name: string | { en: string; de: string };
   description: string | { en: string; de: string };
   price?: number;
-  category: string | { _id: string; name: string; slug: string };
+  category: string | { _id: string; name: string | { en: string; de: string }; slug: string };
   stock?: number;
   images: string[];
-  occasions?: string[];
   slug?: string;
+  occasions?: string[];
+  isFeatured?: boolean;
 }
 
-export default function Products() {
+const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Array<{_id: string, name: string | { en: string; de: string }, slug: string}>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showQuickView, setShowQuickView] = useState(false);
+  
+  // Filters
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [min, setMin] = useState('');
   const [max, setMax] = useState('');
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Available occasions
-  const availableOccasions = [
+  const occasions = [
     'DIWALI', 'ANNIVERSARY', 'BIRTHDAY', 'CONDOLENCES', 'CONGRATULATION',
     'FATHERS DAY', 'GET WELL SOON', 'HOUSE WARMING', 'JUST BECAUSE',
     'MISS YOU', 'NEW BORN', 'ONAM', 'SYMPATHY', 'THANK YOU',
     'TRADITIONAL', 'WEDDING'
   ];
 
-  // Initial load effect
   useEffect(() => {
     fetchCategories();
     fetchProducts();
@@ -94,13 +99,23 @@ export default function Products() {
   }, [search, category, selectedOccasions, min, max]);
 
   const handleQuickView = (product: Product) => {
-    setQuickViewProduct(product);
-    setIsQuickViewOpen(true);
+    setSelectedProduct(product);
+    setShowQuickView(true);
   };
 
-  const handleCloseQuickView = () => {
-    setIsQuickViewOpen(false);
-    setQuickViewProduct(null);
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setSelectedProduct(null);
+    setShowModal(false);
+  };
+
+  const closeQuickView = () => {
+    setSelectedProduct(null);
+    setShowQuickView(false);
   };
 
   const clearFilters = () => {
@@ -113,11 +128,21 @@ export default function Products() {
 
   return (
     <>
+      <Head>
+        <title>Products - KeralGiftsOnline</title>
+        <meta name="description" content="Discover our collection of gifts, cakes, flowers, and celebration items" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+      </Head>
+
       <Navbar />
       <main className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           {/* Header */}
-      
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Our Products</h1>
+            <p className="text-gray-600">Discover perfect gifts for every occasion</p>
+          </div>
 
           {/* Filters */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
@@ -140,7 +165,7 @@ export default function Products() {
                 >
                   <option value="">All Categories</option>
                   {categories.map(cat => {
-                    const categoryName = typeof cat.name === 'string' ? cat.name : cat.name.en || cat.name.de;
+                    const categoryName = typeof cat.name === 'string' ? cat.name : getMultilingualText(cat.name);
                     return (
                       <option key={cat._id} value={cat.slug}>
                         {categoryName}
@@ -148,121 +173,115 @@ export default function Products() {
                     );
                   })}
                 </select>
-
-                <select
-                  value={selectedOccasions[0] || ''}
-                  onChange={e => setSelectedOccasions(e.target.value ? [e.target.value] : [])}
-                  className="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">All Occasions</option>
-                  {availableOccasions.map(occasion => (
-                    <option key={occasion} value={occasion}>
-                      {occasion}
-                    </option>
-                  ))}
-                </select>
-                
-                <input
-                  type="number"
-                  placeholder="Min Price"
-                  value={min}
-                  onChange={e => setMin(e.target.value)}
-                  className="w-32 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                
-                <input
-                  type="number"
-                  placeholder="Max Price"
-                  value={max}
-                  onChange={e => setMax(e.target.value)}
-                  className="w-32 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
                 
                 <button
                   onClick={clearFilters}
-                  className="px-6 py-3 text-gray-600 hover:text-gray-800 transition-colors"
+                  className="px-4 py-3 text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   Clear
                 </button>
               </div>
             </div>
+
+            {/* Additional Filters */}
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={min}
+                    onChange={e => setMin(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={max}
+                    onChange={e => setMax(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Occasions</label>
+                <select
+                  multiple
+                  value={selectedOccasions}
+                  onChange={e => {
+                    const values = Array.from(e.target.selectedOptions, option => option.value);
+                    setSelectedOccasions(values);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {occasions.map(occasion => (
+                    <option key={occasion} value={occasion}>
+                      {occasion.replace('_', ' ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
 
           {/* Results */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between">
-              <p className="text-gray-600">
-                {loading ? 'Loading...' : `${Array.isArray(products) ? products.length : 0} products found`}
-              </p>
+          <div className="mb-6 flex justify-between items-center">
+            <div className="text-sm text-gray-600">
+              {loading ? 'Loading...' : `${products.length} products found`}
             </div>
-            {error && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-red-800">{error}</span>
-                </div>
-              </div>
-            )}
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <p className="text-red-800">{error}</p>
+            </div>
+          )}
 
           {/* Products Grid */}
           {loading ? (
-            <ProductSkeletonGrid count={8} />
-          ) : (!Array.isArray(products) || products.length === 0) ? (
-            <div className="text-center py-16">
-              <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
-                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <LoadingSpinner />
+          ) : products.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
-              <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
-              <button
-                onClick={clearFilters}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Clear Filters
-              </button>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+              <p className="text-gray-600">Try adjusting your search criteria or browse all products.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {Array.isArray(products) && products.map(product => {
-                // Helper function to get text from multilingual object or string
-                const getText = (text: string | { en: string; de: string }): string => {
-                  if (typeof text === 'string') return text;
-                  return text.en || text.de || '';
-                };
-
-                // Transform the product data to ensure proper rendering
-                const transformedProduct = {
-                  ...product,
-                  name: getText(product.name),
-                  description: getText(product.description),
-                  category: typeof product.category === 'object' ? getText(product.category.name) : product.category,
-                  slug: product.slug // Ensure slug is passed through
-                };
-
-                return (
-                  <ProductCard 
-                    key={product._id} 
-                    product={transformedProduct} 
-                    onQuickView={handleQuickView}
-                  />
-                );
-              })}
+              {products.map(product => (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  onQuickView={handleQuickView}
+                  onClick={handleProductClick}
+                />
+              ))}
             </div>
           )}
         </div>
       </main>
 
-      {/* Quick View Modal */}
+      {/* Modals */}
+      <ProductModal
+        product={selectedProduct}
+        isOpen={showModal}
+        onClose={closeModal}
+      />
+      
       <QuickViewModal
-        product={quickViewProduct}
-        isOpen={isQuickViewOpen}
-        onClose={handleCloseQuickView}
+        product={selectedProduct}
+        isOpen={showQuickView}
+        onClose={closeQuickView}
       />
     </>
   );
-}
+};
+
+export default ProductsPage;

@@ -6,8 +6,8 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { Wishlist } = require('../models/wishlists.model.ts');
-const { Product } = require('../models/products.model.ts');
+const { Wishlist } = require('../models/wishlists.model');
+const { Product } = require('../models/products.model');
 const auth = require('../middleware/auth');
 
 // Get user's wishlist with product details

@@ -3,7 +3,7 @@
  * Handles cultural content, recipes, festival guides, and language learning
  */
 
-import { Content, IContent, ContentType } from '../models/content.model';
+import { Content, IContent, ContentType, ContentStatus } from '../models/content.model';
 import { UserPreferences, IUserPreferences } from '../models/userPreferences.model';
 import { Product, IProduct } from '../models/products.model';
 import { Category, ICategory } from '../models/categories.model';
@@ -272,7 +272,7 @@ export class ContentService {
   /**
    * Search content
    */
-  static async searchContent(searchTerm: string, language?: ContentLanguage): Promise<IContent[]> {
+  static async searchContent(searchTerm: string, language?: string): Promise<IContent[]> {
     const query: any = {
       isDeleted: false,
       isPublished: true,
@@ -307,9 +307,9 @@ export class ContentService {
       isPublished: true,
       $or: [
         { type: content.type },
-        { language: content.language },
-        { tags: { $in: content.tags } },
-        { category: content.category },
+        { type: content.type },
+        { 'culturalContext.festival': { $in: content.culturalContext?.festival || [] } },
+        { 'culturalContext.region': { $in: content.culturalContext?.region || [] } },
       ],
     };
 
@@ -326,7 +326,7 @@ export class ContentService {
     const sampleRecipes = [
       {
         type: ContentType.RECIPE,
-        language: ContentLanguage.ENGLISH,
+        status: ContentStatus.PUBLISHED,
         title: {
           en: 'Traditional Kerala Fish Curry',
           de: 'Traditionelles Kerala Fisch Curry',
@@ -337,14 +337,23 @@ export class ContentService {
           de: 'Ein köstliches traditionelles Fischcurry aus Kerala mit Kokosmilch und Gewürzen.',
           ml: 'തേങ്ങാപ്പാലും മസാലകളും ചേർത്ത കേരള ഫിഷ് കറി.',
         },
-        category: 'recipes',
-        tags: ['fish', 'curry', 'kerala', 'traditional', 'spicy'],
-        isPublished: true,
+        slug: {
+          en: 'traditional-kerala-fish-curry',
+          de: 'traditionelles-kerala-fisch-curry',
+          ml: 'kerala-fish-curry',
+        },
+        culturalContext: {
+          festival: ['onam', 'vishu'],
+          region: ['kerala'],
+          tradition: ['fishing', 'cooking'],
+          season: ['monsoon'],
+          dietary: ['non-vegetarian']
+        },
         recipe: {
           cookingTime: 45,
           preparationTime: 15,
           servings: 4,
-          difficulty: 'medium',
+          difficulty: 'medium' as const,
           ingredients: [
             {
               name: { en: 'Fish', de: 'Fisch', ml: 'മീൻ' },
@@ -365,6 +374,7 @@ export class ContentService {
                 de: 'Fisch säubern und in Stücke schneiden',
                 ml: 'മീൻ വൃത്തിയാക്കി കഷണങ്ങളാക്കുക',
               },
+              image: '',
             },
           ],
           nutrition: {
@@ -382,7 +392,7 @@ export class ContentService {
     const sampleFestivalGuides = [
       {
         type: ContentType.FESTIVAL_GUIDE,
-        language: ContentLanguage.ENGLISH,
+        status: ContentStatus.PUBLISHED,
         title: {
           en: 'Onam Festival Guide',
           de: 'Onam Fest Guide',
@@ -393,9 +403,18 @@ export class ContentService {
           de: 'Vollständiger Leitfaden zur Feier des Onam-Festivals mit traditionellen Bräuchen und Rezepten.',
           ml: 'പരമ്പരാഗത ആചാരങ്ങളും പാചകവിധികളും ഉപയോഗിച്ച് ഓണം ആഘോഷിക്കാനുള്ള സമ്പൂർണ്ണ ഗൈഡ്.',
         },
-        category: 'festivals',
-        tags: ['onam', 'festival', 'kerala', 'traditional', 'celebration'],
-        isPublished: true,
+        slug: {
+          en: 'onam-festival-guide',
+          de: 'onam-fest-guide',
+          ml: 'onam-utsav-guide',
+        },
+        culturalContext: {
+          festival: ['onam'],
+          region: ['kerala'],
+          tradition: ['celebration', 'feast'],
+          season: ['monsoon'],
+          dietary: ['vegetarian']
+        },
         festivalGuide: {
           festivalDate: new Date('2024-08-15'),
           duration: 10,
@@ -404,17 +423,19 @@ export class ContentService {
             de: 'Onam ist das größte Festival Keralas und feiert die Heimkehr von König Mahabali.',
             ml: 'ഓണം കേരളത്തിന്റെ ഏറ്റവും വലിയ ഉത്സവമാണ്, മഹാബലി രാജാവിന്റെ വീട്ടുവരവ് ആഘോഷിക്കുന്നു.',
           },
-          traditions: [
+          traditions: {
+            en: ['Pookalam (flower rangoli)', 'Onasadya (traditional feast)'],
+            de: ['Pookalam (Blumen-Rangoli)', 'Onasadya (traditionelles Festmahl)'],
+            ml: ['പൂക്കളം', 'ഓണസദ്യ'],
+          },
+          products: [],
+          events: [
             {
-              en: 'Pookalam (flower rangoli)',
-              de: 'Pookalam (Blumen-Rangoli)',
-              ml: 'പൂക്കളം',
-            },
-            {
-              en: 'Onasadya (traditional feast)',
-              de: 'Onasadya (traditionelles Festmahl)',
-              ml: 'ഓണസദ്യ',
-            },
+              name: 'Onam Celebration',
+              date: new Date('2024-08-15'),
+              location: 'Kerala, India',
+              description: 'Traditional Onam festival celebration'
+            }
           ],
         },
       },

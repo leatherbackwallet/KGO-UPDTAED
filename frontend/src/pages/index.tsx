@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
 import ProductSkeleton from '@/components/ProductSkeleton';
+import ProductModal from '@/components/ProductModal';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -30,12 +31,16 @@ interface Product {
   images: string[];
   defaultImage: string;
   isFeatured: boolean;
+  price?: number;
+  stock?: number;
+  occasions?: string[];
 }
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { user } = useAuth();
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -87,8 +92,15 @@ export default function Home() {
   };
 
   const handleQuickView = (product: Product) => {
-    // Quick view functionality can be implemented here
-    console.log('Quick view:', product);
+    setSelectedProduct(product);
+  };
+
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
+  const closeModal = () => {
+    setSelectedProduct(null);
   };
 
   if (loading) {
@@ -224,15 +236,18 @@ export default function Home() {
                 key={product._id}
                 product={{
                   _id: product._id,
-                  name: product.name.en,
-                  description: product.description.en,
-                  category: typeof product.category === 'object' ? product.category.name.en : product.category,
+                  name: product.name,
+                  description: product.description,
+                  category: product.category,
                   images: product.images,
                   slug: product.slug,
                   isFeatured: product.isFeatured,
-                  price: 0
+                  price: product.price || 0,
+                  stock: product.stock || 0,
+                  occasions: product.occasions
                 }}
                 onQuickView={() => handleQuickView(product)}
+                onClick={() => handleProductClick(product)}
               />
             ))}
           </div>
@@ -259,6 +274,26 @@ export default function Home() {
           </Link>
         </div>
       </div>
+
+      {/* Product Modal */}
+      {selectedProduct && (
+        <ProductModal
+          product={{
+            _id: selectedProduct._id,
+            name: selectedProduct.name,
+            description: selectedProduct.description,
+            price: selectedProduct.price || 0,
+            category: selectedProduct.category,
+            stock: selectedProduct.stock || 0,
+            images: selectedProduct.images,
+            slug: selectedProduct.slug,
+            occasions: selectedProduct.occasions,
+            isFeatured: selectedProduct.isFeatured
+          }}
+          isOpen={!!selectedProduct}
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 }

@@ -25,7 +25,10 @@ const corsOptions = {
         'http://localhost:3000'
     ],
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Content-Length', 'Content-Type']
 };
 if (process.env.NODE_ENV === 'production') {
     app.use(generalLimiter);
@@ -34,7 +37,16 @@ app.use(logger);
 app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
-app.use('/images', express_1.default.static(path_1.default.join(__dirname, '../public/images')));
+app.use('/images', express_1.default.static(path_1.default.join(__dirname, '../public/images'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.svg')) {
+            res.setHeader('Content-Type', 'image/svg+xml');
+        }
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    }
+}));
 async function createSuperUser() {
     try {
         let adminRole = await roles_model_1.Role.findOne({ name: 'admin' });

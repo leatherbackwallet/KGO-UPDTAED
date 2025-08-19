@@ -1,22 +1,19 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { useAuth } from '../context/AuthContext';
-import FileUpload from './FileUpload';
-import { extractProductNameFromImage, generateSlug } from '../utils/imageUtils';
+import { getMultilingualText } from '../utils/api';
 
 interface Product {
   _id: string;
   name: string | { en: string; de: string };
   description: string | { en: string; de: string };
   price?: number;
-  categories: string[] | Array<{ _id: string; name: string | { en: string; de: string }; slug: string }>;
+  category: string | { _id: string; name: string | { en: string; de: string }; slug: string };
   stock?: number;
   images: string[];
-  occasions?: string[];
-  vendors?: string[] | Array<{ _id: string; storeName: string }>;
-  isFeatured: boolean;
   slug?: string;
-  defaultImage?: string;
+  occasions?: string[];
+  isFeatured?: boolean;
 }
 
 interface Category {
@@ -25,541 +22,199 @@ interface Category {
   slug: string;
 }
 
-interface Vendor {
-  _id: string;
-  storeName: string;
-  status?: string;
-}
-
-export default function AdminProducts() {
-  const { token } = useAuth();
+const AdminProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [editing, setEditing] = useState<Product | null>(null);
-  const [form, setForm] = useState<{
-    name?: string;
-    description?: string;
-    price?: number;
-    categories?: string[];
-    stock?: number;
-    defaultImage?: string;
-    occasions?: string[];
-    vendors?: string[];
-    isFeatured?: boolean;
-  }>({});
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [dataLoading, setDataLoading] = useState(true);
-
-  // Available occasions for tag selection
-  const availableOccasions = [
-    'DIWALI', 'ANNIVERSARY', 'BIRTHDAY', 'CONDOLENCES', 'CONGRATULATION',
-    'FATHERS DAY', 'GET WELL SOON', 'HOUSE WARMING', 'JUST BECAUSE',
-    'MISS YOU', 'NEW BORN', 'ONAM', 'SYMPATHY', 'THANK YOU',
-    'TRADITIONAL', 'WEDDING'
-  ];
-
-  // Get all used occasions from existing products
-  const usedOccasions = Array.from(new Set(
-    Array.isArray(products) ? products.flatMap(product => product.occasions || []) : []
-  ));
-
-  // Combine available and used occasions
-  const allOccasions = Array.from(new Set([...availableOccasions, ...usedOccasions]));
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Partial<Product>>({});
 
   useEffect(() => {
-    const loadData = async () => {
-      setDataLoading(true);
-      try {
-        await Promise.all([
-          fetchProducts(),
-          fetchCategories(),
-          fetchVendors()
-        ]);
-      } catch (err) {
-        console.error('Error loading data:', err);
-      } finally {
-        setDataLoading(false);
-      }
-    };
-    
-    loadData();
+    fetchProducts();
+    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
     try {
-      const res = await api.get('/products');
-      // Handle the nested data structure from the API
-      const productsData = res.data.data || res.data || [];
-      setProducts(Array.isArray(productsData) ? productsData : []);
-    } catch (err) {
-      console.error('Error fetching products:', err);
-      setProducts([]); // Ensure products is always an array
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const res = await api.get('/categories');
-      // Handle the nested data structure from the API
-      const categoriesData = res.data.data || res.data || [];
-      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
-    } catch (err) {
-      console.error('Error fetching categories:', err);
-      setCategories([]); // Ensure categories is always an array
-    }
-  };
-
-  const fetchVendors = async () => {
-    try {
-      const res = await api.get('/vendors/all', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      // Handle the nested data structure from the API
-      const vendorsData = res.data.data || res.data || [];
-      setVendors(Array.isArray(vendorsData) ? vendorsData : []);
-    } catch (err) {
-      console.error('Error fetching vendors:', err);
-      setVendors([]); // Ensure vendors is always an array
-    }
-  };
-
-  const handleEdit = (product: Product) => {
-    setEditing(product);
-    setForm({
-      ...product,
-      name: getText(product.name),
-      description: getText(product.description),
-      categories: Array.isArray(product.categories) 
-        ? product.categories.map(cat => typeof cat === 'string' ? cat : cat._id)
-        : [],
-      vendors: Array.isArray(product.vendors)
-        ? product.vendors.map(vendor => typeof vendor === 'string' ? vendor : vendor._id)
-        : []
-    });
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this product?')) return;
-    try {
-      await api.delete(`/products/${id}`, { headers: { Authorization: `Bearer ${token}` } });
-      fetchProducts();
-    } catch (err) {
-      console.error('Error deleting product:', err);
-    }
-  };
-
-  // Helper function to get text from multilingual object or string
-  const getText = (text: string | { en: string; de: string }): string => {
-    if (typeof text === 'string') return text;
-    return text.en || text.de || '';
-  };
-
-  const handleImageUpload = (fileData: { url: string; filename?: string }) => {
-    setForm(f => ({ 
-      ...f, 
-      defaultImage: fileData.url 
-    }));
-
-    // Auto-extract product name from image filename if name is empty
-    if (!form.name && fileData.filename) {
-      const extractedName = extractProductNameFromImage(fileData.filename);
-      if (extractedName) {
-        setForm(f => ({ 
-          ...f, 
-          name: extractedName,
-          defaultImage: fileData.url 
-        }));
-      }
-    }
-  };
-
-  const toggleOccasion = (occasion: string) => {
-    setForm(f => ({
-      ...f,
-      occasions: f.occasions?.includes(occasion)
-        ? f.occasions.filter(o => o !== occasion)
-        : [...(f.occasions || []), occasion]
-    }));
-  };
-
-  const toggleCategory = (categoryId: string) => {
-    setForm(f => ({
-      ...f,
-      categories: f.categories?.includes(categoryId)
-        ? f.categories.filter(c => c !== categoryId)
-        : [...(f.categories || []), categoryId]
-    }));
-  };
-
-  const toggleVendor = (vendorId: string) => {
-    setForm(f => ({
-      ...f,
-      vendors: f.vendors?.includes(vendorId)
-        ? f.vendors.filter(v => v !== vendorId)
-        : [...(f.vendors || []), vendorId]
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const productData = {
-        ...form,
-        name: { en: (form.name as string) || '', de: (form.name as string) || '' },
-        description: { en: (form.description as string) || '', de: (form.description as string) || '' },
-        slug: form.name ? generateSlug(form.name as string) : undefined,
-        images: form.defaultImage ? [form.defaultImage] : [],
-        categories: form.categories || [],
-        vendors: form.vendors || [],
-        price: form.price || 0,
-        stock: form.stock || 0
-      };
-
-      if (editing) {
-        await api.put(`/products/${editing._id}`, productData, { headers: { Authorization: `Bearer ${token}` } });
-      } else {
-        await api.post('/products', productData, { headers: { Authorization: `Bearer ${token}` } });
-      }
-      
-      setEditing(null);
-      setForm({});
-      fetchProducts();
+      setLoading(true);
+      const response = await api.get('/products');
+      setProducts(response.data.data || []);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error saving product');
+      console.error('Error fetching products:', err);
+      setError(err.response?.data?.error?.message || 'Failed to fetch products');
     } finally {
       setLoading(false);
     }
   };
 
-  const clearForm = () => {
-    setEditing(null);
-    setForm({});
-    setError('');
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/categories');
+      setCategories(response.data);
+    } catch (err: any) {
+      console.error('Error fetching categories:', err);
+    }
   };
 
-  // Show loading state while data is being fetched
-  if (dataLoading) {
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setEditingProduct({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+      stock: product.stock,
+      occasions: product.occasions,
+      isFeatured: product.isFeatured
+    });
+    setShowModal(true);
+  };
+
+  const handleSaveProduct = async () => {
+    if (!selectedProduct) return;
+
+    try {
+      await api.put(`/products/${selectedProduct._id}`, editingProduct);
+      fetchProducts();
+      setShowModal(false);
+      setSelectedProduct(null);
+      setEditingProduct({});
+    } catch (err: any) {
+      console.error('Error updating product:', err);
+      setError(err.response?.data?.error?.message || 'Failed to update product');
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      await api.delete(`/products/${productId}`);
+      fetchProducts();
+    } catch (err: any) {
+      console.error('Error deleting product:', err);
+      setError(err.response?.data?.error?.message || 'Failed to delete product');
+    }
+  };
+
+  const getCategoryName = (category: any) => {
+    if (typeof category === 'string') return category;
+    return getMultilingualText(category.name);
+  };
+
+  if (loading) {
     return (
-      <div>
-        <h2 className="text-xl font-bold mb-4">Product Management</h2>
-        <div className="flex items-center justify-center py-8">
-          <div className="text-gray-500">Loading products, categories, and vendors...</div>
-        </div>
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading products...</p>
       </div>
     );
   }
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Product Management</h2>
-      
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <h3 className="font-semibold text-blue-800 mb-2">📝 How to Add Products:</h3>
-        <ul className="text-blue-700 text-sm space-y-1">
-          <li>• <strong>Image Upload:</strong> Upload an image first - the product name will be auto-extracted from the filename</li>
-          <li>• <strong>Categories:</strong> Select multiple categories by clicking on them</li>
-          <li>• <strong>Occasions:</strong> Click on occasion tags to add/remove them</li>
-          <li>• <strong>Vendors:</strong> Select vendors who can supply this product (optional)</li>
-        </ul>
-        <p className="text-blue-600 text-sm mt-2">
-          💡 <strong>Tip:</strong> Use descriptive filenames like "birthday-cake-chocolate.jpg" for better auto-naming.
-        </p>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-900">Products Management</h2>
+        <button
+          onClick={() => {
+            setSelectedProduct(null);
+            setEditingProduct({});
+            setShowModal(true);
+          }}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Add New Product
+        </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="mb-6 bg-gray-50 p-6 rounded-lg">
-        {error && <div className="text-red-600 mb-4 p-3 bg-red-50 rounded">{error}</div>}
-        
-        {/* Image Upload Section */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Product Image *</label>
-          <FileUpload
-            onUploadSuccess={handleImageUpload}
-            onUploadError={(error) => setError(error)}
-            className="mb-2"
-          />
-          {form.defaultImage && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>✓ Image uploaded successfully</span>
-              <button
-                type="button"
-                onClick={() => setForm(f => ({ ...f, defaultImage: undefined }))}
-                className="text-red-600 hover:text-red-800"
-              >
-                Remove
-              </button>
-            </div>
-          )}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error}</p>
         </div>
+      )}
 
-        {/* Basic Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
-            <input 
-              type="text" 
-              placeholder="Product name (auto-filled from image filename)" 
-              value={form.name || ''} 
-              onChange={e => setForm(f => ({ ...f, name: e.target.value }))} 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-              required 
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Price *</label>
-            <input 
-              type="number" 
-              placeholder="0.00" 
-              value={form.price || ''} 
-              onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))} 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-              min="0"
-              step="0.01"
-              required
-            />
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
-          <textarea 
-            placeholder="Product description" 
-            value={form.description || ''} 
-            onChange={e => setForm(f => ({ ...f, description: e.target.value }))} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-            rows={3} 
-            required 
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Stock Quantity *</label>
-            <input 
-              type="number" 
-              placeholder="0" 
-              value={form.stock || ''} 
-              onChange={e => setForm(f => ({ ...f, stock: Number(e.target.value) }))} 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-              min="0"
-              required
-            />
-          </div>
-          <div className="flex items-center">
-            <label className="flex items-center">
-              <input 
-                type="checkbox" 
-                checked={form.isFeatured || false} 
-                onChange={e => setForm(f => ({ ...f, isFeatured: e.target.checked }))} 
-                className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
-              />
-              <span className="text-sm font-medium text-gray-700">Featured Product</span>
-            </label>
-          </div>
-        </div>
-
-        {/* Categories Selection */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3">Categories *</label>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            {categories.map(category => {
-              const categoryName = getText(category.name);
-              const isSelected = form.categories?.includes(category._id);
-              return (
-                <button
-                  key={category._id}
-                  type="button"
-                  onClick={() => toggleCategory(category._id)}
-                  className={`px-3 py-2 text-sm rounded-md border transition-colors ${
-                    isSelected
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {categoryName}
-                </button>
-              );
-            })}
-          </div>
-          {form.categories && form.categories.length > 0 && (
-            <p className="text-sm text-gray-600 mt-2">
-              Selected: {form.categories.length} category{form.categories.length !== 1 ? 'ies' : 'y'}
-            </p>
-          )}
-        </div>
-
-        {/* Occasions Selection */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3">Occasions (Tags)</label>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            {allOccasions.map(occasion => {
-              const isSelected = form.occasions?.includes(occasion);
-              const isUsed = usedOccasions.includes(occasion);
-              return (
-                <button
-                  key={occasion}
-                  type="button"
-                  onClick={() => toggleOccasion(occasion)}
-                  className={`px-3 py-2 text-sm rounded-md border transition-colors ${
-                    isSelected
-                      ? 'bg-green-600 text-white border-green-600'
-                      : isUsed
-                      ? 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {occasion}
-                </button>
-              );
-            })}
-          </div>
-          {form.occasions && form.occasions.length > 0 && (
-            <p className="text-sm text-gray-600 mt-2">
-              Selected: {form.occasions.length} occasion{form.occasions.length !== 1 ? 's' : ''}
-            </p>
-          )}
-        </div>
-
-        {/* Vendors Selection */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3">Vendors (Optional)</label>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            {vendors.map(vendor => {
-              const isSelected = form.vendors?.includes(vendor._id);
-              return (
-                <button
-                  key={vendor._id}
-                  type="button"
-                  onClick={() => toggleVendor(vendor._id)}
-                  className={`px-3 py-2 text-sm rounded-md border transition-colors ${
-                    isSelected
-                      ? 'bg-purple-600 text-white border-purple-600'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {vendor.storeName}
-                </button>
-              );
-            })}
-          </div>
-          {form.vendors && form.vendors.length > 0 && (
-            <p className="text-sm text-gray-600 mt-2">
-              Selected: {form.vendors.length} vendor{form.vendors.length !== 1 ? 's' : ''}
-            </p>
-          )}
-        </div>
-
-        {/* Form Actions */}
-        <div className="flex gap-3">
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Saving...' : (editing ? 'Update Product' : 'Create Product')}
-          </button>
-          {editing && (
-            <button 
-              type="button" 
-              onClick={clearForm}
-              className="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
-
-      {/* Products Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">All Products ({Array.isArray(products) ? products.length : 0})</h3>
-        </div>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categories</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Featured</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Product
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Stock
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {Array.isArray(products) && products.map(product => (
+              {products.map((product) => (
                 <tr key={product._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      {/* Product Thumbnail */}
-                      <div className="flex-shrink-0 mr-3">
-                        {product.images && product.images.length > 0 ? (
-                          <img 
-                            src={`http://localhost:5001/images/${product.images[0]}`}
-                            alt={getText(product.name)}
-                            className="h-10 w-10 rounded-lg object-cover border border-gray-200"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = '/images/products/placeholder.svg';
-                            }}
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-lg bg-gray-200 border border-gray-200 flex items-center justify-center">
-                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                          </div>
-                        )}
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <img
+                          className="h-10 w-10 rounded-lg object-cover"
+                          src={product.images[0] || '/images/products/placeholder.svg'}
+                          alt={getMultilingualText(product.name)}
+                        />
                       </div>
-                      
-                      {/* Product Details */}
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900">{getText(product.name)}</div>
-                        <div className="text-sm text-gray-500">{product.occasions?.join(', ') || 'No occasions'}</div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {getMultilingualText(product.name)}
+                        </div>
+                        <div className="text-sm text-gray-500 line-clamp-2">
+                          {getMultilingualText(product.description)}
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${product.price ? product.price.toFixed(2) : '0.00'}
+                    {getCategoryName(product.category)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {Array.isArray(product.categories) 
-                      ? product.categories.map(cat => 
-                          typeof cat === 'string' ? cat : getText(cat.name)
-                        ).join(', ')
-                      : 'No categories'
-                    }
+                    €{product.price?.toFixed(2) || '0.00'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {product.stock || 0}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {product.isFeatured ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✓ Featured
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      product.isFeatured 
+                        ? 'bg-yellow-100 text-yellow-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {product.isFeatured ? 'Featured' : 'Regular'}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button 
-                      onClick={() => handleEdit(product)} 
-                      className="text-blue-600 hover:text-blue-900 mr-3"
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(product._id)} 
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEditProduct(product)}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(product._id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -567,6 +222,188 @@ export default function AdminProducts() {
           </table>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">
+                {selectedProduct ? 'Edit Product' : 'Add New Product'}
+              </h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name (English)
+                </label>
+                <input
+                  type="text"
+                  value={typeof editingProduct.name === 'object' ? editingProduct.name?.en || '' : ''}
+                  onChange={(e) => setEditingProduct({
+                    ...editingProduct,
+                    name: {
+                      en: e.target.value,
+                      de: typeof editingProduct.name === 'object' ? editingProduct.name?.de || '' : ''
+                    }
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name (German)
+                </label>
+                <input
+                  type="text"
+                  value={typeof editingProduct.name === 'object' ? editingProduct.name?.de || '' : ''}
+                  onChange={(e) => setEditingProduct({
+                    ...editingProduct,
+                    name: {
+                      en: typeof editingProduct.name === 'object' ? editingProduct.name?.en || '' : '',
+                      de: e.target.value
+                    }
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description (English)
+                </label>
+                <textarea
+                  value={typeof editingProduct.description === 'object' ? editingProduct.description?.en || '' : ''}
+                  onChange={(e) => setEditingProduct({
+                    ...editingProduct,
+                    description: {
+                      en: e.target.value,
+                      de: typeof editingProduct.description === 'object' ? editingProduct.description?.de || '' : ''
+                    }
+                  })}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description (German)
+                </label>
+                <textarea
+                  value={typeof editingProduct.description === 'object' ? editingProduct.description?.de || '' : ''}
+                  onChange={(e) => setEditingProduct({
+                    ...editingProduct,
+                    description: {
+                      en: typeof editingProduct.description === 'object' ? editingProduct.description?.en || '' : '',
+                      de: e.target.value
+                    }
+                  })}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Price (€)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editingProduct.price || ''}
+                    onChange={(e) => setEditingProduct({
+                      ...editingProduct,
+                      price: parseFloat(e.target.value) || 0
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Stock
+                  </label>
+                  <input
+                    type="number"
+                    value={editingProduct.stock || ''}
+                    onChange={(e) => setEditingProduct({
+                      ...editingProduct,
+                      stock: parseInt(e.target.value) || 0
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category
+                </label>
+                <select
+                  value={typeof editingProduct.category === 'object' ? editingProduct.category?._id || '' : ''}
+                  onChange={(e) => {
+                    const category = categories.find(cat => cat._id === e.target.value);
+                    setEditingProduct({
+                      ...editingProduct,
+                      category: category || ''
+                    });
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((category) => (
+                    <option key={category._id} value={category._id}>
+                      {getMultilingualText(category.name)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={editingProduct.isFeatured || false}
+                    onChange={(e) => setEditingProduct({
+                      ...editingProduct,
+                      isFeatured: e.target.checked
+                    })}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Featured Product</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveProduct}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                {selectedProduct ? 'Update Product' : 'Add Product'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-} 
+};
+
+export default AdminProducts; 

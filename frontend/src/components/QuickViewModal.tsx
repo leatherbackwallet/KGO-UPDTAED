@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import WishlistButton from './WishlistButton';
-import { getProductImage } from '../utils/imageUtils';
+import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
+import { getMultilingualText } from '../utils/api';
 
 interface Product {
   _id: string;
   name: string | { en: string; de: string };
   description: string | { en: string; de: string };
   price?: number;
-  category: string | { _id: string; name: string; slug: string };
+  category: string | { _id: string; name: string | { en: string; de: string }; slug: string };
   stock?: number;
-  images?: string[];
+  images: string[];
   slug?: string;
+  occasions?: string[];
+  isFeatured?: boolean;
 }
 
 interface QuickViewModalProps {
@@ -25,156 +27,167 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  // Helper function to get text from multilingual object or string
-  const getText = (text: string | { en: string; de: string }): string => {
-    if (typeof text === 'string') return text;
-    return text.en || text.de || '';
-  };
-
   if (!product || !isOpen) return null;
 
   const handleAddToCart = () => {
     addToCart({
       product: product._id,
-      name: getText(product.name),
+      name: getMultilingualText(product.name),
       price: product.price || 0,
-      image: getProductImage(product.images?.[0] || '', product.slug),
+      image: getProductImage(product.images[selectedImage], product.slug),
       quantity,
       stock: product.stock || 0
     });
     onClose();
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.target as HTMLImageElement;
-    target.src = '/images/products/placeholder.svg';
+  const getCategoryName = () => {
+    if (typeof product.category === 'string') return product.category;
+    return getMultilingualText(product.category.name);
   };
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      onClick={handleBackdropClick}
-    >
-      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-900">Quick View</h2>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        {/* Background overlay */}
+        <div 
+          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          onClick={onClose}
+        ></div>
 
-        {/* Content */}
-        <div className="flex flex-col lg:flex-row">
-          {/* Image Section */}
-          <div className="lg:w-1/2 p-6">
-            <div className="relative">
-              <img
-                src={getProductImage(product.images?.[selectedImage] || '', product.slug)}
-                alt={getText(product.name)}
-                className="w-full h-80 object-cover rounded-lg"
-                onError={handleImageError}
-              />
-              <WishlistButton 
-                product={{
-                  _id: product._id,
-                  name: getText(product.name),
-                  price: product.price,
-                  images: product.images || [],
-                  slug: product.slug
-                }} 
-                className="absolute top-4 right-4"
-              />
-            </div>
-            
-            {/* Image Thumbnails */}
-            {product.images && product.images.length > 1 && (
-              <div className="flex gap-2 mt-4">
-                {product.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedImage === index 
-                        ? 'border-blue-500' 
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <img
-                      src={getProductImage(image, product.slug)}
-                      alt={`${getText(product.name)} ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={handleImageError}
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Details Section */}
-          <div className="lg:w-1/2 p-6 flex flex-col">
-            <div className="flex-1">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">{getText(product.name)}</h3>
-              <p className="text-3xl font-bold text-blue-600 mb-4">${(product.price || 0).toFixed(2)}</p>
-              
-              <div className="mb-4">
-                <span className="text-sm text-gray-500">Category:</span>
-                <span className="ml-2 text-sm font-medium text-gray-700">
-                  {typeof product.category === 'object' ? getText(product.category.name) : product.category}
-                </span>
-              </div>
-              
-              <div className="mb-4">
-                <span className="text-sm text-gray-500">Stock:</span>
-                <span className={`ml-2 text-sm font-medium ${
-                  (product.stock || 0) > 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {(product.stock || 0) > 0 ? `${product.stock} available` : 'Out of stock'}
-                </span>
-              </div>
-              
-              <p className="text-gray-600 mb-6 leading-relaxed">{getText(product.description)}</p>
+        {/* Modal panel */}
+        <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                {getMultilingualText(product.name)}
+              </h2>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
-            {/* Actions */}
-            <div className="border-t pt-6">
-              <div className="flex items-center gap-4 mb-4">
-                <label className="text-sm font-medium text-gray-700">Quantity:</label>
-                <input
-                  type="number"
-                  min="1"
-                  max={product.stock || 1}
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, Math.min(product.stock || 1, Number(e.target.value))))}
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Image Gallery */}
+              <div className="space-y-3">
+                <div className="aspect-w-1 aspect-h-1 w-full">
+                  <img
+                    src={getProductImage(product.images[selectedImage], product.slug)}
+                    alt={getMultilingualText(product.name)}
+                    className="w-full h-64 object-cover rounded-lg"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = DEFAULT_PRODUCT_IMAGE;
+                    }}
+                  />
+                </div>
+                
+                {/* Thumbnail images */}
+                {product.images.length > 1 && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {product.images.slice(0, 4).map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImage(index)}
+                        className={`aspect-w-1 aspect-h-1 w-full rounded-lg overflow-hidden border-2 transition-colors ${
+                          selectedImage === index ? 'border-blue-500' : 'border-gray-200'
+                        }`}
+                      >
+                        <img
+                          src={getProductImage(image, product.slug)}
+                          alt={`${getMultilingualText(product.name)} ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = DEFAULT_PRODUCT_IMAGE;
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              
-              <div className="flex gap-3">
+
+              {/* Product Details */}
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">
+                    {getMultilingualText(product.name)}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-2">
+                    {getCategoryName()}
+                  </p>
+                  <div className="text-2xl font-bold text-gray-900 mb-3">
+                    €{product.price?.toFixed(2) || '0.00'}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 mb-1">Description</h4>
+                  <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                    {getMultilingualText(product.description)}
+                  </p>
+                </div>
+
+                {/* Occasions */}
+                {product.occasions && product.occasions.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-1">Perfect for</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {product.occasions.slice(0, 3).map((occasion, index) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+                        >
+                          {occasion}
+                        </span>
+                      ))}
+                      {product.occasions.length > 3 && (
+                        <span className="text-xs text-gray-500">
+                          +{product.occasions.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Stock Status */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <label htmlFor="quantity" className="text-sm font-medium text-gray-700">
+                      Qty:
+                    </label>
+                    <select
+                      id="quantity"
+                      value={quantity}
+                      onChange={(e) => setQuantity(Number(e.target.value))}
+                      className="border border-gray-300 rounded px-2 py-1 text-sm"
+                      disabled={(product.stock || 0) === 0}
+                    >
+                      {[...Array(Math.min(5, product.stock || 0))].map((_, i) => (
+                        <option key={i + 1} value={i + 1}>
+                          {i + 1}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {product.stock !== undefined ? `${product.stock} in stock` : 'Stock not available'}
+                  </div>
+                </div>
+
+                {/* Add to Cart Button */}
                 <button
                   onClick={handleAddToCart}
                   disabled={(product.stock || 0) === 0}
-                  className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  className="w-full bg-kgo-red text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
                 >
-                  Add to Cart
-                </button>
-                <button
-                  onClick={onClose}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                >
-                  View Full Details
+                  {(product.stock || 0) === 0 ? 'Out of Stock' : 'Add to Cart'}
                 </button>
               </div>
             </div>
