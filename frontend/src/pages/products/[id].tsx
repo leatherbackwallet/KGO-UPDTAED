@@ -66,8 +66,12 @@ const ProductDetailPage: React.FC = () => {
   }
 
   const getCategoryName = () => {
+    if (!product.category) return 'Uncategorized';
     if (typeof product.category === 'string') return product.category;
-    return getMultilingualText(product.category.name);
+    if (product.category.name) {
+      return getMultilingualText(product.category.name);
+    }
+    return 'Uncategorized';
   };
 
   return (

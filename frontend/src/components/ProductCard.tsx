@@ -5,6 +5,7 @@ import WishlistButton from './WishlistButton';
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import { getMultilingualText } from '../utils/api';
 import { Product } from '../types/product';
+import { useImageCache } from '../utils/imageCache';
 
 interface ProductCardProps {
   product: Product;
@@ -16,8 +17,14 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
   const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
 
-  // Get image path
-  const imagePath = getProductImage(product.images?.[0] || product.defaultImage, product.slug);
+  // Use cached image
+  const { data: imagePath, isLoading: imageLoading } = useImageCache(
+    product.images?.[0] || product.defaultImage,
+    product.slug,
+    {
+      staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    }
+  );
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
@@ -55,10 +62,11 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
       {/* Image Container */}
       <div className="relative overflow-hidden">
         <img
-          src={imagePath}
+          src={imagePath || DEFAULT_PRODUCT_IMAGE}
           alt={getMultilingualText(product.name)}
           className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
           onError={handleImageError}
+          style={{ opacity: imageLoading ? 0.7 : 1 }}
         />
         
         {/* Overlay with actions */}
@@ -95,13 +103,7 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
 
         {/* Wishlist Button */}
         <div className="absolute top-3 right-3">
-          <WishlistButton product={{
-            _id: product._id,
-            name: getMultilingualText(product.name),
-            price: product.price,
-            images: product.images,
-            slug: product.slug
-          }} />
+          <WishlistButton product={product} />
         </div>
 
         {/* Stock Badge */}
@@ -127,7 +129,14 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
       <div className="p-4">
         <div className="mb-2">
           <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-            {typeof product.category === 'object' ? getMultilingualText(product.category.name) : product.category}
+            {(() => {
+              if (!product.category) return 'Uncategorized';
+              if (typeof product.category === 'string') return product.category;
+              if (product.category.name) {
+                return getMultilingualText(product.category.name);
+              }
+              return 'Uncategorized';
+            })()}
           </span>
         </div>
         

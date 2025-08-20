@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
 import { Product } from '../types/product';
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
+import { useImageCache } from '../utils/imageCache';
 
 interface Category {
   _id: string;
@@ -314,64 +315,76 @@ const AdminProducts: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products && products.length > 0 ? products.map((product) => (
-                <tr key={product._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        <img
-                          className="h-10 w-10 rounded-lg object-cover"
-                          src={getProductImage(product.images?.[0] || DEFAULT_PRODUCT_IMAGE)}
-                          alt={getMultilingualText(product.name)}
-                          onError={handleImageError}
-                        />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {getMultilingualText(product.name)}
+              {products && products.length > 0 ? products.map((product) => {
+                // Use cached image for each product
+                const { data: imagePath, isLoading: imageLoading } = useImageCache(
+                  product.images?.[0] || product.defaultImage,
+                  product.slug,
+                  {
+                    staleTime: 1000 * 60 * 60 * 24, // 24 hours
+                  }
+                );
+
+                return (
+                  <tr key={product._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <img
+                            className="h-10 w-10 rounded-lg object-cover"
+                            src={imagePath || DEFAULT_PRODUCT_IMAGE}
+                            alt={getMultilingualText(product.name)}
+                            onError={handleImageError}
+                            style={{ opacity: imageLoading ? 0.7 : 1 }}
+                          />
                         </div>
-                        <div className="text-sm text-gray-500 line-clamp-2">
-                          {getMultilingualText(product.description)}
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {getMultilingualText(product.name)}
+                          </div>
+                          <div className="text-sm text-gray-500 line-clamp-2">
+                            {getMultilingualText(product.description)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {getCategoryName(product.category)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    €{product.price?.toFixed(2) || '0.00'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.stock || 0}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      product.isFeatured 
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {product.isFeatured ? 'Featured' : 'Regular'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEditProduct(product)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProduct(product._id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )) : (
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {getCategoryName(product.category)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      €{product.price?.toFixed(2) || '0.00'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {product.stock || 0}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        product.isFeatured 
+                          ? 'bg-yellow-100 text-yellow-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {product.isFeatured ? 'Featured' : 'Regular'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditProduct(product)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product._id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              }) : (
                 <tr>
                   <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
                     No products found

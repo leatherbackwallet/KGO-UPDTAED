@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
-import RecipientAddresses from '../components/RecipientAddresses';
 import OrderStatusTimeline from '../components/OrderStatusTimeline';
 import api from '../utils/api';
 import { getMultilingualText } from '../utils/api';
@@ -10,13 +9,13 @@ interface RecipientAddress {
   name: string;
   phone: string;
   address: {
-    street: string;
-    city: string;
-    state: string;
+    streetName: string;
+    houseNumber: string;
     postalCode: string;
-    country: string;
+    city: string;
     countryCode: string;
   };
+  additionalInstructions?: string;
 }
 
 interface OrderItem {
@@ -42,6 +41,12 @@ interface Order {
   totalAmount: number;
   status: string;
   recipientAddress: RecipientAddress;
+  statusHistory?: Array<{
+    status: string;
+    timestamp: Date;
+    notes?: string;
+    updatedBy?: string;
+  }>;
   createdAt: string;
   updatedAt: string;
 }
@@ -164,7 +169,7 @@ const OrdersPage: React.FC = () => {
                           <div className="flex-shrink-0">
                             <img
                               src={item.productId.images[0] || '/images/products/placeholder.svg'}
-                              alt={getMultilingualText(item.productId.name) || 'Product'}
+                              alt={getMultilingualText(item.productId?.name) || 'Product'}
                               className="w-16 h-16 object-cover rounded-lg"
                             />
                           </div>
@@ -173,7 +178,15 @@ const OrdersPage: React.FC = () => {
                               {getMultilingualText(item.productId?.name) || 'Unknown Product'}
                             </h4>
                             <p className="text-sm text-gray-500">
-                              📂 {getMultilingualText(item.productId.categories[0]?.name) || 'Uncategorized'}
+                              📂 {(() => {
+                                if (!item.productId.categories || !item.productId.categories[0]) return 'Uncategorized';
+                                const category = item.productId.categories[0];
+                                if (typeof category === 'string') return category;
+                                if (category.name) {
+                                  return getMultilingualText(category.name);
+                                }
+                                return 'Uncategorized';
+                              })()}
                             </p>
                             <p className="text-sm text-gray-600 line-clamp-2">
                               {getMultilingualText(item.productId.description) || 'No description available'}
@@ -197,13 +210,27 @@ const OrdersPage: React.FC = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                       <div className="mb-4 sm:mb-0">
                         <h4 className="text-sm font-medium text-gray-900 mb-2">Recipient Address</h4>
-                        <RecipientAddresses addresses={[order.recipientAddress]} readOnly />
+                        <div className="text-sm text-gray-600">
+                          <p><strong>{order.recipientAddress.name}</strong></p>
+                          <p>{order.recipientAddress.phone}</p>
+                          <p>
+                            {order.recipientAddress.address.streetName} {order.recipientAddress.address.houseNumber}
+                          </p>
+                          <p>
+                            {order.recipientAddress.address.postalCode} {order.recipientAddress.address.city}
+                          </p>
+                          {order.recipientAddress.additionalInstructions && (
+                            <p className="mt-2 text-gray-500">
+                              <strong>Instructions:</strong> {order.recipientAddress.additionalInstructions}
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-semibold text-gray-900">
                           Total: €{order.totalAmount.toFixed(2)}
                         </p>
-                        <OrderStatusTimeline orderId={order._id} currentStatus={order.status} />
+                        <OrderStatusTimeline currentStatus={order.status} statusHistory={order.statusHistory || []} />
                       </div>
                     </div>
                   </div>

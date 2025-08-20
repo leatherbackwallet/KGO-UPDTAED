@@ -5,6 +5,7 @@ import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
 import ProductModal from '../components/ProductModal';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ProductFilters from '../components/ProductFilters';
 import api from '../utils/api';
 import { getMultilingualText } from '../utils/api';
 import performanceMonitor from '../utils/performance';
@@ -133,105 +134,51 @@ const ProductsPage: React.FC = () => {
       <Navbar />
       <main className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-          {/* Header */}
+          {/* Modern Filters - Moved to top */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Our Products</h1>
-            <p className="text-gray-600">Discover perfect gifts for every occasion</p>
+            <ProductFilters
+              search={search}
+              setSearch={setSearch}
+              category={category}
+              setCategory={setCategory}
+              selectedOccasions={selectedOccasions}
+              setSelectedOccasions={setSelectedOccasions}
+              min={min}
+              setMin={setMin}
+              max={max}
+              setMax={setMax}
+              categories={categories}
+              occasions={occasions}
+              clearFilters={clearFilters}
+            />
           </div>
 
-          {/* Filters */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <div className="flex gap-4">
-                <select
-                  value={category}
-                  onChange={e => setCategory(e.target.value)}
-                  className="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">All Categories</option>
-                  {categories.map(cat => {
-                    const categoryName = typeof cat.name === 'string' ? cat.name : getMultilingualText(cat.name);
-                    return (
-                      <option key={cat._id} value={cat.slug}>
-                        {categoryName}
-                      </option>
-                    );
-                  })}
-                </select>
-                
-                <button
-                  onClick={clearFilters}
-                  className="px-4 py-3 text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  Clear
-                </button>
-              </div>
-            </div>
-
-            {/* Additional Filters */}
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    value={min}
-                    onChange={e => setMin(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    value={max}
-                    onChange={e => setMax(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Occasions</label>
-                <select
-                  multiple
-                  value={selectedOccasions}
-                  onChange={e => {
-                    const values = Array.from(e.target.selectedOptions, option => option.value);
-                    setSelectedOccasions(values);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {occasions.map(occasion => (
-                    <option key={occasion} value={occasion}>
-                      {occasion.replace('_', ' ')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Results */}
+          {/* Results Header */}
           <div className="mb-6 flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-              {loading ? 'Loading...' : `${products.length} products found`}
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-gray-600">
+                {loading ? 'Loading...' : `${products.length} products found`}
+              </div>
+              {!loading && products.length > 0 && (
+                <div className="h-1 w-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+              )}
             </div>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <p className="text-red-800">{error}</p>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-red-800">Error loading products</h3>
+                  <p className="text-sm text-red-700 mt-1">{error}</p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -239,14 +186,23 @@ const ProductsPage: React.FC = () => {
           {loading ? (
             <LoadingSpinner />
           ) : products.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            <div className="text-center py-16">
+              <div className="bg-gray-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                <svg className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-              <p className="text-gray-600">Try adjusting your search criteria or browse all products.</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">No products found</h3>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">We couldn't find any products matching your criteria. Try adjusting your filters or search terms.</p>
+              <button
+                onClick={clearFilters}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Clear all filters
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

@@ -80,6 +80,10 @@ router.get('/', cacheConfigs.products, async (req, res) => {
       .sort({ isFeatured: -1, createdAt: -1 })
       .limit(100); // Limit results for performance
     
+    // Set cache headers for product responses
+    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=600'); // 5 min browser, 10 min CDN
+    res.setHeader('ETag', `"products-${products.length}-${Date.now()}"`);
+    
     res.json({
       success: true,
       data: products,

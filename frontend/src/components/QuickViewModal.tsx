@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { getMultilingualText } from '../utils/api';
 import { Product } from '../types/product';
+import { useImageCache } from '../utils/imageCache';
+import { DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 
 interface QuickViewModalProps {
   product: Product | null;
@@ -14,6 +16,28 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
+  // Use cached images for all product images
+  const { data: mainImagePath, isLoading: mainImageLoading } = useImageCache(
+    product?.images?.[selectedImage] || product?.defaultImage,
+    product?.slug,
+    {
+      staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    }
+  );
+
+  // Cache all thumbnail images
+  const thumbnailImages = product?.images?.slice(0, 4) || [];
+  const cachedThumbnails = thumbnailImages.map((image, index) => {
+    const { data: imagePath, isLoading } = useImageCache(
+      image,
+      product?.slug,
+      {
+        staleTime: 1000 * 60 * 60 * 24, // 24 hours
+      }
+    );
+    return { imagePath, isLoading, originalIndex: index };
+  });
+
   if (!product || !isOpen) return null;
 
   const handleAddToCart = () => {
@@ -21,7 +45,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
       product: product._id,
       name: getMultilingualText(product.name),
       price: product.price || 0,
-      image: product.images[selectedImage],
+      image: mainImagePath || product.images[selectedImage],
       quantity,
       stock: product.stock || 0
     });
@@ -29,8 +53,18 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   };
 
   const getCategoryName = () => {
+    if (!product.category) return 'Uncategorized';
     if (typeof product.category === 'string') return product.category;
-    return getMultilingualText(product.category.name);
+    if (product.category.name) {
+      return getMultilingualText(product.category.name);
+    }
+    return 'Uncategorized';
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    console.error('Image failed to load:', target.src);
+    target.src = DEFAULT_PRODUCT_IMAGE;
   };
 
   return (
@@ -64,27 +98,31 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
               <div className="space-y-3">
                 <div className="aspect-w-1 aspect-h-1 w-full">
                   <img
-                    src={product.images[selectedImage]}
+                    src={mainImagePath || DEFAULT_PRODUCT_IMAGE}
                     alt={getMultilingualText(product.name)}
                     className="w-full h-64 object-cover rounded-lg"
+                    onError={handleImageError}
+                    style={{ opacity: mainImageLoading ? 0.7 : 1 }}
                   />
                 </div>
                 
                 {/* Thumbnail images */}
-                {product.images.length > 1 && (
+                {thumbnailImages.length > 1 && (
                   <div className="grid grid-cols-4 gap-2">
-                    {product.images.slice(0, 4).map((image, index) => (
+                    {cachedThumbnails.map(({ imagePath, isLoading, originalIndex }) => (
                       <button
-                        key={index}
-                        onClick={() => setSelectedImage(index)}
+                        key={originalIndex}
+                        onClick={() => setSelectedImage(originalIndex)}
                         className={`aspect-w-1 aspect-h-1 w-full rounded-lg overflow-hidden border-2 transition-colors ${
-                          selectedImage === index ? 'border-blue-500' : 'border-gray-200'
+                          selectedImage === originalIndex ? 'border-blue-500' : 'border-gray-200'
                         }`}
                       >
                         <img
-                          src={image}
-                          alt={`${getMultilingualText(product.name)} ${index + 1}`}
+                          src={imagePath || DEFAULT_PRODUCT_IMAGE}
+                          alt={`${getMultilingualText(product.name)} ${originalIndex + 1}`}
                           className="w-full h-full object-cover"
+                          onError={handleImageError}
+                          style={{ opacity: isLoading ? 0.7 : 1 }}
                         />
                       </button>
                     ))}

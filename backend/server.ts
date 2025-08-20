@@ -7,7 +7,7 @@ import { User } from './models/users.model';
 import { Role } from './models/roles.model';
 import { Category } from './models/categories.model';
 import { hashPassword } from './utils/hash';
-import { initializeGridFS, getImageStream } from './utils/gridfs';
+import { initializeGridFS, getImageStream, getImageMetadata } from './utils/gridfs';
 const { generalLimiter, authLimiter, apiLimiter } = require('./middleware/rateLimit');
 const { logger, errorLogger } = require('./middleware/logger');
 
@@ -44,7 +44,7 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Serve static files from public directory (for legacy images)
+// Serve static files from public directory (for legacy images) with caching
 app.use('/images', express.static(path.join(__dirname, '../public/images'), {
   setHeaders: (res, path) => {
     if (path.endsWith('.svg')) {
@@ -53,6 +53,8 @@ app.use('/images', express.static(path.join(__dirname, '../public/images'), {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // Cache for 1 year
+    res.setHeader('Expires', new Date(Date.now() + 31536000 * 1000).toUTCString());
   }
 }));
 
@@ -122,7 +124,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// GridFS image serving route
+// GridFS image serving route with caching
 app.get('/api/images/:fileId', async (req, res): Promise<void> => {
   try {
     const { fileId } = req.params;
@@ -132,26 +134,41 @@ app.get('/api/images/:fileId', async (req, res): Promise<void> => {
       return;
     }
 
+    // Get image metadata for ETag generation
+    const metadata = await getImageMetadata(fileId);
+    if (!metadata) {
+      res.status(404).json({ success: false, error: 'Image not found' });
+      return;
+    }
+
+    // Generate ETag from file ID and last modified date
+    const etag = `"${fileId}-${metadata.uploadDate.getTime()}"`;
+    
+    // Check if client has cached version
+    if (req.headers['if-none-match'] === etag) {
+      res.status(304).end(); // Not Modified
+      return;
+    }
+
     const stream = getImageStream(fileId);
     
-    // Set proper headers for image serving
+    // Set comprehensive cache headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    res.setHeader('ETag', etag);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // Cache for 1 year
+    res.setHeader('Expires', new Date(Date.now() + 31536000 * 1000).toUTCString());
+    res.setHeader('Last-Modified', metadata.uploadDate.toUTCString());
+    
+    // Set content type
+    const contentType = metadata.contentType || 'image/jpeg';
+    res.setHeader('Content-Type', contentType);
     
     stream.on('error', (error) => {
       console.error('Error streaming image:', error);
       if (!res.headersSent) {
         res.status(404).json({ success: false, error: 'Image not found' });
-      }
-    });
-
-    stream.on('data', (chunk) => {
-      // Set content type based on file extension or default to image/jpeg
-      if (!res.headersSent) {
-        const contentType = getContentTypeFromStream(stream) || 'image/jpeg';
-        res.setHeader('Content-Type', contentType);
       }
     });
 
