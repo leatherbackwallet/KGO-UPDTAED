@@ -1,20 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import { getMultilingualText } from '../utils/api';
-
-interface Product {
-  _id: string;
-  name: string | { en: string; de: string };
-  description: string | { en: string; de: string };
-  price?: number;
-  category?: { _id: string; name: string | { en: string; de: string }; slug: string };
-  stock?: number;
-  images: string[];
-  slug?: string;
-  occasions?: string[];
-  isFeatured?: boolean;
-}
+import { Product } from '../types/product';
 
 interface ProductModalProps {
   product: Product | null;
@@ -34,7 +21,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       product: product._id,
       name: getMultilingualText(product.name),
       price: product.price || 0,
-      image: getProductImage(product.images[selectedImage], product.slug),
+      image: product.images[selectedImage],
       quantity,
       stock: product.stock || 0
     });
@@ -80,13 +67,9 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                   <div className="space-y-4">
                     <div className="aspect-w-1 aspect-h-1 w-full">
                       <img
-                        src={getProductImage(product.images[selectedImage], product.slug)}
+                        src={product.images[selectedImage]}
                         alt={getMultilingualText(product.name)}
                         className="w-full h-96 object-cover rounded-lg"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = DEFAULT_PRODUCT_IMAGE;
-                        }}
                       />
                     </div>
                     
@@ -102,13 +85,9 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                             }`}
                           >
                             <img
-                              src={getProductImage(image, product.slug)}
+                              src={image}
                               alt={`${getMultilingualText(product.name)} ${index + 1}`}
                               className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = DEFAULT_PRODUCT_IMAGE;
-                              }}
                             />
                           </button>
                         ))}

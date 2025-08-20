@@ -19,28 +19,89 @@ export const DEFAULT_PRODUCT_IMAGE = `${PRODUCT_IMAGES_PATH}/placeholder.svg`;
  * @returns Image path string
  */
 export function getProductImage(imagePath?: string, slug?: string): string {
+  // If no image path provided, use default
+  if (!imagePath) {
+    return DEFAULT_PRODUCT_IMAGE;
+  }
+
   // If we have a GridFS URL (starts with /api/images/), use it directly
-  if (imagePath && imagePath.startsWith('/api/images/')) {
+  if (imagePath.startsWith('/api/images/')) {
     return `${STATIC_BASE_URL}${imagePath}`;
   }
   
   // If we have a full URL (uploaded image), use it directly
-  if (imagePath && imagePath.startsWith('http')) {
+  if (imagePath.startsWith('http')) {
     return imagePath;
   }
   
   // If we have a relative path starting with /images/products/ (from database)
-  if (imagePath && imagePath.startsWith('/images/products/')) {
+  if (imagePath.startsWith('/images/products/')) {
+    // Check if it's a JPG/PNG file that might not exist, use SVG fallback
+    if (imagePath.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+      // Try to use a category-based SVG fallback
+      const categoryFallback = getCategoryBasedFallback(slug);
+      if (categoryFallback) {
+        return categoryFallback;
+      }
+    }
     return `${STATIC_BASE_URL}${imagePath}`;
   }
   
-  // Fallback to slug-based naming (legacy images)
-  if (slug) {
-    // Try SVG first (since we have SVG placeholders), then JPG as fallback
-    return `${PRODUCT_IMAGES_PATH}/${slug}.svg`;
+  // If we have a relative path starting with /images/ (from database)
+  if (imagePath.startsWith('/images/')) {
+    return `${STATIC_BASE_URL}${imagePath}`;
+  }
+  
+  // If we have just a filename, assume it's in the products directory
+  if (imagePath && !imagePath.includes('/')) {
+    return `${PRODUCT_IMAGES_PATH}/${imagePath}`;
+  }
+  
+  // Fallback to category-based SVG or default
+  const categoryFallback = getCategoryBasedFallback(slug);
+  if (categoryFallback) {
+    return categoryFallback;
   }
   
   return DEFAULT_PRODUCT_IMAGE;
+}
+
+/**
+ * Get category-based fallback image based on product slug
+ * @param slug - Product slug
+ * @returns Fallback image path or null
+ */
+function getCategoryBasedFallback(slug?: string): string | null {
+  if (!slug) return null;
+  
+  const slugLower = slug.toLowerCase();
+  
+  // Wedding cakes
+  if (slugLower.includes('wedding')) {
+    return `${PRODUCT_IMAGES_PATH}/wedding-cake.svg`;
+  }
+  
+  // Birthday cakes
+  if (slugLower.includes('birthday')) {
+    return `${PRODUCT_IMAGES_PATH}/birthday-cake.svg`;
+  }
+  
+  // Chocolates
+  if (slugLower.includes('chocolate') || slugLower.includes('truffle')) {
+    return `${PRODUCT_IMAGES_PATH}/chocolates.svg`;
+  }
+  
+  // Flowers
+  if (slugLower.includes('flower') || slugLower.includes('rose') || slugLower.includes('bouquet')) {
+    return `${PRODUCT_IMAGES_PATH}/rose-bouquet.svg`;
+  }
+  
+  // Gift baskets
+  if (slugLower.includes('gift') || slugLower.includes('basket') || slugLower.includes('hamper')) {
+    return `${PRODUCT_IMAGES_PATH}/gift-basket-premium.svg`;
+  }
+  
+  return null;
 }
 
 /**

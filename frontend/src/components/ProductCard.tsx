@@ -4,19 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import WishlistButton from './WishlistButton';
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import { getMultilingualText } from '../utils/api';
-
-interface Product {
-  _id: string;
-  name: string | { en: string; de: string };
-  description: string | { en: string; de: string };
-  price?: number;
-  category: string | { _id: string; name: string | { en: string; de: string }; slug: string };
-  stock?: number;
-  images: string[];
-  slug?: string;
-  occasions?: string[];
-  isFeatured?: boolean;
-}
+import { Product } from '../types/product';
 
 interface ProductCardProps {
   product: Product;
@@ -29,7 +17,13 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
   const [isHovered, setIsHovered] = useState(false);
 
   // Get image path
-  const imagePath = getProductImage(product.images[0], product.slug);
+  const imagePath = getProductImage(product.images?.[0] || product.defaultImage, product.slug);
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    console.error('Image failed to load:', target.src);
+    target.src = DEFAULT_PRODUCT_IMAGE;
+  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -64,11 +58,7 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
           src={imagePath}
           alt={getMultilingualText(product.name)}
           className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            console.error('Image failed to load:', target.src);
-            target.src = DEFAULT_PRODUCT_IMAGE;
-          }}
+          onError={handleImageError}
         />
         
         {/* Overlay with actions */}

@@ -8,33 +8,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import api from '@/utils/api';
-
-interface Product {
-  _id: string;
-  name: {
-    en: string;
-    de: string;
-  };
-  description: {
-    en: string;
-    de: string;
-  };
-  slug: string;
-  category: string | {
-    _id: string;
-    name: {
-      en: string;
-      de: string;
-    };
-    slug: string;
-  };
-  images: string[];
-  defaultImage: string;
-  isFeatured: boolean;
-  price?: number;
-  stock?: number;
-  occasions?: string[];
-}
+import { getMultilingualText } from '@/utils/api';
+import { Product } from '@/types/product';
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -70,11 +45,11 @@ export default function Home() {
   const handleAddToCart = (product: Product) => {
     addToCart({
       product: product._id,
-      name: product.name.en,
-      price: 0, // Price will be handled by product attributes
-      image: product.defaultImage,
+      name: getMultilingualText(product.name),
+      price: product.price || 0,
+      image: product.images[0] || product.defaultImage || '/images/products/placeholder.svg',
       quantity: 1,
-      stock: 10
+      stock: product.stock || 0
     });
   };
 
@@ -84,9 +59,9 @@ export default function Home() {
     } else {
       addToWishlist({
         product: product._id,
-        name: product.name.en,
-        price: 0,
-        image: product.defaultImage
+        name: getMultilingualText(product.name),
+        price: product.price || 0,
+        image: product.images[0] || product.defaultImage || '/images/products/placeholder.svg'
       });
     }
   };
@@ -103,197 +78,147 @@ export default function Home() {
     setSelectedProduct(null);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Head>
-          <title>KeralGiftsOnline.com - Premium Gifts & Celebrations</title>
-          <meta name="description" content="Discover beautiful gifts, cakes, flowers, and celebration items. Premium quality with fast delivery across Germany." />
-          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-          <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        </Head>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Welcome to KeralGiftsOnline.com
-            </h1>
-            <p className="text-xl text-gray-600">
-              Premium gifts and celebrations for every occasion
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <ProductSkeleton key={i} />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Head>
-        <title>KeralGiftsOnline.com - Premium Gifts & Celebrations</title>
-        <meta name="description" content="Discover beautiful gifts, cakes, flowers, and celebration items. Premium quality with fast delivery across Germany." />
+        <title>KeralGiftsOnline - Premium Gifts & Celebrations</title>
+        <meta name="description" content="Discover premium quality gifts, cakes, flowers, and celebration items. Fast delivery across Germany with our advanced logistics network." />
         <meta name="keywords" content="gifts, cakes, flowers, celebrations, Germany, online shopping" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
 
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <h1 className="text-5xl font-bold mb-6">
-              Welcome to KeralGiftsOnline.com
-            </h1>
-            <p className="text-xl mb-8 max-w-3xl mx-auto">
-              Discover premium gifts, beautiful cakes, fresh flowers, and everything you need for perfect celebrations. 
-              Fast delivery across Germany with our advanced logistics network.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/products" className="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+      <main className="min-h-screen bg-gray-50">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-br from-red-600 to-red-800 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                Celebrate Every Moment
+              </h1>
+              <p className="text-xl md:text-2xl mb-8 text-red-100">
+                Premium quality with fast delivery across Germany.
+              </p>
+              <Link 
+                href="/products"
+                className="inline-block bg-white text-red-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-red-50 transition-colors"
+              >
                 Shop Now
               </Link>
-              <Link href="/celebration" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition-colors">
-                Celebration Cakes
-              </Link>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Features Section */}
-      <div className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Why Choose KeralGiftsOnline.com?
-            </h2>
-            <p className="text-lg text-gray-600">
-              Enterprise-grade platform with advanced features for the best shopping experience
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+        {/* Features Section */}
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Fast Delivery</h3>
+                <p className="text-gray-600">Quick and reliable delivery across Germany</p>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Fast Delivery</h3>
-              <p className="text-gray-600">Advanced logistics with hub-based delivery for quick and reliable service</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="bg-pink-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Premium Quality</h3>
+                <p className="text-gray-600">Carefully curated selection of high-quality items</p>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Premium Quality</h3>
-              <p className="text-gray-600">Curated selection of high-quality gifts and celebration items</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Personal Touch</h3>
+                <p className="text-gray-600">Personalized service for every celebration</p>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Fast Delivery</h3>
-              <p className="text-gray-600">Quick and reliable delivery across Germany</p>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Featured Products */}
-      <div className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Featured Products
-            </h2>
-            <p className="text-lg text-gray-600">
-              Handpicked premium items for your special occasions
-            </p>
-          </div>
-
-          {error && (
-            <div className="text-center text-red-600 mb-8">
-              {error}
+        {/* Featured Products Section */}
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Products</h2>
+              <p className="text-gray-600">Discover our most popular items</p>
             </div>
-          )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {Array.isArray(products) && products.map((product) => (
-              <ProductCard
-                key={product._id}
-                product={{
-                  _id: product._id,
-                  name: product.name,
-                  description: product.description,
-                  category: product.category,
-                  images: product.images,
-                  slug: product.slug,
-                  isFeatured: product.isFeatured,
-                  price: product.price || 0,
-                  stock: product.stock || 0,
-                  occasions: product.occasions
-                }}
-                onQuickView={() => handleQuickView(product)}
-                onClick={() => handleProductClick(product)}
-              />
-            ))}
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {[...Array(8)].map((_, i) => (
+                  <ProductSkeleton key={i} />
+                ))}
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <div className="text-red-500 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Products</h3>
+                <p className="text-gray-600 mb-4">{error}</p>
+                <button
+                  onClick={fetchProducts}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Products Available</h3>
+                <p className="text-gray-600">Check back later for new products</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {products.slice(0, 8).map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    onQuickView={handleQuickView}
+                    onClick={handleProductClick}
+                  />
+                ))}
+              </div>
+            )}
+
+            {products.length > 8 && (
+              <div className="text-center mt-12">
+                <Link
+                  href="/products"
+                  className="inline-block bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                >
+                  View All Products
+                </Link>
+              </div>
+            )}
           </div>
-
-          {(!Array.isArray(products) || products.length === 0) && !error && (
-            <div className="text-center text-gray-500">
-              No products available at the moment.
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="bg-purple-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Ready to Start Shopping?
-          </h2>
-          <p className="text-xl mb-8">
-            Join thousands of satisfied customers who trust KeralGiftsOnline.com for their celebration needs.
-          </p>
-          <Link href="/products" className="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-            Explore All Products
-          </Link>
-        </div>
-      </div>
+        </section>
+      </main>
 
       {/* Product Modal */}
       {selectedProduct && (
         <ProductModal
-          product={{
-            _id: selectedProduct._id,
-            name: selectedProduct.name,
-            description: selectedProduct.description,
-            price: selectedProduct.price || 0,
-            category: selectedProduct.category,
-            stock: selectedProduct.stock || 0,
-            images: selectedProduct.images,
-            slug: selectedProduct.slug,
-            occasions: selectedProduct.occasions,
-            isFeatured: selectedProduct.isFeatured
-          }}
+          product={selectedProduct}
           isOpen={!!selectedProduct}
           onClose={closeModal}
         />
       )}
-    </div>
+    </>
   );
 }

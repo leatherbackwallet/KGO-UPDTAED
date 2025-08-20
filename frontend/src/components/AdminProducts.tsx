@@ -2,19 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { getMultilingualText } from '../utils/api';
-
-interface Product {
-  _id: string;
-  name: string | { en: string; de: string };
-  description: string | { en: string; de: string };
-  price?: number;
-  category: string | { _id: string; name: string | { en: string; de: string }; slug: string };
-  stock?: number;
-  images: string[];
-  slug?: string;
-  occasions?: string[];
-  isFeatured?: boolean;
-}
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/router';
+import { Product } from '../types/product';
+import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 
 interface Category {
   _id: string;
@@ -23,27 +14,45 @@ interface Category {
 }
 
 const AdminProducts: React.FC = () => {
+  const { user, token } = useAuth();
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [saving, setSaving] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Partial<Product>>({});
 
+  // Check authentication and admin role
   useEffect(() => {
+    if (!user || !token) {
+      router.push('/login');
+      return;
+    }
+    
+    // Check if user has admin role
+    if (user.roleName !== 'admin') {
+      setError('Access denied. Admin privileges required.');
+      return;
+    }
+    
     fetchProducts();
     fetchCategories();
-  }, []);
+  }, [user, token, router]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
       const response = await api.get('/products');
-      setProducts(response.data.data || []);
+      const productsData = response.data?.data || response.data || [];
+      setProducts(Array.isArray(productsData) ? productsData : []);
     } catch (err: any) {
       console.error('Error fetching products:', err);
       setError(err.response?.data?.error?.message || 'Failed to fetch products');
+      setProducts([]); // Ensure products is always an array
     } finally {
       setLoading(false);
     }
@@ -52,9 +61,11 @@ const AdminProducts: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const response = await api.get('/categories');
-      setCategories(response.data);
+      const categoriesData = response.data?.data || response.data || [];
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (err: any) {
       console.error('Error fetching categories:', err);
+      setCategories([]); // Ensure categories is always an array
     }
   };
 
@@ -73,17 +84,117 @@ const AdminProducts: React.FC = () => {
   };
 
   const handleSaveProduct = async () => {
+    if (!selectedProduct) {
+      // Adding new product
+      await handleAddProduct();
+    } else {
+      // Editing existing product
+      await handleEditProductSave();
+    }
+  };
+
+  const handleAddProduct = async () => {
+    try {
+      setSaving(true);
+      setError('');
+      
+      // Validate required fields
+      if (!editingProduct.name || !editingProduct.description) {
+        setError('Name and description are required');
+        return;
+      }
+
+      // Ensure name and description have both English and German versions
+      const validatedData = {
+        ...editingProduct,
+        name: {
+          en: typeof editingProduct.name === 'object' ? editingProduct.name.en || '' : '',
+          de: typeof editingProduct.name === 'object' ? editingProduct.name.de || '' : ''
+        },
+        description: {
+          en: typeof editingProduct.description === 'object' ? editingProduct.description.en || '' : '',
+          de: typeof editingProduct.description === 'object' ? editingProduct.description.de || '' : ''
+        },
+        // Ensure categories is an array
+        categories: editingProduct.category ? [editingProduct.category] : []
+      };
+
+      console.log('Sending validated new product data:', validatedData);
+      
+      const response = await api.post('/products', validatedData);
+      console.log('Add response:', response.data);
+      
+      if (response.data) {
+        // Refresh the products list
+        await fetchProducts();
+        setShowModal(false);
+        setSelectedProduct(null);
+        setEditingProduct({});
+        setError(''); // Clear any previous errors
+        setSuccess('Product added successfully!');
+        setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
+      } else {
+        setError('Failed to add product');
+      }
+    } catch (err: any) {
+      console.error('Error adding product:', err);
+      console.error('Error response:', err.response?.data);
+      setError(err.response?.data?.error?.message || err.message || 'Failed to add product');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEditProductSave = async () => {
     if (!selectedProduct) return;
 
     try {
-      await api.put(`/products/${selectedProduct._id}`, editingProduct);
-      fetchProducts();
-      setShowModal(false);
-      setSelectedProduct(null);
-      setEditingProduct({});
+      setSaving(true);
+      setError('');
+      
+      // Validate required fields
+      if (!editingProduct.name || !editingProduct.description) {
+        setError('Name and description are required');
+        return;
+      }
+
+      // Ensure name and description have both English and German versions
+      const validatedData = {
+        ...editingProduct,
+        name: {
+          en: typeof editingProduct.name === 'object' ? editingProduct.name.en || '' : '',
+          de: typeof editingProduct.name === 'object' ? editingProduct.name.de || '' : ''
+        },
+        description: {
+          en: typeof editingProduct.description === 'object' ? editingProduct.description.en || '' : '',
+          de: typeof editingProduct.description === 'object' ? editingProduct.description.de || '' : ''
+        }
+      };
+
+      console.log('Sending validated update data:', validatedData);
+      console.log('Product ID:', selectedProduct._id);
+      
+      const response = await api.put(`/products/${selectedProduct._id}`, validatedData);
+      console.log('Update response:', response.data);
+      
+      if (response.data.success) {
+        // Refresh the products list
+        await fetchProducts();
+        setShowModal(false);
+        setSelectedProduct(null);
+        setEditingProduct({});
+        setError(''); // Clear any previous errors
+        setSuccess('Product updated successfully!');
+        setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
+      } else {
+        setError(response.data.error?.message || 'Failed to update product');
+      }
     } catch (err: any) {
       console.error('Error updating product:', err);
-      setError(err.response?.data?.error?.message || 'Failed to update product');
+      console.error('Error response:', err.response?.data);
+      setError(err.response?.data?.error?.message || err.message || 'Failed to update product');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -99,9 +210,23 @@ const AdminProducts: React.FC = () => {
     }
   };
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    console.error('Image failed to load:', target.src);
+    target.src = DEFAULT_PRODUCT_IMAGE;
+  };
+
   const getCategoryName = (category: any) => {
-    if (typeof category === 'string') return category;
-    return getMultilingualText(category.name);
+    if (!category) return 'No Category';
+    if (typeof category === 'string') {
+      // If it's a string, try to find the category name from the categories array
+      const foundCategory = categories.find(cat => cat._id === category);
+      return foundCategory ? getMultilingualText(foundCategory.name) : category;
+    }
+    if (category.name) {
+      return getMultilingualText(category.name);
+    }
+    return 'Unknown Category';
   };
 
   if (loading) {
@@ -109,6 +234,28 @@ const AdminProducts: React.FC = () => {
       <div className="text-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
         <p className="mt-4 text-gray-600">Loading products...</p>
+      </div>
+    );
+  }
+
+  if (!user || !token) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">Please log in to access this page.</p>
+      </div>
+    );
+  }
+
+  if (user.roleName !== 'admin') {
+    return (
+      <div className="text-center py-12">
+        <div className="text-red-500 mb-4">
+          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
+        <p className="text-gray-600">Admin privileges required to access this page.</p>
       </div>
     );
   }
@@ -132,6 +279,12 @@ const AdminProducts: React.FC = () => {
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">{error}</p>
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-green-800">{success}</p>
         </div>
       )}
 
@@ -161,15 +314,16 @@ const AdminProducts: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products.map((product) => (
+              {products && products.length > 0 ? products.map((product) => (
                 <tr key={product._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         <img
                           className="h-10 w-10 rounded-lg object-cover"
-                          src={product.images[0] || '/images/products/placeholder.svg'}
+                          src={getProductImage(product.images?.[0] || DEFAULT_PRODUCT_IMAGE)}
                           alt={getMultilingualText(product.name)}
+                          onError={handleImageError}
                         />
                       </div>
                       <div className="ml-4">
@@ -217,7 +371,13 @@ const AdminProducts: React.FC = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                    No products found
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -350,7 +510,7 @@ const AdminProducts: React.FC = () => {
                   Category
                 </label>
                 <select
-                  value={typeof editingProduct.category === 'object' ? editingProduct.category?._id || '' : ''}
+                  value={typeof editingProduct.category === 'object' ? editingProduct.category?._id || '' : (editingProduct.category || '')}
                   onChange={(e) => {
                     const category = categories.find(cat => cat._id === e.target.value);
                     setEditingProduct({
@@ -361,11 +521,13 @@ const AdminProducts: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Select Category</option>
-                  {categories.map((category) => (
+                  {categories && categories.length > 0 ? categories.map((category) => (
                     <option key={category._id} value={category._id}>
                       {getMultilingualText(category.name)}
                     </option>
-                  ))}
+                  )) : (
+                    <option value="" disabled>No categories available</option>
+                  )}
                 </select>
               </div>
 
@@ -394,9 +556,17 @@ const AdminProducts: React.FC = () => {
               </button>
               <button
                 onClick={handleSaveProduct}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                disabled={saving}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {selectedProduct ? 'Update Product' : 'Add Product'}
+                {saving ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    {selectedProduct ? 'Updating...' : 'Adding...'}
+                  </div>
+                ) : (
+                  selectedProduct ? 'Update Product' : 'Add Product'
+                )}
               </button>
             </div>
           </div>

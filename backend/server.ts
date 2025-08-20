@@ -134,17 +134,55 @@ app.get('/api/images/:fileId', async (req, res): Promise<void> => {
 
     const stream = getImageStream(fileId);
     
+    // Set proper headers for image serving
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    
     stream.on('error', (error) => {
       console.error('Error streaming image:', error);
-      res.status(404).json({ success: false, error: 'Image not found' });
+      if (!res.headersSent) {
+        res.status(404).json({ success: false, error: 'Image not found' });
+      }
+    });
+
+    stream.on('data', (chunk) => {
+      // Set content type based on file extension or default to image/jpeg
+      if (!res.headersSent) {
+        const contentType = getContentTypeFromStream(stream) || 'image/jpeg';
+        res.setHeader('Content-Type', contentType);
+      }
     });
 
     stream.pipe(res);
   } catch (error) {
     console.error('Error serving image:', error);
-    res.status(500).json({ success: false, error: 'Internal server error' });
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
   }
 });
+
+// Helper function to determine content type from stream metadata
+function getContentTypeFromStream(stream: any): string | null {
+  try {
+    // Try to get content type from stream metadata
+    if (stream.options && stream.options.contentType) {
+      return stream.options.contentType;
+    }
+    
+    // Try to get from file metadata
+    if (stream.file && stream.file.contentType) {
+      return stream.file.contentType;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error getting content type:', error);
+    return null;
+  }
+}
 
 // Add error handling for uncaught exceptions
 process.on('uncaughtException', (err) => {

@@ -160,11 +160,77 @@ router.post('/', auth, role('admin'), async (req, res) => {
 // Update product (admin only)
 router.put('/:id', auth, role('admin'), async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!product) return res.status(404).json({ message: 'Product not found' });
-    res.json(product);
+    const { name, description, price, category, categories, stock, occasions, isFeatured } = req.body;
+    
+    // Prepare update data
+    const updateData = {};
+    
+    // Handle multilingual name
+    if (name) {
+      updateData.name = {
+        en: name.en || '',
+        de: name.de || ''
+      };
+    }
+    
+    // Handle multilingual description
+    if (description) {
+      updateData.description = {
+        en: description.en || '',
+        de: description.de || ''
+      };
+    }
+    
+    // Handle other fields
+    if (price !== undefined) updateData.price = price;
+    if (stock !== undefined) updateData.stock = stock;
+    if (occasions !== undefined) updateData.occasions = occasions;
+    if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
+    
+    // Handle category update - support both 'category' and 'categories'
+    const categoryData = categories || category;
+    if (categoryData) {
+      if (typeof categoryData === 'string') {
+        // If category is a string (ObjectId), convert to array
+        updateData.categories = [categoryData];
+      } else if (categoryData._id) {
+        // If category is an object with _id, extract the _id
+        updateData.categories = [categoryData._id];
+      } else if (Array.isArray(categoryData)) {
+        // If category is already an array
+        updateData.categories = categoryData;
+      }
+    }
+    
+    console.log('Updating product with data:', updateData);
+    
+    const product = await Product.findByIdAndUpdate(
+      req.params.id, 
+      updateData, 
+      { new: true, runValidators: true }
+    ).populate('categories', 'name slug');
+    
+    if (!product) {
+      return res.status(404).json({ 
+        success: false,
+        error: { message: 'Product not found', code: 'PRODUCT_NOT_FOUND' } 
+      });
+    }
+    
+    // Invalidate cache
+    invalidateProductCache();
+    
+    res.json({
+      success: true,
+      data: product,
+      message: 'Product updated successfully'
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Product update error:', err);
+    res.status(500).json({ 
+      success: false,
+      error: { message: err.message || 'Server error', code: 'UPDATE_ERROR' } 
+    });
   }
 });
 

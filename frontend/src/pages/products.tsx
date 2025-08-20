@@ -7,20 +7,8 @@ import ProductModal from '../components/ProductModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import api from '../utils/api';
 import { getMultilingualText } from '../utils/api';
-import { performanceMonitor } from '../utils/performance';
-
-interface Product {
-  _id: string;
-  name: string | { en: string; de: string };
-  description: string | { en: string; de: string };
-  price?: number;
-  category: string | { _id: string; name: string | { en: string; de: string }; slug: string };
-  stock?: number;
-  images: string[];
-  slug?: string;
-  occasions?: string[];
-  isFeatured?: boolean;
-}
+import performanceMonitor from '../utils/performance';
+import { Product } from '../types/product';
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -77,7 +65,7 @@ const ProductsPage: React.FC = () => {
     setLoading(true);
     setError('');
     
-    return performanceMonitor.measureAsyncInteraction('fetch_products', async () => {
+    const fetchFunction = async () => {
       try {
         const params: any = {};
         if (search) params.search = search;
@@ -95,7 +83,14 @@ const ProductsPage: React.FC = () => {
       } finally {
         setLoading(false);
       }
-    });
+    };
+
+    // Use performance monitor if available, otherwise just call the function
+    if (performanceMonitor && typeof performanceMonitor.measureAsyncInteraction === 'function') {
+      return performanceMonitor.measureAsyncInteraction('fetch_products', fetchFunction);
+    } else {
+      return fetchFunction();
+    }
   }, [search, category, selectedOccasions, min, max]);
 
   const handleQuickView = (product: Product) => {
