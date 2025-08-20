@@ -16,7 +16,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  // Use cached images for all product images
+  // Use cached image for the main selected image only
   const { data: mainImagePath, isLoading: mainImageLoading } = useImageCache(
     product?.images?.[selectedImage] || product?.defaultImage,
     product?.slug,
@@ -24,19 +24,6 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
       staleTime: 1000 * 60 * 60 * 24, // 24 hours
     }
   );
-
-  // Cache all thumbnail images
-  const thumbnailImages = product?.images?.slice(0, 4) || [];
-  const cachedThumbnails = thumbnailImages.map((image, index) => {
-    const { data: imagePath, isLoading } = useImageCache(
-      image,
-      product?.slug,
-      {
-        staleTime: 1000 * 60 * 60 * 24, // 24 hours
-      }
-    );
-    return { imagePath, isLoading, originalIndex: index };
-  });
 
   if (!product || !isOpen) return null;
 
@@ -66,6 +53,9 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
     console.error('Image failed to load:', target.src);
     target.src = DEFAULT_PRODUCT_IMAGE;
   };
+
+  // Get thumbnail images (max 4)
+  const thumbnailImages = product.images?.slice(0, 4) || [];
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -106,23 +96,22 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                   />
                 </div>
                 
-                {/* Thumbnail images */}
+                {/* Thumbnail images - using direct image paths without hooks */}
                 {thumbnailImages.length > 1 && (
                   <div className="grid grid-cols-4 gap-2">
-                    {cachedThumbnails.map(({ imagePath, isLoading, originalIndex }) => (
+                    {thumbnailImages.map((image, index) => (
                       <button
-                        key={originalIndex}
-                        onClick={() => setSelectedImage(originalIndex)}
+                        key={index}
+                        onClick={() => setSelectedImage(index)}
                         className={`aspect-w-1 aspect-h-1 w-full rounded-lg overflow-hidden border-2 transition-colors ${
-                          selectedImage === originalIndex ? 'border-blue-500' : 'border-gray-200'
+                          selectedImage === index ? 'border-blue-500' : 'border-gray-200'
                         }`}
                       >
                         <img
-                          src={imagePath || DEFAULT_PRODUCT_IMAGE}
-                          alt={`${getMultilingualText(product.name)} ${originalIndex + 1}`}
+                          src={image || DEFAULT_PRODUCT_IMAGE}
+                          alt={`${getMultilingualText(product.name)} ${index + 1}`}
                           className="w-full h-full object-cover"
                           onError={handleImageError}
-                          style={{ opacity: isLoading ? 0.7 : 1 }}
                         />
                       </button>
                     ))}
