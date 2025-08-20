@@ -1,15 +1,15 @@
 import axios from 'axios';
 
-// Utility function to safely extract text from multilingual objects
-export const getMultilingualText = (text: string | { en: string; ml: string } | undefined, preferredLanguage: 'en' | 'ml' = 'en'): string => {
+// Utility function to safely extract text (handles both old multilingual and new string formats)
+export const getMultilingualText = (text: string | { en: string; de?: string; ml?: string } | undefined): string => {
   if (!text) return '';
   
   if (typeof text === 'string') return text;
   
-  // Try preferred language first, then fallback to English, then Malayalam
-  if (preferredLanguage === 'ml' && text.ml) return text.ml;
-  if (text.en) return text.en;
-  if (text.ml) return text.ml;
+  // Handle old multilingual format
+  if (typeof text === 'object') {
+    return text.en || text.de || text.ml || '';
+  }
   
   return '';
 };
@@ -55,32 +55,7 @@ api.interceptors.request.use((config) => {
 // Handle response errors
 api.interceptors.response.use(
   (response) => {
-    // Validate multilingual content structure
-    if (response.data && response.data.data) {
-      const validateMultilingualContent = (obj: any) => {
-        if (obj && typeof obj === 'object') {
-          // Check if it's a multilingual object
-          if (obj.en !== undefined || obj.ml !== undefined) {
-            // Ensure both languages are present
-            if (!obj.en && !obj.ml) {
-              console.warn('Multilingual content missing both English and Malayalam translations:', obj);
-            }
-          }
-          // Recursively check nested objects
-          Object.values(obj).forEach(value => {
-            if (typeof value === 'object' && value !== null) {
-              validateMultilingualContent(value);
-            }
-          });
-        }
-      };
-
-      if (Array.isArray(response.data.data)) {
-        response.data.data.forEach(validateMultilingualContent);
-      } else {
-        validateMultilingualContent(response.data.data);
-      }
-    }
+    // No multilingual validation needed for English-only content
     
     return response;
   },
@@ -95,9 +70,7 @@ api.interceptors.response.use(
         const details = error.response.data.error.details;
         if (details) {
           details.forEach((detail: any) => {
-            if (detail.field && detail.field.includes('ml')) {
-              console.error('Malayalam language validation error:', detail);
-            }
+            console.error('Validation error:', detail);
           });
         }
       }

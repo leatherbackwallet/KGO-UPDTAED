@@ -6,15 +6,9 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ICategory extends Document {
-  name: {
-    en: string;
-    de: string;
-  };
+  name: string;
   slug: string;
-  description?: {
-    en: string;
-    de: string;
-  };
+  description?: string;
   parentCategory?: mongoose.Types.ObjectId;
   sortOrder: number;
   isActive: boolean;
@@ -25,16 +19,9 @@ export interface ICategory extends Document {
 
 const categorySchema = new Schema<ICategory>({
   name: {
-    en: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    de: {
-      type: String,
-      required: true,
-      trim: true
-    }
+    type: String,
+    required: true,
+    trim: true
   },
   slug: {
     type: String,
@@ -44,14 +31,8 @@ const categorySchema = new Schema<ICategory>({
     lowercase: true
   },
   description: {
-    en: {
-      type: String,
-      trim: true
-    },
-    de: {
-      type: String,
-      trim: true
-    }
+    type: String,
+    trim: true
   },
   parentCategory: {
     type: Schema.Types.ObjectId,
@@ -76,8 +57,7 @@ const categorySchema = new Schema<ICategory>({
 // Generate slug from name before saving
 categorySchema.pre('save', function(next) {
   if (this.isModified('name') && !this.slug) {
-    const englishName = this.name.en || this.name.de;
-    this.slug = englishName
+    this.slug = this.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
@@ -86,10 +66,9 @@ categorySchema.pre('save', function(next) {
 });
 
 // Indexes
-categorySchema.index({ slug: 1 }, { unique: true });
 categorySchema.index({ parentCategory: 1 });
 categorySchema.index({ sortOrder: 1 });
 categorySchema.index({ isActive: 1, isDeleted: 1 });
-categorySchema.index({ 'name.en': 'text', 'name.de': 'text' });
+categorySchema.index({ 'name': 'text' });
 
 export const Category = mongoose.model<ICategory>('Category', categorySchema); 

@@ -189,7 +189,7 @@ const ContentViewer: React.FC<ContentViewerProps> = ({
   };
 
   const getLanguageText = (obj: any, lang: string) => {
-    return obj[lang] || obj.en || obj.de || obj.ml || '';
+    return obj || '';
   };
 
   if (loading) {

@@ -1,9 +1,9 @@
 export interface Product {
   _id: string;
-  name: string | { en: string; ml: string };
-  description: string | { en: string; ml: string };
+  name: string;
+  description: string;
   price?: number;
-  category: string | { _id: string; name: string | { en: string; ml: string }; slug: string };
+  category: string | { _id: string; name: string; slug: string };
   celebrationType?: string;
   stock?: number;
   images: string[];

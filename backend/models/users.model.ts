@@ -181,7 +181,6 @@ const userSchema = new Schema<IUser>({
 });
 
 // Indexes
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ location: '2dsphere' });
 userSchema.index({ roleId: 1 });
 userSchema.index({ isActive: 1, isDeleted: 1 });

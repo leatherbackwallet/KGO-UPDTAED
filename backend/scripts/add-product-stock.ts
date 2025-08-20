@@ -39,7 +39,7 @@ async function addProductStock() {
       await Product.findByIdAndUpdate(product._id, {
         stock: defaultStock
       });
-      console.log(`Updated product "${product.name.en}" with stock ${defaultStock}`);
+              console.log(`Updated product "${product.name}" with stock ${defaultStock}`);
       updatedCount++;
     }
     

@@ -370,8 +370,6 @@ const contentSchema = new Schema<IContent>({
 // Indexes for performance
 contentSchema.index({ type: 1, status: 1 });
 contentSchema.index({ 'slug.en': 1 });
-
-contentSchema.index({ 'slug.ml': 1 });
 contentSchema.index({ 'culturalContext.festival': 1 });
 contentSchema.index({ 'publishing.publishedAt': 1 });
 contentSchema.index({ 'publishing.isFeatured': 1 });

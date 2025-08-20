@@ -1,16 +1,15 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import api from '../utils/api';
 import { getMultilingualText } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
 import { Product } from '../types/product';
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
-import { useImageCache } from '../utils/imageCache';
 
 interface Category {
   _id: string;
-  name: string | { en: string; ml: string };
+  name: string;
   slug: string;
 }
 
@@ -26,6 +25,47 @@ const AdminProducts: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Partial<Product>>({});
+  const [imageCache, setImageCache] = useState<Map<string, string>>(new Map());
+
+  // Preload all product images
+  useEffect(() => {
+    const preloadImages = async () => {
+      const newCache = new Map<string, string>();
+      
+      for (const product of products) {
+        const imagePath = product.images?.[0] || product.defaultImage;
+        if (imagePath) {
+          try {
+            const imageUrl = getProductImage(imagePath, product.slug);
+            // Preload the image
+            await new Promise<string>((resolve, reject) => {
+              const img = new Image();
+              img.onload = () => resolve(imageUrl);
+              img.onerror = () => reject(new Error('Failed to load image'));
+              img.src = imageUrl;
+            });
+            newCache.set(product._id, imageUrl);
+          } catch (err) {
+            console.warn(`Failed to preload image for product ${product._id}:`, err);
+            newCache.set(product._id, DEFAULT_PRODUCT_IMAGE);
+          }
+        } else {
+          newCache.set(product._id, DEFAULT_PRODUCT_IMAGE);
+        }
+      }
+      
+      setImageCache(newCache);
+    };
+
+    if (products.length > 0) {
+      preloadImages();
+    }
+  }, [products]);
+
+  // Helper function to get cached image URL
+  const getCachedImageUrl = (product: Product): string => {
+    return imageCache.get(product._id) || DEFAULT_PRODUCT_IMAGE;
+  };
 
   // Check authentication and admin role
   useEffect(() => {
@@ -105,17 +145,11 @@ const AdminProducts: React.FC = () => {
         return;
       }
 
-      // Ensure name and description have both English and Malayalam versions
+      // Ensure name and description are simple strings
       const validatedData = {
         ...editingProduct,
-        name: {
-          en: typeof editingProduct.name === 'object' ? editingProduct.name.en || '' : '',
-          ml: typeof editingProduct.name === 'object' ? editingProduct.name.ml || '' : ''
-        },
-        description: {
-          en: typeof editingProduct.description === 'object' ? editingProduct.description.en || '' : '',
-          ml: typeof editingProduct.description === 'object' ? editingProduct.description.ml || '' : ''
-        },
+        name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
+        description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
         // Ensure categories is an array
         categories: editingProduct.category ? [editingProduct.category] : []
       };
@@ -159,17 +193,11 @@ const AdminProducts: React.FC = () => {
         return;
       }
 
-      // Ensure name and description have both English and Malayalam versions
+      // Ensure name and description are simple strings
       const validatedData = {
         ...editingProduct,
-        name: {
-          en: typeof editingProduct.name === 'object' ? editingProduct.name.en || '' : '',
-          ml: typeof editingProduct.name === 'object' ? editingProduct.name.ml || '' : ''
-        },
-        description: {
-          en: typeof editingProduct.description === 'object' ? editingProduct.description.en || '' : '',
-          ml: typeof editingProduct.description === 'object' ? editingProduct.description.ml || '' : ''
-        }
+        name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
+        description: typeof editingProduct.description === 'string' ? editingProduct.description : ''
       };
 
       console.log('Sending validated update data:', validatedData);
@@ -317,13 +345,7 @@ const AdminProducts: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {products && products.length > 0 ? products.map((product) => {
                 // Use cached image for each product
-                const { data: imagePath, isLoading: imageLoading } = useImageCache(
-                  product.images?.[0] || product.defaultImage,
-                  product.slug,
-                  {
-                    staleTime: 1000 * 60 * 60 * 24, // 24 hours
-                  }
-                );
+                const imageUrl = getCachedImageUrl(product);
 
                 return (
                   <tr key={product._id} className="hover:bg-gray-50">
@@ -332,10 +354,10 @@ const AdminProducts: React.FC = () => {
                         <div className="flex-shrink-0 h-10 w-10">
                           <img
                             className="h-10 w-10 rounded-lg object-cover"
-                            src={imagePath || DEFAULT_PRODUCT_IMAGE}
+                            src={imageUrl}
                             alt={getMultilingualText(product.name)}
                             onError={handleImageError}
-                            style={{ opacity: imageLoading ? 0.7 : 1 }}
+                            style={{ opacity: 1 }} // No opacity change needed for preloaded images
                           />
                         </div>
                         <div className="ml-4">
@@ -419,13 +441,10 @@ const AdminProducts: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  value={typeof editingProduct.name === 'object' ? editingProduct.name?.en || '' : ''}
+                  value={typeof editingProduct.name === 'string' ? editingProduct.name : ''}
                   onChange={(e) => setEditingProduct({
                     ...editingProduct,
-                    name: {
-                      en: e.target.value,
-                      ml: typeof editingProduct.name === 'object' ? editingProduct.name?.ml || '' : ''
-                    }
+                    name: e.target.value
                   })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -438,13 +457,10 @@ const AdminProducts: React.FC = () => {
                   Description (English)
                 </label>
                 <textarea
-                  value={typeof editingProduct.description === 'object' ? editingProduct.description?.en || '' : ''}
+                  value={typeof editingProduct.description === 'string' ? editingProduct.description : ''}
                   onChange={(e) => setEditingProduct({
                     ...editingProduct,
-                    description: {
-                      en: e.target.value,
-                      ml: typeof editingProduct.description === 'object' ? editingProduct.description?.ml || '' : ''
-                    }
+                    description: e.target.value
                   })}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"

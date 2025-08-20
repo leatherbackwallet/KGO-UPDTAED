@@ -158,7 +158,7 @@ class PersonalizationService {
           recommendations.push({
             products: similarProducts,
             score: 0.9,
-            reason: `Similar to ${purchasedProduct.name.en}`,
+            reason: `Similar to ${purchasedProduct.name}`,
             category: 'purchase'
           });
         }

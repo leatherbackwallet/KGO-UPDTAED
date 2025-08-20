@@ -66,10 +66,8 @@ router.get('/', cacheConfigs.products, async (req, res) => {
     if (search) {
       const searchRegex = new RegExp(search, 'i');
       filter.$or = [
-        { 'name.en': searchRegex },
-        { 'name.de': searchRegex },
-        { 'description.en': searchRegex },
-        { 'description.de': searchRegex },
+        { 'name': searchRegex },
+        { 'description': searchRegex },
         { occasions: searchRegex }
       ];
     }
@@ -169,20 +167,14 @@ router.put('/:id', auth, role('admin'), async (req, res) => {
     // Prepare update data
     const updateData = {};
     
-    // Handle multilingual name
+    // Handle name
     if (name) {
-      updateData.name = {
-        en: name.en || '',
-        de: name.de || ''
-      };
+      updateData.name = name;
     }
     
-    // Handle multilingual description
+    // Handle description
     if (description) {
-      updateData.description = {
-        en: description.en || '',
-        de: description.de || ''
-      };
+      updateData.description = description;
     }
     
     // Handle other fields

@@ -38,7 +38,7 @@ async function migrateToGridFS() {
     
     for (const product of products) {
       try {
-        console.log(`\nProcessing product: ${product.name.en} (${product._id})`);
+        console.log(`\nProcessing product: ${product.name} (${product._id})`);
         
         const updatedImages: string[] = [];
         let hasChanges = false;
