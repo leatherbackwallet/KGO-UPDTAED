@@ -22,7 +22,7 @@ export default function Cart() {
                   <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded" />
                   <div className="flex-1">
                     <div className="font-semibold">{item.name}</div>
-                    <div className="text-gray-600">€{item.price.toFixed(2)}</div>
+                    <div className="text-gray-600">₹{item.price.toFixed(2)}</div>
                     <div className="flex items-center gap-2 mt-2">
                       <label>Qty:</label>
                       <input
@@ -40,7 +40,7 @@ export default function Cart() {
               ))}
             </ul>
             <div className="text-right mt-6">
-              <div className="text-xl font-bold">Subtotal: €{subtotal.toFixed(2)}</div>
+              <div className="text-xl font-bold">Subtotal: ₹{subtotal.toFixed(2)}</div>
               <Link href="/checkout" className="mt-4 inline-block px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Proceed to Checkout</Link>
             </div>
           </div>

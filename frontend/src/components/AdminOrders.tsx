@@ -186,16 +186,16 @@ const AdminOrders: React.FC = () => {
                             <div className="text-sm font-medium text-gray-900 truncate">
                               {getMultilingualText(item.productId?.name) || 'Unknown Product'}
                             </div>
-                            <div className="text-sm text-gray-500">
-                              Qty: {item.quantity} × €{item.price.toFixed(2)}
-                            </div>
+                                                <div className="text-sm text-gray-500">
+                      Qty: {item.quantity} × ₹{item.price.toFixed(2)}
+                    </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    €{order.totalAmount.toFixed(2)}
+                    ₹{order.totalAmount.toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
@@ -267,7 +267,7 @@ const AdminOrders: React.FC = () => {
                           {getMultilingualText(item.productId?.name) || 'Unknown Product'}
                         </div>
                         <div className="text-sm text-gray-500">
-                          Qty: {item.quantity} × €{item.price.toFixed(2)} = €{(item.quantity * item.price).toFixed(2)}
+                          Qty: {item.quantity} × ₹{item.price.toFixed(2)} = ₹{(item.quantity * item.price).toFixed(2)}
                         </div>
                       </div>
                     </div>
@@ -275,7 +275,7 @@ const AdminOrders: React.FC = () => {
                 </div>
                 <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                   <div className="text-lg font-semibold text-gray-900">
-                    Total: €{selectedOrder.totalAmount.toFixed(2)}
+                    Total: ₹{selectedOrder.totalAmount.toFixed(2)}
                   </div>
                 </div>
               </div>

@@ -29,11 +29,11 @@ const loginSchema = z.object({
 const productSchema = z.object({
   name: z.object({
     en: z.string().min(1, 'English name is required'),
-    de: z.string().min(1, 'German name is required')
+    ml: z.string().min(1, 'Malayalam name is required')
   }),
   description: z.object({
     en: z.string().min(1, 'English description is required'),
-    de: z.string().min(1, 'German description is required')
+    ml: z.string().min(1, 'Malayalam description is required')
   }),
   price: z.number().min(0, 'Price cannot be negative'),
   categories: z.array(z.string()).optional(),

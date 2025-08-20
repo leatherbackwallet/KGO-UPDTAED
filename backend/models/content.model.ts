@@ -1,6 +1,6 @@
 /**
  * Content Model - Multi-language content management and cultural content delivery
- * Supports English, German, and Malayalam with cultural context
+ * Supports English and Malayalam with cultural context
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
@@ -26,31 +26,26 @@ export enum ContentStatus {
 export interface IContent extends Document {
   title: {
     en: string;
-    de: string;
     ml: string; // Malayalam
   };
   
   content: {
     en: string;
-    de: string;
     ml: string;
   };
   
   excerpt: {
     en: string;
-    de: string;
     ml: string;
   };
   
   metaDescription: {
     en: string;
-    de: string;
     ml: string;
   };
   
   slug: {
     en: string;
-    de: string;
     ml: string;
   };
   
@@ -70,7 +65,6 @@ export interface IContent extends Document {
   seo: {
     keywords: {
       en: string[];
-      de: string[];
       ml: string[];
     };
     canonicalUrl: string;
@@ -132,11 +126,9 @@ export interface IContent extends Document {
     };
     pronunciation: {
       ml: string; // Malayalam pronunciation guide
-      de: string; // German pronunciation guide
     };
     grammarNotes: {
       en: string;
-      de: string;
       ml: string;
     };
   };
@@ -150,7 +142,6 @@ export interface IContent extends Document {
     ingredients: {
       name: {
         en: string;
-        de: string;
         ml: string;
       };
       amount: string;
@@ -160,7 +151,6 @@ export interface IContent extends Document {
       step: number;
       instruction: {
         en: string;
-        de: string;
         ml: string;
       };
       image: string;
@@ -181,12 +171,10 @@ export interface IContent extends Document {
     duration: number; // in days
     significance: {
       en: string;
-      de: string;
       ml: string;
     };
     traditions: {
       en: string[];
-      de: string[];
       ml: string[];
     };
     products: mongoose.Types.ObjectId[]; // Related products
@@ -206,25 +194,21 @@ export interface IContent extends Document {
 const contentSchema = new Schema<IContent>({
   title: {
     en: { type: String, required: true },
-    de: { type: String, required: true },
     ml: { type: String, required: true }
   },
   
   content: {
     en: { type: String, required: true },
-    de: { type: String, required: true },
     ml: { type: String, required: true }
   },
   
   excerpt: {
     en: { type: String },
-    de: { type: String },
     ml: { type: String }
   },
   
   metaDescription: {
     en: { type: String },
-    de: { type: String },
     ml: { type: String }
   },
   
@@ -257,7 +241,6 @@ const contentSchema = new Schema<IContent>({
   seo: {
     keywords: {
       en: [String],
-      de: [String],
       ml: [String]
     },
     canonicalUrl: String,
@@ -311,16 +294,13 @@ const contentSchema = new Schema<IContent>({
     },
     vocabulary: {
       en: [String],
-      de: [String],
       ml: [String]
     },
     pronunciation: {
-      ml: String,
-      de: String
+      ml: String
     },
     grammarNotes: {
       en: String,
-      de: String,
       ml: String
     }
   },
@@ -336,7 +316,6 @@ const contentSchema = new Schema<IContent>({
     ingredients: [{
       name: {
         en: String,
-        de: String,
         ml: String
       },
       amount: String,
@@ -346,7 +325,6 @@ const contentSchema = new Schema<IContent>({
       step: Number,
       instruction: {
         en: String,
-        de: String,
         ml: String
       },
       image: String
@@ -366,12 +344,10 @@ const contentSchema = new Schema<IContent>({
     duration: Number,
     significance: {
       en: String,
-      de: String,
       ml: String
     },
     traditions: {
       en: [String],
-      de: [String],
       ml: [String]
     },
     products: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
@@ -394,7 +370,7 @@ const contentSchema = new Schema<IContent>({
 // Indexes for performance
 contentSchema.index({ type: 1, status: 1 });
 contentSchema.index({ 'slug.en': 1 });
-contentSchema.index({ 'slug.de': 1 });
+
 contentSchema.index({ 'slug.ml': 1 });
 contentSchema.index({ 'culturalContext.festival': 1 });
 contentSchema.index({ 'publishing.publishedAt': 1 });

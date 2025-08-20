@@ -125,13 +125,13 @@
 4. **Performance Optimization** - +30% user satisfaction
 
 ### **🔄 Expected Revenue Impact**
-- **Year 1**: €150,000 - €250,000 additional revenue
-- **Year 2**: €500,000 - €750,000 additional revenue
-- **Year 3**: €1,000,000+ additional revenue
+- **Year 1**: ₹1,50,00,000 - ₹2,50,00,000 additional revenue
+- **Year 2**: ₹5,00,00,000 - ₹7,50,00,000 additional revenue
+- **Year 3**: ₹1,00,00,000+ additional revenue
 
 ### **🎯 Market Positioning**
 - **Competitive Advantage**: AI-powered cultural commerce
-- **Target Market**: German Malayali community + general German market
+- **Target Market**: Indian Malayali community + general Indian market
 - **Unique Value**: Cultural intelligence + modern e-commerce
 
 ---

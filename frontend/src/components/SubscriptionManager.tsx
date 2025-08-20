@@ -109,7 +109,7 @@ const SubscriptionManager: React.FC = () => {
       // Refresh data
       await fetchSubscriptionData();
       setPointsToRedeem(0);
-      alert(`Successfully redeemed ${pointsToRedeem} points for €${response.data.data.discountAmount.toFixed(2)} discount`);
+              alert(`Successfully redeemed ${pointsToRedeem} points for ₹${response.data.data.discountAmount.toFixed(2)} discount`);
     } catch (err) {
       console.error('Error redeeming points:', err);
       setError('Failed to redeem loyalty points');
@@ -197,7 +197,7 @@ const SubscriptionManager: React.FC = () => {
                 )}
                 <div className="flex items-center">
                   <span className="w-4 h-4 bg-green-500 rounded-full mr-3"></span>
-                  <span>€{userBenefits.monthlyCredits} monthly credits</span>
+                  <span>₹{userBenefits.monthlyCredits} monthly credits</span>
                 </div>
               </div>
             </div>
@@ -247,7 +247,7 @@ const SubscriptionManager: React.FC = () => {
                   </button>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
-                  100 points = €1.00 discount
+                  100 points = ₹1.00 discount
                 </p>
               </div>
             </div>
@@ -278,7 +278,7 @@ const SubscriptionManager: React.FC = () => {
               <div className="text-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">{tier.name}</h3>
                 <div className="text-3xl font-bold text-blue-600 mt-2">
-                  €{tier.price}
+                  ₹{tier.price}
                   <span className="text-sm font-normal text-gray-500">/month</span>
                 </div>
               </div>

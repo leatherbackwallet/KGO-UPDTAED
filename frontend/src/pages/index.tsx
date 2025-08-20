@@ -1,89 +1,55 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import ProductCard from '@/components/ProductCard';
-import ProductSkeleton from '@/components/ProductSkeleton';
-import ProductModal from '@/components/ProductModal';
-import { useAuth } from '@/context/AuthContext';
-import { useCart } from '@/context/CartContext';
-import { useWishlist } from '@/context/WishlistContext';
-import api from '@/utils/api';
-import { getMultilingualText } from '@/utils/api';
-import { Product } from '@/types/product';
+import Navbar from '../components/Navbar';
+import ProductCard from '../components/ProductCard';
+import ProductSkeleton from '../components/ProductSkeleton';
+import QuickViewModal from '../components/QuickViewModal';
+import api from '../utils/api';
+import { Product } from '../types/product';
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const { user } = useAuth();
-  const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-
-  const fetchProducts = useCallback(async () => {
-    try {
-      console.log('Fetching products...');
-      const response = await api.get('/products');
-      console.log('Response status:', response.status);
-      console.log('Products data:', response.data);
-      // Handle both old and new API response formats
-      const productsData = response.data.data || response.data || [];
-      setProducts(Array.isArray(productsData) ? productsData : []);
-    } catch (err) {
-      console.error('Error fetching products:', err);
-      setError(`Failed to load products: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      setProducts([]); // Ensure products is always an array
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [showQuickView, setShowQuickView] = useState(false);
 
   useEffect(() => {
     fetchProducts();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleAddToCart = (product: Product) => {
-    addToCart({
-      product: product._id,
-      name: getMultilingualText(product.name),
-      price: product.price || 0,
-      image: product.images[0] || product.defaultImage || '/images/products/placeholder.svg',
-      quantity: 1,
-      stock: product.stock || 0
-    });
-  };
-
-  const handleWishlistToggle = (product: Product) => {
-    if (isInWishlist(product._id)) {
-      removeFromWishlist(product._id);
-    } else {
-      addToWishlist({
-        product: product._id,
-        name: getMultilingualText(product.name),
-        price: product.price || 0,
-        image: product.images[0] || product.defaultImage || '/images/products/placeholder.svg'
-      });
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/products?featured=true&limit=8');
+      const productsData = response.data?.data || response.data || [];
+      setProducts(Array.isArray(productsData) ? productsData : []);
+    } catch (err: any) {
+      console.error('Error fetching products:', err);
+      setError(err.response?.data?.error?.message || 'Failed to fetch products');
+      setProducts([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleQuickView = (product: Product) => {
     setSelectedProduct(product);
+    setShowQuickView(true);
   };
 
-  const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-  };
-
-  const closeModal = () => {
+  const closeQuickView = () => {
     setSelectedProduct(null);
+    setShowQuickView(false);
   };
 
   return (
     <>
       <Head>
         <title>KeralGiftsOnline - Premium Gifts & Celebrations</title>
-        <meta name="description" content="Discover premium quality gifts, cakes, flowers, and celebration items. Fast delivery across Germany with our advanced logistics network." />
-        <meta name="keywords" content="gifts, cakes, flowers, celebrations, Germany, online shopping" />
+        <meta name="description" content="Discover premium quality gifts, cakes, flowers, and celebration items. Fast delivery across India with our advanced logistics network." />
+        <meta name="keywords" content="gifts, cakes, flowers, celebrations, India, online shopping" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
@@ -97,7 +63,7 @@ export default function Home() {
                 Celebrate Every Moment
               </h1>
               <p className="text-xl md:text-2xl mb-8 text-red-100">
-                Premium quality with fast delivery across Germany.
+                Premium quality with fast delivery across India.
               </p>
               <Link 
                 href="/products"
@@ -120,7 +86,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Fast Delivery</h3>
-                <p className="text-gray-600">Quick and reliable delivery across Germany</p>
+                <p className="text-gray-600">Quick and reliable delivery across India</p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -191,7 +157,6 @@ export default function Home() {
                     key={product._id}
                     product={product}
                     onQuickView={handleQuickView}
-                    onClick={handleProductClick}
                   />
                 ))}
               </div>
@@ -211,14 +176,12 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Product Modal */}
-      {selectedProduct && (
-        <ProductModal
-          product={selectedProduct}
-          isOpen={!!selectedProduct}
-          onClose={closeModal}
-        />
-      )}
+      {/* Quick View Modal */}
+      <QuickViewModal
+        product={selectedProduct}
+        isOpen={showQuickView}
+        onClose={closeQuickView}
+      />
     </>
   );
 }

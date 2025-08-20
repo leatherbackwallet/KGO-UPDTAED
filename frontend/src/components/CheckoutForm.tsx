@@ -261,18 +261,18 @@ export default function CheckoutForm() {
                 {/* Product Details */}
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-gray-900">{item.name}</div>
-                  <div className="text-sm text-gray-500">Qty: {item.quantity} × €{item.price.toFixed(2)}</div>
+                  <div className="text-sm text-gray-500">Qty: {item.quantity} × ₹{item.price.toFixed(2)}</div>
                 </div>
                 
                 {/* Total Price */}
                 <div className="text-right">
-                  <span className="font-medium text-gray-900">€{(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-medium text-gray-900">₹{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               </div>
             ))}
             <div className="border-t border-gray-300 pt-3 flex justify-between items-center">
               <span className="text-lg font-bold text-gray-900">Total:</span>
-              <span className="text-xl font-bold text-blue-600">€{subtotal.toFixed(2)}</span>
+              <span className="text-xl font-bold text-blue-600">₹{subtotal.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -281,7 +281,7 @@ export default function CheckoutForm() {
         <div className="bg-blue-50 p-4 rounded-lg">
           <h3 className="text-lg font-semibold mb-2 text-blue-900">🚚 Delivery Information</h3>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Free delivery within Germany</li>
+            <li>• Free delivery within India</li>
             <li>• Delivery time: 2-3 business days</li>
             <li>• Gift will be delivered to the selected recipient</li>
             <li>• You can add a gift message during checkout</li>
@@ -303,7 +303,7 @@ export default function CheckoutForm() {
               Processing Order...
             </span>
           ) : (
-            `Pay €${subtotal.toFixed(2)}`
+            `Pay ₹${subtotal.toFixed(2)}`
           )}
         </button>
 

@@ -123,7 +123,7 @@ const ProductDetailPage: React.FC = () => {
                     Category: {getCategoryName()}
                   </p>
                   <div className="text-4xl font-bold text-gray-900 mb-4">
-                    €{product.price?.toFixed(2) || '0.00'}
+                    ₹{product.price?.toFixed(2) || '0.00'}
                   </div>
                 </div>
 

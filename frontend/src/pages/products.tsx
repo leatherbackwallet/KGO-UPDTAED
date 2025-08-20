@@ -3,7 +3,6 @@ import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
-import ProductModal from '../components/ProductModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ProductFilters from '../components/ProductFilters';
 import api from '../utils/api';
@@ -13,11 +12,10 @@ import { Product } from '../types/product';
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Array<{_id: string, name: string | { en: string; de: string }, slug: string}>>([]);
+  const [categories, setCategories] = useState<Array<{_id: string, name: string | { en: string; ml: string }, slug: string}>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [showModal, setShowModal] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
   
   // Filters
@@ -44,69 +42,55 @@ const ProductsPage: React.FC = () => {
 
   // Debounced search effect (only for filters, not initial load)
   useEffect(() => {
-    if (isInitialLoad) return; // Skip on initial load to prevent double call
-    
-    const timeoutId = setTimeout(() => {
-      fetchProducts();
-    }, 300); // 300ms debounce
+    if (!isInitialLoad) {
+      const timeoutId = setTimeout(() => {
+        fetchProducts();
+      }, 500);
 
-    return () => clearTimeout(timeoutId);
-  }, [search, category, selectedOccasions, min, max]); // Removed isInitialLoad from dependencies
+      return () => clearTimeout(timeoutId);
+    }
+  }, [search, category, selectedOccasions, min, max, isInitialLoad]);
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      // performanceMonitor.startTimer('products-fetch');
+
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (category) params.append('category', category);
+      if (selectedOccasions.length > 0) params.append('occasions', selectedOccasions.join(','));
+      if (min) params.append('minPrice', min);
+      if (max) params.append('maxPrice', max);
+
+      const response = await api.get(`/products?${params.toString()}`);
+      const productsData = response.data?.data || response.data || [];
+      setProducts(Array.isArray(productsData) ? productsData : []);
+
+      // performanceMonitor.endTimer('products-fetch');
+    } catch (err: any) {
+      console.error('Error fetching products:', err);
+      setError(err.response?.data?.error?.message || 'Failed to fetch products');
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [search, category, selectedOccasions, min, max]);
 
   const fetchCategories = async () => {
     try {
-      const res = await api.get('/categories');
-      setCategories(res.data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
+      const response = await api.get('/categories');
+      const categoriesData = response.data?.data || response.data || [];
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+    } catch (err: any) {
+      console.error('Error fetching categories:', err);
+      setCategories([]);
     }
   };
-
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    
-    const fetchFunction = async () => {
-      try {
-        const params: any = {};
-        if (search) params.search = search;
-        if (category) params.category = category;
-        if (selectedOccasions.length > 0) params.occasions = selectedOccasions.join(',');
-        if (min) params.min = min;
-        if (max) params.max = max;
-        const res = await api.get('/products', { params });
-        const responseData = res.data;
-        setProducts(responseData.data || responseData || []);
-      } catch (error: any) {
-        console.error('Error fetching products:', error);
-        setError(error.response?.data?.error?.message || 'Failed to fetch products');
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Use performance monitor if available, otherwise just call the function
-    if (performanceMonitor && typeof performanceMonitor.measureAsyncInteraction === 'function') {
-      return performanceMonitor.measureAsyncInteraction('fetch_products', fetchFunction);
-    } else {
-      return fetchFunction();
-    }
-  }, [search, category, selectedOccasions, min, max]);
 
   const handleQuickView = (product: Product) => {
     setSelectedProduct(product);
     setShowQuickView(true);
-  };
-
-  const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setSelectedProduct(null);
-    setShowModal(false);
   };
 
   const closeQuickView = () => {
@@ -133,99 +117,85 @@ const ProductsPage: React.FC = () => {
 
       <Navbar />
       <main className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-          {/* Modern Filters - Moved to top */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <ProductFilters
-              search={search}
-              setSearch={setSearch}
-              category={category}
-              setCategory={setCategory}
-              selectedOccasions={selectedOccasions}
-              setSelectedOccasions={setSelectedOccasions}
-              min={min}
-              setMin={setMin}
-              max={max}
-              setMax={setMax}
-              categories={categories}
-              occasions={occasions}
-              clearFilters={clearFilters}
-            />
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Our Products</h1>
+            <p className="text-gray-600">Discover our collection of premium gifts and celebration items</p>
           </div>
 
-          {/* Results Header */}
-          <div className="mb-6 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="text-sm text-gray-600">
-                {loading ? 'Loading...' : `${products.length} products found`}
-              </div>
-              {!loading && products.length > 0 && (
-                <div className="h-1 w-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
-              )}
-            </div>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-red-800">Error loading products</h3>
-                  <p className="text-sm text-red-700 mt-1">{error}</p>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Filters */}
+          <ProductFilters
+            search={search}
+            setSearch={setSearch}
+            category={category}
+            setCategory={setCategory}
+            selectedOccasions={selectedOccasions}
+            setSelectedOccasions={setSelectedOccasions}
+            min={min}
+            setMin={setMin}
+            max={max}
+            setMax={setMax}
+            categories={categories}
+            occasions={occasions}
+            onClearFilters={clearFilters}
+          />
 
           {/* Products Grid */}
-          {loading ? (
-            <LoadingSpinner />
-          ) : products.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="bg-gray-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                <svg className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+          <div className="mt-8">
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {[...Array(8)].map((_, i) => (
+                  <LoadingSpinner key={i} />
+                ))}
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">No products found</h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">We couldn't find any products matching your criteria. Try adjusting your filters or search terms.</p>
-              <button
-                onClick={clearFilters}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Clear all filters
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map(product => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  onQuickView={handleQuickView}
-                  onClick={handleProductClick}
-                />
-              ))}
-            </div>
-          )}
+            ) : error ? (
+              <div className="text-center py-12">
+                <div className="text-red-500 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Products</h3>
+                <p className="text-gray-600 mb-4">{error}</p>
+                <button
+                  onClick={fetchProducts}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Products Found</h3>
+                <p className="text-gray-600 mb-4">Try adjusting your filters or search terms</p>
+                <button
+                  onClick={clearFilters}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    onQuickView={handleQuickView}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </main>
 
-      {/* Modals */}
-      <ProductModal
-        product={selectedProduct}
-        isOpen={showModal}
-        onClose={closeModal}
-      />
-      
+      {/* Quick View Modal */}
       <QuickViewModal
         product={selectedProduct}
         isOpen={showQuickView}

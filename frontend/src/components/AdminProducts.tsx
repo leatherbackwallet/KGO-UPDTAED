@@ -10,7 +10,7 @@ import { useImageCache } from '../utils/imageCache';
 
 interface Category {
   _id: string;
-  name: string | { en: string; de: string };
+  name: string | { en: string; ml: string };
   slug: string;
 }
 
@@ -105,16 +105,16 @@ const AdminProducts: React.FC = () => {
         return;
       }
 
-      // Ensure name and description have both English and German versions
+      // Ensure name and description have both English and Malayalam versions
       const validatedData = {
         ...editingProduct,
         name: {
           en: typeof editingProduct.name === 'object' ? editingProduct.name.en || '' : '',
-          de: typeof editingProduct.name === 'object' ? editingProduct.name.de || '' : ''
+          ml: typeof editingProduct.name === 'object' ? editingProduct.name.ml || '' : ''
         },
         description: {
           en: typeof editingProduct.description === 'object' ? editingProduct.description.en || '' : '',
-          de: typeof editingProduct.description === 'object' ? editingProduct.description.de || '' : ''
+          ml: typeof editingProduct.description === 'object' ? editingProduct.description.ml || '' : ''
         },
         // Ensure categories is an array
         categories: editingProduct.category ? [editingProduct.category] : []
@@ -159,16 +159,16 @@ const AdminProducts: React.FC = () => {
         return;
       }
 
-      // Ensure name and description have both English and German versions
+      // Ensure name and description have both English and Malayalam versions
       const validatedData = {
         ...editingProduct,
         name: {
           en: typeof editingProduct.name === 'object' ? editingProduct.name.en || '' : '',
-          de: typeof editingProduct.name === 'object' ? editingProduct.name.de || '' : ''
+          ml: typeof editingProduct.name === 'object' ? editingProduct.name.ml || '' : ''
         },
         description: {
           en: typeof editingProduct.description === 'object' ? editingProduct.description.en || '' : '',
-          de: typeof editingProduct.description === 'object' ? editingProduct.description.de || '' : ''
+          ml: typeof editingProduct.description === 'object' ? editingProduct.description.ml || '' : ''
         }
       };
 
@@ -352,7 +352,7 @@ const AdminProducts: React.FC = () => {
                       {getCategoryName(product.category)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      €{product.price?.toFixed(2) || '0.00'}
+                      ₹{product.price?.toFixed(2) || '0.00'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.stock || 0}
@@ -424,30 +424,14 @@ const AdminProducts: React.FC = () => {
                     ...editingProduct,
                     name: {
                       en: e.target.value,
-                      de: typeof editingProduct.name === 'object' ? editingProduct.name?.de || '' : ''
+                      ml: typeof editingProduct.name === 'object' ? editingProduct.name?.ml || '' : ''
                     }
                   })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name (German)
-                </label>
-                <input
-                  type="text"
-                  value={typeof editingProduct.name === 'object' ? editingProduct.name?.de || '' : ''}
-                  onChange={(e) => setEditingProduct({
-                    ...editingProduct,
-                    name: {
-                      en: typeof editingProduct.name === 'object' ? editingProduct.name?.en || '' : '',
-                      de: e.target.value
-                    }
-                  })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -459,7 +443,7 @@ const AdminProducts: React.FC = () => {
                     ...editingProduct,
                     description: {
                       en: e.target.value,
-                      de: typeof editingProduct.description === 'object' ? editingProduct.description?.de || '' : ''
+                      ml: typeof editingProduct.description === 'object' ? editingProduct.description?.ml || '' : ''
                     }
                   })}
                   rows={3}
@@ -467,28 +451,12 @@ const AdminProducts: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description (German)
-                </label>
-                <textarea
-                  value={typeof editingProduct.description === 'object' ? editingProduct.description?.de || '' : ''}
-                  onChange={(e) => setEditingProduct({
-                    ...editingProduct,
-                    description: {
-                      en: typeof editingProduct.description === 'object' ? editingProduct.description?.en || '' : '',
-                      de: e.target.value
-                    }
-                  })}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Price (€)
+                    Price (₹)
                   </label>
                   <input
                     type="number"

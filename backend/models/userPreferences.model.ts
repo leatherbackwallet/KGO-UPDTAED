@@ -47,7 +47,7 @@ export interface IUserPreferences extends Document {
   
   // Cultural preferences (for Kerala-specific targeting)
   culturalPreferences: {
-    languagePreference: 'en' | 'de' | 'ml'; // English, German, Malayalam
+    languagePreference: 'en' | 'ml'; // English, Malayalam
     festivalPreferences: string[]; // Onam, Diwali, etc.
     traditionalItems: boolean;
     modernItems: boolean;

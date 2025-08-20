@@ -39,7 +39,7 @@ async function addProductPrices() {
       await Product.findByIdAndUpdate(product._id, {
         price: defaultPrice
       });
-      console.log(`Updated product "${product.name.en}" with price $${defaultPrice}`);
+      console.log(`Updated product "${product.name.en}" with price ₹${defaultPrice}`);
       updatedCount++;
     }
     

@@ -12,9 +12,9 @@ interface ProductFiltersProps {
   setMin: (value: string) => void;
   max: string;
   setMax: (value: string) => void;
-  categories: Array<{_id: string, name: string | { en: string; de: string }, slug: string}>;
+  categories: Array<{_id: string, name: string | { en: string; ml: string }, slug: string}>;
   occasions: string[];
-  clearFilters: () => void;
+  onClearFilters: () => void;
 }
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({
@@ -30,7 +30,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
   setMax,
   categories,
   occasions,
-  clearFilters
+  onClearFilters
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
@@ -101,7 +101,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           
           {activeFilterCount > 0 && (
             <button
-              onClick={clearFilters}
+              onClick={onClearFilters}
               className="text-sm text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1 hover:bg-gray-50 px-3 py-2 rounded-lg"
             >
               <X className="h-4 w-4" />

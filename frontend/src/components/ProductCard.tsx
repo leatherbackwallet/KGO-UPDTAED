@@ -47,9 +47,8 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
   };
 
   const handleCardClick = () => {
-    if (onClick) {
-      onClick(product);
-    }
+    // Always trigger quick view when card is clicked
+    onQuickView(product);
   };
 
   return (
@@ -69,25 +68,11 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
           style={{ opacity: imageLoading ? 0.7 : 1 }}
         />
         
-        {/* Overlay with actions */}
+        {/* Overlay with only Add to Cart action */}
         <div className={`absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-300 ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`}>
           <div className="flex gap-3">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onQuickView(product);
-              }}
-              className="w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all duration-200 hover:scale-110"
-              aria-label="Quick view"
-            >
-              <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-            </button>
-            
             <button
               onClick={handleAddToCart}
               disabled={(product.stock || 0) === 0}
@@ -117,7 +102,7 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
 
         {/* Featured Badge */}
         {product.isFeatured && (
-          <div className="absolute bottom-3 left-3">
+          <div className="absolute top-3 left-3">
             <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-medium">
               Featured
             </span>
@@ -125,61 +110,22 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
         )}
       </div>
 
-      {/* Content */}
+      {/* Product Info */}
       <div className="p-4">
-        <div className="mb-2">
-          <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-            {(() => {
-              if (!product.category) return 'Uncategorized';
-              if (typeof product.category === 'string') return product.category;
-              if (product.category.name) {
-                return getMultilingualText(product.category.name);
-              }
-              return 'Uncategorized';
-            })()}
-          </span>
-        </div>
-        
         <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
           {getMultilingualText(product.name)}
         </h3>
-        
         <p className="text-gray-600 text-sm mb-3 line-clamp-2">
           {getMultilingualText(product.description)}
         </p>
-
-        {/* Price */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-gray-900">
-              €{product.price?.toFixed(2) || '0.00'}
-            </span>
-            {product.stock !== undefined && (
-              <span className="text-sm text-gray-500">
-                ({product.stock} in stock)
-              </span>
-            )}
-          </div>
+          <span className="text-xl font-bold text-gray-900">
+            ₹{product.price?.toFixed(2) || '0.00'}
+          </span>
+          <span className="text-sm text-gray-500">
+            {product.stock !== undefined ? `${product.stock} in stock` : 'Stock not available'}
+          </span>
         </div>
-
-        {/* Occasions */}
-        {product.occasions && product.occasions.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1">
-            {product.occasions.slice(0, 3).map((occasion, index) => (
-              <span
-                key={index}
-                className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
-              >
-                {occasion}
-              </span>
-            ))}
-            {product.occasions.length > 3 && (
-              <span className="text-xs text-gray-500">
-                +{product.occasions.length - 3} more
-              </span>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

@@ -79,16 +79,7 @@ const ContentPage: React.FC = () => {
                 >
                   English
                 </button>
-                <button
-                  onClick={() => setLanguage('de')}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                    language === 'de'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  Deutsch
-                </button>
+
                 <button
                   onClick={() => setLanguage('ml')}
                   className={`px-3 py-1 rounded text-sm font-medium transition-colors ${

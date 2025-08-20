@@ -194,7 +194,7 @@ const OrdersPage: React.FC = () => {
                           </div>
                           <div className="flex-shrink-0 text-right">
                             <p className="text-sm font-medium text-gray-900">
-                              €{item.price.toFixed(2)}
+                              ₹{item.price.toFixed(2)}
                             </p>
                             <p className="text-sm text-gray-500">
                               Qty: {item.quantity}
@@ -228,7 +228,7 @@ const OrdersPage: React.FC = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-semibold text-gray-900">
-                          Total: €{order.totalAmount.toFixed(2)}
+                          Total: ₹{order.totalAmount.toFixed(2)}
                         </p>
                         <OrderStatusTimeline currentStatus={order.status} statusHistory={order.statusHistory || []} />
                       </div>

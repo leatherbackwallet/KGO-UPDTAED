@@ -32,7 +32,7 @@ const hubSchema = new Schema<IHub>(
       unique: true,
       trim: true,
       maxlength: [100, 'Hub name cannot exceed 100 characters'],
-      description: 'e.g., Eschweiler Central Hub'
+      description: 'e.g., Kochi Central Hub'
     },
     address: {
       street: {
@@ -44,13 +44,13 @@ const hubSchema = new Schema<IHub>(
         type: String,
         required: [true, 'City is required'],
         trim: true,
-        default: 'Eschweiler'
+        default: 'Kochi'
       },
       state: {
         type: String,
         required: [true, 'State is required'],
         trim: true,
-        default: 'North Rhine-Westphalia'
+        default: 'Kerala'
       },
       postalCode: {
         type: String,
@@ -95,9 +95,9 @@ hubSchema.set('toJSON', { virtuals: true });
 
 // Pre-save middleware to validate hub data
 hubSchema.pre('save', function(next) {
-  // Validate postal code format (German format)
-  if (this.address.postalCode && !/^\d{5}$/.test(this.address.postalCode)) {
-    return next(new Error('Postal code must be 5 digits'));
+  // Validate postal code format (Indian format)
+  if (this.address.postalCode && !/^\d{6}$/.test(this.address.postalCode)) {
+    return next(new Error('Postal code must be 6 digits'));
   }
   next();
 });

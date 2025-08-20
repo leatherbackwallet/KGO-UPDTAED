@@ -1,16 +1,14 @@
 import axios from 'axios';
 
 // Utility function to safely extract text from multilingual objects
-export const getMultilingualText = (text: string | { en: string; de: string; ml?: string } | undefined, preferredLanguage: 'en' | 'de' | 'ml' = 'en'): string => {
+export const getMultilingualText = (text: string | { en: string; ml: string } | undefined, preferredLanguage: 'en' | 'ml' = 'en'): string => {
   if (!text) return '';
   
   if (typeof text === 'string') return text;
   
-  // Try preferred language first, then fallback to English, then German
-  if (preferredLanguage === 'de' && text.de) return text.de;
+  // Try preferred language first, then fallback to English, then Malayalam
   if (preferredLanguage === 'ml' && text.ml) return text.ml;
   if (text.en) return text.en;
-  if (text.de) return text.de;
   if (text.ml) return text.ml;
   
   return '';
@@ -62,10 +60,10 @@ api.interceptors.response.use(
       const validateMultilingualContent = (obj: any) => {
         if (obj && typeof obj === 'object') {
           // Check if it's a multilingual object
-          if (obj.en !== undefined || obj.de !== undefined) {
+          if (obj.en !== undefined || obj.ml !== undefined) {
             // Ensure both languages are present
-            if (!obj.en && !obj.de) {
-              console.warn('Multilingual content missing both English and German translations:', obj);
+            if (!obj.en && !obj.ml) {
+              console.warn('Multilingual content missing both English and Malayalam translations:', obj);
             }
           }
           // Recursively check nested objects
@@ -97,8 +95,8 @@ api.interceptors.response.use(
         const details = error.response.data.error.details;
         if (details) {
           details.forEach((detail: any) => {
-            if (detail.field && detail.field.includes('de')) {
-              console.error('German language validation error:', detail);
+            if (detail.field && detail.field.includes('ml')) {
+              console.error('Malayalam language validation error:', detail);
             }
           });
         }

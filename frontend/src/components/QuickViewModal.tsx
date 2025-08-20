@@ -54,9 +54,6 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
     target.src = DEFAULT_PRODUCT_IMAGE;
   };
 
-  // Get thumbnail images (max 4)
-  const thumbnailImages = product.images?.slice(0, 4) || [];
-
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -66,11 +63,11 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
           onClick={onClose}
         ></div>
 
-        {/* Modal panel */}
-        <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+        {/* Modal panel - Updated to max-w-4xl like ProductModal */}
+        <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-2xl font-bold text-gray-900">
                 {getMultilingualText(product.name)}
               </h2>
               <button
@@ -83,23 +80,23 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Image Gallery */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="aspect-w-1 aspect-h-1 w-full">
                   <img
                     src={mainImagePath || DEFAULT_PRODUCT_IMAGE}
                     alt={getMultilingualText(product.name)}
-                    className="w-full h-64 object-cover rounded-lg"
+                    className="w-full h-96 object-cover rounded-lg"
                     onError={handleImageError}
                     style={{ opacity: mainImageLoading ? 0.7 : 1 }}
                   />
                 </div>
                 
-                {/* Thumbnail images - using direct image paths without hooks */}
-                {thumbnailImages.length > 1 && (
+                {/* Thumbnail images - Show all images like ProductModal */}
+                {product.images && product.images.length > 1 && (
                   <div className="grid grid-cols-4 gap-2">
-                    {thumbnailImages.map((image, index) => (
+                    {product.images.map((image, index) => (
                       <button
                         key={index}
                         onClick={() => setSelectedImage(index)}
@@ -119,63 +116,58 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                 )}
               </div>
 
-              {/* Product Details */}
-              <div className="space-y-4">
+              {/* Product Details - Enhanced with all ProductModal features */}
+              <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
                     {getMultilingualText(product.name)}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-2">
-                    {getCategoryName()}
+                  <p className="text-sm text-gray-500 mb-4">
+                    Category: {getCategoryName()}
                   </p>
-                  <div className="text-2xl font-bold text-gray-900 mb-3">
-                    €{product.price?.toFixed(2) || '0.00'}
+                  <div className="text-3xl font-bold text-gray-900 mb-4">
+                    ₹{product.price?.toFixed(2) || '0.00'}
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-1">Description</h4>
-                  <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                    {getMultilingualText(product.description)}
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
+                  <p className="text-gray-600 leading-relaxed">
+                    {getMultilingualText(product.description) || 'No description available.'}
                   </p>
                 </div>
 
                 {/* Occasions */}
                 {product.occasions && product.occasions.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-semibold text-gray-900 mb-1">Perfect for</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {product.occasions.slice(0, 3).map((occasion, index) => (
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Perfect for</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {product.occasions.map((occasion, index) => (
                         <span
                           key={index}
-                          className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+                          className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full"
                         >
-                          {occasion}
+                          {occasion.replace('_', ' ')}
                         </span>
                       ))}
-                      {product.occasions.length > 3 && (
-                        <span className="text-xs text-gray-500">
-                          +{product.occasions.length - 3} more
-                        </span>
-                      )}
                     </div>
                   </div>
                 )}
 
-                {/* Stock Status */}
+                {/* Stock Status and Quantity Selector */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-4">
                     <label htmlFor="quantity" className="text-sm font-medium text-gray-700">
-                      Qty:
+                      Quantity:
                     </label>
                     <select
                       id="quantity"
                       value={quantity}
                       onChange={(e) => setQuantity(Number(e.target.value))}
-                      className="border border-gray-300 rounded px-2 py-1 text-sm"
+                      className="border border-gray-300 rounded-md px-3 py-1 text-sm"
                       disabled={(product.stock || 0) === 0}
                     >
-                      {[...Array(Math.min(5, product.stock || 0))].map((_, i) => (
+                      {[...Array(Math.min(10, product.stock || 0))].map((_, i) => (
                         <option key={i + 1} value={i + 1}>
                           {i + 1}
                         </option>
@@ -187,11 +179,20 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                   </div>
                 </div>
 
+                {/* Featured Badge */}
+                {product.isFeatured && (
+                  <div className="flex items-center">
+                    <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-medium">
+                      Featured Product
+                    </span>
+                  </div>
+                )}
+
                 {/* Add to Cart Button */}
                 <button
                   onClick={handleAddToCart}
                   disabled={(product.stock || 0) === 0}
-                  className="w-full bg-kgo-red text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                  className="w-full bg-kgo-red text-white py-3 px-6 rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   {(product.stock || 0) === 0 ? 'Out of Stock' : 'Add to Cart'}
                 </button>

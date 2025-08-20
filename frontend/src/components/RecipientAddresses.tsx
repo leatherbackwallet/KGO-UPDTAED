@@ -282,7 +282,7 @@ export default function RecipientAddresses({
                   onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="DE">Germany</option>
+                  <option value="IN">India</option>
                   <option value="AT">Austria</option>
                   <option value="CH">Switzerland</option>
                 </select>

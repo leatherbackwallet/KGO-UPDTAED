@@ -125,7 +125,7 @@ const WishlistPage: React.FC = () => {
                       {item.name}
                     </h3>
                     <p className="text-xl font-bold text-gray-900 mb-3">
-                      €{item.price.toFixed(2)}
+                      ₹{item.price.toFixed(2)}
                     </p>
                     <div className="flex gap-2">
                       <a
