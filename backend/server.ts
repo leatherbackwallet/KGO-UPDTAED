@@ -60,6 +60,12 @@ app.use('/images', express.static(path.join(__dirname, '../public/images'), {
 
 // Create default superuser if not exists
 async function createSuperUser() {
+  // Only create superuser if explicitly enabled
+  if (process.env.CREATE_SUPERUSER !== 'true') {
+    console.log('Superuser creation skipped (CREATE_SUPERUSER not set to true)');
+    return;
+  }
+
   try {
     // First, ensure we have an admin role
     let adminRole = await Role.findOne({ name: 'admin' });
@@ -71,6 +77,8 @@ async function createSuperUser() {
         isActive: true
       });
       console.log('Admin role created');
+    } else {
+      console.log('Admin role already exists');
     }
 
     const email = process.env.ADMIN_EMAIL || 'admin@keralagiftsonline.com';

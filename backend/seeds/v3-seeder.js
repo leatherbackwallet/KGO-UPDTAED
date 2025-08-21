@@ -31,13 +31,20 @@ const userSchema = new mongoose.Schema({
 
 const categorySchema = new mongoose.Schema({
   name: {
-    en: { type: String, required: true },
-    de: { type: String, required: true }
+    type: String,
+    required: true,
+    trim: true
   },
-  slug: { type: String, required: true, unique: true },
+  slug: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
+  },
   description: {
-    en: String,
-    de: String
+    type: String,
+    trim: true
   },
   parentCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
   sortOrder: { type: Number, default: 0 },
@@ -47,25 +54,74 @@ const categorySchema = new mongoose.Schema({
 
 const productSchema = new mongoose.Schema({
   name: {
-    en: { type: String, required: true },
-    de: { type: String, required: true }
+    type: String,
+    required: true,
+    trim: true
   },
   description: {
-    en: { type: String, required: true },
-    de: { type: String, required: true }
+    type: String,
+    required: true,
+    trim: true
   },
-  slug: { type: String, required: true, unique: true },
-  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
-  images: [String],
-  defaultImage: String,
-  isFeatured: { type: Boolean, default: false },
-  isDeleted: { type: Boolean, default: false }
+  slug: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
+  },
+  categories: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: true
+  }],
+  price: {
+    type: Number,
+    required: true,
+    min: [0, 'Price cannot be negative']
+  },
+  stock: {
+    type: Number,
+    required: true,
+    min: [0, 'Stock cannot be negative']
+  },
+  images: [{
+    type: String,
+    trim: true
+  }],
+  defaultImage: {
+    type: String,
+    trim: true
+  },
+  occasions: [{
+    type: String,
+    trim: true,
+    enum: [
+      'DIWALI', 'ANNIVERSARY', 'BIRTHDAY', 'CONDOLENCES', 'CONGRATULATION',
+      'FATHERS DAY', 'GET WELL SOON', 'HOUSE WARMING', 'JUST BECAUSE',
+      'MISS YOU', 'NEW BORN', 'ONAM', 'SYMPATHY', 'THANK YOU',
+      'TRADITIONAL', 'WEDDING'
+    ]
+  }],
+  vendors: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vendor'
+  }],
+  isFeatured: {
+    type: Boolean,
+    default: false
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  }
 }, { timestamps: true });
 
 const attributeSchema = new mongoose.Schema({
   name: {
-    en: { type: String, required: true },
-    de: { type: String, required: true }
+    type: String,
+    required: true,
+    trim: true
   },
   type: {
     type: String,
@@ -74,10 +130,13 @@ const attributeSchema = new mongoose.Schema({
   },
   options: [{
     label: {
-      en: String,
-      de: String
+      type: String,
+      required: true
     },
-    value: String
+    value: {
+      type: String,
+      required: true
+    }
   }],
   isRequired: { type: Boolean, default: false },
   isDeleted: { type: Boolean, default: false }
@@ -130,6 +189,13 @@ const Hub = mongoose.model('Hub', hubSchema);
 async function seedRoles() {
   console.log('Seeding roles...');
   
+  // Check if roles already exist
+  const existingRoles = await Role.countDocuments();
+  if (existingRoles > 0) {
+    console.log('Roles already exist, skipping...');
+    return await Role.find();
+  }
+  
   const roles = [
     {
       name: 'admin',
@@ -163,7 +229,6 @@ async function seedRoles() {
     }
   ];
 
-  await Role.deleteMany({});
   const createdRoles = await Role.insertMany(roles);
   console.log(`Created ${createdRoles.length} roles`);
   return createdRoles;
@@ -171,6 +236,13 @@ async function seedRoles() {
 
 async function seedUsers(roles) {
   console.log('Seeding users...');
+  
+  // Check if users already exist
+  const existingUsers = await User.countDocuments();
+  if (existingUsers > 0) {
+    console.log('Users already exist, skipping...');
+    return await User.find();
+  }
   
   const adminRole = roles.find(r => r.name === 'admin');
   const customerRole = roles.find(r => r.name === 'customer');
@@ -206,7 +278,6 @@ async function seedUsers(roles) {
     }
   ];
 
-  await User.deleteMany({});
   const createdUsers = await User.insertMany(users);
   console.log(`Created ${createdUsers.length} users`);
   return createdUsers;
@@ -215,38 +286,44 @@ async function seedUsers(roles) {
 async function seedCategories() {
   console.log('Seeding categories...');
   
+  // Check if categories already exist
+  const existingCategories = await Category.countDocuments();
+  if (existingCategories > 0) {
+    console.log('Categories already exist, skipping...');
+    return await Category.find();
+  }
+  
   const categories = [
     {
-      name: { en: 'Celebration Cakes', de: 'Feierkuchen' },
+      name: 'Celebration Cakes',
       slug: 'celebration-cakes',
-      description: { en: 'Beautiful cakes for special occasions', de: 'Schöne Kuchen für besondere Anlässe' },
+      description: 'Beautiful cakes for special occasions',
       sortOrder: 1,
       isActive: true
     },
     {
-      name: { en: 'Gift Baskets', de: 'Geschenkkörbe' },
+      name: 'Gift Baskets',
       slug: 'gift-baskets',
-      description: { en: 'Curated gift baskets for all occasions', de: 'Kuratiert Geschenkkörbe für alle Anlässe' },
+      description: 'Curated gift baskets for all occasions',
       sortOrder: 2,
       isActive: true
     },
     {
-      name: { en: 'Flowers', de: 'Blumen' },
+      name: 'Flowers',
       slug: 'flowers',
-      description: { en: 'Fresh flowers and arrangements', de: 'Frische Blumen und Arrangements' },
+      description: 'Fresh flowers and arrangements',
       sortOrder: 3,
       isActive: true
     },
     {
-      name: { en: 'Chocolates', de: 'Schokoladen' },
+      name: 'Chocolates',
       slug: 'chocolates',
-      description: { en: 'Premium chocolates and sweets', de: 'Premium Schokoladen und Süßigkeiten' },
+      description: 'Premium chocolates and sweets',
       sortOrder: 4,
       isActive: true
     }
   ];
 
-  await Category.deleteMany({});
   const createdCategories = await Category.insertMany(categories);
   console.log(`Created ${createdCategories.length} categories`);
   return createdCategories;
@@ -255,46 +332,64 @@ async function seedCategories() {
 async function seedProducts(categories) {
   console.log('Seeding products...');
   
+  // Check if products already exist
+  const existingProducts = await Product.countDocuments();
+  if (existingProducts > 0) {
+    console.log('Products already exist, skipping...');
+    return await Product.find();
+  }
+  
   const products = [
     {
-      name: { en: 'Birthday Cake', de: 'Geburtstagskuchen' },
-      description: { en: 'Delicious birthday cake with cream and fruits', de: 'Leckerer Geburtstagskuchen mit Sahne und Früchten' },
+      name: 'Birthday Cake',
+      description: 'Delicious birthday cake with cream and fruits',
       slug: 'birthday-cake',
-      category: categories[0]._id,
+      categories: [categories[0]._id],
+      price: 50,
+      stock: 10,
       images: ['/images/products/birthday-cake.svg'],
       defaultImage: '/images/products/birthday-cake.svg',
+      occasions: ['BIRTHDAY'],
       isFeatured: true
     },
     {
-      name: { en: 'Wedding Cake', de: 'Hochzeitstorte' },
-      description: { en: 'Elegant wedding cake with white frosting', de: 'Elegante Hochzeitstorte mit weißer Glasur' },
+      name: 'Wedding Cake',
+      description: 'Elegant wedding cake with white frosting',
       slug: 'wedding-cake',
-      category: categories[0]._id,
+      categories: [categories[0]._id],
+      price: 100,
+      stock: 5,
       images: ['/images/products/wedding-cake.svg'],
       defaultImage: '/images/products/wedding-cake.svg',
+      occasions: ['WEDDING'],
       isFeatured: true
     },
     {
-      name: { en: 'Gift Basket Premium', de: 'Geschenkkorb Premium' },
-      description: { en: 'Premium gift basket with chocolates and wine', de: 'Premium Geschenkkorb mit Schokoladen und Wein' },
+      name: 'Gift Basket Premium',
+      description: 'Premium gift basket with chocolates and wine',
       slug: 'gift-basket-premium',
-      category: categories[1]._id,
+      categories: [categories[1]._id],
+      price: 75,
+      stock: 15,
       images: ['/images/products/gift-basket-premium.svg'],
       defaultImage: '/images/products/gift-basket-premium.svg',
+      occasions: ['ANNIVERSARY', 'BIRTHDAY'],
       isFeatured: false
     },
     {
-      name: { en: 'Rose Bouquet', de: 'Rosenstrauß' },
-      description: { en: 'Beautiful red rose bouquet', de: 'Schöner roter Rosenstrauß' },
+      name: 'Rose Bouquet',
+      description: 'Beautiful red rose bouquet',
       slug: 'rose-bouquet',
-      category: categories[2]._id,
+      categories: [categories[2]._id],
+      price: 25,
+      stock: 20,
       images: ['/images/products/rose-bouquet.svg'],
       defaultImage: '/images/products/rose-bouquet.svg',
+      occasions: ['DIWALI', 'ANNIVERSARY'],
       isFeatured: true
     }
   ];
 
-  await Product.deleteMany({});
   const createdProducts = await Product.insertMany(products);
   console.log(`Created ${createdProducts.length} products`);
   return createdProducts;
@@ -303,40 +398,46 @@ async function seedProducts(categories) {
 async function seedAttributes() {
   console.log('Seeding attributes...');
   
+  // Check if attributes already exist
+  const existingAttributes = await Attribute.countDocuments();
+  if (existingAttributes > 0) {
+    console.log('Attributes already exist, skipping...');
+    return await Attribute.find();
+  }
+  
   const attributes = [
     {
-      name: { en: 'Size', de: 'Größe' },
+      name: 'Size',
       type: 'dropdown',
       options: [
-        { label: { en: 'Small', de: 'Klein' }, value: 'small' },
-        { label: { en: 'Medium', de: 'Mittel' }, value: 'medium' },
-        { label: { en: 'Large', de: 'Groß' }, value: 'large' }
+        { label: 'Small', value: 'small' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'Large', value: 'large' }
       ],
       isRequired: true
     },
     {
-      name: { en: 'Color', de: 'Farbe' },
+      name: 'Color',
       type: 'dropdown',
       options: [
-        { label: { en: 'Red', de: 'Rot' }, value: 'red' },
-        { label: { en: 'White', de: 'Weiß' }, value: 'white' },
-        { label: { en: 'Pink', de: 'Rosa' }, value: 'pink' }
+        { label: 'Red', value: 'red' },
+        { label: 'White', value: 'white' },
+        { label: 'Pink', value: 'pink' }
       ],
       isRequired: false
     },
     {
-      name: { en: 'Allergen Free', de: 'Allergenfrei' },
+      name: 'Allergen Free',
       type: 'checkbox_group',
       options: [
-        { label: { en: 'Gluten Free', de: 'Glutenfrei' }, value: 'gluten_free' },
-        { label: { en: 'Dairy Free', de: 'Laktosefrei' }, value: 'dairy_free' },
-        { label: { en: 'Nut Free', de: 'Nussfrei' }, value: 'nut_free' }
+        { label: 'Gluten Free', value: 'gluten_free' },
+        { label: 'Dairy Free', value: 'dairy_free' },
+        { label: 'Nut Free', value: 'nut_free' }
       ],
       isRequired: false
     }
   ];
 
-  await Attribute.deleteMany({});
   const createdAttributes = await Attribute.insertMany(attributes);
   console.log(`Created ${createdAttributes.length} attributes`);
   return createdAttributes;
@@ -344,6 +445,13 @@ async function seedAttributes() {
 
 async function seedPromotions() {
   console.log('Seeding promotions...');
+  
+  // Check if promotions already exist
+  const existingPromotions = await Promotion.countDocuments();
+  if (existingPromotions > 0) {
+    console.log('Promotions already exist, skipping...');
+    return await Promotion.find();
+  }
   
   const promotions = [
     {
@@ -384,7 +492,6 @@ async function seedPromotions() {
     }
   ];
 
-  await Promotion.deleteMany({});
   const createdPromotions = await Promotion.insertMany(promotions);
   console.log(`Created ${createdPromotions.length} promotions`);
   return createdPromotions;
@@ -392,6 +499,13 @@ async function seedPromotions() {
 
 async function seedHubs() {
   console.log('Seeding hubs...');
+  
+  // Check if hubs already exist
+  const existingHubs = await Hub.countDocuments();
+  if (existingHubs > 0) {
+    console.log('Hubs already exist, skipping...');
+    return await Hub.find();
+  }
   
   const hubs = [
     {
@@ -428,7 +542,6 @@ async function seedHubs() {
     }
   ];
 
-  await Hub.deleteMany({});
   const createdHubs = await Hub.insertMany(hubs);
   console.log(`Created ${createdHubs.length} hubs`);
   return createdHubs;

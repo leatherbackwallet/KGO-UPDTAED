@@ -3,15 +3,15 @@ export interface Product {
   name: string;
   description: string;
   price?: number;
-  category: string | { _id: string; name: string; slug: string };
-  celebrationType?: string;
+  categories: Array<{ _id: string; name: string; slug: string }>;
   stock?: number;
   images: string[];
-  tags?: string[];
+  defaultImage?: string;
   occasions?: string[];
+  vendors?: Array<{ _id: string; name: string }>;
   isFeatured?: boolean;
   slug?: string;
-  defaultImage?: string;
+  isDeleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
 } 
