@@ -48,7 +48,7 @@ export default function WishlistButton({ product, className = '' }: WishlistButt
           product: product._id,
           name: getMultilingualText(product.name),
           price: product.price || 0,
-          image: product.images[0] || '/images/products/placeholder.svg'
+          image: product.images?.[0] || product.defaultImage || '/images/products/placeholder.svg'
         });
       }
     } catch (error) {
