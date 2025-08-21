@@ -12,6 +12,9 @@
   --kgo-gray: #6b7280;
   --kgo-red-light: #fef2f2;
   --kgo-green-light: #f0fdf4;
+  --onam-green: #005933;
+  --onam-yellow: #fbbf24;
+  --onam-gold: #f59e0b;
 }
 
 /* Browser Compatibility Fixes */
@@ -158,6 +161,60 @@ body {
   .status-cancelled {
     @apply bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium;
   }
+
+  /* Onam Festival Theme Components */
+  .onam-hero {
+    @apply relative min-h-screen flex items-center justify-center overflow-hidden;
+  }
+
+  .onam-bg {
+    background: linear-gradient(135deg, var(--onam-green) 0%, #004d2e 50%, #003d25 100%);
+  }
+
+  .onam-text-glow {
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+  }
+
+  .onam-card {
+    @apply bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2;
+  }
+
+  .onam-button {
+    @apply bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 font-semibold rounded-full hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 transform hover:scale-105 shadow-lg;
+  }
+
+  .onam-button-outline {
+    @apply border-2 border-white text-white hover:bg-white hover:text-green-900 transition-all duration-300 transform hover:scale-105;
+  }
+
+  /* Floating animation for festive elements */
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .float-animation-delay-1 {
+    animation: float 6s ease-in-out infinite;
+    animation-delay: 1s;
+  }
+
+  .float-animation-delay-2 {
+    animation: float 6s ease-in-out infinite;
+    animation-delay: 2s;
+  }
+
+  .float-animation-delay-3 {
+    animation: float 6s ease-in-out infinite;
+    animation-delay: 3s;
+  }
+
+  /* Festive pattern background */
+  .festive-pattern {
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(251, 191, 36, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(251, 191, 36, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    background-size: 100px 100px, 150px 150px, 200px 200px;
+  }
 }
 
 @layer utilities {
@@ -191,5 +248,82 @@ body {
   
   .border-kgo-green {
     border-color: var(--kgo-green);
+  }
+
+  /* Onam Festival Colors */
+  .text-onam-green {
+    color: var(--onam-green);
+  }
+
+  .text-onam-yellow {
+    color: var(--onam-yellow);
+  }
+
+  .text-onam-gold {
+    color: var(--onam-gold);
+  }
+
+  .bg-onam-green {
+    background-color: var(--onam-green);
+  }
+
+  .bg-onam-yellow {
+    background-color: var(--onam-yellow);
+  }
+
+  .bg-onam-gold {
+    background-color: var(--onam-gold);
+  }
+
+  .border-onam-green {
+    border-color: var(--onam-green);
+  }
+
+  .border-onam-yellow {
+    border-color: var(--onam-yellow);
+  }
+
+  .border-onam-gold {
+    border-color: var(--onam-gold);
+  }
+
+  /* Custom animations */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200px 0;
+    }
+    100% {
+      background-position: calc(200px + 100%) 0;
+    }
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background-size: 200px 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--onam-yellow), var(--onam-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
