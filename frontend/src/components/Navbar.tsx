@@ -39,9 +39,11 @@ export default function Navbar() {
             <Link href="/content" className="nav-link">
               Cultural Content
             </Link>
-            <Link href="/subscription" className="nav-link">
-              Subscription
-            </Link>
+            {user?.roleName === 'admin' && (
+              <Link href="/subscription" className="nav-link">
+                Subscription
+              </Link>
+            )}
             <Link href="/about" className="nav-link">
               About
             </Link>
@@ -141,9 +143,11 @@ export default function Navbar() {
               <Link href="/content" className="text-gray-700 hover:text-purple-600 transition-colors">
                 Cultural Content
               </Link>
-              <Link href="/subscription" className="text-gray-700 hover:text-purple-600 transition-colors">
-                Subscription
-              </Link>
+              {user?.roleName === 'admin' && (
+                <Link href="/subscription" className="text-gray-700 hover:text-purple-600 transition-colors">
+                  Subscription
+                </Link>
+              )}
               <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors">
                 About
               </Link>
