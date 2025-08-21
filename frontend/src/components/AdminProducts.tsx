@@ -392,6 +392,20 @@ const AdminProducts: React.FC = () => {
     }
   };
 
+  const getOccasionNames = (productOccasions: string[]) => {
+    if (!productOccasions || productOccasions.length === 0) return 'No Occasions';
+    
+    const occasionNames = productOccasions.map(occasion => occasion.replace('_', ' '));
+    
+    if (occasionNames.length === 1) {
+      return occasionNames[0];
+    } else if (occasionNames.length <= 3) {
+      return occasionNames.join(', ');
+    } else {
+      return `${occasionNames.slice(0, 2).join(', ')} +${occasionNames.length - 2} more`;
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -511,6 +525,9 @@ const AdminProducts: React.FC = () => {
                   Categories
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Occasions
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Price
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -555,6 +572,11 @@ const AdminProducts: React.FC = () => {
                     <td className="px-6 py-4 text-sm text-gray-900">
                       <div className="max-w-xs">
                         {getCategoryNames(product.categories || [])}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      <div className="max-w-xs">
+                        {getOccasionNames(product.occasions || [])}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -763,6 +785,60 @@ const AdminProducts: React.FC = () => {
                 {editingProduct.categories && editingProduct.categories.length > 0 && (
                   <p className="text-xs text-gray-500 mt-1">
                     Selected: {editingProduct.categories.length} category{editingProduct.categories.length > 1 ? 'ies' : 'y'}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Occasions (Optional - Select multiple)
+                </label>
+                <div className="border border-gray-300 rounded-md p-3 max-h-48 overflow-y-auto bg-gray-50">
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      'DIWALI', 'ANNIVERSARY', 'BIRTHDAY', 'CONDOLENCES', 'CONGRATULATION',
+                      'FATHERS DAY', 'GET WELL SOON', 'HOUSE WARMING', 'JUST BECAUSE',
+                      'MISS YOU', 'NEW BORN', 'ONAM', 'SYMPATHY', 'THANK YOU',
+                      'TRADITIONAL', 'WEDDING'
+                    ].map((occasion) => {
+                      const isSelected = editingProduct.occasions?.includes(occasion) || false;
+                      
+                      return (
+                        <label key={occasion} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 p-1 rounded">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              let newOccasions = [...(editingProduct.occasions || [])];
+                              
+                              if (e.target.checked) {
+                                // Add occasion if not already present
+                                if (!newOccasions.includes(occasion)) {
+                                  newOccasions.push(occasion);
+                                }
+                              } else {
+                                // Remove occasion
+                                newOccasions = newOccasions.filter(occ => occ !== occasion);
+                              }
+                              
+                              setEditingProduct({
+                                ...editingProduct,
+                                occasions: newOccasions
+                              });
+                            }}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">
+                            {occasion.replace('_', ' ')}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+                {editingProduct.occasions && editingProduct.occasions.length > 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Selected: {editingProduct.occasions.length} occasion{editingProduct.occasions.length > 1 ? 's' : ''}
                   </p>
                 )}
               </div>
