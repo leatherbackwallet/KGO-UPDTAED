@@ -22,7 +22,7 @@ export default function Home() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/products?featured=true&limit=8');
+      const response = await api.get(`/products?featured=true&limit=8&_t=${Date.now()}`);
       const productsData = response.data?.data || response.data || [];
       setProducts(Array.isArray(productsData) ? productsData : []);
     } catch (err: any) {

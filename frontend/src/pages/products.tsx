@@ -62,6 +62,9 @@ const ProductsPage: React.FC = () => {
       if (selectedOccasions.length > 0) params.append('occasions', selectedOccasions.join(','));
       if (min) params.append('minPrice', min);
       if (max) params.append('maxPrice', max);
+      
+      // Add cache busting parameter
+      params.append('_t', Date.now().toString());
 
       const response = await api.get(`/products?${params.toString()}`);
       const productsData = response.data?.data || response.data || [];
