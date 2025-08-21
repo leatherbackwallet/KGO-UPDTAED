@@ -7,7 +7,7 @@ import { User } from './models/users.model';
 import { Role } from './models/roles.model';
 import { Category } from './models/categories.model';
 import { hashPassword } from './utils/hash';
-import { initializeGridFS, getImageStream, getImageMetadata } from './utils/gridfs';
+import { ensureProductImagesDir } from './utils/fileUpload';
 const { generalLimiter, authLimiter, apiLimiter } = require('./middleware/rateLimit');
 const { logger, errorLogger } = require('./middleware/logger');
 
@@ -150,90 +150,16 @@ mongoose.connect(process.env.MONGODB_URI, {
 }).then(async () => {
   console.log('MongoDB connected with connection pooling');
   
-  // Initialize GridFS for image storage
-  initializeGridFS();
-  console.log('GridFS initialized for product images');
+  // Ensure product images directory exists
+  ensureProductImagesDir();
+  console.log('Product images directory initialized');
   
   await createSuperUser();
 })
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// GridFS image serving route with caching
-app.get('/api/images/:fileId', async (req, res): Promise<void> => {
-  try {
-    const { fileId } = req.params;
-    
-    if (!fileId || !mongoose.Types.ObjectId.isValid(fileId)) {
-      res.status(400).json({ success: false, error: 'Invalid file ID' });
-      return;
-    }
-
-    // Get image metadata for ETag generation
-    const metadata = await getImageMetadata(fileId);
-    if (!metadata) {
-      res.status(404).json({ success: false, error: 'Image not found' });
-      return;
-    }
-
-    // Generate ETag from file ID and last modified date
-    const etag = `"${fileId}-${metadata.uploadDate.getTime()}"`;
-    
-    // Check if client has cached version
-    if (req.headers['if-none-match'] === etag) {
-      res.status(304).end(); // Not Modified
-      return;
-    }
-
-    const stream = getImageStream(fileId);
-    
-    // Set comprehensive cache headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('ETag', etag);
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // Cache for 1 year
-    res.setHeader('Expires', new Date(Date.now() + 31536000 * 1000).toUTCString());
-    res.setHeader('Last-Modified', metadata.uploadDate.toUTCString());
-    
-    // Set content type
-    const contentType = metadata.contentType || 'image/jpeg';
-    res.setHeader('Content-Type', contentType);
-    
-    stream.on('error', (error) => {
-      console.error('Error streaming image:', error);
-      if (!res.headersSent) {
-        res.status(404).json({ success: false, error: 'Image not found' });
-      }
-    });
-
-    stream.pipe(res);
-  } catch (error) {
-    console.error('Error serving image:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ success: false, error: 'Internal server error' });
-    }
-  }
-});
-
-// Helper function to determine content type from stream metadata
-function getContentTypeFromStream(stream: any): string | null {
-  try {
-    // Try to get content type from stream metadata
-    if (stream.options && stream.options.contentType) {
-      return stream.options.contentType;
-    }
-    
-    // Try to get from file metadata
-    if (stream.file && stream.file.contentType) {
-      return stream.file.contentType;
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Error getting content type:', error);
-    return null;
-  }
-}
+// Product images are now served via static file serving from /images/products/
+// No additional route needed - files are served directly from the file system
 
 // Add error handling for uncaught exceptions
 process.on('uncaughtException', (err) => {

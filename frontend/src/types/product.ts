@@ -3,10 +3,10 @@ export interface Product {
   name: string;
   description: string;
   price?: number;
-  categories: Array<{ _id: string; name: string; slug: string }>;
+  categories: Array<{ _id: string; name: string; slug: string } | string>;
   stock?: number;
-  images: string[];
-  defaultImage?: string;
+  images: string[]; // Image filenames (e.g., "product-123.jpg")
+  defaultImage?: string; // Default image filename
   occasions?: string[];
   vendors?: Array<{ _id: string; name: string }>;
   isFeatured?: boolean;

@@ -27,8 +27,10 @@ const AdminProducts: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Partial<Product>>({});
   const [imageCache, setImageCache] = useState<Map<string, string>>(new Map());
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<Array<{ filename: string; url: string; originalName: string }>>([]);
   const [uploadError, setUploadError] = useState<string>('');
+  const [deletingProducts, setDeletingProducts] = useState<Set<string>>(new Set());
+  const [recentlyDeleted, setRecentlyDeleted] = useState<Set<string>>(new Set());
 
   // Preload all product images
   useEffect(() => {
@@ -87,15 +89,52 @@ const AdminProducts: React.FC = () => {
     fetchCategories();
   }, [user, token, router]);
 
+  const clearCacheAndRefresh = async () => {
+    try {
+      // Clear any cached data
+      if (typeof window !== 'undefined') {
+        // Clear image cache
+        setImageCache(new Map());
+        
+        // Clear any cached API responses
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+        }
+      }
+      
+      // Fetch fresh data
+      await fetchProducts();
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      // Fallback to regular fetch
+      await fetchProducts();
+    }
+  };
+
+  // Debug function to log current products
+  const debugProducts = () => {
+    console.log('Current products in state:', products.map(p => ({ id: p._id, name: p.name })));
+  };
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/products');
+      setError(''); // Clear any previous errors
+      
+      // Add cache busting parameter to ensure fresh data
+      const response = await api.get('/products', {
+        params: {
+          _t: Date.now() // Cache busting parameter
+        }
+      });
+      
       const productsData = response.data?.data || response.data || [];
       setProducts(Array.isArray(productsData) ? productsData : []);
     } catch (err: any) {
       console.error('Error fetching products:', err);
-      setError(err.response?.data?.error?.message || 'Failed to fetch products');
+      const errorMessage = err.response?.data?.error?.message || err.response?.data?.message || 'Failed to fetch products';
+      setError(errorMessage);
       setProducts([]); // Ensure products is always an array
     } finally {
       setLoading(false);
@@ -119,12 +158,19 @@ const AdminProducts: React.FC = () => {
       name: product.name,
       description: product.description,
       price: product.price,
-      category: product.category,
+              categories: product.categories,
       stock: product.stock,
       occasions: product.occasions,
       isFeatured: product.isFeatured
     });
-    setUploadedImages(product.images || []);
+            // Convert existing images to the new format if they exist
+        const existingImages = product.images || [];
+        const formattedImages = existingImages.map((filename: string) => ({
+          filename: filename,
+          url: `/images/products/${filename}`,
+          originalName: filename
+        }));
+        setUploadedImages(formattedImages);
     setShowModal(true);
   };
 
@@ -154,11 +200,11 @@ const AdminProducts: React.FC = () => {
         ...editingProduct,
         name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
         description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
-        // Ensure categories is an array
-        categories: editingProduct.category ? [editingProduct.category] : [],
-        // Include images
-        images: uploadedImages,
-        defaultImage: uploadedImages[0] || undefined
+        // Ensure categories is an array of ObjectId strings
+        categories: editingProduct.categories?.map(cat => typeof cat === 'string' ? cat : cat._id) || [],
+        // Include images - extract filenames
+        images: uploadedImages.map(img => img.filename),
+        defaultImage: uploadedImages[0]?.filename || undefined
       };
 
       console.log('Sending validated new product data:', validatedData);
@@ -205,9 +251,9 @@ const AdminProducts: React.FC = () => {
         ...editingProduct,
         name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
         description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
-        // Include images
-        images: uploadedImages,
-        defaultImage: uploadedImages[0] || undefined
+        // Include images - extract filenames
+        images: uploadedImages.map(img => img.filename),
+        defaultImage: uploadedImages[0]?.filename || undefined
       };
 
       console.log('Sending validated update data:', validatedData);
@@ -239,13 +285,60 @@ const AdminProducts: React.FC = () => {
 
   const handleDeleteProduct = async (productId: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
+    
+    // Prevent multiple deletions of the same product
+    if (deletingProducts.has(productId)) {
+      return;
+    }
+    
+    // Prevent deleting recently deleted products
+    if (recentlyDeleted.has(productId)) {
+      setError('This product was recently deleted. Please refresh the page.');
+      return;
+    }
 
     try {
+      setError(''); // Clear any previous errors
+      setDeletingProducts(prev => new Set(prev).add(productId));
+      
+      // Optimistic update - remove product from state immediately
+      setProducts(prevProducts => prevProducts.filter(product => product._id !== productId));
+      
       await api.delete(`/products/${productId}`);
-      fetchProducts();
+      setSuccess('Product deleted successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+      
+      // Add to recently deleted set to prevent immediate re-deletion
+      setRecentlyDeleted(prev => new Set(prev).add(productId));
+      setTimeout(() => {
+        setRecentlyDeleted(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(productId);
+          return newSet;
+        });
+      }, 5000); // Remove from recently deleted after 5 seconds
+      
+      // Fetch fresh data to ensure consistency
+      await fetchProducts();
     } catch (err: any) {
       console.error('Error deleting product:', err);
-      setError(err.response?.data?.error?.message || 'Failed to delete product');
+      const errorMessage = err.response?.data?.error?.message || err.response?.data?.message || 'Failed to delete product';
+      setError(errorMessage);
+      
+      // If the product was not found, refresh the products list to get the latest data
+      if (err.response?.status === 404) {
+        console.log('Product not found, refreshing products list...');
+        await fetchProducts();
+      } else {
+        // If it was a different error, revert the optimistic update
+        await fetchProducts();
+      }
+    } finally {
+      setDeletingProducts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(productId);
+        return newSet;
+      });
     }
   };
 
@@ -256,7 +349,11 @@ const AdminProducts: React.FC = () => {
   };
 
   const handleImageUploadSuccess = (fileData: { filename: string; url: string; originalName: string }) => {
-    setUploadedImages(prev => [...prev, fileData.url]);
+    setUploadedImages(prev => [...prev, {
+      filename: fileData.filename,
+      url: fileData.url,
+      originalName: fileData.originalName
+    }]);
     setUploadError('');
   };
 
@@ -316,29 +413,75 @@ const AdminProducts: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Products Management</h2>
-        <button
-          onClick={() => {
-            setSelectedProduct(null);
-            setEditingProduct({});
-            setUploadedImages([]);
-            setUploadError('');
-            setShowModal(true);
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Add New Product
-        </button>
+        <div className="flex space-x-3">
+          {process.env.NODE_ENV === 'development' && (
+            <button
+              onClick={debugProducts}
+              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm"
+            >
+              Debug
+            </button>
+          )}
+          <button
+            onClick={clearCacheAndRefresh}
+            disabled={loading}
+            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Refreshing...
+              </div>
+            ) : (
+              'Refresh'
+            )}
+          </button>
+          <button
+            onClick={() => {
+              setSelectedProduct(null);
+              setEditingProduct({});
+              setUploadedImages([]);
+              setUploadError('');
+              setShowModal(true);
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Add New Product
+          </button>
+        </div>
       </div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <p className="text-red-800 font-medium">Error</p>
+              <p className="text-red-700 mt-1">{error}</p>
+            </div>
+            <button
+              onClick={() => setError('')}
+              className="text-red-500 hover:text-red-700 ml-4"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
 
       {success && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-green-800">{success}</p>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <p className="text-green-800 font-medium">Success</p>
+              <p className="text-green-700 mt-1">{success}</p>
+            </div>
+            <button
+              onClick={() => setSuccess('')}
+              className="text-green-500 hover:text-green-700 ml-4"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
 
@@ -396,7 +539,7 @@ const AdminProducts: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getCategoryName(product.category)}
+                      {getCategoryName(product.categories?.[0])}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       ₹{product.price?.toFixed(2) || '0.00'}
@@ -417,15 +560,32 @@ const AdminProducts: React.FC = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEditProduct(product)}
-                          className="text-blue-600 hover:text-blue-900"
+                          disabled={deletingProducts.has(product._id) || recentlyDeleted.has(product._id)}
+                          className={`${
+                            deletingProducts.has(product._id) || recentlyDeleted.has(product._id)
+                              ? 'text-gray-400 cursor-not-allowed'
+                              : 'text-blue-600 hover:text-blue-900'
+                          }`}
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDeleteProduct(product._id)}
-                          className="text-red-600 hover:text-red-900"
+                          disabled={deletingProducts.has(product._id) || recentlyDeleted.has(product._id)}
+                          className={`${
+                            deletingProducts.has(product._id)
+                              ? 'text-gray-400 cursor-not-allowed'
+                              : recentlyDeleted.has(product._id)
+                              ? 'text-gray-500 cursor-not-allowed'
+                              : 'text-red-600 hover:text-red-900'
+                          }`}
                         >
-                          Delete
+                          {deletingProducts.has(product._id) 
+                            ? 'Deleting...' 
+                            : recentlyDeleted.has(product._id)
+                            ? 'Deleted'
+                            : 'Delete'
+                          }
                         </button>
                       </div>
                     </td>
@@ -536,12 +696,12 @@ const AdminProducts: React.FC = () => {
                   Category
                 </label>
                 <select
-                  value={typeof editingProduct.category === 'object' ? editingProduct.category?._id || '' : (editingProduct.category || '')}
+                  value={typeof editingProduct.categories?.[0] === 'string' ? editingProduct.categories[0] : editingProduct.categories?.[0]?._id || ''}
                   onChange={(e) => {
-                    const category = categories.find(cat => cat._id === e.target.value);
+                    const categoryId = e.target.value;
                     setEditingProduct({
                       ...editingProduct,
-                      category: category || ''
+                      categories: categoryId ? [categoryId] : []
                     });
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -593,10 +753,10 @@ const AdminProducts: React.FC = () => {
                   <div className="mt-4">
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Images:</h4>
                     <div className="grid grid-cols-3 gap-2">
-                      {uploadedImages.map((imageUrl, index) => (
+                      {uploadedImages.map((imageData, index) => (
                         <div key={index} className="relative">
                           <img
-                            src={imageUrl}
+                            src={imageData.url}
                             alt={`Product image ${index + 1}`}
                             className="w-full h-20 object-cover rounded-lg"
                           />

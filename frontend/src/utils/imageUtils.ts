@@ -1,20 +1,20 @@
 /**
- * Image Utilities - Product images are now served from MongoDB GridFS via the backend API.
- * This utility handles both GridFS images (with ObjectId URLs) and legacy images (with slug names).
+ * Image Utilities - Product images are now stored in the file system
+ * This utility handles image paths for products stored in the public folder
  */
 
 // Backend API base URL for API calls
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
-// Backend base URL for static files (legacy images) - remove /api suffix
+// Backend base URL for static files - remove /api suffix
 const STATIC_BASE_URL = API_BASE_URL.replace('/api', '');
 
 export const PRODUCT_IMAGES_PATH = `${STATIC_BASE_URL}/images/products`;
 export const DEFAULT_PRODUCT_IMAGE = `${PRODUCT_IMAGES_PATH}/placeholder.svg`;
 
 /**
- * Get product image path - handles both GridFS images and legacy images
- * @param imagePath - GridFS URL (/api/images/fileId) or relative path from database
+ * Get product image path - handles file system stored images
+ * @param imagePath - Image filename (e.g., "product-123.jpg") or full path
  * @param slug - Product slug for fallback image filename
  * @returns Image path string
  */
@@ -24,11 +24,6 @@ export function getProductImage(imagePath?: string, slug?: string): string {
     return DEFAULT_PRODUCT_IMAGE;
   }
 
-  // If we have a GridFS URL (starts with /api/images/), use it directly
-  if (imagePath.startsWith('/api/images/')) {
-    return `${STATIC_BASE_URL}${imagePath}`;
-  }
-  
   // If we have a full URL (uploaded image), use it directly
   if (imagePath.startsWith('http')) {
     return imagePath;
@@ -36,14 +31,6 @@ export function getProductImage(imagePath?: string, slug?: string): string {
   
   // If we have a relative path starting with /images/products/ (from database)
   if (imagePath.startsWith('/images/products/')) {
-    // Check if it's a JPG/PNG file that might not exist, use SVG fallback
-    if (imagePath.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-      // Try to use a category-based SVG fallback
-      const categoryFallback = getCategoryBasedFallback(slug);
-      if (categoryFallback) {
-        return categoryFallback;
-      }
-    }
     return `${STATIC_BASE_URL}${imagePath}`;
   }
   

@@ -12,8 +12,8 @@ export interface IProduct extends Document {
   categories: mongoose.Types.ObjectId[]; // Multiple categories
   price: number;
   stock: number;
-  images?: string[];
-  defaultImage?: string;
+  images?: string[]; // Image filenames (e.g., "product-123.jpg")
+  defaultImage?: string; // Default image filename
   occasions?: string[]; // Array of occasion tags
   vendors?: mongoose.Types.ObjectId[]; // Multiple vendors
   isFeatured: boolean;
@@ -35,7 +35,7 @@ const productSchema = new Schema<IProduct>({
   },
   slug: {
     type: String,
-    required: true,
+    required: false, // Will be generated automatically
     unique: true,
     trim: true,
     lowercase: true
@@ -57,11 +57,25 @@ const productSchema = new Schema<IProduct>({
   },
   images: [{
     type: String,
-    trim: true
+    trim: true,
+    validate: {
+      validator: function(v: string) {
+        // Validate filename format (alphanumeric, hyphens, underscores, dots)
+        return /^[a-zA-Z0-9._-]+$/.test(v);
+      },
+      message: 'Invalid filename format'
+    }
   }],
   defaultImage: {
     type: String,
-    trim: true
+    trim: true,
+    validate: {
+      validator: function(v: string) {
+        if (!v) return true; // Allow empty/null
+        return /^[a-zA-Z0-9._-]+$/.test(v);
+      },
+      message: 'Invalid filename format'
+    }
   },
   occasions: [{
     type: String,
@@ -90,25 +104,38 @@ const productSchema = new Schema<IProduct>({
 });
 
 // Generate slug from name before saving
-productSchema.pre('save', function(next) {
-  if (this.isModified('name') && !this.slug) {
-    this.slug = this.name
+productSchema.pre('save', async function(next) {
+  if (!this.slug && this.name) {
+    let baseSlug = this.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
+    
+    // Check if slug already exists and add suffix if needed
+    let slug = baseSlug;
+    let counter = 1;
+    
+    while (await mongoose.model('Product').findOne({ slug, _id: { $ne: this._id } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    
+    this.slug = slug;
   }
   next();
 });
 
 // Indexes
 productSchema.index({ categories: 1 });
-productSchema.index({ vendors: 1 });
-productSchema.index({ occasions: 1 });
-productSchema.index({ isFeatured: 1, isDeleted: 1 });
-productSchema.index({ 'name': 'text', 'description': 'text' });
-
-// Additional indexes for better search performance
 productSchema.index({ price: 1 });
+productSchema.index({ stock: 1 });
 productSchema.index({ isFeatured: 1, createdAt: -1 });
+productSchema.index({ isDeleted: 1 });
+productSchema.index({ slug: 1 }, { unique: true });
+productSchema.index({ name: 'text', description: 'text' }); // Text search index
+productSchema.index({ occasions: 1 });
+productSchema.index({ vendors: 1 });
+productSchema.index({ createdAt: -1 });
+productSchema.index({ updatedAt: -1 });
 
 export const Product = mongoose.model<IProduct>('Product', productSchema); 

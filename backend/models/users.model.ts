@@ -38,7 +38,7 @@ export interface IUser extends Document {
   password: string;
   roleId: mongoose.Types.ObjectId;
   phone: string;
-  avatar?: string; // GridFS file ID for avatar image
+  avatar?: string; // Avatar image filename
   location?: IUserLocation;
   schedules?: IUserSchedule[];
   recipientAddresses?: IRecipientAddress[];

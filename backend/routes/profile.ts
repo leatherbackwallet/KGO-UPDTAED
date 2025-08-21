@@ -6,7 +6,7 @@ import express from 'express';
 import multer from 'multer';
 import { User } from '../models/index';
 import { hashPassword, comparePassword } from '../utils/hash';
-import { uploadImage, deleteImage } from '../utils/gridfs';
+import { uploadImage, deleteImage } from '../utils/fileUpload';
 
 const router = express.Router();
 
@@ -151,12 +151,12 @@ router.post('/avatar', auth, upload.single('avatar'), async (req: AuthenticatedR
 
     // Upload new avatar
     const uploadResult = await uploadImage(req.file);
-    user.avatar = uploadResult.fileId.toString();
+    user.avatar = uploadResult.filename;
     await user.save();
 
     return res.json({
       success: true,
-      data: { avatar: uploadResult.fileId.toString() }
+      data: { avatar: uploadResult.filename }
     });
   } catch (err) {
     console.error('Upload avatar error:', err);

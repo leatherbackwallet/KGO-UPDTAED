@@ -1,13 +1,12 @@
 import express from 'express';
 import multer from 'multer';
-import { v4 as uuidv4 } from 'uuid';
-import { uploadImage, deleteImage, listImages, getImageMetadata } from '../utils/gridfs';
+import { uploadImage, deleteImage, listImages, getImageMetadata } from '../utils/fileUpload';
 const auth = require('../middleware/auth');
 const role = require('../middleware/role');
 
 const router = express.Router();
 
-// Configure multer for memory storage (for GridFS)
+// Configure multer for memory storage
 const storage = multer.memoryStorage();
 
 // File filter to only allow images
@@ -32,7 +31,7 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-// Upload single image to GridFS
+// Upload single image to file system
 router.post('/product-image', auth, role('admin'), upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
@@ -42,25 +41,20 @@ router.post('/product-image', auth, role('admin'), upload.single('image'), async
       });
     }
 
-    // Generate a unique filename
-    const fileExtension = req.file.originalname.split('.').pop();
-    const uniqueFilename = `${uuidv4()}.${fileExtension}`;
-
-    // Upload to GridFS
-    const uploadResult = await uploadImage(req.file, uniqueFilename);
+    // Upload to file system
+    const uploadResult = await uploadImage(req.file);
 
     // Generate the public URL for the uploaded file
-    const imageUrl = `/api/images/${uploadResult.fileId}`;
+    const imageUrl = `/images/products/${uploadResult.filename}`;
 
     return res.status(200).json({
       success: true,
       data: {
-        fileId: uploadResult.fileId,
         filename: uploadResult.filename,
-        originalName: req.file.originalname,
+        originalName: uploadResult.originalName,
         url: imageUrl,
         size: uploadResult.size,
-        mimetype: uploadResult.contentType
+        mimetype: uploadResult.mimetype
       }
     });
   } catch (error) {
@@ -72,19 +66,19 @@ router.post('/product-image', auth, role('admin'), upload.single('image'), async
   }
 });
 
-// Delete uploaded image from GridFS
-router.delete('/product-image/:fileId', auth, role('admin'), async (req, res) => {
+// Delete uploaded image from file system
+router.delete('/product-image/:filename', auth, role('admin'), async (req, res) => {
   try {
-    const { fileId } = req.params;
+    const { filename } = req.params;
 
-    if (!fileId) {
+    if (!filename) {
       return res.status(400).json({
         success: false,
-        error: { message: 'File ID is required', code: 'MISSING_FILE_ID' }
+        error: { message: 'Filename is required', code: 'MISSING_FILENAME' }
       });
     }
 
-    await deleteImage(fileId);
+    await deleteImage(filename);
     
     return res.status(200).json({
       success: true,
@@ -99,19 +93,20 @@ router.delete('/product-image/:fileId', auth, role('admin'), async (req, res) =>
   }
 });
 
-// Get list of uploaded images from GridFS
+// Get list of uploaded images from file system
 router.get('/product-images', auth, role('admin'), async (req, res) => {
   try {
     const images = await listImages();
     
-    const imageFiles = images.map(image => ({
-      fileId: image._id,
-      filename: image.filename,
-      url: `/api/images/${image._id}`,
-      size: image.length,
-      mimetype: image.contentType,
-      uploadDate: image.uploadDate,
-      metadata: image.metadata
+    const imageFiles = await Promise.all(images.map(async (filename) => {
+      const metadata = await getImageMetadata(filename);
+      return {
+        filename: filename,
+        url: `/images/products/${filename}`,
+        size: metadata?.size || 0,
+        mimetype: metadata?.mimetype || 'application/octet-stream',
+        created: metadata?.created || new Date()
+      };
     }));
 
     return res.status(200).json({
@@ -128,18 +123,18 @@ router.get('/product-images', auth, role('admin'), async (req, res) => {
 });
 
 // Get image metadata
-router.get('/product-image/:fileId', auth, role('admin'), async (req, res) => {
+router.get('/product-image/:filename', auth, role('admin'), async (req, res) => {
   try {
-    const { fileId } = req.params;
+    const { filename } = req.params;
 
-    if (!fileId) {
+    if (!filename) {
       return res.status(400).json({
         success: false,
-        error: { message: 'File ID is required', code: 'MISSING_FILE_ID' }
+        error: { message: 'Filename is required', code: 'MISSING_FILENAME' }
       });
     }
 
-    const metadata = await getImageMetadata(fileId);
+    const metadata = await getImageMetadata(filename);
     
     if (!metadata) {
       return res.status(404).json({
@@ -151,13 +146,11 @@ router.get('/product-image/:fileId', auth, role('admin'), async (req, res) => {
     return res.status(200).json({
       success: true,
       data: {
-        fileId: metadata._id,
         filename: metadata.filename,
-        url: `/api/images/${metadata._id}`,
-        size: metadata.length,
-        mimetype: metadata.contentType,
-        uploadDate: metadata.uploadDate,
-        metadata: metadata.metadata
+        url: `/images/products/${metadata.filename}`,
+        size: metadata.size,
+        mimetype: metadata.mimetype,
+        created: metadata.created
       }
     });
   } catch (error) {

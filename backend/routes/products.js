@@ -2,8 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { Product } = require('../models/products.model');
 const { Category } = require('../models/categories.model');
+const { ActivityLog } = require('../models/activityLogs.model');
+const { ProductAttribute } = require('../models/productAttributes.model');
+const { VendorProduct } = require('../models/vendorProducts.model');
+const { Review } = require('../models/reviews.model');
+const { Wishlist } = require('../models/wishlists.model');
+const { Notification } = require('../models/notifications.model');
 const auth = require('../middleware/auth');
 const role = require('../middleware/role');
+const { validate } = require('../middleware/validation');
 const mongoose = require('mongoose');
 const { cacheConfigs, invalidateProductCache } = require('../middleware/cache');
 
@@ -152,10 +159,80 @@ router.post('/', auth, role('admin'), async (req, res) => {
       slug,
       defaultImage
     });
+    
+    // Log the product creation activity
+    await ActivityLog.logUserAction(
+      req.user.id,
+      'product_created',
+      { type: 'Product', id: product._id },
+      { 
+        productName: product.name,
+        productId: product._id,
+        categories: categoryIds,
+        price: product.price,
+        stock: product.stock
+      }
+    );
+    
+    // Create notification for product creation
+    try {
+      await Notification.create({
+        userId: req.user.id,
+        title: 'Product Created Successfully',
+        message: `Product "${product.name}" has been created successfully`,
+        type: 'success',
+        relatedEntity: { type: 'Product', id: product._id }
+      });
+    } catch (notificationError) {
+      console.error('Error creating notification:', notificationError);
+      // Don't fail the operation if notification fails
+    }
+    
     res.status(201).json(product);
   } catch (err) {
     console.error('Product creation error:', err);
-    res.status(500).json({ message: err.message || 'Server error' });
+    
+    // Log the error for debugging
+    await ActivityLog.logSystemAction(
+      'product_creation_failed',
+      { type: 'Product', id: 'unknown' },
+      { 
+        error: err.message,
+        stack: err.stack,
+        requestData: req.body,
+        userId: req.user.id
+      }
+    );
+    
+    // Return appropriate error response
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ 
+        success: false,
+        error: { 
+          message: 'Validation failed', 
+          code: 'VALIDATION_ERROR',
+          details: Object.values(err.errors).map(e => e.message)
+        } 
+      });
+    }
+    
+    if (err.code === 11000) {
+      return res.status(400).json({ 
+        success: false,
+        error: { 
+          message: 'Product with this name or slug already exists', 
+          code: 'DUPLICATE_ERROR' 
+        } 
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false,
+      error: { 
+        message: 'Failed to create product', 
+        code: 'SERVER_ERROR' 
+      } 
+    });
   }
 });
 
@@ -216,6 +293,23 @@ router.put('/:id', auth, role('admin'), async (req, res) => {
     // Invalidate cache
     invalidateProductCache();
     
+    // Log the product update activity
+    await ActivityLog.logUserAction(
+      req.user.id,
+      'product_updated',
+      { type: 'Product', id: product._id },
+      { 
+        productName: product.name,
+        productId: product._id,
+        changes: updateData,
+        previousData: {
+          name: product?.name,
+          price: product?.price,
+          stock: product?.stock
+        }
+      }
+    );
+    
     res.json({
       success: true,
       data: product,
@@ -233,11 +327,102 @@ router.put('/:id', auth, role('admin'), async (req, res) => {
 // Delete product (admin only)
 router.delete('/:id', auth, role('admin'), async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) return res.status(404).json({ message: 'Product not found' });
-    res.json({ message: 'Product deleted' });
+    console.log(`[DELETE] Attempting to delete product with ID: ${req.params.id}`);
+    
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      console.log(`[DELETE] Invalid ObjectId format: ${req.params.id}`);
+      return res.status(400).json({ 
+        success: false,
+        error: { message: 'Invalid product ID format', code: 'INVALID_ID' } 
+      });
+    }
+    
+    // First check if product exists
+    const existingProduct = await Product.findById(req.params.id);
+    if (!existingProduct) {
+      console.log(`[DELETE] Product not found with ID: ${req.params.id}`);
+      return res.status(404).json({ 
+        success: false,
+        error: { message: 'Product not found', code: 'PRODUCT_NOT_FOUND' } 
+      });
+    }
+    
+    console.log(`[DELETE] Found product: ${existingProduct.name} (ID: ${existingProduct._id})`);
+    
+    // Delete the product
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+    
+    if (!deletedProduct) {
+      console.log(`[DELETE] Failed to delete product with ID: ${req.params.id}`);
+      return res.status(500).json({ 
+        success: false,
+        error: { message: 'Failed to delete product', code: 'DELETE_ERROR' } 
+      });
+    }
+    
+    console.log(`Successfully deleted product: ${deletedProduct.name} (ID: ${deletedProduct._id})`);
+    
+    // Cascade cleanup - remove related records
+    try {
+      console.log(`[DELETE] Starting cascade cleanup for product: ${deletedProduct._id}`);
+      
+      // Cleanup product attributes
+      const deletedAttributes = await ProductAttribute.deleteMany({ productId: req.params.id });
+      console.log(`[DELETE] Deleted ${deletedAttributes.deletedCount} product attributes`);
+      
+      // Cleanup vendor products
+      const deletedVendorProducts = await VendorProduct.deleteMany({ productId: req.params.id });
+      console.log(`[DELETE] Deleted ${deletedVendorProducts.deletedCount} vendor products`);
+      
+      // Cleanup reviews
+      const deletedReviews = await Review.deleteMany({ productId: req.params.id });
+      console.log(`[DELETE] Deleted ${deletedReviews.deletedCount} reviews`);
+      
+      // Remove from wishlists
+      const updatedWishlists = await Wishlist.updateMany(
+        { products: req.params.id },
+        { $pull: { products: req.params.id } }
+      );
+      console.log(`[DELETE] Updated ${updatedWishlists.modifiedCount} wishlists`);
+      
+      console.log(`[DELETE] Cascade cleanup completed successfully`);
+    } catch (cleanupError) {
+      console.error('[DELETE] Error during cascade cleanup:', cleanupError);
+      // Don't fail the delete operation if cleanup fails
+    }
+    
+    // Log the product deletion activity
+    await ActivityLog.logUserAction(
+      req.user.id,
+      'product_deleted',
+      { type: 'Product', id: req.params.id },
+      { 
+        productName: deletedProduct.name,
+        productId: deletedProduct._id,
+        deletedAt: new Date()
+      }
+    );
+    
+    // Invalidate cache
+    invalidateProductCache();
+    
+    res.json({ 
+      success: true,
+      data: { 
+        message: 'Product deleted successfully',
+        deletedProduct: {
+          id: deletedProduct._id,
+          name: deletedProduct.name
+        }
+      }
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('[DELETE] Error deleting product:', err);
+    res.status(500).json({ 
+      success: false,
+      error: { message: 'Server error', code: 'SERVER_ERROR' } 
+    });
   }
 });
 
