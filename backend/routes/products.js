@@ -86,7 +86,9 @@ router.get('/', cacheConfigs.products, async (req, res) => {
       .limit(100); // Limit results for performance
     
     // Set cache headers for product responses
-    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=600'); // 5 min browser, 10 min CDN
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // Prevent browser caching
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.setHeader('ETag', `"products-${products.length}-${Date.now()}"`);
     
     res.json({
@@ -422,6 +424,23 @@ router.delete('/:id', auth, role('admin'), async (req, res) => {
     res.status(500).json({ 
       success: false,
       error: { message: 'Server error', code: 'SERVER_ERROR' } 
+    });
+  }
+});
+
+// Clear product cache (admin only)
+router.post('/clear-cache', auth, role('admin'), async (req, res) => {
+  try {
+    invalidateProductCache();
+    res.json({
+      success: true,
+      message: 'Product cache cleared successfully'
+    });
+  } catch (err) {
+    console.error('Cache clear error:', err);
+    res.status(500).json({ 
+      success: false,
+      error: { message: 'Failed to clear cache', code: 'CACHE_CLEAR_ERROR' } 
     });
   }
 });
