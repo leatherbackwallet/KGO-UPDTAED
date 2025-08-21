@@ -45,7 +45,7 @@ npm run dev
 
 ### Required
 ```bash
-MONGODB_URI=your-mongodb-connection-string
+MONGODB_URI=mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
 JWT_SECRET=your-super-secret-jwt-key-here
 ```
 
@@ -110,7 +110,7 @@ curl -X POST "http://localhost:5001/api/categories" \
 #### 3. Via Database Directly
 ```bash
 # Connect to MongoDB and add data directly
-mongosh "your-mongodb-uri"
+mongosh "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net"
 ```
 
 ## Current Database State
@@ -142,10 +142,10 @@ mongosh "your-mongodb-uri"
 ### 3. Database Backups
 ```bash
 # Create regular backups
-mongodump --uri="your-mongodb-uri" --out=./backup-$(date +%Y%m%d)
+mongodump --uri="mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net" --out=./backup-$(date +%Y%m%d)
 
 # Restore from backup if needed
-mongorestore --uri="your-mongodb-uri" ./backup-folder
+mongorestore --uri="mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net" ./backup-folder
 ```
 
 ### 4. Data Validation

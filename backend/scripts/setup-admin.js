@@ -8,6 +8,38 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
+// ⚠️ CRITICAL: Validate MongoDB Atlas URI
+if (!process.env.MONGODB_URI) {
+  console.error('❌ ERROR: MONGODB_URI environment variable is required');
+  process.exit(1);
+}
+
+// Ensure MongoDB Atlas is always used, never local MongoDB
+if (!process.env.MONGODB_URI.includes('mongodb+srv://') || 
+    !process.env.MONGODB_URI.includes('mongodb.net') ||
+    process.env.MONGODB_URI.includes('localhost') ||
+    process.env.MONGODB_URI.includes('127.0.0.1')) {
+  console.error('❌ ERROR: MongoDB Atlas must be used. Local MongoDB is not allowed.');
+  console.error('❌ Current URI:', process.env.MONGODB_URI);
+  console.error('✅ Expected format: mongodb+srv://username:password@cluster.mongodb.net/database');
+  console.error('✅ Correct URI: mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net');
+  process.exit(1);
+}
+
+// Validate correct MongoDB Atlas URI
+const correctUri = 'mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net';
+if (!process.env.MONGODB_URI.includes('castlebek') || 
+    !process.env.MONGODB_URI.includes('keralagiftsonline.7oukp55.mongodb.net')) {
+  console.error('❌ ERROR: Incorrect MongoDB Atlas URI detected!');
+  console.error('❌ Current URI:', process.env.MONGODB_URI);
+  console.error('✅ Correct URI:', correctUri);
+  console.error('🔧 Please update your .env file with the correct URI');
+  process.exit(1);
+}
+
+console.log('✅ MongoDB Atlas URI validated successfully');
+console.log('✅ Connecting to: keralagiftsonline.7oukp55.mongodb.net');
+
 // Define schemas inline
 const roleSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
@@ -34,10 +66,6 @@ const User = mongoose.model('User', userSchema);
 async function setupAdmin() {
   try {
     console.log('🔧 Setting up admin user and role...');
-    
-    if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI environment variable is required');
-    }
     
     // Connect to MongoDB
     await mongoose.connect(process.env.MONGODB_URI);

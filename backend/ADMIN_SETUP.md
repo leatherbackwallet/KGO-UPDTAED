@@ -8,11 +8,31 @@ This guide explains how to set up the admin user for your KeralGiftsOnline appli
 - ✅ **Superuser Only**: Only creates admin role and superuser when needed
 - ✅ **Safe Operations**: No risk of data loss from seeding operations
 
+## ⚠️ IMPORTANT: Correct MongoDB URI
+
+### ✅ **CORRECT DATABASE URI**
+```
+mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
+```
+
+### ❌ **INCORRECT DATABASE URI (DO NOT USE)**
+```
+mongodb+srv://dev:JthEecxEt7J4BYN5@improov-dev.u8zpctx.mongodb.net/keralagiftsonline?retryWrites=true&w=majority
+```
+
+### 🔧 **Database Connection Details**
+- **Protocol**: `mongodb+srv://`
+- **Username**: `castlebek`
+- **Password**: `uJrTGo7E47HiEYpf`
+- **Cluster**: `keralagiftsonline.7oukp55.mongodb.net`
+- **Database**: `keralagiftsonline`
+
 ## Option 1: Automatic Creation on Startup (Recommended)
 
 ### Step 1: Set Environment Variables
 Add these to your `.env` file:
 ```bash
+MONGODB_URI=mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
 ADMIN_EMAIL=admin@keralagiftsonline.com
 ADMIN_PASSWORD=YourSecurePassword123!
 ADMIN_PHONE=+49123456789
@@ -31,6 +51,7 @@ The admin user will be created on the first startup only.
 
 ### Step 1: Set Environment Variables
 ```bash
+MONGODB_URI=mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
 ADMIN_EMAIL=admin@keralagiftsonline.com
 ADMIN_PASSWORD=YourSecurePassword123!
 ADMIN_PHONE=+49123456789
@@ -55,6 +76,7 @@ If you want to manage admin users manually:
 
 ```bash
 # Set in your .env file
+MONGODB_URI=mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
 CREATE_SUPERUSER=false
 ```
 
@@ -72,6 +94,7 @@ Then create admin users through your application's admin interface or API.
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
+| `MONGODB_URI` | MongoDB connection string | `mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net` | **YES** |
 | `ADMIN_EMAIL` | Admin user email | `admin@keralagiftsonline.com` | No |
 | `ADMIN_PASSWORD` | Admin user password | `SuperSecure123!` | No |
 | `ADMIN_PHONE` | Admin user phone | `+49123456789` | No |
@@ -106,7 +129,7 @@ No other data (products, categories, users, etc.) will be automatically created.
 
 ### Admin User Not Created
 1. Check if `CREATE_SUPERUSER=true` is set in your `.env` file
-2. Verify MongoDB connection
+2. Verify MongoDB connection using the correct URI
 3. Check server logs for errors
 4. Run the setup script manually: `npm run setup-admin`
 
@@ -115,11 +138,18 @@ No other data (products, categories, users, etc.) will be automatically created.
 2. Check if the user is properly linked to the admin role
 3. Verify the role ID in the user document
 
+### Database Connection Issues
+1. **Verify MongoDB URI**: Ensure you're using the correct URI
+2. **Check network connectivity**: Ensure MongoDB Atlas is accessible
+3. **Verify credentials**: Check username and password
+4. **Check IP whitelist**: Ensure your IP is whitelisted in MongoDB Atlas
+
 ## Database Queries
 
 ### Check Existing Admin Users
 ```javascript
 // In MongoDB shell or Compass
+mongosh "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net"
 db.users.find({email: "admin@keralagiftsonline.com"})
 ```
 
@@ -131,4 +161,16 @@ db.roles.find({name: "admin"})
 ### Delete Admin User (if needed)
 ```javascript
 db.users.deleteOne({email: "admin@keralagiftsonline.com"})
+```
+
+## ⚠️ **CRITICAL REMINDER**
+
+**ALWAYS USE THE CORRECT MONGODB URI:**
+```
+mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
+```
+
+**NEVER USE THE OLD URI:**
+```
+mongodb+srv://dev:JthEecxEt7J4BYN5@improov-dev.u8zpctx.mongodb.net/keralagiftsonline?retryWrites=true&w=majority
 ```

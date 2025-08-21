@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
 import { Product } from '../types/product';
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
+import FileUpload from './FileUpload';
 
 interface Category {
   _id: string;
@@ -26,6 +27,8 @@ const AdminProducts: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Partial<Product>>({});
   const [imageCache, setImageCache] = useState<Map<string, string>>(new Map());
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadError, setUploadError] = useState<string>('');
 
   // Preload all product images
   useEffect(() => {
@@ -121,6 +124,7 @@ const AdminProducts: React.FC = () => {
       occasions: product.occasions,
       isFeatured: product.isFeatured
     });
+    setUploadedImages(product.images || []);
     setShowModal(true);
   };
 
@@ -151,7 +155,10 @@ const AdminProducts: React.FC = () => {
         name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
         description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
         // Ensure categories is an array
-        categories: editingProduct.category ? [editingProduct.category] : []
+        categories: editingProduct.category ? [editingProduct.category] : [],
+        // Include images
+        images: uploadedImages,
+        defaultImage: uploadedImages[0] || undefined
       };
 
       console.log('Sending validated new product data:', validatedData);
@@ -197,7 +204,10 @@ const AdminProducts: React.FC = () => {
       const validatedData = {
         ...editingProduct,
         name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
-        description: typeof editingProduct.description === 'string' ? editingProduct.description : ''
+        description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
+        // Include images
+        images: uploadedImages,
+        defaultImage: uploadedImages[0] || undefined
       };
 
       console.log('Sending validated update data:', validatedData);
@@ -243,6 +253,19 @@ const AdminProducts: React.FC = () => {
     const target = e.target as HTMLImageElement;
     console.error('Image failed to load:', target.src);
     target.src = DEFAULT_PRODUCT_IMAGE;
+  };
+
+  const handleImageUploadSuccess = (fileData: { filename: string; url: string; originalName: string }) => {
+    setUploadedImages(prev => [...prev, fileData.url]);
+    setUploadError('');
+  };
+
+  const handleImageUploadError = (error: string) => {
+    setUploadError(error);
+  };
+
+  const removeImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const getCategoryName = (category: any) => {
@@ -297,6 +320,8 @@ const AdminProducts: React.FC = () => {
           onClick={() => {
             setSelectedProduct(null);
             setEditingProduct({});
+            setUploadedImages([]);
+            setUploadError('');
             setShowModal(true);
           }}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -427,7 +452,11 @@ const AdminProducts: React.FC = () => {
                 {selectedProduct ? 'Edit Product' : 'Add New Product'}
               </h3>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  setUploadedImages([]);
+                  setUploadError('');
+                }}
                 className="text-gray-500 hover:text-gray-700"
               >
                 ✕
@@ -542,11 +571,56 @@ const AdminProducts: React.FC = () => {
                   <span className="ml-2 text-sm text-gray-700">Featured Product</span>
                 </label>
               </div>
+
+              {/* Image Upload Section */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Product Images
+                </label>
+                <FileUpload
+                  onUploadSuccess={handleImageUploadSuccess}
+                  onUploadError={handleImageUploadError}
+                  accept="image/*"
+                  maxSize={5}
+                  className="mb-4"
+                />
+                {uploadError && (
+                  <p className="text-red-600 text-sm mt-1">{uploadError}</p>
+                )}
+                
+                {/* Display uploaded images */}
+                {uploadedImages.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Images:</h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      {uploadedImages.map((imageUrl, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={imageUrl}
+                            alt={`Product image ${index + 1}`}
+                            className="w-full h-20 object-cover rounded-lg"
+                          />
+                          <button
+                            onClick={() => removeImage(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex justify-end space-x-3 mt-6">
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  setUploadedImages([]);
+                  setUploadError('');
+                }}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
               >
                 Cancel

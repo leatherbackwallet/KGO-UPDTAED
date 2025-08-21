@@ -80,7 +80,7 @@
 
 ### Required
 ```bash
-MONGODB_URI=your-mongodb-connection-string
+MONGODB_URI=mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
 JWT_SECRET=your-super-secret-jwt-key-here
 ```
 
@@ -94,6 +94,37 @@ ADMIN_PHONE=+49123456789
 # Enable automatic superuser creation
 CREATE_SUPERUSER=false
 ```
+
+## ⚠️ IMPORTANT: Correct MongoDB URI
+
+### ✅ **CORRECT DATABASE URI**
+```
+mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
+```
+
+### ❌ **INCORRECT DATABASE URI (DO NOT USE)**
+```
+mongodb+srv://dev:JthEecxEt7J4BYN5@improov-dev.u8zpctx.mongodb.net/keralagiftsonline?retryWrites=true&w=majority
+```
+
+### 🔧 **Database Connection Details**
+- **Protocol**: `mongodb+srv://`
+- **Username**: `castlebek`
+- **Password**: `uJrTGo7E47HiEYpf`
+- **Cluster**: `keralagiftsonline.7oukp55.mongodb.net`
+- **Database**: `keralagiftsonline`
+
+### 📝 **Files Updated with Correct URI**
+- ✅ `backend/.env` - Actual environment file
+- ✅ `backend/env.example` - Example environment file
+- ✅ `backend/DATABASE_MANAGEMENT.md` - Database management guide
+- ✅ `backend/CRUD_OPERATIONS_GUIDE.md` - CRUD operations guide
+- ✅ `backend/SEEDING_REMOVAL_SUMMARY.md` - This file
+
+### 🛡️ **Security Note**
+- **Keep credentials secure**: Never commit `.env` files to version control
+- **Use environment variables**: Always use environment variables in production
+- **Regular rotation**: Rotate database passwords regularly
 
 ## How to Add Data
 
@@ -121,7 +152,7 @@ curl -X POST "http://localhost:5001/api/products" \
 ### 3. Database Direct
 ```bash
 # Connect to MongoDB and add data directly
-mongosh "your-mongodb-uri"
+mongosh "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net"
 ```
 
 ## Benefits of This Change
@@ -153,3 +184,9 @@ mongosh "your-mongodb-uri"
 ## Summary
 
 The application now has a **minimal, safe setup** that only creates the essential admin user and role. All other data management is manual, giving you complete control over your database content while eliminating any risk of accidental data loss from seeding operations.
+
+### 🎯 **Key Points**
+1. **Correct MongoDB URI**: Always use `mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net`
+2. **No Seeding**: All data must be added manually
+3. **Full CRUD**: Complete CRUD operations available through admin interface and API
+4. **Safe Operations**: No risk of data loss from automatic scripts
