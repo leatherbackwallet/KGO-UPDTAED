@@ -56,22 +56,18 @@ var ContentStatus;
 const contentSchema = new mongoose_1.Schema({
     title: {
         en: { type: String, required: true },
-        de: { type: String, required: true },
         ml: { type: String, required: true }
     },
     content: {
         en: { type: String, required: true },
-        de: { type: String, required: true },
         ml: { type: String, required: true }
     },
     excerpt: {
         en: { type: String },
-        de: { type: String },
         ml: { type: String }
     },
     metaDescription: {
         en: { type: String },
-        de: { type: String },
         ml: { type: String }
     },
     slug: {
@@ -99,7 +95,6 @@ const contentSchema = new mongoose_1.Schema({
     seo: {
         keywords: {
             en: [String],
-            de: [String],
             ml: [String]
         },
         canonicalUrl: String,
@@ -147,16 +142,13 @@ const contentSchema = new mongoose_1.Schema({
         },
         vocabulary: {
             en: [String],
-            de: [String],
             ml: [String]
         },
         pronunciation: {
-            ml: String,
-            de: String
+            ml: String
         },
         grammarNotes: {
             en: String,
-            de: String,
             ml: String
         }
     },
@@ -171,7 +163,6 @@ const contentSchema = new mongoose_1.Schema({
         ingredients: [{
                 name: {
                     en: String,
-                    de: String,
                     ml: String
                 },
                 amount: String,
@@ -181,7 +172,6 @@ const contentSchema = new mongoose_1.Schema({
                 step: Number,
                 instruction: {
                     en: String,
-                    de: String,
                     ml: String
                 },
                 image: String
@@ -200,12 +190,10 @@ const contentSchema = new mongoose_1.Schema({
         duration: Number,
         significance: {
             en: String,
-            de: String,
             ml: String
         },
         traditions: {
             en: [String],
-            de: [String],
             ml: [String]
         },
         products: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Product' }],
@@ -225,8 +213,6 @@ const contentSchema = new mongoose_1.Schema({
 });
 contentSchema.index({ type: 1, status: 1 });
 contentSchema.index({ 'slug.en': 1 });
-contentSchema.index({ 'slug.de': 1 });
-contentSchema.index({ 'slug.ml': 1 });
 contentSchema.index({ 'culturalContext.festival': 1 });
 contentSchema.index({ 'publishing.publishedAt': 1 });
 contentSchema.index({ 'publishing.isFeatured': 1 });

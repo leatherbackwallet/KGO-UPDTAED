@@ -94,7 +94,7 @@ Then create admin users through your application's admin interface or API.
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `MONGODB_URI` | MongoDB connection string | `mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net` | **YES** |
+| `MONGODB_URI` | MongoDB connection string | `mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline` | **YES** |
 | `ADMIN_EMAIL` | Admin user email | `admin@keralagiftsonline.com` | No |
 | `ADMIN_PASSWORD` | Admin user password | `SuperSecure123!` | No |
 | `ADMIN_PHONE` | Admin user phone | `+49123456789` | No |
@@ -149,7 +149,7 @@ No other data (products, categories, users, etc.) will be automatically created.
 ### Check Existing Admin Users
 ```javascript
 // In MongoDB shell or Compass
-mongosh "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net"
+mongosh "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline"
 db.users.find({email: "admin@keralagiftsonline.com"})
 ```
 

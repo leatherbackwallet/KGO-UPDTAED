@@ -42,7 +42,7 @@ const hubSchema = new mongoose_1.Schema({
         unique: true,
         trim: true,
         maxlength: [100, 'Hub name cannot exceed 100 characters'],
-        description: 'e.g., Eschweiler Central Hub'
+        description: 'e.g., Kochi Central Hub'
     },
     address: {
         street: {
@@ -54,13 +54,13 @@ const hubSchema = new mongoose_1.Schema({
             type: String,
             required: [true, 'City is required'],
             trim: true,
-            default: 'Eschweiler'
+            default: 'Kochi'
         },
         state: {
             type: String,
             required: [true, 'State is required'],
             trim: true,
-            default: 'North Rhine-Westphalia'
+            default: 'Kerala'
         },
         postalCode: {
             type: String,
@@ -93,8 +93,8 @@ hubSchema.virtual('summary').get(function () {
 });
 hubSchema.set('toJSON', { virtuals: true });
 hubSchema.pre('save', function (next) {
-    if (this.address.postalCode && !/^\d{5}$/.test(this.address.postalCode)) {
-        return next(new Error('Postal code must be 5 digits'));
+    if (this.address.postalCode && !/^\d{6}$/.test(this.address.postalCode)) {
+        return next(new Error('Postal code must be 6 digits'));
     }
     next();
 });

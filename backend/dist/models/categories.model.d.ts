@@ -1,14 +1,8 @@
 import mongoose, { Document } from 'mongoose';
 export interface ICategory extends Document {
-    name: {
-        en: string;
-        de: string;
-    };
+    name: string;
     slug: string;
-    description?: {
-        en: string;
-        de: string;
-    };
+    description?: string;
     parentCategory?: mongoose.Types.ObjectId;
     sortOrder: number;
     isActive: boolean;

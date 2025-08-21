@@ -37,28 +37,14 @@ exports.Product = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const productSchema = new mongoose_1.Schema({
     name: {
-        en: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        de: {
-            type: String,
-            required: true,
-            trim: true
-        }
+        type: String,
+        required: true,
+        trim: true
     },
     description: {
-        en: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        de: {
-            type: String,
-            required: true,
-            trim: true
-        }
+        type: String,
+        required: true,
+        trim: true
     },
     slug: {
         type: String,
@@ -117,24 +103,19 @@ const productSchema = new mongoose_1.Schema({
 });
 productSchema.pre('save', function (next) {
     if (this.isModified('name') && !this.slug) {
-        const englishName = this.name.en || this.name.de;
-        this.slug = englishName
+        this.slug = this.name
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
     }
     next();
 });
-productSchema.index({ slug: 1 }, { unique: true });
 productSchema.index({ categories: 1 });
 productSchema.index({ vendors: 1 });
 productSchema.index({ occasions: 1 });
 productSchema.index({ isFeatured: 1, isDeleted: 1 });
-productSchema.index({ 'name.en': 'text', 'name.de': 'text', 'description.en': 'text', 'description.de': 'text' });
-productSchema.index({ occasions: 1 });
-productSchema.index({ categories: 1 });
+productSchema.index({ 'name': 'text', 'description': 'text' });
 productSchema.index({ price: 1 });
 productSchema.index({ isFeatured: 1, createdAt: -1 });
-productSchema.index({ slug: 1 });
 exports.Product = mongoose_1.default.model('Product', productSchema);
 //# sourceMappingURL=products.model.js.map

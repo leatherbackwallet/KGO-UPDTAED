@@ -22,12 +22,12 @@ if (!process.env.MONGODB_URI.includes('mongodb+srv://') ||
   console.error('❌ ERROR: MongoDB Atlas must be used. Local MongoDB is not allowed.');
   console.error('❌ Current URI:', process.env.MONGODB_URI);
   console.error('✅ Expected format: mongodb+srv://username:password@cluster.mongodb.net/database');
-  console.error('✅ Correct URI: mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net');
+  console.error('✅ Correct URI: mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline');
   process.exit(1);
 }
 
 // Validate correct MongoDB Atlas URI
-const correctUri = 'mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net';
+const correctUri = 'mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline';
 if (!process.env.MONGODB_URI.includes('castlebek') || 
     !process.env.MONGODB_URI.includes('keralagiftsonline.7oukp55.mongodb.net')) {
   console.error('❌ ERROR: Incorrect MongoDB Atlas URI detected!');

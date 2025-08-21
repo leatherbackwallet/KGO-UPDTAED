@@ -4,7 +4,7 @@
 
 ### ✅ **USE THIS URI ONLY**
 ```
-mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
+mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline
 ```
 
 ### ❌ **NEVER USE THIS URI**
@@ -85,7 +85,7 @@ mongodb://127.0.0.1:27017
 
 ### **Required in .env file**
 ```bash
-MONGODB_URI=mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
+MONGODB_URI=mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline
 ```
 
 ### **Example .env file**
@@ -93,8 +93,8 @@ MONGODB_URI=mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.m
 # Database Configuration
 # ⚠️ CRITICAL: ONLY USE MONGODB ATLAS - NEVER USE LOCAL MONGODB
 # ❌ DO NOT USE: mongodb://localhost:27017/keralagiftsonline
-# ✅ ONLY USE: mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
-MONGODB_URI=mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net
+# ✅ ONLY USE: mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline
+MONGODB_URI=mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-here

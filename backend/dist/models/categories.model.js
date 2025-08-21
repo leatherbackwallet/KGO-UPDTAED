@@ -37,16 +37,9 @@ exports.Category = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const categorySchema = new mongoose_1.Schema({
     name: {
-        en: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        de: {
-            type: String,
-            required: true,
-            trim: true
-        }
+        type: String,
+        required: true,
+        trim: true
     },
     slug: {
         type: String,
@@ -56,14 +49,8 @@ const categorySchema = new mongoose_1.Schema({
         lowercase: true
     },
     description: {
-        en: {
-            type: String,
-            trim: true
-        },
-        de: {
-            type: String,
-            trim: true
-        }
+        type: String,
+        trim: true
     },
     parentCategory: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -86,18 +73,16 @@ const categorySchema = new mongoose_1.Schema({
 });
 categorySchema.pre('save', function (next) {
     if (this.isModified('name') && !this.slug) {
-        const englishName = this.name.en || this.name.de;
-        this.slug = englishName
+        this.slug = this.name
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
     }
     next();
 });
-categorySchema.index({ slug: 1 }, { unique: true });
 categorySchema.index({ parentCategory: 1 });
 categorySchema.index({ sortOrder: 1 });
 categorySchema.index({ isActive: 1, isDeleted: 1 });
-categorySchema.index({ 'name.en': 'text', 'name.de': 'text' });
+categorySchema.index({ 'name': 'text' });
 exports.Category = mongoose_1.default.model('Category', categorySchema);
 //# sourceMappingURL=categories.model.js.map

@@ -163,7 +163,6 @@ const userSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ location: '2dsphere' });
 userSchema.index({ roleId: 1 });
 userSchema.index({ isActive: 1, isDeleted: 1 });

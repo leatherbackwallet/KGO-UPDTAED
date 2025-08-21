@@ -18,27 +18,22 @@ export declare enum ContentStatus {
 export interface IContent extends Document {
     title: {
         en: string;
-        de: string;
         ml: string;
     };
     content: {
         en: string;
-        de: string;
         ml: string;
     };
     excerpt: {
         en: string;
-        de: string;
         ml: string;
     };
     metaDescription: {
         en: string;
-        de: string;
         ml: string;
     };
     slug: {
         en: string;
-        de: string;
         ml: string;
     };
     type: ContentType;
@@ -53,7 +48,6 @@ export interface IContent extends Document {
     seo: {
         keywords: {
             en: string[];
-            de: string[];
             ml: string[];
         };
         canonicalUrl: string;
@@ -103,11 +97,9 @@ export interface IContent extends Document {
         };
         pronunciation: {
             ml: string;
-            de: string;
         };
         grammarNotes: {
             en: string;
-            de: string;
             ml: string;
         };
     };
@@ -119,7 +111,6 @@ export interface IContent extends Document {
         ingredients: {
             name: {
                 en: string;
-                de: string;
                 ml: string;
             };
             amount: string;
@@ -129,7 +120,6 @@ export interface IContent extends Document {
             step: number;
             instruction: {
                 en: string;
-                de: string;
                 ml: string;
             };
             image: string;
@@ -148,12 +138,10 @@ export interface IContent extends Document {
         duration: number;
         significance: {
             en: string;
-            de: string;
             ml: string;
         };
         traditions: {
             en: string[];
-            de: string[];
             ml: string[];
         };
         products: mongoose.Types.ObjectId[];

@@ -1,13 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 export interface IProduct extends Document {
-    name: {
-        en: string;
-        de: string;
-    };
-    description: {
-        en: string;
-        de: string;
-    };
+    name: string;
+    description: string;
     slug: string;
     categories: mongoose.Types.ObjectId[];
     price: number;

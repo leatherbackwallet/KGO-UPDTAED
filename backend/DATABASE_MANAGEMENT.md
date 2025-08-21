@@ -110,7 +110,7 @@ curl -X POST "http://localhost:5001/api/categories" \
 #### 3. Via Database Directly
 ```bash
 # Connect to MongoDB and add data directly
-mongosh "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net"
+mongosh "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline"
 ```
 
 ## Current Database State
@@ -142,10 +142,10 @@ mongosh "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mong
 ### 3. Database Backups
 ```bash
 # Create regular backups
-mongodump --uri="mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net" --out=./backup-$(date +%Y%m%d)
+mongodump --uri="mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline" --out=./backup-$(date +%Y%m%d)
 
 # Restore from backup if needed
-mongorestore --uri="mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net" ./backup-folder
+mongorestore --uri="mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline" ./backup-folder
 ```
 
 ### 4. Data Validation

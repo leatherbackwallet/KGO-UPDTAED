@@ -49,7 +49,7 @@ export interface IUserPreferences extends Document {
         newProductAlerts: boolean;
     };
     culturalPreferences: {
-        languagePreference: 'en' | 'de' | 'ml';
+        languagePreference: 'en' | 'ml';
         festivalPreferences: string[];
         traditionalItems: boolean;
         modernItems: boolean;

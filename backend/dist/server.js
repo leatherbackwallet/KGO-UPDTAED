@@ -45,9 +45,15 @@ app.use('/images', express_1.default.static(path_1.default.join(__dirname, '../p
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        res.setHeader('Expires', new Date(Date.now() + 31536000 * 1000).toUTCString());
     }
 }));
 async function createSuperUser() {
+    if (process.env.CREATE_SUPERUSER !== 'true') {
+        console.log('Superuser creation skipped (CREATE_SUPERUSER not set to true)');
+        return;
+    }
     try {
         let adminRole = await roles_model_1.Role.findOne({ name: 'admin' });
         if (!adminRole) {
@@ -58,6 +64,9 @@ async function createSuperUser() {
                 isActive: true
             });
             console.log('Admin role created');
+        }
+        else {
+            console.log('Admin role already exists');
         }
         const email = process.env.ADMIN_EMAIL || 'admin@keralagiftsonline.com';
         const password = process.env.ADMIN_PASSWORD || 'SuperSecure123!';
@@ -86,6 +95,27 @@ if (!process.env.MONGODB_URI) {
     console.error('MONGODB_URI environment variable is required');
     process.exit(1);
 }
+if (!process.env.MONGODB_URI.includes('mongodb+srv://') ||
+    !process.env.MONGODB_URI.includes('mongodb.net') ||
+    process.env.MONGODB_URI.includes('localhost') ||
+    process.env.MONGODB_URI.includes('127.0.0.1')) {
+    console.error('❌ ERROR: MongoDB Atlas must be used. Local MongoDB is not allowed.');
+    console.error('❌ Current URI:', process.env.MONGODB_URI);
+    console.error('✅ Expected format: mongodb+srv://username:password@cluster.mongodb.net/database');
+    console.error('✅ Correct URI: mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline');
+    process.exit(1);
+}
+const correctUri = 'mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline';
+if (!process.env.MONGODB_URI.includes('castlebek') ||
+    !process.env.MONGODB_URI.includes('keralagiftsonline.7oukp55.mongodb.net')) {
+    console.error('❌ ERROR: Incorrect MongoDB Atlas URI detected!');
+    console.error('❌ Current URI:', process.env.MONGODB_URI);
+    console.error('✅ Correct URI:', correctUri);
+    console.error('🔧 Please update your .env file with the correct URI');
+    process.exit(1);
+}
+console.log('✅ MongoDB Atlas URI validated successfully');
+console.log('✅ Connecting to: keralagiftsonline.7oukp55.mongodb.net');
 if (!process.env.JWT_SECRET) {
     console.error('JWT_SECRET environment variable is required');
     process.exit(1);
@@ -109,18 +139,56 @@ app.get('/api/images/:fileId', async (req, res) => {
             res.status(400).json({ success: false, error: 'Invalid file ID' });
             return;
         }
+        const metadata = await (0, gridfs_1.getImageMetadata)(fileId);
+        if (!metadata) {
+            res.status(404).json({ success: false, error: 'Image not found' });
+            return;
+        }
+        const etag = `"${fileId}-${metadata.uploadDate.getTime()}"`;
+        if (req.headers['if-none-match'] === etag) {
+            res.status(304).end();
+            return;
+        }
         const stream = (0, gridfs_1.getImageStream)(fileId);
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        res.setHeader('ETag', etag);
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        res.setHeader('Expires', new Date(Date.now() + 31536000 * 1000).toUTCString());
+        res.setHeader('Last-Modified', metadata.uploadDate.toUTCString());
+        const contentType = metadata.contentType || 'image/jpeg';
+        res.setHeader('Content-Type', contentType);
         stream.on('error', (error) => {
             console.error('Error streaming image:', error);
-            res.status(404).json({ success: false, error: 'Image not found' });
+            if (!res.headersSent) {
+                res.status(404).json({ success: false, error: 'Image not found' });
+            }
         });
         stream.pipe(res);
     }
     catch (error) {
         console.error('Error serving image:', error);
-        res.status(500).json({ success: false, error: 'Internal server error' });
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, error: 'Internal server error' });
+        }
     }
 });
+function getContentTypeFromStream(stream) {
+    try {
+        if (stream.options && stream.options.contentType) {
+            return stream.options.contentType;
+        }
+        if (stream.file && stream.file.contentType) {
+            return stream.file.contentType;
+        }
+        return null;
+    }
+    catch (error) {
+        console.error('Error getting content type:', error);
+        return null;
+    }
+}
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
     process.exit(1);
