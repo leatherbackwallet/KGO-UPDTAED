@@ -48,8 +48,8 @@ export default function Home() {
     <>
       <Head>
         <title>KeralGiftsOnline - Premium Gifts & Celebrations</title>
-        <meta name="description" content="Discover premium quality gifts, cakes, flowers, and celebration items. Fast delivery across India with our advanced logistics network." />
-        <meta name="keywords" content="gifts, cakes, flowers, celebrations, India, online shopping" />
+        <meta name="description" content="Discover premium quality gifts, cakes, flowers, and celebration items. Fast delivery across Kerala with our advanced logistics network." />
+        <meta name="keywords" content="gifts, cakes, flowers, celebrations, Kerala, online shopping" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
@@ -87,7 +87,7 @@ export default function Home() {
                 <span className="block text-3xl md:text-5xl mt-4">Celebrate Every Moment</span>
               </h1>
               <p className="text-xl md:text-2xl mb-8 text-green-100 leading-relaxed">
-                Premium quality gifts with fast delivery across India.<br />
+                Premium quality gifts with fast delivery across Kerala.<br />
                 <span className="text-yellow-200 font-medium">Festive celebrations made special</span>
               </p>
             </div>
@@ -137,7 +137,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <h3 className="text-2xl font-bold text-green-900 mb-4">Lightning Fast Delivery</h3>
-                <p className="text-green-700 leading-relaxed">Express delivery across India with real-time tracking and guaranteed on-time delivery</p>
+                <p className="text-green-700 leading-relaxed">Express delivery across Kerala with real-time tracking and guaranteed on-time delivery</p>
               </div>
               
               <div className="group text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
