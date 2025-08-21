@@ -4,9 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import AdminOrderStatusManager from './AdminOrderStatusManager';
 import { getMultilingualText } from '../utils/api';
 
-interface RecipientAddress {
-  name: string;
-  phone: string;
+interface ShippingDetails {
+  recipientName: string;
+  recipientPhone: string;
   address: {
     streetName: string;
     houseNumber: string;
@@ -14,7 +14,7 @@ interface RecipientAddress {
     city: string;
     countryCode: string;
   };
-  additionalInstructions?: string;
+  specialInstructions?: string;
 }
 
 interface OrderItem {
@@ -29,17 +29,22 @@ interface OrderItem {
   };
   quantity: number;
   price: number;
-  status: string;
 }
 
 interface Order {
   _id: string;
-  orderNumber: string;
-  user: string;
-  items: OrderItem[];
-  totalAmount: number;
-  status: string;
-  recipientAddress: RecipientAddress;
+  orderId: string;
+  userId: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  };
+  orderItems: OrderItem[];
+  totalPrice: number;
+  orderStatus: string;
+  shippingDetails: ShippingDetails;
   statusHistory?: Array<{
     status: string;
     timestamp: Date;
@@ -65,7 +70,8 @@ const AdminOrders: React.FC = () => {
     try {
       setLoading(true);
       const response = await api.get('/orders');
-      setOrders(response.data.data || []);
+      console.log('Orders response:', response.data);
+      setOrders(response.data || []);
     } catch (err: any) {
       console.error('Error fetching orders:', err);
       setError(err.response?.data?.error?.message || 'Failed to fetch orders');
@@ -86,13 +92,15 @@ const AdminOrders: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'confirmed':
+      case 'payment_done':
+        return 'bg-green-100 text-green-800';
+      case 'order_received':
         return 'bg-blue-100 text-blue-800';
-      case 'processing':
+      case 'collecting_items':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'packing':
         return 'bg-purple-100 text-purple-800';
-      case 'shipped':
+      case 'en_route':
         return 'bg-indigo-100 text-indigo-800';
       case 'delivered':
         return 'bg-green-100 text-green-800';
@@ -156,29 +164,29 @@ const AdminOrders: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {orders.map((order) => (
+              {orders?.map((order) => (
                 <tr key={order._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      #{order.orderNumber}
+                      #{order.orderId || 'N/A'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {order.recipientAddress.name}
+                      {order.shippingDetails?.recipientName || 'N/A'}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {order.recipientAddress.phone}
+                      {order.shippingDetails?.recipientPhone || 'N/A'}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="space-y-2">
-                      {order.items.map((item) => (
+                      {order.orderItems?.map((item) => (
                         <div key={item._id} className="flex items-center space-x-3">
                           <div className="flex-shrink-0 h-8 w-8">
                             <img
                               className="h-8 w-8 rounded object-cover"
-                              src={item.productId.images[0] || '/images/products/placeholder.svg'}
+                              src={item.productId?.images?.[0] || '/images/products/placeholder.svg'}
                               alt={getMultilingualText(item.productId?.name) || 'Product'}
                             />
                           </div>
@@ -186,24 +194,24 @@ const AdminOrders: React.FC = () => {
                             <div className="text-sm font-medium text-gray-900 truncate">
                               {getMultilingualText(item.productId?.name) || 'Unknown Product'}
                             </div>
-                                                <div className="text-sm text-gray-500">
-                      Qty: {item.quantity} × ₹{item.price.toFixed(2)}
-                    </div>
+                            <div className="text-sm text-gray-500">
+                              Qty: {item.quantity || 0} × ₹{(item.price || 0).toFixed(2)}
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ₹{order.totalAmount.toFixed(2)}
+                    ₹{(order.totalPrice || 0).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                      {order.status}
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus || 'unknown')}`}>
+                      {(order.orderStatus || 'unknown').replace('_', ' ')}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.createdAt).toLocaleDateString()}
+                    {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
@@ -212,14 +220,6 @@ const AdminOrders: React.FC = () => {
                           setSelectedOrder(order);
                         }}
                         className="text-blue-600 hover:text-blue-900"
-                      >
-                        View Details
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedOrder(order);
-                        }}
-                        className="text-green-600 hover:text-green-900"
                       >
                         View Details
                       </button>
@@ -233,12 +233,12 @@ const AdminOrders: React.FC = () => {
       </div>
 
       {/* Order Details Modal */}
-      {selectedOrder && (
+      {selectedOrder && selectedOrder.orderItems && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
-                Order #{selectedOrder.orderNumber} Details
+                Order #{selectedOrder.orderId || 'N/A'} Details
               </h3>
               <button
                 onClick={() => setSelectedOrder(null)}
@@ -253,12 +253,12 @@ const AdminOrders: React.FC = () => {
               <div>
                 <h4 className="text-md font-semibold text-gray-900 mb-3">Order Items</h4>
                 <div className="space-y-3">
-                  {selectedOrder.items.map((item) => (
+                  {selectedOrder.orderItems?.map((item) => (
                     <div key={item._id} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
                       <div className="flex-shrink-0 h-12 w-12">
                         <img
                           className="h-12 w-12 rounded object-cover"
-                          src={item.productId.images[0] || '/images/products/placeholder.svg'}
+                          src={item.productId?.images?.[0] || '/images/products/placeholder.svg'}
                           alt={getMultilingualText(item.productId?.name) || 'Product'}
                         />
                       </div>
@@ -267,7 +267,7 @@ const AdminOrders: React.FC = () => {
                           {getMultilingualText(item.productId?.name) || 'Unknown Product'}
                         </div>
                         <div className="text-sm text-gray-500">
-                          Qty: {item.quantity} × ₹{item.price.toFixed(2)} = ₹{(item.quantity * item.price).toFixed(2)}
+                          Qty: {item.quantity || 0} × ₹{(item.price || 0).toFixed(2)} = ₹{((item.quantity || 0) * (item.price || 0)).toFixed(2)}
                         </div>
                       </div>
                     </div>
@@ -275,35 +275,35 @@ const AdminOrders: React.FC = () => {
                 </div>
                 <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                   <div className="text-lg font-semibold text-gray-900">
-                    Total: ₹{selectedOrder.totalAmount.toFixed(2)}
+                    Total: ₹{(selectedOrder.totalPrice || 0).toFixed(2)}
                   </div>
                 </div>
               </div>
 
               {/* Recipient Information */}
-                              <div>
-                  <h4 className="text-md font-semibold text-gray-900 mb-3">Recipient Information</h4>
-                  <div className="text-sm text-gray-600">
-                    <p><strong>{selectedOrder.recipientAddress.name}</strong></p>
-                    <p>{selectedOrder.recipientAddress.phone}</p>
-                    <p>
-                      {selectedOrder.recipientAddress.address.streetName} {selectedOrder.recipientAddress.address.houseNumber}
+              <div>
+                <h4 className="text-md font-semibold text-gray-900 mb-3">Recipient Information</h4>
+                <div className="text-sm text-gray-600">
+                  <p><strong>{selectedOrder.shippingDetails?.recipientName || 'N/A'}</strong></p>
+                  <p>{selectedOrder.shippingDetails?.recipientPhone || 'N/A'}</p>
+                  <p>
+                    {selectedOrder.shippingDetails?.address?.streetName || 'N/A'} {selectedOrder.shippingDetails?.address?.houseNumber || ''}
+                  </p>
+                  <p>
+                    {selectedOrder.shippingDetails?.address?.postalCode || 'N/A'} {selectedOrder.shippingDetails?.address?.city || 'N/A'}
+                  </p>
+                  {selectedOrder.shippingDetails?.specialInstructions && (
+                    <p className="mt-2 text-gray-500">
+                      <strong>Instructions:</strong> {selectedOrder.shippingDetails.specialInstructions}
                     </p>
-                    <p>
-                      {selectedOrder.recipientAddress.address.postalCode} {selectedOrder.recipientAddress.address.city}
-                    </p>
-                    {selectedOrder.recipientAddress.additionalInstructions && (
-                      <p className="mt-2 text-gray-500">
-                        <strong>Instructions:</strong> {selectedOrder.recipientAddress.additionalInstructions}
-                      </p>
-                    )}
-                  </div>
+                  )}
+                </div>
                 
                 <div className="mt-4">
                   <h4 className="text-md font-semibold text-gray-900 mb-3">Order Status</h4>
                   <AdminOrderStatusManager
                     orderId={selectedOrder._id}
-                    currentStatus={selectedOrder.status}
+                    currentStatus={selectedOrder.orderStatus || 'unknown'}
                     statusHistory={selectedOrder.statusHistory || []}
                     onStatusUpdate={handleStatusUpdate}
                   />
@@ -313,8 +313,6 @@ const AdminOrders: React.FC = () => {
           </div>
         </div>
       )}
-
-
     </div>
   );
 };

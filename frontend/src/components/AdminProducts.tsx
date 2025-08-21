@@ -378,6 +378,20 @@ const AdminProducts: React.FC = () => {
     return 'Unknown Category';
   };
 
+  const getCategoryNames = (productCategories: any[]) => {
+    if (!productCategories || productCategories.length === 0) return 'No Categories';
+    
+    const categoryNames = productCategories.map(category => getCategoryName(category));
+    
+    if (categoryNames.length === 1) {
+      return categoryNames[0];
+    } else if (categoryNames.length <= 3) {
+      return categoryNames.join(', ');
+    } else {
+      return `${categoryNames.slice(0, 2).join(', ')} +${categoryNames.length - 2} more`;
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -494,7 +508,7 @@ const AdminProducts: React.FC = () => {
                   Product
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
+                  Categories
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Price
@@ -538,8 +552,10 @@ const AdminProducts: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getCategoryName(product.categories?.[0])}
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      <div className="max-w-xs">
+                        {getCategoryNames(product.categories || [])}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       ₹{product.price?.toFixed(2) || '0.00'}
@@ -692,29 +708,63 @@ const AdminProducts: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Categories (Select multiple)
                 </label>
-                <select
-                  value={typeof editingProduct.categories?.[0] === 'string' ? editingProduct.categories[0] : editingProduct.categories?.[0]?._id || ''}
-                  onChange={(e) => {
-                    const categoryId = e.target.value;
-                    setEditingProduct({
-                      ...editingProduct,
-                      categories: categoryId ? [categoryId] : []
-                    });
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Select Category</option>
-                  {categories && categories.length > 0 ? categories.map((category) => (
-                    <option key={category._id} value={category._id}>
-                      {getMultilingualText(category.name)}
-                    </option>
-                  )) : (
-                    <option value="" disabled>No categories available</option>
+                <div className="border border-gray-300 rounded-md p-3 max-h-48 overflow-y-auto bg-gray-50">
+                  {categories && categories.length > 0 ? (
+                    <div className="space-y-2">
+                      {categories.map((category) => {
+                        const isSelected = editingProduct.categories?.some(catId => 
+                          typeof catId === 'string' ? catId === category._id : catId._id === category._id
+                        );
+                        
+                        return (
+                          <label key={category._id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 p-1 rounded">
+                            <input
+                              type="checkbox"
+                              checked={isSelected || false}
+                              onChange={(e) => {
+                                const categoryId = category._id;
+                                let newCategories = [...(editingProduct.categories || [])];
+                                
+                                if (e.target.checked) {
+                                  // Add category if not already present
+                                  if (!newCategories.some(catId => 
+                                    typeof catId === 'string' ? catId === categoryId : catId._id === categoryId
+                                  )) {
+                                    newCategories.push(categoryId);
+                                  }
+                                } else {
+                                  // Remove category
+                                  newCategories = newCategories.filter(catId => 
+                                    typeof catId === 'string' ? catId !== categoryId : catId._id !== categoryId
+                                  );
+                                }
+                                
+                                setEditingProduct({
+                                  ...editingProduct,
+                                  categories: newCategories
+                                });
+                              }}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <span className="text-sm text-gray-700">
+                              {getMultilingualText(category.name)}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No categories available</p>
                   )}
-                </select>
+                </div>
+                {editingProduct.categories && editingProduct.categories.length > 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Selected: {editingProduct.categories.length} category{editingProduct.categories.length > 1 ? 'ies' : 'y'}
+                  </p>
+                )}
               </div>
 
               <div>
