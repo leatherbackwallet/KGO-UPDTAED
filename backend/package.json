@@ -11,6 +11,8 @@
     "setup-admin": "node scripts/setup-admin.js",
     "migrate:prices": "ts-node scripts/add-product-prices.ts",
     "migrate:stock": "ts-node scripts/add-product-stock.ts",
+    "migrate:cloudinary": "ts-node scripts/migrate-to-cloudinary.ts",
+    "test:cloudinary": "ts-node scripts/test-cloudinary.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix"
@@ -28,6 +30,7 @@
   "dependencies": {
     "@types/uuid": "^10.0.0",
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -35,6 +38,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
     "multer": "^1.4.5-lts.1",
+    "multer-storage-cloudinary": "^4.0.0",
     "node-cache": "^5.1.2",
     "uuid": "^11.1.0",
     "zod": "^3.22.4"

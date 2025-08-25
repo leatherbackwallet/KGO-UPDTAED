@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import api from '../utils/api';
 
 interface FileUploadProps {
-  onUploadSuccess: (fileData: { filename: string; url: string; originalName: string }) => void;
+  onUploadSuccess: (fileData: { public_id?: string; filename: string; url: string; originalName: string }) => void;
   onUploadError?: (error: string) => void;
   accept?: string;
   maxSize?: number; // in MB
@@ -47,11 +47,24 @@ export default function FileUpload({
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await api.post('/upload/product-image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // Try the main upload endpoint first
+      let response;
+      try {
+        response = await api.post('/upload/product-image', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      } catch (mainError: any) {
+        console.log('Main upload failed, trying direct upload...', mainError.message);
+        
+        // Fallback to direct upload
+        response = await api.post('/upload/product-image-direct', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      }
 
       if (response.data.success) {
         onUploadSuccess(response.data.data);

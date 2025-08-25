@@ -5,7 +5,7 @@ import { getMultilingualText } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
 import { Product } from '../types/product';
-import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
+import { getProductImage, getOptimizedImagePath, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import FileUpload from './FileUpload';
 
 interface Category {
@@ -27,7 +27,7 @@ const AdminProducts: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Partial<Product>>({});
   const [imageCache, setImageCache] = useState<Map<string, string>>(new Map());
-  const [uploadedImages, setUploadedImages] = useState<Array<{ filename: string; url: string; originalName: string }>>([]);
+  const [uploadedImages, setUploadedImages] = useState<Array<{ public_id?: string; filename: string; url: string; originalName: string }>>([]);
   const [uploadError, setUploadError] = useState<string>('');
   const [deletingProducts, setDeletingProducts] = useState<Set<string>>(new Set());
   const [recentlyDeleted, setRecentlyDeleted] = useState<Set<string>>(new Set());
@@ -69,7 +69,8 @@ const AdminProducts: React.FC = () => {
 
   // Helper function to get cached image URL
   const getCachedImageUrl = (product: Product): string => {
-    return imageCache.get(product._id) || DEFAULT_PRODUCT_IMAGE;
+    const baseImagePath = product.images?.[0] || product.defaultImage;
+    return baseImagePath ? getOptimizedImagePath(baseImagePath, 'medium') : DEFAULT_PRODUCT_IMAGE;
   };
 
   // Check authentication and admin role
@@ -163,13 +164,18 @@ const AdminProducts: React.FC = () => {
       occasions: product.occasions,
       isFeatured: product.isFeatured
     });
-            // Convert existing images to the new format if they exist
+            // Convert existing images to the upload preview format, preserving Cloudinary IDs
         const existingImages = product.images || [];
-        const formattedImages = existingImages.map((filename: string) => ({
-          filename: filename,
-          url: `/images/products/${filename}`,
-          originalName: filename
-        }));
+        const formattedImages = existingImages.map((path: string) => {
+          const isCloudinary = typeof path === 'string' && path.startsWith('keralagiftsonline/products/');
+          const filenameOnly = typeof path === 'string' ? (path.split('/').pop() || path) : '';
+          return {
+            public_id: isCloudinary ? path : undefined,
+            filename: filenameOnly,
+            url: getProductImage(path, product.slug),
+            originalName: filenameOnly
+          };
+        });
         setUploadedImages(formattedImages);
     setShowModal(true);
   };
@@ -195,6 +201,13 @@ const AdminProducts: React.FC = () => {
         return;
       }
 
+      // Validate that we have valid Cloudinary public IDs for images
+      const validImages = uploadedImages.filter(img => img.public_id && img.public_id.startsWith('keralagiftsonline/products/'));
+      if (uploadedImages.length > 0 && validImages.length === 0) {
+        setError('Please upload valid images. All images must be uploaded to Cloudinary.');
+        return;
+      }
+
       // Ensure name and description are simple strings
       const validatedData = {
         ...editingProduct,
@@ -202,9 +215,9 @@ const AdminProducts: React.FC = () => {
         description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
         // Ensure categories is an array of ObjectId strings
         categories: editingProduct.categories?.map(cat => typeof cat === 'string' ? cat : cat._id) || [],
-        // Include images - extract filenames
-        images: uploadedImages.map(img => img.filename),
-        defaultImage: uploadedImages[0]?.filename || undefined
+        // Include images - use Cloudinary public_id only
+        images: validImages.map(img => img.public_id),
+        defaultImage: validImages[0]?.public_id || undefined
       };
 
       console.log('Sending validated new product data:', validatedData);
@@ -246,15 +259,22 @@ const AdminProducts: React.FC = () => {
         return;
       }
 
-      // Ensure name and description are simple strings
-      const validatedData = {
-        ...editingProduct,
-        name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
-        description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
-        // Include images - extract filenames
-        images: uploadedImages.map(img => img.filename),
-        defaultImage: uploadedImages[0]?.filename || undefined
-      };
+      // Validate that we have valid Cloudinary public IDs for images
+      const validImages = uploadedImages.filter(img => img.public_id && img.public_id.startsWith('keralagiftsonline/products/'));
+      if (uploadedImages.length > 0 && validImages.length === 0) {
+        setError('Please upload valid images. All images must be uploaded to Cloudinary.');
+        return;
+      }
+
+              // Ensure name and description are simple strings
+        const validatedData = {
+          ...editingProduct,
+          name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
+          description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
+          // Include images - use Cloudinary public_id only
+          images: validImages.map(img => img.public_id),
+          defaultImage: validImages[0]?.public_id || undefined
+        };
 
       console.log('Sending validated update data:', validatedData);
       console.log('Product ID:', selectedProduct._id);
@@ -348,8 +368,15 @@ const AdminProducts: React.FC = () => {
     target.src = DEFAULT_PRODUCT_IMAGE;
   };
 
-  const handleImageUploadSuccess = (fileData: { filename: string; url: string; originalName: string }) => {
+  const handleImageUploadSuccess = (fileData: { public_id?: string; filename: string; url: string; originalName: string }) => {
+    // Validate that we have a proper Cloudinary public_id
+    if (!fileData.public_id || !fileData.public_id.startsWith('keralagiftsonline/products/')) {
+      setUploadError('Image upload failed: Invalid Cloudinary public ID received');
+      return;
+    }
+    
     setUploadedImages(prev => [...prev, {
+      public_id: fileData.public_id,
       filename: fileData.filename,
       url: fileData.url,
       originalName: fileData.originalName
