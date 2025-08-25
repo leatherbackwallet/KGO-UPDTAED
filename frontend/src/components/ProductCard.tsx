@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import WishlistButton from './WishlistButton';
-import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
+import { getProductImage, getOptimizedImagePath, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import { getMultilingualText } from '../utils/api';
 import { Product } from '../types/product';
-import { useImageCache } from '../utils/imageCache';
 
 interface ProductCardProps {
   product: Product;
@@ -17,14 +16,9 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
   const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
 
-  // Use cached image
-  const { data: imagePath, isLoading: imageLoading } = useImageCache(
-    product.images?.[0] || product.defaultImage,
-    product.slug,
-    {
-      staleTime: 1000 * 60 * 60 * 24, // 24 hours
-    }
-  );
+  // Get the image path directly without caching
+  const baseImagePath = product.images?.[0] || product.defaultImage;
+  const imagePath = baseImagePath ? getOptimizedImagePath(baseImagePath, 'medium') : DEFAULT_PRODUCT_IMAGE;
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
@@ -47,7 +41,7 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
       product: product._id,
       name: getMultilingualText(product.name),
       price: product.price || 0,
-      image: getProductImage(product.images[0], product.slug),
+      image: getProductImage(product.images?.[0], product.slug),
       quantity: 1,
       stock: product.stock || 0
     });
@@ -68,11 +62,10 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
       {/* Image Container */}
       <div className="relative overflow-hidden">
         <img
-          src={imagePath || DEFAULT_PRODUCT_IMAGE}
+          src={imagePath}
           alt={getMultilingualText(product.name)}
           className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
           onError={handleImageError}
-          style={{ opacity: imageLoading ? 0.7 : 1 }}
         />
         
         {/* Overlay with only Add to Cart action */}

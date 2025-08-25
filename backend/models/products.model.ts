@@ -60,10 +60,14 @@ const productSchema = new Schema<IProduct>({
     trim: true,
     validate: {
       validator: function(v: string) {
-        // Validate filename format (alphanumeric, hyphens, underscores, dots)
+        // Allow Cloudinary public IDs (e.g., "keralagiftsonline/products/product-123")
+        if (v && v.startsWith('keralagiftsonline/products/')) {
+          return true;
+        }
+        // Also allow local filenames (alphanumeric, hyphens, underscores, dots)
         return /^[a-zA-Z0-9._-]+$/.test(v);
       },
-      message: 'Invalid filename format'
+      message: 'Invalid image path format. Must be a Cloudinary public ID or valid filename.'
     }
   }],
   defaultImage: {
@@ -72,9 +76,14 @@ const productSchema = new Schema<IProduct>({
     validate: {
       validator: function(v: string) {
         if (!v) return true; // Allow empty/null
+        // Allow Cloudinary public IDs (e.g., "keralagiftsonline/products/product-123")
+        if (v && v.startsWith('keralagiftsonline/products/')) {
+          return true;
+        }
+        // Also allow local filenames (alphanumeric, hyphens, underscores, dots)
         return /^[a-zA-Z0-9._-]+$/.test(v);
       },
-      message: 'Invalid filename format'
+      message: 'Invalid image path format. Must be a Cloudinary public ID or valid filename.'
     }
   },
   occasions: [{

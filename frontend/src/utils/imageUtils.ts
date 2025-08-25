@@ -1,6 +1,6 @@
 /**
- * Image Utilities - Product images are now stored in the file system
- * This utility handles image paths for products stored in the public folder
+ * Image Utilities - Product images are now stored in Cloudinary CDN
+ * This utility handles image paths for products stored in Cloudinary and local file system
  */
 
 // Backend API base URL for API calls
@@ -13,8 +13,8 @@ export const PRODUCT_IMAGES_PATH = `${STATIC_BASE_URL}/images/products`;
 export const DEFAULT_PRODUCT_IMAGE = `${PRODUCT_IMAGES_PATH}/placeholder.svg`;
 
 /**
- * Get product image path - handles file system stored images
- * @param imagePath - Image filename (e.g., "product-123.jpg") or full path
+ * Get product image path - handles Cloudinary CDN and local file system images
+ * @param imagePath - Cloudinary public_id (e.g., "keralagiftsonline/products/product-123") or local filename
  * @param slug - Product slug for fallback image filename
  * @returns Image path string
  */
@@ -24,9 +24,14 @@ export function getProductImage(imagePath?: string, slug?: string): string {
     return DEFAULT_PRODUCT_IMAGE;
   }
 
-  // If we have a full URL (uploaded image), use it directly
+  // If we have a full URL (already processed), use it directly
   if (imagePath.startsWith('http')) {
     return imagePath;
+  }
+  
+  // If we have a Cloudinary public_id (starts with keralagiftsonline/products/)
+  if (imagePath && imagePath.startsWith('keralagiftsonline/products/')) {
+    return `https://res.cloudinary.com/deojqbepy/image/upload/${imagePath}`;
   }
   
   // If we have a relative path starting with /images/products/ (from database)
@@ -88,6 +93,11 @@ function getCategoryBasedFallback(slug?: string): string | null {
     return `${PRODUCT_IMAGES_PATH}/gift-basket-premium.svg`;
   }
   
+  // Cakes (general)
+  if (slugLower.includes('cake')) {
+    return `${PRODUCT_IMAGES_PATH}/birthday-cake.svg`;
+  }
+  
   return null;
 }
 
@@ -106,17 +116,21 @@ export async function imageExists(imagePath: string): Promise<boolean> {
 }
 
 /**
- * Get optimized image path with size suffix (for future use)
- * @param basePath - Base image path
+ * Get optimized Cloudinary image URL with transformations
+ * @param publicId - Cloudinary public ID
  * @param size - Size suffix (thumb, small, medium, large)
- * @returns Optimized image path
+ * @returns Optimized Cloudinary URL
  */
-export function getOptimizedImagePath(basePath: string, size: 'thumb' | 'small' | 'medium' | 'large' = 'medium'): string {
-  const pathParts = basePath.split('.');
-  const extension = pathParts.pop();
-  const baseName = pathParts.join('.');
+export function getOptimizedImagePath(publicId: string, size: 'thumb' | 'small' | 'medium' | 'large' = 'medium'): string {
+  // If it's not a Cloudinary public ID, return as is
+  if (!publicId.startsWith('keralagiftsonline/products/')) {
+    return publicId;
+  }
   
-  return `${baseName}-${size}.${extension}`;
+  const sizeConfig = PRODUCT_IMAGE_SIZES[size];
+  const transformations = `w_${sizeConfig.width},h_${sizeConfig.height},c_fill,q_auto`;
+  
+  return `https://res.cloudinary.com/deojqbepy/image/upload/${transformations}/${publicId}`;
 }
 
 /**

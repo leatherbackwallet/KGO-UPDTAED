@@ -241,7 +241,7 @@ router.post('/', auth, role('admin'), async (req, res) => {
 // Update product (admin only)
 router.put('/:id', auth, role('admin'), async (req, res) => {
   try {
-    const { name, description, price, category, categories, stock, occasions, isFeatured } = req.body;
+    const { name, description, price, category, categories, stock, occasions, isFeatured, images, defaultImage } = req.body;
     
     // Prepare update data
     const updateData = {};
@@ -261,6 +261,14 @@ router.put('/:id', auth, role('admin'), async (req, res) => {
     if (stock !== undefined) updateData.stock = stock;
     if (occasions !== undefined) updateData.occasions = occasions;
     if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
+
+    // Handle images update (supports Cloudinary public IDs)
+    if (Array.isArray(images)) {
+      updateData.images = images;
+    }
+    if (typeof defaultImage === 'string' && defaultImage.length > 0) {
+      updateData.defaultImage = defaultImage;
+    }
     
     // Handle category update - support both 'category' and 'categories'
     const categoryData = categories || category;

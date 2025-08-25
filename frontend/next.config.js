@@ -1,21 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false, // Keep disabled to prevent double renders
+  reactStrictMode: false,
   swcMinify: true,
   compress: true,
   poweredByHeader: false,
   generateEtags: false,
   
-  // Completely disable HMR and Fast Refresh
-  webpackDevMiddleware: config => {
-    config.watchOptions = {
-      poll: false,
-      ignored: /node_modules/,
-    };
-    return config;
-  },
-  
-  // Webpack configuration without HMR
+  // Webpack configuration
   webpack: (config, { dev, isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -29,23 +20,21 @@ const nextConfig = {
     return config;
   },
   
-  // Browser compatibility settings - HMR completely disabled
+  // Browser compatibility settings
   experimental: {
     esmExternals: 'loose',
-    fastRefresh: false,
   },
   
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'res.cloudinary.com'],
     formats: ['image/webp', 'image/avif'],
   },
   
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY || '',
-    FAST_REFRESH: 'false',
   },
   
-  // Add security headers for better browser compatibility
+  // Add security headers
   async headers() {
     return [
       {

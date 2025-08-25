@@ -54,6 +54,12 @@ const ProductsPage: React.FC = () => {
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
+      setError('');
+      console.log('🔍 Fetching products...');
+      console.log('🔗 API Base URL:', api.defaults.baseURL);
+      console.log('🔗 Environment:', process.env.NODE_ENV);
+      console.log('🔗 NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+      
       // performanceMonitor.startTimer('products-fetch');
 
       const params = new URLSearchParams();
@@ -66,16 +72,30 @@ const ProductsPage: React.FC = () => {
       // Add cache busting parameter
       params.append('_t', Date.now().toString());
 
-      const response = await api.get(`/products?${params.toString()}`);
+      const apiUrl = `/products?${params.toString()}`;
+      console.log('🔗 Full API URL:', `${api.defaults.baseURL}${apiUrl}`);
+      
+      const response = await api.get(apiUrl);
+      console.log('✅ API Response Status:', response.status);
+      console.log('✅ API Response Headers:', response.headers);
+      console.log('✅ API Response Data:', response.data);
+      
       const productsData = response.data?.data || response.data || [];
+      console.log('📦 Products data length:', productsData.length);
+      console.log('📦 First product:', productsData[0]);
+      
       setProducts(Array.isArray(productsData) ? productsData : []);
 
       // performanceMonitor.endTimer('products-fetch');
     } catch (err: any) {
-      console.error('Error fetching products:', err);
-      setError(err.response?.data?.error?.message || 'Failed to fetch products');
+      console.error('❌ Error fetching products:', err);
+      console.error('❌ Error message:', err.message);
+      console.error('❌ Error response:', err.response);
+      console.error('❌ Error request:', err.request);
+      setError(err.response?.data?.error?.message || err.message || 'Failed to fetch products');
       setProducts([]);
     } finally {
+      console.log('🏁 Setting loading to false');
       setLoading(false);
     }
   }, [search, category, selectedOccasions, min, max]);
