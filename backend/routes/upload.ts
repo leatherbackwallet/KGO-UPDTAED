@@ -5,86 +5,53 @@ const role = require('../middleware/role');
 
 const router = express.Router();
 
-// Upload single image to Cloudinary CDN
-router.post('/product-image', auth, role('admin'), upload.single('image'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ 
-        success: false, 
-        error: { message: 'No file uploaded', code: 'NO_FILE' } 
+// Upload single image to Cloudinary CDN (memory upload + direct Cloudinary stream)
+router.post('/product-image', auth, role('admin'), (req, res) => {
+  const multer = require('multer');
+  const memoryStorage = multer.memoryStorage();
+  const memoryUpload = multer({ storage: memoryStorage });
+
+  memoryUpload.single('image')(req, res, async (err: any) => {
+    try {
+      if (err) {
+        console.error('Memory upload error:', err);
+        return res.status(400).json({
+          success: false,
+          error: { message: 'File upload failed', code: 'UPLOAD_ERROR' }
+        });
+      }
+
+      if (!req.file || !req.file.buffer) {
+        return res.status(400).json({
+          success: false,
+          error: { message: 'No file uploaded', code: 'NO_FILE' }
+        });
+      }
+
+      const result = await uploadImageToCloudinary(req.file);
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          public_id: result.public_id,
+          filename: req.file.originalname,
+          url: result.url,
+          secure_url: result.secure_url,
+          size: result.size,
+          mimetype: req.file.mimetype,
+          width: result.width,
+          height: result.height,
+          format: result.format
+        }
+      });
+    } catch (uploadError) {
+      console.error('Direct Cloudinary upload failed:', uploadError);
+      return res.status(500).json({
+        success: false,
+        error: { message: 'Cloudinary upload failed', code: 'CLOUDINARY_ERROR' }
       });
     }
-
-    // The file is already uploaded to Cloudinary by multer
-    // Extract the result from req.file
-    const uploadResult = req.file as any;
-
-    console.log('Upload result from multer:', {
-      public_id: uploadResult.public_id,
-      filename: uploadResult.originalname,
-      url: uploadResult.url,
-      secure_url: uploadResult.secure_url,
-      size: uploadResult.size,
-      mimetype: uploadResult.mimetype,
-      width: uploadResult.width,
-      height: uploadResult.height,
-      format: uploadResult.format
-    });
-
-    // Check if we have a valid Cloudinary public_id
-    if (!uploadResult.public_id || !uploadResult.public_id.startsWith('keralagiftsonline/products/')) {
-      console.error('Invalid or missing public_id from multer:', uploadResult.public_id);
-      
-      // Fallback to direct Cloudinary upload
-      try {
-        console.log('Attempting direct Cloudinary upload as fallback...');
-        const directResult = await uploadImageToCloudinary(req.file);
-        console.log('Direct upload successful:', directResult);
-        
-        return res.status(200).json({
-          success: true,
-          data: {
-            public_id: directResult.public_id,
-            filename: req.file.originalname,
-            url: directResult.url,
-            secure_url: directResult.secure_url,
-            size: directResult.size,
-            mimetype: req.file.mimetype,
-            width: directResult.width,
-            height: directResult.height,
-            format: directResult.format
-          }
-        });
-      } catch (directError) {
-        console.error('Direct upload also failed:', directError);
-        return res.status(500).json({
-          success: false,
-          error: { message: 'Both multer and direct upload failed', code: 'UPLOAD_FAILED' }
-        });
-      }
-    }
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        public_id: uploadResult.public_id,
-        filename: uploadResult.originalname,
-        url: uploadResult.url,
-        secure_url: uploadResult.secure_url,
-        size: uploadResult.size,
-        mimetype: uploadResult.mimetype,
-        width: uploadResult.width,
-        height: uploadResult.height,
-        format: uploadResult.format
-      }
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    return res.status(500).json({
-      success: false,
-      error: { message: 'File upload failed', code: 'UPLOAD_ERROR' }
-    });
-  }
+  });
 });
 
 // Upload image with direct Cloudinary upload (alternative endpoint)
