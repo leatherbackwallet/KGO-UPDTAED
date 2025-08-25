@@ -11,6 +11,7 @@ export interface IProduct extends Document {
   slug: string;
   categories: mongoose.Types.ObjectId[]; // Multiple categories
   price: number;
+  costPrice: number; // Cost price for profit calculations
   stock: number;
   images?: string[]; // Image filenames (e.g., "product-123.jpg")
   defaultImage?: string; // Default image filename
@@ -50,10 +51,17 @@ const productSchema = new Schema<IProduct>({
     required: true,
     min: [0, 'Price cannot be negative']
   },
+  costPrice: {
+    type: Number,
+    required: true,
+    min: [0, 'Cost price cannot be negative'],
+    default: 0
+  },
   stock: {
     type: Number,
     required: true,
-    min: [0, 'Stock cannot be negative']
+    min: [0, 'Stock cannot be negative'],
+    default: 200
   },
   images: [{
     type: String,

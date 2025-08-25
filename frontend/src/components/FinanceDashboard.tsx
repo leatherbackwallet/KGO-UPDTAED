@@ -81,11 +81,17 @@ export default function FinanceDashboard() {
   const loadFinancialData = async () => {
     try {
       setLoading(true);
+      setError(''); // Clear previous errors
       const response = await api.get('/finance/aggregates', {
         params: { period, startDate, endDate }
       });
-      setFinancialData(response.data);
+      if (response.data.success) {
+        setFinancialData(response.data.data);
+      } else {
+        setError(response.data.error?.message || 'Failed to load financial data');
+      }
     } catch (err: any) {
+      console.error('Finance API Error:', err);
       setError(err.response?.data?.message || 'Failed to load financial data');
     } finally {
       setLoading(false);
@@ -98,9 +104,15 @@ export default function FinanceDashboard() {
       const response = await api.get('/finance/orders', {
         params: { period, startDate, endDate }
       });
-      setOrderBreakdown(response.data);
+      if (response.data.success) {
+        setOrderBreakdown(response.data.data.orders || []);
+      } else {
+        console.error('Failed to load order breakdown:', response.data.error?.message);
+        setOrderBreakdown([]);
+      }
     } catch (err: any) {
       console.error('Failed to load order breakdown:', err);
+      setOrderBreakdown([]);
     }
   };
 
@@ -203,7 +215,19 @@ export default function FinanceDashboard() {
 
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded">
-          {error}
+          <div className="flex justify-between items-center">
+            <span>{error}</span>
+            <button
+              onClick={() => {
+                setError('');
+                loadFinancialData();
+                loadOrderBreakdown();
+              }}
+              className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
         </div>
       )}
 
@@ -214,7 +238,7 @@ export default function FinanceDashboard() {
         </div>
       )}
 
-      {activeTab === 'aggregates' && financialData && (
+      {activeTab === 'aggregates' && financialData ? (
         <div className="space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -223,11 +247,11 @@ export default function FinanceDashboard() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(financialData.summary.totalRevenue)}
+                    {formatCurrency(financialData.summary?.totalRevenue || 0)}
                   </p>
-                  <div className={`flex items-center text-sm ${getGrowthColor(financialData.summary.revenueGrowth)}`}>
-                    <span className="mr-1">{getGrowthIcon(financialData.summary.revenueGrowth)}</span>
-                    {formatPercentage(financialData.summary.revenueGrowth)}
+                  <div className={`flex items-center text-sm ${getGrowthColor(financialData.summary?.revenueGrowth || 0)}`}>
+                    <span className="mr-1">{getGrowthIcon(financialData.summary?.revenueGrowth || 0)}</span>
+                    {formatPercentage(financialData.summary?.revenueGrowth || 0)}
                   </div>
                 </div>
                 <div className="p-3 bg-green-100 rounded-full">
@@ -243,7 +267,7 @@ export default function FinanceDashboard() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Cost</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(financialData.summary.totalCost)}
+                    {formatCurrency(financialData.summary?.totalCost || 0)}
                   </p>
                 </div>
                 <div className="p-3 bg-red-100 rounded-full">
@@ -259,11 +283,11 @@ export default function FinanceDashboard() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Net Profit</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(financialData.summary.totalProfit)}
+                    {formatCurrency(financialData.summary?.totalProfit || 0)}
                   </p>
-                  <div className={`flex items-center text-sm ${getGrowthColor(financialData.summary.profitGrowth)}`}>
-                    <span className="mr-1">{getGrowthIcon(financialData.summary.profitGrowth)}</span>
-                    {formatPercentage(financialData.summary.profitGrowth)}
+                  <div className={`flex items-center text-sm ${getGrowthColor(financialData.summary?.profitGrowth || 0)}`}>
+                    <span className="mr-1">{getGrowthIcon(financialData.summary?.profitGrowth || 0)}</span>
+                    {formatPercentage(financialData.summary?.profitGrowth || 0)}
                   </div>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-full">
@@ -279,10 +303,10 @@ export default function FinanceDashboard() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Profit Margin</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {formatPercentage(financialData.summary.profitMargin)}
+                    {formatPercentage(financialData.summary?.profitMargin || 0)}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {financialData.summary.totalOrders} orders
+                    {financialData.summary?.totalOrders || 0} orders
                   </p>
                 </div>
                 <div className="p-3 bg-purple-100 rounded-full">
@@ -300,7 +324,7 @@ export default function FinanceDashboard() {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue vs Cost Trend</h3>
               <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={financialData.monthlyData}>
+                <AreaChart data={financialData.monthlyData || []}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="month" 
@@ -322,7 +346,7 @@ export default function FinanceDashboard() {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Profit Trend</h3>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={financialData.monthlyData}>
+                <LineChart data={financialData.monthlyData || []}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="month" 
@@ -345,7 +369,7 @@ export default function FinanceDashboard() {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={financialData.categoryData}
+                    data={financialData.categoryData || []}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -354,7 +378,7 @@ export default function FinanceDashboard() {
                     fill="#8884d8"
                     dataKey="revenue"
                   >
-                    {financialData.categoryData.map((entry, index) => (
+                    {(financialData.categoryData || []).map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -367,7 +391,7 @@ export default function FinanceDashboard() {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Volume</h3>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={financialData.monthlyData}>
+                <BarChart data={financialData.monthlyData || []}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="month" 
@@ -385,9 +409,13 @@ export default function FinanceDashboard() {
             </div>
           </div>
         </div>
+      ) : activeTab === 'aggregates' && !loading && (
+        <div className="text-center py-8">
+          <p className="text-gray-600">No financial data available for the selected period.</p>
+        </div>
       )}
 
-      {activeTab === 'orders' && (
+      {activeTab === 'orders' && orderBreakdown.length > 0 ? (
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">Order-wise Financial Breakdown</h3>
@@ -463,6 +491,10 @@ export default function FinanceDashboard() {
               </tbody>
             </table>
           </div>
+        </div>
+      ) : activeTab === 'orders' && !loading && (
+        <div className="text-center py-8">
+          <p className="text-gray-600">No orders found for the selected period.</p>
         </div>
       )}
     </div>

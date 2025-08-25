@@ -5,6 +5,7 @@ export interface IProduct extends Document {
     slug: string;
     categories: mongoose.Types.ObjectId[];
     price: number;
+    costPrice: number;
     stock: number;
     images?: string[];
     defaultImage?: string;

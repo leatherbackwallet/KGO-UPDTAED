@@ -7,7 +7,10 @@ const { z } = require('zod');
 
 // Common validation schemas
 const emailSchema = z.string().email('Invalid email format').toLowerCase().trim();
-const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
+const passwordSchema = z.string()
+  .min(8, 'Password must be at least 8 characters')
+  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
+    'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
 const phoneSchema = z.string().regex(/^[\+]?[0-9\s\-\(\)]{8,}$/, 'Invalid phone number format');
 
 // User registration validation
@@ -23,6 +26,11 @@ const registerSchema = z.object({
 const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, 'Password is required')
+});
+
+// Token refresh validation
+const refreshSchema = z.object({
+  refreshToken: z.string().min(1, 'Refresh token is required')
 });
 
 // Product creation validation
@@ -118,6 +126,7 @@ module.exports = {
   schemas: {
     register: registerSchema,
     login: loginSchema,
+    refresh: refreshSchema,
     product: productSchema
   }
 }; 

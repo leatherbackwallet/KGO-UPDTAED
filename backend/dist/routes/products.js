@@ -153,7 +153,7 @@ router.post('/', auth, role('admin'), async (req, res) => {
       description, 
       price, 
       categories: categoryIds, 
-      stock, 
+      stock: stock || 200, // Set default stock to 200 if not provided
       images, 
       occasions, 
       vendors,

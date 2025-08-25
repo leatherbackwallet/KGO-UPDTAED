@@ -6,13 +6,12 @@ import AdminProducts from '../components/AdminProducts';
 import AdminOrders from '../components/AdminOrders';
 import AdminUsers from '../components/AdminUsers';
 import FinanceDashboard from '../components/FinanceDashboard';
-import LogisticsDashboard from '../components/LogisticsDashboard';
 import ReturnsDashboard from '../components/ReturnsDashboard';
 import AdminTabs from '../components/AdminTabs';
 
 export default function Admin() {
   const { user } = useAuth();
-  const [tab, setTab] = useState<'dashboard' | 'products' | 'orders' | 'users' | 'finance' | 'logistics' | 'returns'>('dashboard');
+  const [tab, setTab] = useState<'dashboard' | 'products' | 'orders' | 'users' | 'finance' | 'returns'>('dashboard');
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
@@ -20,7 +19,6 @@ export default function Admin() {
     { id: 'orders', label: 'Orders' },
     { id: 'users', label: 'Users' },
     { id: 'finance', label: 'Finance' },
-    { id: 'logistics', label: 'Logistics' },
     { id: 'returns', label: 'Returns' }
   ];
 
@@ -58,7 +56,6 @@ export default function Admin() {
         {tab === 'orders' && <AdminOrders />}
         {tab === 'users' && <AdminUsers />}
         {tab === 'finance' && <FinanceDashboard />}
-        {tab === 'logistics' && <LogisticsDashboard />}
         {tab === 'returns' && <ReturnsDashboard />}
       </main>
     </>

@@ -494,7 +494,9 @@ const AdminProducts: React.FC = () => {
           <button
             onClick={() => {
               setSelectedProduct(null);
-              setEditingProduct({});
+              setEditingProduct({
+                stock: 200 // Set default stock to 200
+              });
               setUploadedImages([]);
               setUploadError('');
               setShowModal(true);
@@ -746,7 +748,7 @@ const AdminProducts: React.FC = () => {
                   </label>
                   <input
                     type="number"
-                    value={editingProduct.stock || ''}
+                    value={editingProduct.stock || 200}
                     onChange={(e) => setEditingProduct({
                       ...editingProduct,
                       stock: parseInt(e.target.value) || 0

@@ -8,57 +8,64 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
-// ⚠️ CRITICAL: Validate MongoDB Atlas URI
-if (!process.env.MONGODB_URI) {
-  console.error('❌ ERROR: MONGODB_URI environment variable is required');
-  process.exit(1);
-}
-
 // Ensure MongoDB Atlas is always used, never local MongoDB
 if (!process.env.MONGODB_URI.includes('mongodb+srv://') || 
     !process.env.MONGODB_URI.includes('mongodb.net') ||
     process.env.MONGODB_URI.includes('localhost') ||
     process.env.MONGODB_URI.includes('127.0.0.1')) {
   console.error('❌ ERROR: MongoDB Atlas must be used. Local MongoDB is not allowed.');
-  console.error('❌ Current URI:', process.env.MONGODB_URI);
+  console.error('❌ Current URI format is invalid');
   console.error('✅ Expected format: mongodb+srv://username:password@cluster.mongodb.net/database');
-  console.error('✅ Correct URI: mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline');
   process.exit(1);
 }
 
-// Validate correct MongoDB Atlas URI
-const correctUri = 'mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline';
-if (!process.env.MONGODB_URI.includes('castlebek') || 
-    !process.env.MONGODB_URI.includes('keralagiftsonline.7oukp55.mongodb.net')) {
-  console.error('❌ ERROR: Incorrect MongoDB Atlas URI detected!');
-  console.error('❌ Current URI:', process.env.MONGODB_URI);
-  console.error('✅ Correct URI:', correctUri);
-  console.error('🔧 Please update your .env file with the correct URI');
+// Validate JWT secret
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET environment variable is required');
   process.exit(1);
 }
 
-console.log('✅ MongoDB Atlas URI validated successfully');
-console.log('✅ Connecting to: keralagiftsonline.7oukp55.mongodb.net');
+// Validate JWT secret strength
+if (process.env.JWT_SECRET.length < 32) {
+  console.error('JWT_SECRET must be at least 32 characters long for security');
+  process.exit(1);
+}
 
-// Define schemas inline
+// Validate JWT refresh secret
+if (!process.env.JWT_REFRESH_SECRET) {
+  console.error('JWT_REFRESH_SECRET environment variable is required');
+  process.exit(1);
+}
+
+// Validate JWT refresh secret strength
+if (process.env.JWT_REFRESH_SECRET.length < 32) {
+  console.error('JWT_REFRESH_SECRET must be at least 32 characters long for security');
+  process.exit(1);
+}
+
+// Role schema
 const roleSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
-  description: String,
-  permissions: [String],
+  description: { type: String, required: true },
+  permissions: [{ type: String }],
   isActive: { type: Boolean, default: true },
-  isDeleted: { type: Boolean, default: false }
-}, { timestamps: true });
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
 
+// User schema
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
-  roleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true },
   phone: { type: String, required: true },
+  roleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true },
   isActive: { type: Boolean, default: true },
-  isDeleted: { type: Boolean, default: false }
-}, { timestamps: true });
+  isDeleted: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
 
 const Role = mongoose.model('Role', roleSchema);
 const User = mongoose.model('User', userSchema);
@@ -69,7 +76,7 @@ async function setupAdmin() {
     
     // Connect to MongoDB
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log('✅ Connected to MongoDB');
+    console.log('✅ Connected to MongoDB Atlas');
     
     // Check if admin role exists
     let adminRole = await Role.findOne({ name: 'admin' });
@@ -87,12 +94,21 @@ async function setupAdmin() {
     }
     
     // Check if admin user exists
-    const email = process.env.ADMIN_EMAIL || 'admin@keralagiftsonline.com';
+    const email = process.env.ADMIN_EMAIL || 'admin@yourdomain.com';
     const existingUser = await User.findOne({ email });
     
     if (!existingUser) {
       console.log('📝 Creating admin user...');
-      const password = process.env.ADMIN_PASSWORD || 'SuperSecure123!';
+      const password = process.env.ADMIN_PASSWORD || 'YourSecurePassword123!';
+      
+      // Validate password complexity
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(password)) {
+        console.error('❌ Admin password does not meet complexity requirements');
+        console.error('Password must contain at least 8 characters including uppercase, lowercase, number, and special character');
+        process.exit(1);
+      }
+      
       const hashedPassword = await bcrypt.hash(password, 12);
       
       await User.create({
@@ -101,11 +117,12 @@ async function setupAdmin() {
         email: email,
         password: hashedPassword,
         roleId: adminRole._id,
-        phone: process.env.ADMIN_PHONE || '+49123456789',
+        phone: process.env.ADMIN_PHONE || '+1234567890',
         isActive: true
       });
       console.log('✅ Admin user created:', email);
       console.log('🔑 Default password:', password);
+      console.log('⚠️  Please change the default password after first login');
     } else {
       console.log('✅ Admin user already exists:', email);
     }
@@ -117,21 +134,13 @@ async function setupAdmin() {
     process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('🔌 Disconnected from MongoDB');
+    console.log('🔌 Disconnected from MongoDB Atlas');
   }
 }
 
 // Run setup if called directly
 if (require.main === module) {
-  setupAdmin()
-    .then(() => {
-      console.log('Setup script completed');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('Setup script failed:', error);
-      process.exit(1);
-    });
+  setupAdmin();
 }
 
-module.exports = { setupAdmin };
+module.exports = setupAdmin;

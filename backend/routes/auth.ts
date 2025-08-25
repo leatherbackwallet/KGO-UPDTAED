@@ -1,7 +1,7 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
 import { User, Role } from '../models/index';
 import { hashPassword, comparePassword } from '../utils/hash';
+import { generateTokenPair, verifyRefreshToken } from '../utils/jwt';
 import { v4 as uuidv4 } from 'uuid';
 const { validate, sanitizeInput, schemas } = require('../middleware/validation');
 
@@ -49,11 +49,23 @@ router.post('/register', sanitizeInput, validate(schemas.register), async (req, 
       });
     }
 
-    // Password validation
-    if (password.length < 6) {
+    // Enhanced password validation
+    if (password.length < 8) {
       return res.status(400).json({
         success: false,
-        error: { message: 'Password must be at least 6 characters long', code: 'INVALID_PASSWORD' }
+        error: { message: 'Password must be at least 8 characters long', code: 'INVALID_PASSWORD' }
+      });
+    }
+
+    // Password complexity validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        success: false,
+        error: { 
+          message: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character', 
+          code: 'INVALID_PASSWORD_COMPLEXITY' 
+        }
       });
     }
 
@@ -100,66 +112,54 @@ router.post('/register', sanitizeInput, validate(schemas.register), async (req, 
     const hashedPassword = await hashPassword(password);
     
     // Create new user with proper error handling
-    let user;
+    let user: any;
     try {
-      user = await User.create({ 
-        firstName: trimmedFirstName, 
-        lastName: trimmedLastName, 
-        email: trimmedEmail, 
-        password: hashedPassword, 
+      user = await User.create({
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
+        email: trimmedEmail,
+        password: hashedPassword,
         phone: trimmedPhone,
         roleId: customerRole._id,
         isActive: true
       });
-      
-      console.log(`New user created successfully: ${user.email} (${user._id})`);
-    } catch (createError: any) {
-      console.error('Error creating user:', createError);
-      
-      // Handle specific MongoDB errors
-      if (createError.code === 11000) {
-        return res.status(400).json({
-          success: false,
-          error: { message: 'Email already in use. Please use a different email.', code: 'EMAIL_EXISTS' }
-        });
-      }
-      
+    } catch (createError) {
+      console.error('User creation error:', createError);
       return res.status(500).json({
         success: false,
-        error: { message: 'Failed to create user account. Please try again.', code: 'USER_CREATION_FAILED' }
+        error: { message: 'Failed to create user account', code: 'USER_CREATION_FAILED' }
       });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ 
-      id: user._id, 
+    // Generate token pair
+    const tokenPair = generateTokenPair({
+      id: user._id.toString(),
       email: user.email,
-      roleId: user.roleId,
+      roleId: user.roleId.toString(),
       firstName: user.firstName,
       lastName: user.lastName
-    }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
+    });
 
-    // Return success response
-    return res.json({ 
+    return res.status(201).json({
       success: true,
-      data: { 
-        token, 
-        user: { 
-          id: user._id, 
+      data: {
+        user: {
+          id: user._id,
           firstName: user.firstName,
           lastName: user.lastName,
-          email: user.email, 
+          email: user.email,
           phone: user.phone,
           roleId: user.roleId,
           roleName: 'customer'
-        }
+        },
+        tokens: tokenPair
       }
     });
   } catch (err) {
-    console.error('Register error:', err);
-    return res.status(500).json({ 
-      success: false, 
-      error: { message: 'Server error occurred. Please try again later.', code: 'SERVER_ERROR' } 
+    console.error('Registration error:', err);
+    return res.status(500).json({
+      success: false,
+      error: { message: 'Server error during registration', code: 'SERVER_ERROR' }
     });
   }
 });
@@ -189,8 +189,8 @@ router.post('/login', sanitizeInput, validate(schemas.login), async (req, res) =
     }
 
     // Find user with populated role
-    const user = await User.findOne({ email: trimmedEmail, isActive: true, isDeleted: false })
-      .populate<{ roleId: { name: string } }>('roleId');
+    const user: any = await User.findOne({ email: trimmedEmail, isActive: true, isDeleted: false })
+      .populate('roleId');
       
     if (!user) {
       return res.status(400).json({ 
@@ -208,19 +208,18 @@ router.post('/login', sanitizeInput, validate(schemas.login), async (req, res) =
       });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ 
-      id: user._id, 
+    // Generate token pair
+    const tokenPair = generateTokenPair({
+      id: user._id.toString(),
       email: user.email,
-      roleId: user.roleId,
+      roleId: user.roleId._id.toString(),
       firstName: user.firstName,
       lastName: user.lastName
-    }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
+    });
 
     return res.json({ 
       success: true,
       data: { 
-        token, 
         user: { 
           id: user._id, 
           firstName: user.firstName,
@@ -229,155 +228,78 @@ router.post('/login', sanitizeInput, validate(schemas.login), async (req, res) =
           phone: user.phone,
           roleId: user.roleId,
           roleName: user.roleId?.name || 'customer'
-        }
+        },
+        tokens: tokenPair
       }
     });
   } catch (err) {
     console.error('Login error:', err);
-    return res.status(500).json({ 
-      success: false, 
-      error: { message: 'Server error occurred. Please try again later.', code: 'SERVER_ERROR' } 
+    return res.status(500).json({
+      success: false,
+      error: { message: 'Server error during login', code: 'SERVER_ERROR' }
     });
   }
 });
 
-// Guest Checkout - Creates a guest user with all details
-router.post('/guest', async (req, res) => {
+// Refresh token
+router.post('/refresh', async (req, res) => {
   try {
-    const { name, email, phone, deliveryAddress, paymentMethod } = req.body;
-    
-    if (!name || !email || !phone || !deliveryAddress) {
-      return res.status(400).json({ 
-        success: false, 
-        error: { message: 'Name, email, phone, and delivery address are required', code: 'MISSING_FIELDS' } 
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Refresh token is required', code: 'MISSING_REFRESH_TOKEN' }
       });
     }
 
-    // Check if user already exists with this email
-    let user = await User.findOne({ email }).populate('roleId');
+    const decoded = verifyRefreshToken(refreshToken);
     
-    if (user) {
-      // If user exists, add delivery address if not already present
-      const addressExists = user.recipientAddresses?.some(addr => 
-        addr.address.streetName === deliveryAddress.street &&
-        addr.address.houseNumber === deliveryAddress.houseNumber &&
-        addr.address.city === deliveryAddress.city
-      );
-
-      if (!addressExists) {
-        const nameParts = name.trim().split(' ');
-        const firstName = nameParts[0] || name;
-        const lastName = nameParts.slice(1).join(' ') || 'Guest';
-
-        const newAddress = {
-          name: `${firstName} ${lastName}`,
-          phone: phone,
-          address: {
-            streetName: deliveryAddress.street,
-            houseNumber: deliveryAddress.houseNumber,
-            postalCode: deliveryAddress.zipCode,
-            city: deliveryAddress.city,
-            countryCode: deliveryAddress.country || 'IN'
-          },
-          isDefault: user.recipientAddresses?.length === 0
-        };
-
-        user.recipientAddresses = user.recipientAddresses || [];
-        user.recipientAddresses.push(newAddress);
-        await user.save();
-      }
-
-      // Return their token (they can complete checkout as existing user)
-      const token = jwt.sign({ 
-        id: user._id, 
-        roleId: user.roleId
-      }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
-
-      return res.json({ 
-        success: true,
-        data: { 
-          token, 
-          user: { 
-            id: user._id, 
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email, 
-            phone: user.phone,
-            roleId: user.roleId,
-            roleName: (user.roleId as any)?.name
-          }
-        }
+    if (!decoded) {
+      return res.status(401).json({
+        success: false,
+        error: { message: 'Invalid or expired refresh token', code: 'INVALID_REFRESH_TOKEN' }
       });
     }
 
-    // Get customer role for guest users
-    let guestRole = await Role.findOne({ name: 'customer' });
-    if (!guestRole) {
-      guestRole = await Role.create({ 
-        name: 'customer', 
-        description: 'Customer user',
-        permissions: ['read_products', 'create_orders']
-      });
-    }
-
-    // Split name into firstName and lastName
-    const nameParts = name.trim().split(' ');
-    const firstName = nameParts[0] || name;
-    const lastName = nameParts.slice(1).join(' ') || 'Guest';
-
-    // Generate a random password for guest user
-    const randomPassword = Math.random().toString(36).slice(-8);
-    const hashedPassword = await hashPassword(randomPassword);
-    
-    // Create guest user with all details
-    user = await User.create({ 
-      firstName,
-      lastName,
-      email, 
-      phone,
-      password: hashedPassword,
-      roleId: guestRole._id,
-      recipientAddresses: [{
-        name: `${firstName} ${lastName}`,
-        phone: phone,
-        address: {
-          streetName: deliveryAddress.street,
-          houseNumber: deliveryAddress.houseNumber,
-          postalCode: deliveryAddress.zipCode,
-          city: deliveryAddress.city,
-          countryCode: deliveryAddress.country || 'IN'
-        },
-        isDefault: true
-      }]
+    // Generate new token pair
+    const tokenPair = generateTokenPair({
+      id: decoded.id,
+      email: decoded.email,
+      roleId: decoded.roleId,
+      firstName: decoded.firstName,
+      lastName: decoded.lastName
     });
 
-    const token = jwt.sign({ 
-      id: user._id, 
-      roleId: user.roleId
-    }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
-
-    return res.json({ 
+    return res.json({
       success: true,
-      data: { 
-        token, 
-        user: { 
-          id: user._id, 
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email, 
-          phone: user.phone,
-          roleId: user.roleId,
-          roleName: (user.roleId as any)?.name,
-          isGuest: true
-        }
+      data: {
+        tokens: tokenPair
       }
     });
   } catch (err) {
-    console.error('Guest checkout error:', err);
-    console.error('Error details:', JSON.stringify(err, null, 2));
-    return res.status(500).json({ 
-      success: false, 
-      error: { message: 'Server error', code: 'SERVER_ERROR' } 
+    console.error('Token refresh error:', err);
+    return res.status(500).json({
+      success: false,
+      error: { message: 'Server error during token refresh', code: 'SERVER_ERROR' }
+    });
+  }
+});
+
+// Logout
+router.post('/logout', async (req, res) => {
+  try {
+    // In a production environment, you might want to blacklist the refresh token
+    // For now, we'll just return a success response
+    return res.json({
+      success: true,
+      data: { message: 'Logged out successfully' }
+    });
+  } catch (err) {
+    console.error('Logout error:', err);
+    return res.status(500).json({
+      success: false,
+      error: { message: 'Server error during logout', code: 'SERVER_ERROR' }
     });
   }
 });

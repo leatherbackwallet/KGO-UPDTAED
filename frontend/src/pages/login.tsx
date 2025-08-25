@@ -34,10 +34,10 @@ export default function Login() {
       }
       
       const res = await api.post('/auth/login', { email, password });
-      const data = res.data as { success: boolean; data: { token: string; user: any } };
+      const data = res.data as { success: boolean; data: { tokens: any; user: any } };
       
-      if (data.success && data.data.token) {
-        login(data.data.token, data.data.user);
+      if (data.success && data.data.tokens && data.data.user) {
+        login(data.data.tokens, data.data.user);
         
         // Use setTimeout to ensure state updates before navigation
         setTimeout(() => {
@@ -49,113 +49,95 @@ export default function Login() {
     } catch (err: any) {
       console.error('Login error:', err);
       
-      // Handle different types of errors
-      if (err.response) {
-        // Server responded with error
-        const errorMessage = err.response.data?.error?.message || 
-                           err.response.data?.message || 
-                           'Login failed - server error';
-        setError(errorMessage);
-      } else if (err.request) {
-        // Network error
-        setError('Network error - please check your connection and try again');
+      if (err.response?.data?.error?.message) {
+        setError(err.response.data.error.message);
+      } else if (err.response?.status === 401) {
+        setError('Invalid email or password');
+      } else if (err.response?.status === 400) {
+        setError('Please check your input and try again');
+      } else if (err.code === 'ECONNABORTED') {
+        setError('Request timed out. Please try again.');
+      } else if (err.message === 'Network Error') {
+        setError('Network error. Please check your connection and try again.');
       } else {
-        // Other error
-        setError('Login failed - please try again');
+        setError('An unexpected error occurred. Please try again.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    // Clear error when user starts typing
-    if (error) setError('');
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-    // Clear error when user starts typing
-    if (error) setError('');
-  };
-
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50">
       <Navbar />
-      <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
-        <form onSubmit={handleSubmit} className="card p-8 w-full max-w-md">
-          <h2 className="text-2xl font-bold mb-6 text-center text-kgo-red">Login</h2>
-          
-          {error && (
-            <div className="mb-4 text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                {error}
-              </div>
+      
+      <div className="flex items-center justify-center min-h-screen px-4 py-12">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-xl p-8">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+              <p className="text-gray-600">Sign in to your account</p>
             </div>
-          )}
-          
-          <div className="mb-4">
-            <label htmlFor="email" className="form-label">Email</label>
-            <input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={handleEmailChange}
-              className="form-input w-full"
-              required
-              disabled={loading}
-              autoComplete="email"
-            />
-          </div>
-          
-          <div className="mb-6">
-            <label htmlFor="password" className="form-label">Password</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={handlePasswordChange}
-              className="form-input w-full"
-              required
-              disabled={loading}
-              autoComplete="current-password"
-            />
-          </div>
-          
-          <button 
-            type="submit" 
-            className="btn-primary w-full flex items-center justify-center"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Logging in...
-              </>
-            ) : (
-              'Login'
+
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
             )}
-          </button>
-          
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
-              <a href="/register" className="text-kgo-red hover:text-red-700 underline">
-                Register here
-              </a>
-            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                  placeholder="Enter your email"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                  placeholder="Enter your password"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Signing In...' : 'Sign In'}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <a href="/register" className="text-red-600 hover:text-red-700 font-medium">
+                  Sign up here
+                </a>
+              </p>
+            </div>
           </div>
-        </form>
-      </main>
-    </>
+        </div>
+      </div>
+    </div>
   );
 }

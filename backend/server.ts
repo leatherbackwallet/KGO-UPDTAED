@@ -31,10 +31,8 @@ const corsOptions = {
   exposedHeaders: ['Content-Length', 'Content-Type']
 };
 
-// Apply rate limiting (disabled in development)
-if (process.env.NODE_ENV === 'production') {
-  app.use(generalLimiter);
-}
+// Apply rate limiting (enabled in all environments for security)
+app.use(generalLimiter);
 
 // Apply logging
 app.use(logger);
@@ -116,30 +114,25 @@ if (!process.env.MONGODB_URI.includes('mongodb+srv://') ||
     process.env.MONGODB_URI.includes('localhost') ||
     process.env.MONGODB_URI.includes('127.0.0.1')) {
   console.error('❌ ERROR: MongoDB Atlas must be used. Local MongoDB is not allowed.');
-  console.error('❌ Current URI:', process.env.MONGODB_URI);
+  console.error('❌ Current URI format is invalid');
   console.error('✅ Expected format: mongodb+srv://username:password@cluster.mongodb.net/database');
-  console.error('✅ Correct URI: mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline');
   process.exit(1);
 }
 
-// Validate correct MongoDB Atlas URI
-const correctUri = 'mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline';
-if (!process.env.MONGODB_URI.includes('castlebek') || 
-    !process.env.MONGODB_URI.includes('keralagiftsonline.7oukp55.mongodb.net')) {
-  console.error('❌ ERROR: Incorrect MongoDB Atlas URI detected!');
-  console.error('❌ Current URI:', process.env.MONGODB_URI);
-  console.error('✅ Correct URI:', correctUri);
-  console.error('🔧 Please update your .env file with the correct URI');
-  process.exit(1);
-}
-
-console.log('✅ MongoDB Atlas URI validated successfully');
-console.log('✅ Connecting to: keralagiftsonline.7oukp55.mongodb.net');
-
+// Validate JWT secret
 if (!process.env.JWT_SECRET) {
   console.error('JWT_SECRET environment variable is required');
   process.exit(1);
 }
+
+// Validate JWT secret strength
+if (process.env.JWT_SECRET.length < 32) {
+  console.error('JWT_SECRET must be at least 32 characters long for security');
+  process.exit(1);
+}
+
+console.log('✅ Environment variables validated successfully');
+console.log('✅ Connecting to MongoDB Atlas...');
 
 // Connect to MongoDB with connection pooling
 mongoose.connect(process.env.MONGODB_URI, {
@@ -198,48 +191,26 @@ const returnsRoutes = require('./routes/returns');
 const healthRoutes = require('./routes/health');
 
 // Apply specific rate limiting to routes (disabled in development)
-if (process.env.NODE_ENV === 'production') {
-  app.use('/api/auth', authLimiter, authRoutes);
-  app.use('/api/upload', apiLimiter, uploadRoutes);
-  app.use('/api/profile', apiLimiter, profileRoutes);
-  app.use('/api/products', apiLimiter, productsRoutes);
-  app.use('/api/categories', apiLimiter, categoriesRoutes);
-  app.use('/api/vendors', apiLimiter, vendorsRoutes);
-  app.use('/api/orders', apiLimiter, ordersRoutes);
-  app.use('/api/users', apiLimiter, usersRoutes);
-  app.use('/api/wishlist', apiLimiter, wishlistRoutes);
-  app.use('/api/cart', apiLimiter, cartRoutes);
-  app.use('/api/finance', apiLimiter, financeRoutes);
-  app.use('/api/hubs', apiLimiter, hubsRoutes);
-  app.use('/api/delivery-runs', apiLimiter, deliveryRunsRoutes);
-  app.use('/api/returns', apiLimiter, returnsRoutes);
-  app.use('/api/health', healthRoutes);
-  app.use('/api/personalization', apiLimiter, personalizationRoutes);
-  app.use('/api/analytics', apiLimiter, analyticsRoutes);
-  app.use('/api/subscriptions', apiLimiter, subscriptionRoutes);
-  app.use('/api/content', apiLimiter, contentRoutes);
-} else {
-  // Development mode - no rate limiting
-  app.use('/api/auth', authRoutes);
-  app.use('/api/upload', uploadRoutes);
-  app.use('/api/profile', profileRoutes);
-  app.use('/api/products', productsRoutes);
-  app.use('/api/categories', categoriesRoutes);
-  app.use('/api/vendors', vendorsRoutes);
-  app.use('/api/orders', ordersRoutes);
-  app.use('/api/users', usersRoutes);
-  app.use('/api/wishlist', wishlistRoutes);
-  app.use('/api/cart', cartRoutes);
-  app.use('/api/finance', financeRoutes);
-  app.use('/api/hubs', hubsRoutes);
-  app.use('/api/delivery-runs', deliveryRunsRoutes);
-  app.use('/api/returns', returnsRoutes);
-  app.use('/api/health', healthRoutes);
-  app.use('/api/personalization', personalizationRoutes);
-  app.use('/api/analytics', analyticsRoutes);
-  app.use('/api/subscriptions', subscriptionRoutes);
-  app.use('/api/content', contentRoutes);
-}
+// Apply rate limiting to all routes (enabled in all environments for security)
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/upload', apiLimiter, uploadRoutes);
+app.use('/api/profile', apiLimiter, profileRoutes);
+app.use('/api/products', apiLimiter, productsRoutes);
+app.use('/api/categories', apiLimiter, categoriesRoutes);
+app.use('/api/vendors', apiLimiter, vendorsRoutes);
+app.use('/api/orders', apiLimiter, ordersRoutes);
+app.use('/api/users', apiLimiter, usersRoutes);
+app.use('/api/wishlist', apiLimiter, wishlistRoutes);
+app.use('/api/cart', apiLimiter, cartRoutes);
+app.use('/api/finance', apiLimiter, financeRoutes);
+app.use('/api/hubs', apiLimiter, hubsRoutes);
+app.use('/api/delivery-runs', apiLimiter, deliveryRunsRoutes);
+app.use('/api/returns', apiLimiter, returnsRoutes);
+app.use('/api/health', healthRoutes);
+app.use('/api/personalization', apiLimiter, personalizationRoutes);
+app.use('/api/analytics', apiLimiter, analyticsRoutes);
+app.use('/api/subscriptions', apiLimiter, subscriptionRoutes);
+app.use('/api/content', apiLimiter, contentRoutes);
 
 // Apply error logging middleware
 app.use(errorLogger);

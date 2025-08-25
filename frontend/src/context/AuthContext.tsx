@@ -1,69 +1,34 @@
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import axios from 'axios';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import api from '../utils/api';
 
-type User = {
+export interface User {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
+  phone: string;
   roleId: string;
-  roleName?: string;
-};
+  roleName: string;
+}
+
+export interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpiry: number;
+  refreshTokenExpiry: number;
+}
 
 type AuthContextType = {
   user: User | null;
-  token: string | null;
-  login: (token: string, userData?: User) => void;
+  tokens: TokenPair | null;
+  login: (tokens: TokenPair, userData: User) => void;
   logout: () => void;
+  refreshTokens: () => Promise<boolean>;
+  isAuthenticated: boolean;
+  isLoading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Cross-browser compatible JWT decode function
-const safeJwtDecode = (token: string): any => {
-  try {
-    if (!token || typeof token !== 'string') {
-      return null;
-    }
-    
-    // Handle different JWT formats
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      return null;
-    }
-    
-    const payload = parts[1];
-    
-    // Cross-browser compatible base64 decode
-    let decodedPayload: string;
-    try {
-      // Try native atob first (modern browsers)
-      decodedPayload = atob(payload);
-    } catch (e) {
-      // Fallback for older browsers or special characters
-      try {
-        // Handle URL-safe base64
-        const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
-        decodedPayload = atob(normalizedPayload);
-      } catch (e2) {
-        console.error('Failed to decode JWT payload:', e2);
-        return null;
-      }
-    }
-    
-    // Parse the JSON payload
-    try {
-      return JSON.parse(decodedPayload);
-    } catch (e) {
-      console.error('Failed to parse JWT payload:', e);
-      return null;
-    }
-  } catch (error) {
-    console.error('JWT decode error:', error);
-    return null;
-  }
-};
 
 // Cross-browser compatible localStorage functions
 const safeLocalStorage = {
@@ -106,117 +71,78 @@ const safeLocalStorage = {
   }
 };
 
-// Helper function to validate token and extract user data
-const extractUserFromToken = (token: string): User | null => {
-  try {
-    const decoded = safeJwtDecode(token);
-    if (!decoded) {
-      return null;
-    }
-    
-    // Handle different token formats
-    const userId = decoded.id || decoded.userId || decoded.sub || '';
-    const firstName = decoded.firstName || decoded.given_name || '';
-    const lastName = decoded.lastName || decoded.family_name || '';
-    const email = decoded.email || '';
-    const phone = decoded.phone || '';
-    const roleId = decoded.roleId || decoded.role_id || '';
-    const roleName = decoded.roleName || decoded.role_name || '';
-    
-    return {
-      id: userId,
-      firstName,
-      lastName,
-      email,
-      phone,
-      roleId,
-      roleName
-    };
-  } catch (error) {
-    console.error('Error extracting user from token:', error);
-    return null;
-  }
-};
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [tokens, setTokens] = useState<TokenPair | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Check if token is expired
+  const isTokenExpired = (expiry: number): boolean => {
+    return Date.now() >= expiry * 1000;
+  };
+
+  // Initialize auth state
   useEffect(() => {
     const initializeAuth = () => {
       try {
-        const storedToken = safeLocalStorage.getItem('token');
+        const storedTokens = safeLocalStorage.getItem('tokens');
         const storedUser = safeLocalStorage.getItem('user');
         
-        if (storedToken && storedToken.trim() !== '') {
-          let userData: User | null = null;
-          
-          // Try to load user data from localStorage first
-          if (storedUser) {
-            try {
-              userData = JSON.parse(storedUser);
-            } catch (e) {
-              console.error('Error parsing stored user data:', e);
+        if (storedTokens && storedUser) {
+          try {
+            const tokenPair: TokenPair = JSON.parse(storedTokens);
+            const userData: User = JSON.parse(storedUser);
+            
+            // Check if access token is expired
+            if (isTokenExpired(tokenPair.accessTokenExpiry)) {
+              // Check if refresh token is also expired
+              if (isTokenExpired(tokenPair.refreshTokenExpiry)) {
+                // Both tokens expired, clear storage
+                safeLocalStorage.removeItem('tokens');
+                safeLocalStorage.removeItem('user');
+                setTokens(null);
+                setUser(null);
+              } else {
+                // Access token expired but refresh token is valid
+                setTokens(tokenPair);
+                setUser(userData);
+                // Try to refresh tokens
+                refreshTokens();
+              }
+            } else {
+              // Tokens are still valid
+              setTokens(tokenPair);
+              setUser(userData);
             }
-          }
-          
-          // If no stored user data, try to extract from token
-          if (!userData) {
-            userData = extractUserFromToken(storedToken);
-          }
-          
-          if (userData) {
-            setToken(storedToken);
-            setUser(userData);
-          } else {
-            // Invalid token, remove it
-            safeLocalStorage.removeItem('token');
+          } catch (e) {
+            console.error('Error parsing stored auth data:', e);
+            safeLocalStorage.removeItem('tokens');
             safeLocalStorage.removeItem('user');
           }
         }
       } catch (error) {
         console.error('Error loading auth state:', error);
-        // Clear invalid token
-        safeLocalStorage.removeItem('token');
+        safeLocalStorage.removeItem('tokens');
         safeLocalStorage.removeItem('user');
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    // Initialize auth state
     initializeAuth();
-    setIsLoaded(true);
   }, []);
 
-  const login = (token: string, userData?: User) => {
+  const login = (tokenPair: TokenPair, userData: User) => {
     try {
-      if (!token || typeof token !== 'string') {
-        console.error('Invalid token provided to login');
-        return;
-      }
-
-      let finalUserData = userData;
+      const tokensStored = safeLocalStorage.setItem('tokens', JSON.stringify(tokenPair));
+      const userStored = safeLocalStorage.setItem('user', JSON.stringify(userData));
       
-      // If no user data provided, try to extract from token
-      if (!finalUserData) {
-        const extractedUser = extractUserFromToken(token);
-        if (!extractedUser) {
-          console.error('Failed to extract user data from token');
-          return;
-        }
-        finalUserData = extractedUser;
-      }
-
-      // Store in localStorage with error handling
-      const tokenStored = safeLocalStorage.setItem('token', token);
-      const userStored = safeLocalStorage.setItem('user', JSON.stringify(finalUserData));
-      
-      if (!tokenStored || !userStored) {
+      if (!tokensStored || !userStored) {
         console.warn('Failed to store auth data in localStorage, but continuing with session');
       }
       
-      setToken(token);
-      setUser(finalUserData);
+      setTokens(tokenPair);
+      setUser(userData);
     } catch (error) {
       console.error('Error during login:', error);
     }
@@ -224,17 +150,58 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     try {
-      safeLocalStorage.removeItem('token');
+      safeLocalStorage.removeItem('tokens');
       safeLocalStorage.removeItem('user');
-      setToken(null);
+      setTokens(null);
       setUser(null);
     } catch (error) {
       console.error('Error during logout:', error);
     }
   };
 
+  const refreshTokens = async (): Promise<boolean> => {
+    try {
+      if (!tokens?.refreshToken) {
+        return false;
+      }
+
+      const response = await api.post('/auth/refresh', {
+        refreshToken: tokens.refreshToken
+      });
+
+      if (response.data.success) {
+        const newTokens = response.data.data.tokens;
+        const tokensStored = safeLocalStorage.setItem('tokens', JSON.stringify(newTokens));
+        
+        if (!tokensStored) {
+          console.warn('Failed to store new tokens in localStorage');
+        }
+        
+        setTokens(newTokens);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error refreshing tokens:', error);
+      // If refresh fails, logout the user
+      logout();
+      return false;
+    }
+  };
+
+  const isAuthenticated = !!user && !!tokens && !isTokenExpired(tokens.accessTokenExpiry);
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      tokens, 
+      login, 
+      logout, 
+      refreshTokens, 
+      isAuthenticated, 
+      isLoading 
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -242,6 +209,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 };

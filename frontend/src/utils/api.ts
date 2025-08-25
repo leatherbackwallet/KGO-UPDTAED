@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse, AxiosError } from 'axios';
 
 // Utility function to safely extract text (handles both old multilingual and new string formats)
 export const getMultilingualText = (text: string | { en: string; de?: string; ml?: string } | undefined): string => {
@@ -14,16 +14,30 @@ export const getMultilingualText = (text: string | { en: string; de?: string; ml
   return '';
 };
 
-// Cross-browser compatible localStorage function
-const safeGetToken = (): string | null => {
+// Safe localStorage access
+const safeGetTokens = (): { accessToken: string; refreshToken: string } | null => {
   try {
     if (typeof window === 'undefined' || !window.localStorage) {
       return null;
     }
-    return window.localStorage.getItem('token');
+    const tokens = window.localStorage.getItem('tokens');
+    return tokens ? JSON.parse(tokens) : null;
   } catch (error) {
-    console.error('Error accessing localStorage:', error);
+    console.error('Error getting tokens from localStorage:', error);
     return null;
+  }
+};
+
+const safeSetTokens = (tokens: any): boolean => {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return false;
+    }
+    window.localStorage.setItem('tokens', JSON.stringify(tokens));
+    return true;
+  } catch (error) {
+    console.error('Error setting tokens in localStorage:', error);
+    return false;
   }
 };
 
@@ -39,9 +53,9 @@ const api = axios.create({
 // Add auth token to requests if available
 api.interceptors.request.use((config) => {
   try {
-    const token = safeGetToken();
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const tokens = safeGetTokens();
+    if (tokens?.accessToken && config.headers) {
+      config.headers.Authorization = `Bearer ${tokens.accessToken}`;
     }
   } catch (error) {
     console.error('Error adding auth token to request:', error);
@@ -52,49 +66,53 @@ api.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
-// Handle response errors
+// Handle response errors and token refresh
 api.interceptors.response.use(
-  (response) => {
-    // No multilingual validation needed for English-only content
-    
-    return response;
-  },
-  (error) => {
-    // Handle different types of errors
-    if (error.response) {
-      // Server responded with error status
-      console.error('API Error Response:', error.response.status, error.response.data);
-      
-      // Handle validation errors specifically
-      if (error.response.status === 400 && error.response.data?.error?.code === 'VALIDATION_ERROR') {
-        const details = error.response.data.error.details;
-        if (details) {
-          details.forEach((detail: any) => {
-            console.error('Validation error:', detail);
-          });
-        }
-      }
-      
-      // Handle authentication errors
-      if (error.response.status === 401) {
-        // Clear invalid token
-        try {
-          if (typeof window !== 'undefined' && window.localStorage) {
-            window.localStorage.removeItem('token');
+  (response: AxiosResponse) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as any;
+
+    // If the error is 401 and we haven't already tried to refresh
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const tokens = safeGetTokens();
+        if (!tokens?.refreshToken) {
+          // No refresh token, redirect to login
+          if (typeof window !== 'undefined') {
+            window.localStorage.removeItem('tokens');
             window.localStorage.removeItem('user');
+            window.location.href = '/login';
           }
-        } catch (e) {
-          console.error('Error clearing auth data:', e);
+          return Promise.reject(error);
+        }
+
+        // Try to refresh the token
+        const refreshResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/auth/refresh`,
+          { refreshToken: tokens.refreshToken }
+        );
+
+        if (refreshResponse.data.success) {
+          const newTokens = refreshResponse.data.data.tokens;
+          safeSetTokens(newTokens);
+
+          // Retry the original request with the new token
+          originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+        // Refresh failed, clear tokens and redirect to login
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem('tokens');
+          window.localStorage.removeItem('user');
+          window.location.href = '/login';
         }
       }
-    } else if (error.request) {
-      // Request was made but no response received
-      console.error('API Network Error:', error.request);
-    } else {
-      // Something else happened
-      console.error('API Error:', error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );

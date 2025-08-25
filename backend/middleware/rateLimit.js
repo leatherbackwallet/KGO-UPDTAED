@@ -5,10 +5,27 @@
 
 const rateLimit = require('express-rate-limit');
 
+// Get rate limiting configuration from environment variables
+const getRateLimitConfig = () => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  return {
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes default
+    max: isProduction 
+      ? (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100)
+      : (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000), // Higher limit for development
+    authMax: parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS) || 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+  };
+};
+
+const config = getRateLimitConfig();
+
 // General rate limiter
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // Higher limit for development
+  windowMs: config.windowMs,
+  max: config.max,
   message: {
     success: false,
     error: {
@@ -16,14 +33,14 @@ const generalLimiter = rateLimit({
       code: 'RATE_LIMIT_EXCEEDED'
     }
   },
-  standardHeaders: true,
-  legacyHeaders: false,
+  standardHeaders: config.standardHeaders,
+  legacyHeaders: config.legacyHeaders,
 });
 
 // Strict limiter for auth endpoints
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
+  windowMs: config.windowMs,
+  max: config.authMax,
   message: {
     success: false,
     error: {
@@ -31,14 +48,14 @@ const authLimiter = rateLimit({
       code: 'AUTH_RATE_LIMIT_EXCEEDED'
     }
   },
-  standardHeaders: true,
-  legacyHeaders: false,
+  standardHeaders: config.standardHeaders,
+  legacyHeaders: config.legacyHeaders,
 });
 
 // API limiter for product endpoints
 const apiLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: process.env.NODE_ENV === 'production' ? 30 : 300, // Higher limit for development
+  max: config.max,
   message: {
     success: false,
     error: {
@@ -46,8 +63,8 @@ const apiLimiter = rateLimit({
       code: 'API_RATE_LIMIT_EXCEEDED'
     }
   },
-  standardHeaders: true,
-  legacyHeaders: false,
+  standardHeaders: config.standardHeaders,
+  legacyHeaders: config.legacyHeaders,
 });
 
 module.exports = {
