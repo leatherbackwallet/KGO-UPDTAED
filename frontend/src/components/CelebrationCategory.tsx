@@ -135,11 +135,13 @@ export default function CelebrationCategory() {
       </div>
 
       {/* Quick View Modal */}
-      <QuickViewModal
-        product={quickViewProduct}
-        isOpen={isQuickViewOpen}
-        onClose={handleCloseQuickView}
-      />
+      {quickViewProduct && (
+        <QuickViewModal
+          product={quickViewProduct}
+          isOpen={isQuickViewOpen}
+          onClose={handleCloseQuickView}
+        />
+      )}
     </div>
   );
 } 

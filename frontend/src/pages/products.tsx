@@ -214,11 +214,13 @@ const ProductsPage: React.FC = () => {
       </main>
 
       {/* Quick View Modal */}
-      <QuickViewModal
-        product={selectedProduct}
-        isOpen={showQuickView}
-        onClose={closeQuickView}
-      />
+      {selectedProduct && (
+        <QuickViewModal
+          product={selectedProduct}
+          isOpen={showQuickView}
+          onClose={closeQuickView}
+        />
+      )}
     </>
   );
 };

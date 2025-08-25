@@ -289,11 +289,13 @@ export default function Home() {
       </main>
 
       {/* Quick View Modal */}
-      <QuickViewModal
-        product={selectedProduct}
-        isOpen={showQuickView}
-        onClose={closeQuickView}
-      />
+      {selectedProduct && (
+        <QuickViewModal
+          product={selectedProduct}
+          isOpen={showQuickView}
+          onClose={closeQuickView}
+        />
+      )}
 
       <style jsx>{`
         .bg-pattern {

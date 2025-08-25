@@ -73,9 +73,12 @@ const productSchema = new mongoose_1.Schema({
             trim: true,
             validate: {
                 validator: function (v) {
+                    if (v && v.startsWith('keralagiftsonline/products/')) {
+                        return true;
+                    }
                     return /^[a-zA-Z0-9._-]+$/.test(v);
                 },
-                message: 'Invalid filename format'
+                message: 'Invalid image path format. Must be a Cloudinary public ID or valid filename.'
             }
         }],
     defaultImage: {
@@ -85,9 +88,12 @@ const productSchema = new mongoose_1.Schema({
             validator: function (v) {
                 if (!v)
                     return true;
+                if (v && v.startsWith('keralagiftsonline/products/')) {
+                    return true;
+                }
                 return /^[a-zA-Z0-9._-]+$/.test(v);
             },
-            message: 'Invalid filename format'
+            message: 'Invalid image path format. Must be a Cloudinary public ID or valid filename.'
         }
     },
     occasions: [{

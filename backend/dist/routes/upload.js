@@ -8,52 +8,95 @@ const cloudinary_1 = require("../utils/cloudinary");
 const auth = require('../middleware/auth');
 const role = require('../middleware/role');
 const router = express_1.default.Router();
-router.post('/product-image', auth, role('admin'), cloudinary_1.upload.single('image'), async (req, res) => {
-    try {
+router.post('/product-image', auth, role('admin'), (req, res) => {
+    const multer = require('multer');
+    const memoryStorage = multer.memoryStorage();
+    const memoryUpload = multer({ storage: memoryStorage });
+    memoryUpload.single('image')(req, res, async (err) => {
+        try {
+            if (err) {
+                console.error('Memory upload error:', err);
+                return res.status(400).json({
+                    success: false,
+                    error: { message: 'File upload failed', code: 'UPLOAD_ERROR' }
+                });
+            }
+            if (!req.file || !req.file.buffer) {
+                return res.status(400).json({
+                    success: false,
+                    error: { message: 'No file uploaded', code: 'NO_FILE' }
+                });
+            }
+            const result = await (0, cloudinary_1.uploadImageToCloudinary)(req.file);
+            return res.status(200).json({
+                success: true,
+                data: {
+                    public_id: result.public_id,
+                    filename: req.file.originalname,
+                    url: result.url,
+                    secure_url: result.secure_url,
+                    size: result.size,
+                    mimetype: req.file.mimetype,
+                    width: result.width,
+                    height: result.height,
+                    format: result.format
+                }
+            });
+        }
+        catch (uploadError) {
+            console.error('Direct Cloudinary upload failed:', uploadError);
+            return res.status(500).json({
+                success: false,
+                error: { message: 'Cloudinary upload failed', code: 'CLOUDINARY_ERROR' }
+            });
+        }
+    });
+});
+router.post('/product-image-direct', auth, role('admin'), (req, res) => {
+    const multer = require('multer');
+    const memoryStorage = multer.memoryStorage();
+    const memoryUpload = multer({ storage: memoryStorage });
+    memoryUpload.single('image')(req, res, async (err) => {
+        if (err) {
+            console.error('Memory upload error:', err);
+            return res.status(400).json({
+                success: false,
+                error: { message: 'File upload failed', code: 'UPLOAD_ERROR' }
+            });
+        }
         if (!req.file) {
             return res.status(400).json({
                 success: false,
                 error: { message: 'No file uploaded', code: 'NO_FILE' }
             });
         }
-        const uploadResult = req.file;
-        return res.status(200).json({
-            success: true,
-            data: {
-                public_id: uploadResult.public_id,
-                filename: uploadResult.originalname,
-                url: uploadResult.url,
-                secure_url: uploadResult.secure_url,
-                size: uploadResult.size,
-                mimetype: uploadResult.mimetype,
-                width: uploadResult.width,
-                height: uploadResult.height,
-                format: uploadResult.format
-            }
-        });
-    }
-    catch (error) {
-        console.error('Upload error:', error);
-        return res.status(500).json({
-            success: false,
-            error: { message: 'File upload failed', code: 'UPLOAD_ERROR' }
-        });
-    }
-});
-router.post('/product-image-custom', auth, role('admin'), async (req, res) => {
-    try {
-        return res.status(501).json({
-            success: false,
-            error: { message: 'Custom upload not implemented yet', code: 'NOT_IMPLEMENTED' }
-        });
-    }
-    catch (error) {
-        console.error('Custom upload error:', error);
-        return res.status(500).json({
-            success: false,
-            error: { message: 'File upload failed', code: 'UPLOAD_ERROR' }
-        });
-    }
+        try {
+            console.log('Attempting direct Cloudinary upload...');
+            const result = await (0, cloudinary_1.uploadImageToCloudinary)(req.file);
+            console.log('Direct upload successful:', result);
+            return res.status(200).json({
+                success: true,
+                data: {
+                    public_id: result.public_id,
+                    filename: req.file.originalname,
+                    url: result.url,
+                    secure_url: result.secure_url,
+                    size: result.size,
+                    mimetype: req.file.mimetype,
+                    width: result.width,
+                    height: result.height,
+                    format: result.format
+                }
+            });
+        }
+        catch (uploadError) {
+            console.error('Direct upload failed:', uploadError);
+            return res.status(500).json({
+                success: false,
+                error: { message: 'Cloudinary upload failed', code: 'CLOUDINARY_ERROR' }
+            });
+        }
+    });
 });
 router.delete('/product-image/:public_id', auth, role('admin'), async (req, res) => {
     try {
