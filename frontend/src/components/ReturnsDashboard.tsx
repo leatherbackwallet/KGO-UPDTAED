@@ -49,7 +49,7 @@ interface ReturnsData {
 }
 
 const ReturnsDashboard: React.FC = () => {
-  const { token, user } = useAuth();
+  const { tokens, user } = useAuth();
   const [returns, setReturns] = useState<ReturnItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,7 +89,7 @@ const ReturnsDashboard: React.FC = () => {
       }
 
       const response = await api.get(`/returns?${params}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
       const data: ReturnsData = response.data as any;
       
@@ -106,12 +106,12 @@ const ReturnsDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (token && (user?.roleName === 'admin' || user?.roleName === 'support_agent')) {
+    if (tokens?.accessToken && (user?.roleName === 'admin' || user?.roleName === 'support_agent')) {
       fetchReturns();
     } else {
       setLoading(false);
     }
-  }, [token, user, currentPage, selectedStatus]);
+  }, [tokens, user, currentPage, selectedStatus]);
 
   const handleStatusUpdate = async (returnId: string, status: string, resolution?: string, notes?: string) => {
     try {
@@ -121,7 +121,7 @@ const ReturnsDashboard: React.FC = () => {
         resolution,
         notes
       }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
       fetchReturns();
       setShowModal(false);
@@ -154,7 +154,7 @@ const ReturnsDashboard: React.FC = () => {
     });
   };
 
-  if (!token || (user?.roleName !== 'admin' && user?.roleName !== 'support_agent')) {
+  if (!tokens?.accessToken || (user?.roleName !== 'admin' && user?.roleName !== 'support_agent')) {
     return <div className="text-red-600">Access denied. Admin or Support privileges required.</div>;
   }
 

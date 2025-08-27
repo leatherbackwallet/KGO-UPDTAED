@@ -28,19 +28,19 @@ interface Order {
 }
 
 export default function AdminDashboard() {
-  const { token, user } = useAuth();
+  const { tokens, user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (token && user?.roleName === 'admin') {
+    if (tokens?.accessToken && user?.roleName === 'admin') {
       fetchStats();
     } else {
       setLoading(false);
     }
     // eslint-disable-next-line
-  }, [token, user]);
+  }, [tokens, user]);
 
   const fetchStats = async () => {
     try {
@@ -48,9 +48,9 @@ export default function AdminDashboard() {
       // In a real app, you'd have a dedicated stats endpoint
       // For now, we'll fetch basic data
       const [usersRes, productsRes, ordersRes] = await Promise.all([
-        api.get<User[]>('/users', { headers: { Authorization: `Bearer ${token}` } }),
+        api.get<User[]>('/users', { headers: { Authorization: `Bearer ${tokens?.accessToken}` } }),
         api.get<Product[]>('/products'),
-        api.get<Order[]>('/orders', { headers: { Authorization: `Bearer ${token}` } })
+        api.get<Order[]>('/orders', { headers: { Authorization: `Bearer ${tokens?.accessToken}` } })
       ]);
 
       const totalRevenue = ordersRes.data?.reduce((sum: number, order: Order) => sum + (order.totalPrice || 0), 0) || 0;
@@ -77,7 +77,7 @@ export default function AdminDashboard() {
 
   if (loading) return <div>Loading dashboard...</div>;
 
-  if (!token || user?.roleName !== 'admin') {
+  if (!tokens?.accessToken || user?.roleName !== 'admin') {
     return <div className="text-red-600">Access denied. Admin privileges required.</div>;
   }
 

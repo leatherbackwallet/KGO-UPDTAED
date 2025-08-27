@@ -7,7 +7,7 @@ import api from '../utils/api';
 interface AuthResponse {
   success: boolean;
   data: {
-    token: string;
+    tokens: any;
     user: any;
   };
 }
@@ -100,11 +100,11 @@ export default function Register() {
         phone: phone.trim()
       });
       
-      if (res.data.success && res.data.data.token) {
+      if (res.data.success && res.data.data.tokens) {
         setSuccess('Registration successful! Redirecting...');
         
         // Login the user
-        login(res.data.data.token, res.data.data.user);
+        login(res.data.data.tokens, res.data.data.user);
         
         // Redirect after a short delay
         setTimeout(() => {

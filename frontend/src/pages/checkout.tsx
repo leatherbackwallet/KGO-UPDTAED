@@ -80,7 +80,7 @@ interface OrderRecipient {
 export default function Checkout() {
   const router = useRouter();
   const { cart, clearCart, refreshCart } = useCart();
-  const { user, login, token } = useAuth();
+  const { user, login, tokens } = useAuth();
   const { wishlist } = useWishlist();
   
   const [activeTab, setActiveTab] = useState<TabType>('login');
@@ -95,15 +95,15 @@ export default function Checkout() {
 
   // Fetch previous order recipients when user is authenticated
   useEffect(() => {
-    if (token && user) {
+    if (tokens?.accessToken && user) {
       fetchPreviousOrderRecipients();
     }
-  }, [token, user]);
+  }, [tokens, user]);
 
   const fetchPreviousOrderRecipients = async () => {
     try {
       const res = await api.get('/orders/my', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
       
       // Extract unique recipients from previous orders
@@ -209,7 +209,7 @@ export default function Checkout() {
           additionalInstructions: selectedRecipientAddress.additionalInstructions
         }
       }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
 
       setSuccess('Order placed successfully!');
@@ -237,11 +237,11 @@ export default function Checkout() {
     try {
       // Create guest user
       const guestResponse = await api.post('/auth/guest', guestData);
-      const data = guestResponse.data as { data: { token: string; user: any } };
-      const { token: guestToken, user: guestUser } = data.data;
+      const data = guestResponse.data as { data: { tokens: any; user: any } };
+      const { tokens: guestTokens, user: guestUser } = data.data;
 
       // Merge guest data with existing cart/wishlist
-      await mergeGuestData(guestToken);
+      await mergeGuestData(guestTokens.accessToken);
 
       // Place order
       await api.post('/orders', {
@@ -250,7 +250,7 @@ export default function Checkout() {
         paymentMethod: guestData.paymentMethod,
 
       }, {
-        headers: { Authorization: `Bearer ${guestToken}` }
+        headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
       });
 
       setSuccess('Order placed successfully! Guest account created.');
@@ -276,13 +276,13 @@ export default function Checkout() {
 
     try {
       const response = await api.post('/auth/login', loginData);
-      const data = response.data as { data: { token: string; user: any } };
-      const { token: loginToken, user: loginUser } = data.data;
+      const data = response.data as { data: { tokens: any; user: any } };
+      const { tokens: loginTokens, user: loginUser } = data.data;
       
       // Merge guest data with account
-      await mergeGuestData(loginToken);
+      await mergeGuestData(loginTokens.accessToken);
       
-      login(loginToken, data.data.user);
+      login(loginTokens, data.data.user);
       setSuccess('Login successful! Your cart and wishlist have been merged.');
       setShowAuthModal(false);
       
@@ -308,13 +308,13 @@ export default function Checkout() {
 
     try {
       const response = await api.post('/auth/register', registerData);
-      const data = response.data as { data: { token: string; user: any } };
-      const { token: registerToken, user: registerUser } = data.data;
+      const data = response.data as { data: { tokens: any; user: any } };
+      const { tokens: registerTokens, user: registerUser } = data.data;
       
       // Merge guest data with new account
-      await mergeGuestData(registerToken);
+      await mergeGuestData(registerTokens.accessToken);
       
-      login(registerToken, data.data.user);
+      login(registerTokens, data.data.user);
       setSuccess('Registration successful! Your cart and wishlist have been merged.');
       setShowAuthModal(false);
       

@@ -22,7 +22,7 @@ interface WishlistItem {
 }
 
 const WishlistPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, tokens } = useAuth();
   const { wishlist, removeFromWishlist } = useWishlist();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -38,15 +38,14 @@ const WishlistPage: React.FC = () => {
       }
 
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!tokens?.accessToken) {
           console.error('No authentication token found');
           setIsLoadingServer(false);
           return;
         }
 
         const response = await api.get('/wishlist', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${tokens.accessToken}` }
         });
 
         if (response.data.success) {
@@ -70,14 +69,13 @@ const WishlistPage: React.FC = () => {
       if (user) {
         // Remove from server if user is authenticated
         try {
-          const token = localStorage.getItem('token');
           await api.delete(`/wishlist/remove/${productId}`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${tokens?.accessToken}` }
           });
           
           // Refresh server wishlist after successful removal
           const response = await api.get('/wishlist', {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${tokens?.accessToken}` }
           });
           
           if (response.data.success) {

@@ -15,7 +15,7 @@ interface Category {
 }
 
 const AdminProducts: React.FC = () => {
-  const { user, token } = useAuth();
+  const { user, tokens } = useAuth();
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -75,7 +75,7 @@ const AdminProducts: React.FC = () => {
 
   // Check authentication and admin role
   useEffect(() => {
-    if (!user || !token) {
+    if (!user || !tokens?.accessToken) {
       router.push('/login');
       return;
     }
@@ -88,7 +88,7 @@ const AdminProducts: React.FC = () => {
     
     fetchProducts();
     fetchCategories();
-  }, [user, token, router]);
+  }, [user, tokens, router]);
 
   const clearCacheAndRefresh = async () => {
     try {
@@ -442,7 +442,7 @@ const AdminProducts: React.FC = () => {
     );
   }
 
-  if (!user || !token) {
+  if (!user || !tokens?.accessToken) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-600">Please log in to access this page.</p>

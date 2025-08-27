@@ -4,9 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const index_1 = require("../models/index");
 const hash_1 = require("../utils/hash");
+const jwt_1 = require("../utils/jwt");
 const { validate, sanitizeInput, schemas } = require('../middleware/validation');
 const router = express_1.default.Router();
 router.post('/register', sanitizeInput, validate(schemas.register), async (req, res) => {
@@ -41,10 +41,20 @@ router.post('/register', sanitizeInput, validate(schemas.register), async (req, 
                 error: { message: 'Please enter a valid email address', code: 'INVALID_EMAIL' }
             });
         }
-        if (password.length < 6) {
+        if (password.length < 8) {
             return res.status(400).json({
                 success: false,
-                error: { message: 'Password must be at least 6 characters long', code: 'INVALID_PASSWORD' }
+                error: { message: 'Password must be at least 8 characters long', code: 'INVALID_PASSWORD' }
+            });
+        }
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    message: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+                    code: 'INVALID_PASSWORD_COMPLEXITY'
+                }
             });
         }
         const phoneRegex = /^[\+]?[0-9\s\-\(\)]{8,}$/;
@@ -91,32 +101,24 @@ router.post('/register', sanitizeInput, validate(schemas.register), async (req, 
                 roleId: customerRole._id,
                 isActive: true
             });
-            console.log(`New user created successfully: ${user.email} (${user._id})`);
         }
         catch (createError) {
-            console.error('Error creating user:', createError);
-            if (createError.code === 11000) {
-                return res.status(400).json({
-                    success: false,
-                    error: { message: 'Email already in use. Please use a different email.', code: 'EMAIL_EXISTS' }
-                });
-            }
+            console.error('User creation error:', createError);
             return res.status(500).json({
                 success: false,
-                error: { message: 'Failed to create user account. Please try again.', code: 'USER_CREATION_FAILED' }
+                error: { message: 'Failed to create user account', code: 'USER_CREATION_FAILED' }
             });
         }
-        const token = jsonwebtoken_1.default.sign({
-            id: user._id,
+        const tokenPair = (0, jwt_1.generateTokenPair)({
+            id: user._id.toString(),
             email: user.email,
-            roleId: user.roleId,
+            roleId: user.roleId.toString(),
             firstName: user.firstName,
             lastName: user.lastName
-        }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
-        return res.json({
+        });
+        return res.status(201).json({
             success: true,
             data: {
-                token,
                 user: {
                     id: user._id,
                     firstName: user.firstName,
@@ -125,15 +127,16 @@ router.post('/register', sanitizeInput, validate(schemas.register), async (req, 
                     phone: user.phone,
                     roleId: user.roleId,
                     roleName: 'customer'
-                }
+                },
+                tokens: tokenPair
             }
         });
     }
     catch (err) {
-        console.error('Register error:', err);
+        console.error('Registration error:', err);
         return res.status(500).json({
             success: false,
-            error: { message: 'Server error occurred. Please try again later.', code: 'SERVER_ERROR' }
+            error: { message: 'Server error during registration', code: 'SERVER_ERROR' }
         });
     }
 });
@@ -169,17 +172,16 @@ router.post('/login', sanitizeInput, validate(schemas.login), async (req, res) =
                 error: { message: 'Invalid email or password', code: 'INVALID_CREDENTIALS' }
             });
         }
-        const token = jsonwebtoken_1.default.sign({
-            id: user._id,
+        const tokenPair = (0, jwt_1.generateTokenPair)({
+            id: user._id.toString(),
             email: user.email,
-            roleId: user.roleId,
+            roleId: user.roleId._id.toString(),
             firstName: user.firstName,
             lastName: user.lastName
-        }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
+        });
         return res.json({
             success: true,
             data: {
-                token,
                 user: {
                     id: user._id,
                     firstName: user.firstName,
@@ -188,7 +190,8 @@ router.post('/login', sanitizeInput, validate(schemas.login), async (req, res) =
                     phone: user.phone,
                     roleId: user.roleId,
                     roleName: user.roleId?.name || 'customer'
-                }
+                },
+                tokens: tokenPair
             }
         });
     }
@@ -196,124 +199,60 @@ router.post('/login', sanitizeInput, validate(schemas.login), async (req, res) =
         console.error('Login error:', err);
         return res.status(500).json({
             success: false,
-            error: { message: 'Server error occurred. Please try again later.', code: 'SERVER_ERROR' }
+            error: { message: 'Server error during login', code: 'SERVER_ERROR' }
         });
     }
 });
-router.post('/guest', async (req, res) => {
+router.post('/refresh', async (req, res) => {
     try {
-        const { name, email, phone, deliveryAddress, paymentMethod } = req.body;
-        if (!name || !email || !phone || !deliveryAddress) {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
             return res.status(400).json({
                 success: false,
-                error: { message: 'Name, email, phone, and delivery address are required', code: 'MISSING_FIELDS' }
+                error: { message: 'Refresh token is required', code: 'MISSING_REFRESH_TOKEN' }
             });
         }
-        let user = await index_1.User.findOne({ email }).populate('roleId');
-        if (user) {
-            const addressExists = user.recipientAddresses?.some(addr => addr.address.streetName === deliveryAddress.street &&
-                addr.address.houseNumber === deliveryAddress.houseNumber &&
-                addr.address.city === deliveryAddress.city);
-            if (!addressExists) {
-                const nameParts = name.trim().split(' ');
-                const firstName = nameParts[0] || name;
-                const lastName = nameParts.slice(1).join(' ') || 'Guest';
-                const newAddress = {
-                    name: `${firstName} ${lastName}`,
-                    phone: phone,
-                    address: {
-                        streetName: deliveryAddress.street,
-                        houseNumber: deliveryAddress.houseNumber,
-                        postalCode: deliveryAddress.zipCode,
-                        city: deliveryAddress.city,
-                        countryCode: deliveryAddress.country || 'IN'
-                    },
-                    isDefault: user.recipientAddresses?.length === 0
-                };
-                user.recipientAddresses = user.recipientAddresses || [];
-                user.recipientAddresses.push(newAddress);
-                await user.save();
-            }
-            const token = jsonwebtoken_1.default.sign({
-                id: user._id,
-                roleId: user.roleId
-            }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
-            return res.json({
-                success: true,
-                data: {
-                    token,
-                    user: {
-                        id: user._id,
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        email: user.email,
-                        phone: user.phone,
-                        roleId: user.roleId,
-                        roleName: user.roleId?.name
-                    }
-                }
+        const decoded = (0, jwt_1.verifyRefreshToken)(refreshToken);
+        if (!decoded) {
+            return res.status(401).json({
+                success: false,
+                error: { message: 'Invalid or expired refresh token', code: 'INVALID_REFRESH_TOKEN' }
             });
         }
-        let guestRole = await index_1.Role.findOne({ name: 'customer' });
-        if (!guestRole) {
-            guestRole = await index_1.Role.create({
-                name: 'customer',
-                description: 'Customer user',
-                permissions: ['read_products', 'create_orders']
-            });
-        }
-        const nameParts = name.trim().split(' ');
-        const firstName = nameParts[0] || name;
-        const lastName = nameParts.slice(1).join(' ') || 'Guest';
-        const randomPassword = Math.random().toString(36).slice(-8);
-        const hashedPassword = await (0, hash_1.hashPassword)(randomPassword);
-        user = await index_1.User.create({
-            firstName,
-            lastName,
-            email,
-            phone,
-            password: hashedPassword,
-            roleId: guestRole._id,
-            recipientAddresses: [{
-                    name: `${firstName} ${lastName}`,
-                    phone: phone,
-                    address: {
-                        streetName: deliveryAddress.street,
-                        houseNumber: deliveryAddress.houseNumber,
-                        postalCode: deliveryAddress.zipCode,
-                        city: deliveryAddress.city,
-                        countryCode: deliveryAddress.country || 'IN'
-                    },
-                    isDefault: true
-                }]
+        const tokenPair = (0, jwt_1.generateTokenPair)({
+            id: decoded.id,
+            email: decoded.email,
+            roleId: decoded.roleId,
+            firstName: decoded.firstName,
+            lastName: decoded.lastName
         });
-        const token = jsonwebtoken_1.default.sign({
-            id: user._id,
-            roleId: user.roleId
-        }, process.env.JWT_SECRET || '', { expiresIn: '7d' });
         return res.json({
             success: true,
             data: {
-                token,
-                user: {
-                    id: user._id,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email,
-                    phone: user.phone,
-                    roleId: user.roleId,
-                    roleName: user.roleId?.name,
-                    isGuest: true
-                }
+                tokens: tokenPair
             }
         });
     }
     catch (err) {
-        console.error('Guest checkout error:', err);
-        console.error('Error details:', JSON.stringify(err, null, 2));
+        console.error('Token refresh error:', err);
         return res.status(500).json({
             success: false,
-            error: { message: 'Server error', code: 'SERVER_ERROR' }
+            error: { message: 'Server error during token refresh', code: 'SERVER_ERROR' }
+        });
+    }
+});
+router.post('/logout', async (req, res) => {
+    try {
+        return res.json({
+            success: true,
+            data: { message: 'Logged out successfully' }
+        });
+    }
+    catch (err) {
+        console.error('Logout error:', err);
+        return res.status(500).json({
+            success: false,
+            error: { message: 'Server error during logout', code: 'SERVER_ERROR' }
         });
     }
 });

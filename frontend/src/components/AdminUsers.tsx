@@ -49,7 +49,7 @@ interface User {
 }
 
 export default function AdminUsers() {
-  const { token, user } = useAuth();
+  const { tokens, user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -58,19 +58,19 @@ export default function AdminUsers() {
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
-    if (token && user?.roleName === 'admin') {
+    if (tokens?.accessToken && user?.roleName === 'admin') {
       fetchUsers();
     } else {
       setLoading(false);
     }
-  }, [token, user]);
+  }, [tokens, user]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
       setError('');
       const res = await api.get<User[]>('/users', { 
-        headers: { Authorization: `Bearer ${token}` } 
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` } 
       });
       setUsers(res.data || []);
     } catch (err: any) {
@@ -84,7 +84,7 @@ export default function AdminUsers() {
   const grantAdmin = async (id: string) => {
     try {
       await api.put(`/users/${id}/grant`, {}, { 
-        headers: { Authorization: `Bearer ${token}` } 
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` } 
       });
       fetchUsers();
     } catch (err: any) {
@@ -95,7 +95,7 @@ export default function AdminUsers() {
   const revokeAdmin = async (id: string) => {
     try {
       await api.put(`/users/${id}/revoke`, {}, { 
-        headers: { Authorization: `Bearer ${token}` } 
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` } 
       });
       fetchUsers();
     } catch (err: any) {
@@ -194,7 +194,7 @@ export default function AdminUsers() {
     }
   };
 
-  if (!token || user?.roleName !== 'admin') {
+  if (!tokens?.accessToken || user?.roleName !== 'admin') {
     return <div className="text-red-600">Access denied. Admin privileges required.</div>;
   }
 

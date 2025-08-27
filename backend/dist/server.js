@@ -30,9 +30,7 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     exposedHeaders: ['Content-Length', 'Content-Type']
 };
-if (process.env.NODE_ENV === 'production') {
-    app.use(generalLimiter);
-}
+app.use(generalLimiter);
 app.use(logger);
 app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json({ limit: '10mb' }));
@@ -100,26 +98,20 @@ if (!process.env.MONGODB_URI.includes('mongodb+srv://') ||
     process.env.MONGODB_URI.includes('localhost') ||
     process.env.MONGODB_URI.includes('127.0.0.1')) {
     console.error('❌ ERROR: MongoDB Atlas must be used. Local MongoDB is not allowed.');
-    console.error('❌ Current URI:', process.env.MONGODB_URI);
+    console.error('❌ Current URI format is invalid');
     console.error('✅ Expected format: mongodb+srv://username:password@cluster.mongodb.net/database');
-    console.error('✅ Correct URI: mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline');
     process.exit(1);
 }
-const correctUri = 'mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline';
-if (!process.env.MONGODB_URI.includes('castlebek') ||
-    !process.env.MONGODB_URI.includes('keralagiftsonline.7oukp55.mongodb.net')) {
-    console.error('❌ ERROR: Incorrect MongoDB Atlas URI detected!');
-    console.error('❌ Current URI:', process.env.MONGODB_URI);
-    console.error('✅ Correct URI:', correctUri);
-    console.error('🔧 Please update your .env file with the correct URI');
-    process.exit(1);
-}
-console.log('✅ MongoDB Atlas URI validated successfully');
-console.log('✅ Connecting to: keralagiftsonline.7oukp55.mongodb.net');
 if (!process.env.JWT_SECRET) {
     console.error('JWT_SECRET environment variable is required');
     process.exit(1);
 }
+if (process.env.JWT_SECRET.length < 32) {
+    console.error('JWT_SECRET must be at least 32 characters long for security');
+    process.exit(1);
+}
+console.log('✅ Environment variables validated successfully');
+console.log('✅ Connecting to MongoDB Atlas...');
 mongoose_1.default.connect(process.env.MONGODB_URI, {
     maxPoolSize: 10,
     serverSelectionTimeoutMS: 5000,
@@ -159,48 +151,25 @@ const hubsRoutes = require('./routes/hubs');
 const deliveryRunsRoutes = require('./routes/deliveryRuns');
 const returnsRoutes = require('./routes/returns');
 const healthRoutes = require('./routes/health');
-if (process.env.NODE_ENV === 'production') {
-    app.use('/api/auth', authLimiter, auth_1.default);
-    app.use('/api/upload', apiLimiter, upload_1.default);
-    app.use('/api/profile', apiLimiter, profile_1.default);
-    app.use('/api/products', apiLimiter, productsRoutes);
-    app.use('/api/categories', apiLimiter, categoriesRoutes);
-    app.use('/api/vendors', apiLimiter, vendorsRoutes);
-    app.use('/api/orders', apiLimiter, orders_1.default);
-    app.use('/api/users', apiLimiter, usersRoutes);
-    app.use('/api/wishlist', apiLimiter, wishlistRoutes);
-    app.use('/api/cart', apiLimiter, cartRoutes);
-    app.use('/api/finance', apiLimiter, financeRoutes);
-    app.use('/api/hubs', apiLimiter, hubsRoutes);
-    app.use('/api/delivery-runs', apiLimiter, deliveryRunsRoutes);
-    app.use('/api/returns', apiLimiter, returnsRoutes);
-    app.use('/api/health', healthRoutes);
-    app.use('/api/personalization', apiLimiter, personalization_1.default);
-    app.use('/api/analytics', apiLimiter, analytics_1.default);
-    app.use('/api/subscriptions', apiLimiter, subscriptions_1.default);
-    app.use('/api/content', apiLimiter, content_1.default);
-}
-else {
-    app.use('/api/auth', auth_1.default);
-    app.use('/api/upload', upload_1.default);
-    app.use('/api/profile', profile_1.default);
-    app.use('/api/products', productsRoutes);
-    app.use('/api/categories', categoriesRoutes);
-    app.use('/api/vendors', vendorsRoutes);
-    app.use('/api/orders', orders_1.default);
-    app.use('/api/users', usersRoutes);
-    app.use('/api/wishlist', wishlistRoutes);
-    app.use('/api/cart', cartRoutes);
-    app.use('/api/finance', financeRoutes);
-    app.use('/api/hubs', hubsRoutes);
-    app.use('/api/delivery-runs', deliveryRunsRoutes);
-    app.use('/api/returns', returnsRoutes);
-    app.use('/api/health', healthRoutes);
-    app.use('/api/personalization', personalization_1.default);
-    app.use('/api/analytics', analytics_1.default);
-    app.use('/api/subscriptions', subscriptions_1.default);
-    app.use('/api/content', content_1.default);
-}
+app.use('/api/auth', authLimiter, auth_1.default);
+app.use('/api/upload', apiLimiter, upload_1.default);
+app.use('/api/profile', apiLimiter, profile_1.default);
+app.use('/api/products', apiLimiter, productsRoutes);
+app.use('/api/categories', apiLimiter, categoriesRoutes);
+app.use('/api/vendors', apiLimiter, vendorsRoutes);
+app.use('/api/orders', apiLimiter, orders_1.default);
+app.use('/api/users', apiLimiter, usersRoutes);
+app.use('/api/wishlist', apiLimiter, wishlistRoutes);
+app.use('/api/cart', apiLimiter, cartRoutes);
+app.use('/api/finance', apiLimiter, financeRoutes);
+app.use('/api/hubs', apiLimiter, hubsRoutes);
+app.use('/api/delivery-runs', apiLimiter, deliveryRunsRoutes);
+app.use('/api/returns', apiLimiter, returnsRoutes);
+app.use('/api/health', healthRoutes);
+app.use('/api/personalization', apiLimiter, personalization_1.default);
+app.use('/api/analytics', apiLimiter, analytics_1.default);
+app.use('/api/subscriptions', apiLimiter, subscriptions_1.default);
+app.use('/api/content', apiLimiter, content_1.default);
 app.use(errorLogger);
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

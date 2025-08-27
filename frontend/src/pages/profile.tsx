@@ -29,7 +29,7 @@ interface UserProfile {
 }
 
 export default function Profile() {
-  const { user, login } = useAuth();
+  const { user, login, tokens } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,10 +106,9 @@ export default function Profile() {
       setProfile(updatedUser);
       setSuccess('Profile updated successfully');
       
-      // Update auth context with current token
-      const currentToken = localStorage.getItem('token');
-      if (currentToken) {
-        login(currentToken as string, updatedUser);
+      // Update auth context with current tokens
+      if (tokens) {
+        login(tokens, updatedUser);
       }
     } catch (err: any) {
       setError(err.response?.data?.error?.message || 'Failed to update profile');

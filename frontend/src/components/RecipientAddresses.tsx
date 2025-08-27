@@ -29,7 +29,7 @@ export default function RecipientAddresses({
   showAddButton = true,
   className = '' 
 }: RecipientAddressesProps) {
-  const { token } = useAuth();
+  const { tokens } = useAuth();
   const [addresses, setAddresses] = useState<RecipientAddress[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -55,7 +55,7 @@ export default function RecipientAddresses({
     try {
       setLoading(true);
       const response = await api.get('/profile/addresses', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
       setAddresses(response.data.data || []);
     } catch (err: any) {
@@ -73,13 +73,13 @@ export default function RecipientAddresses({
       if (editingIndex !== null) {
         // Update existing address
         await api.put(`/profile/addresses/${editingIndex}`, formData, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${tokens?.accessToken}` }
         });
         setEditingIndex(null);
       } else {
         // Add new address
         await api.post('/profile/addresses', formData, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${tokens?.accessToken}` }
         });
       }
 
@@ -124,7 +124,7 @@ export default function RecipientAddresses({
 
     try {
       await api.delete(`/profile/addresses/${index}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
       fetchAddresses();
     } catch (err: any) {

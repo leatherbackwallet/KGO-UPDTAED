@@ -33,7 +33,7 @@ interface OrderRecipient {
 
 export default function CheckoutForm() {
   const { cart, clearCart } = useCart();
-  const { user, token } = useAuth();
+  const { user, tokens } = useAuth();
   const [selectedRecipientAddress, setSelectedRecipientAddress] = useState<RecipientAddress | null>(null);
   const [previousOrderRecipients, setPreviousOrderRecipients] = useState<OrderRecipient[]>([]);
   const [loading, setLoading] = useState(false);
@@ -45,15 +45,15 @@ export default function CheckoutForm() {
 
   // Fetch previous order recipients
   useEffect(() => {
-    if (token) {
+    if (tokens?.accessToken) {
       fetchPreviousOrderRecipients();
     }
-  }, [token]);
+  }, [tokens]);
 
   const fetchPreviousOrderRecipients = async () => {
     try {
       const res = await api.get('/orders/my', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
       
       // Extract unique recipients from previous orders
@@ -112,7 +112,7 @@ export default function CheckoutForm() {
           additionalInstructions: selectedRecipientAddress.additionalInstructions
         }
       }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
 
       setSuccess('Order placed successfully! Your gift will be delivered to the selected recipient.');
