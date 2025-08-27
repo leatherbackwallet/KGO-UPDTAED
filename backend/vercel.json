@@ -1,0 +1,3 @@
+{ "version": 2, "rewrites": [{ "source": "/(.*)", "destination": "/dist" }],
+"installCommand": "npm install",
+  "buildCommand": "npm run build"  }

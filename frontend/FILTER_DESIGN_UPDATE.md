@@ -1,7 +1,7 @@
 # Modern Filter Design Update
 
 ## Overview
-The products page search and filter interface has been completely redesigned with a modern, minimalistic, and elegant approach.
+The products page search and filter interface has been completely redesigned with a modern, minimalistic, and elegant approach...
 
 ## Key Design Improvements
 
