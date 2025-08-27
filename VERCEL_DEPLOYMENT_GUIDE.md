@@ -17,9 +17,8 @@
 2. **Create a `vercel.json` configuration file in your project root:**
    ```json
    {
-     "buildCommand": "npm run build:frontend",
+     "buildCommand": "npm run vercel-build",
      "outputDirectory": "frontend/.next",
-     "installCommand": "npm install",
      "framework": "nextjs"
    }
    ```
