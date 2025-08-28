@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const analyticsService_1 = require("../services/analyticsService");
 const analytics_model_1 = require("../models/analytics.model");
-const auth = require('../middleware/auth');
-const role = require('../middleware/role');
+const auth = require('../middleware/auth.js');
+const role = require('../middleware/role.js');
 const router = express_1.default.Router();
 router.get('/summary', auth, role(['admin']), async (req, res) => {
     try {

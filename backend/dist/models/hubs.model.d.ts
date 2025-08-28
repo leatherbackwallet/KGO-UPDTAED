@@ -13,7 +13,7 @@ export interface IHub extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Hub: mongoose.Model<IHub, {}, {}, {}, mongoose.Document<unknown, {}, IHub, {}> & IHub & Required<{
+export declare const Hub: mongoose.Model<IHub, {}, {}, {}, mongoose.Document<unknown, {}, IHub, {}, {}> & IHub & Required<{
     _id: unknown;
 }> & {
     __v: number;

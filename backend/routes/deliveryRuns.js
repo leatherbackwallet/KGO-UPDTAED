@@ -5,11 +5,11 @@
 
 const express = require('express');
 const router = express.Router();
-const { DeliveryRun } = require('../models/deliveryRuns.model');
-const Order = require('../models/orders.model');
-const { Hub } = require('../models/hubs.model');
-const auth = require('../middleware/auth');
-const role = require('../middleware/role');
+const { DeliveryRun } = require('../models/deliveryRuns.model.js');
+const Order = require('../models/orders.model.js');
+const { Hub } = require('../models/hubs.model.js');
+const auth = require('../middleware/auth.js');
+const role = require('../middleware/role.js');
 
 // Get all delivery runs (admin and delivery agents)
 router.get('/', auth, async (req, res) => {
@@ -113,7 +113,7 @@ router.post('/', auth, role('admin'), async (req, res) => {
     }
     
     // Validate that delivery agent exists and is a delivery agent
-    const { User } = require('../models/users.model');
+    const { User } = require('../models/users.model.js');
     const deliveryAgent = await User.findById(deliveryAgentId);
     if (!deliveryAgent || deliveryAgent.role !== 'delivery_agent') {
       return res.status(400).json({

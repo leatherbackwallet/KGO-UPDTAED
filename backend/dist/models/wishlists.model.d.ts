@@ -5,7 +5,7 @@ export interface IWishlist extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Wishlist: mongoose.Model<IWishlist, {}, {}, {}, mongoose.Document<unknown, {}, IWishlist, {}> & IWishlist & Required<{
+export declare const Wishlist: mongoose.Model<IWishlist, {}, {}, {}, mongoose.Document<unknown, {}, IWishlist, {}, {}> & IWishlist & Required<{
     _id: unknown;
 }> & {
     __v: number;

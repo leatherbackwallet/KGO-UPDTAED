@@ -14,6 +14,12 @@ const PRODUCT_IMAGES_DIR = path.join(process.cwd(), '../public/images/products')
  * Ensure the product images directory exists
  */
 export function ensureProductImagesDir(): void {
+  // Skip directory creation in production (Vercel serverless environment)
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Skipping local file system operations in production');
+    return;
+  }
+  
   if (!fs.existsSync(PRODUCT_IMAGES_DIR)) {
     fs.mkdirSync(PRODUCT_IMAGES_DIR, { recursive: true });
   }

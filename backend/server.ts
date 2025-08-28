@@ -126,8 +126,15 @@ mongoose.connect(process.env.MONGODB_URI, {
   bufferCommands: false,
 }).then(async () => {
   console.log('MongoDB connected with connection pooling');
-  ensureProductImagesDir();
-  console.log('Product images directory initialized');
+  
+  // Skip directory creation in production (Vercel serverless environment)
+  if (process.env.NODE_ENV !== 'production') {
+    ensureProductImagesDir();
+    console.log('Product images directory initialized');
+  } else {
+    console.log('Skipping local file system initialization in production');
+  }
+  
   await createSuperUser();
 }).catch((err) => console.error('MongoDB connection error:', err));
 
@@ -153,7 +160,7 @@ import subscriptionRoutes from './routes/subscriptions';
 import contentRoutes from './routes/content';
 
 const productsRoutes = require('./routes/products');
-const categoriesRoutes = require('./routes/categories');
+import categoriesRoutes from './routes/categories';
 const vendorsRoutes = require('./routes/vendors');
 const usersRoutes = require('./routes/users');
 const wishlistRoutes = require('./routes/wishlist');

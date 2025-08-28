@@ -9,7 +9,7 @@ const index_1 = require("../models/index");
 const hash_1 = require("../utils/hash");
 const fileUpload_1 = require("../utils/fileUpload");
 const router = express_1.default.Router();
-const auth = require('../middleware/auth');
+const auth = require('../middleware/auth.js');
 const upload = (0, multer_1.default)({
     storage: multer_1.default.memoryStorage(),
     limits: {

@@ -11,7 +11,7 @@ export interface IActivityLog extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const ActivityLog: mongoose.Model<IActivityLog, {}, {}, {}, mongoose.Document<unknown, {}, IActivityLog, {}> & IActivityLog & Required<{
+export declare const ActivityLog: mongoose.Model<IActivityLog, {}, {}, {}, mongoose.Document<unknown, {}, IActivityLog, {}, {}> & IActivityLog & Required<{
     _id: unknown;
 }> & {
     __v: number;

@@ -7,7 +7,7 @@ const express_1 = __importDefault(require("express"));
 const index_1 = require("../models/index");
 const hash_1 = require("../utils/hash");
 const jwt_1 = require("../utils/jwt");
-const { validate, sanitizeInput, schemas } = require('../middleware/validation');
+const { validate, sanitizeInput, schemas } = require('../middleware/validation.js');
 const router = express_1.default.Router();
 router.post('/register', sanitizeInput, validate(schemas.register), async (req, res) => {
     try {

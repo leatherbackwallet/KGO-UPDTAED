@@ -4,10 +4,10 @@
  */
 
 // Backend API base URL for API calls
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Backend base URL for static files - remove /api suffix
-const STATIC_BASE_URL = API_BASE_URL.replace('/api', '') || 'http://localhost:5001';
+const STATIC_BASE_URL = API_BASE_URL?.replace('/api', '') || '';
 
 export const PRODUCT_IMAGES_PATH = `${STATIC_BASE_URL}/images/products`;
 export const DEFAULT_PRODUCT_IMAGE = `${PRODUCT_IMAGES_PATH}/placeholder.svg`;

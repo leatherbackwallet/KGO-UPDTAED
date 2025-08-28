@@ -1,7 +1,7 @@
 import express from 'express';
 import { upload, uploadImageToCloudinary, deleteImageFromCloudinary, listImages, getImageMetadata, getOptimizedImageUrl } from '../utils/cloudinary';
-const auth = require('../middleware/auth');
-const role = require('../middleware/role');
+const auth = require('../middleware/auth.js');
+const role = require('../middleware/role.js');
 
 const router = express.Router();
 

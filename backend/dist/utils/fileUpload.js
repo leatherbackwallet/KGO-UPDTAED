@@ -15,6 +15,10 @@ const path_1 = __importDefault(require("path"));
 const uuid_1 = require("uuid");
 const PRODUCT_IMAGES_DIR = path_1.default.join(process.cwd(), '../public/images/products');
 function ensureProductImagesDir() {
+    if (process.env.NODE_ENV === 'production') {
+        console.log('Skipping local file system operations in production');
+        return;
+    }
     if (!fs_1.default.existsSync(PRODUCT_IMAGES_DIR)) {
         fs_1.default.mkdirSync(PRODUCT_IMAGES_DIR, { recursive: true });
     }

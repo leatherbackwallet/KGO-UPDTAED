@@ -6,8 +6,8 @@
 import express from 'express';
 import { personalizationService } from '../services/personalizationService';
 import { UserPreferences } from '../models/userPreferences.model';
-const auth = require('../middleware/auth');
-const { validate, sanitizeInput } = require('../middleware/validation');
+const auth = require('../middleware/auth.js');
+const { validate, sanitizeInput } = require('../middleware/validation.js');
 import { z } from 'zod';
 
 const router = express.Router();

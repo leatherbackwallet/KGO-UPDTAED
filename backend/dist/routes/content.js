@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const content_model_1 = require("../models/content.model");
 const userPreferences_model_1 = require("../models/userPreferences.model");
-const authenticateToken = require('../middleware/auth');
-const { validate } = require('../middleware/validation');
+const authenticateToken = require('../middleware/auth.js');
+const { validate } = require('../middleware/validation.js');
 const zod_1 = require("zod");
 const router = express_1.default.Router();
 const createContentSchema = zod_1.z.object({

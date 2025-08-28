@@ -112,8 +112,13 @@ mongoose_1.default.connect(process.env.MONGODB_URI, {
     bufferCommands: false,
 }).then(async () => {
     console.log('MongoDB connected with connection pooling');
-    (0, fileUpload_1.ensureProductImagesDir)();
-    console.log('Product images directory initialized');
+    if (process.env.NODE_ENV !== 'production') {
+        (0, fileUpload_1.ensureProductImagesDir)();
+        console.log('Product images directory initialized');
+    }
+    else {
+        console.log('Skipping local file system initialization in production');
+    }
     await createSuperUser();
 }).catch((err) => console.error('MongoDB connection error:', err));
 process.on('uncaughtException', (err) => {
@@ -133,7 +138,7 @@ const analytics_1 = __importDefault(require("./routes/analytics"));
 const subscriptions_1 = __importDefault(require("./routes/subscriptions"));
 const content_1 = __importDefault(require("./routes/content"));
 const productsRoutes = require('./routes/products');
-const categoriesRoutes = require('./routes/categories');
+const categories_1 = __importDefault(require("./routes/categories"));
 const vendorsRoutes = require('./routes/vendors');
 const usersRoutes = require('./routes/users');
 const wishlistRoutes = require('./routes/wishlist');
@@ -147,7 +152,7 @@ app.use('/api/auth', authLimiter, auth_1.default);
 app.use('/api/upload', apiLimiter, upload_1.default);
 app.use('/api/profile', apiLimiter, profile_1.default);
 app.use('/api/products', apiLimiter, productsRoutes);
-app.use('/api/categories', apiLimiter, categoriesRoutes);
+app.use('/api/categories', apiLimiter, categories_1.default);
 app.use('/api/vendors', apiLimiter, vendorsRoutes);
 app.use('/api/orders', apiLimiter, orders_1.default);
 app.use('/api/users', apiLimiter, usersRoutes);

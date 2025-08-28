@@ -252,7 +252,7 @@ export default function Profile() {
 
   const getAvatarUrl = (avatarId?: string) => {
     if (!avatarId) return undefined;
-    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/images/${avatarId}`;
+    return `${process.env.NEXT_PUBLIC_API_URL}/images/${avatarId}`;
   };
 
   if (loading) {

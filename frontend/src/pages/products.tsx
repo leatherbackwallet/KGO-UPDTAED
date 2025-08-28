@@ -92,7 +92,7 @@ const ProductsPage: React.FC = () => {
       });
       
       const apiPromise = api.get(apiUrl);
-      const response = await Promise.race([apiPromise, timeoutPromise]);
+      const response = await Promise.race([apiPromise, timeoutPromise]) as any;
       
       console.log('✅ API Response Status:', response.status);
       console.log('✅ API Response Headers:', response.headers);

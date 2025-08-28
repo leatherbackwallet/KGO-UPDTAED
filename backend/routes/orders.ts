@@ -5,8 +5,8 @@
 
 import express from 'express';
 import { Order, Product } from '../models/index';
-const auth = require('../middleware/auth');
-const role = require('../middleware/role');
+const auth = require('../middleware/auth.js');
+const role = require('../middleware/role.js');
 
 const router = express.Router();
 

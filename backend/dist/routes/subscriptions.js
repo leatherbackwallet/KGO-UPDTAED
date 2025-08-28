@@ -36,8 +36,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = __importStar(require("express"));
 const subscriptionService_1 = require("../services/subscriptionService");
 const subscriptions_model_1 = require("../models/subscriptions.model");
-const authenticateToken = require('../middleware/auth');
-const { validate } = require('../middleware/validation');
+const authenticateToken = require('../middleware/auth.js');
+const { validate } = require('../middleware/validation.js');
 const zod_1 = require("zod");
 const router = express.Router();
 const createSubscriptionSchema = zod_1.z.object({

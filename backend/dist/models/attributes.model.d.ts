@@ -18,7 +18,7 @@ export interface IAttribute extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Attribute: mongoose.Model<IAttribute, {}, {}, {}, mongoose.Document<unknown, {}, IAttribute, {}> & IAttribute & Required<{
+export declare const Attribute: mongoose.Model<IAttribute, {}, {}, {}, mongoose.Document<unknown, {}, IAttribute, {}, {}> & IAttribute & Required<{
     _id: unknown;
 }> & {
     __v: number;

@@ -14,7 +14,7 @@ export interface IReturn extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Return: mongoose.Model<IReturn, {}, {}, {}, mongoose.Document<unknown, {}, IReturn, {}> & IReturn & Required<{
+export declare const Return: mongoose.Model<IReturn, {}, {}, {}, mongoose.Document<unknown, {}, IReturn, {}, {}> & IReturn & Required<{
     _id: unknown;
 }> & {
     __v: number;

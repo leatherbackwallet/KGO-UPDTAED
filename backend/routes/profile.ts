@@ -11,7 +11,7 @@ import { uploadImage, deleteImage } from '../utils/fileUpload';
 const router = express.Router();
 
 // Import auth middleware with proper typing
-const auth = require('../middleware/auth') as express.RequestHandler;
+const auth = require('../middleware/auth.js') as express.RequestHandler;
 
 // Configure multer for file uploads
 const upload = multer({

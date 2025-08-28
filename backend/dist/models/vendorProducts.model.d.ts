@@ -11,7 +11,7 @@ export interface IVendorProduct extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const VendorProduct: mongoose.Model<IVendorProduct, {}, {}, {}, mongoose.Document<unknown, {}, IVendorProduct, {}> & IVendorProduct & Required<{
+export declare const VendorProduct: mongoose.Model<IVendorProduct, {}, {}, {}, mongoose.Document<unknown, {}, IVendorProduct, {}, {}> & IVendorProduct & Required<{
     _id: unknown;
 }> & {
     __v: number;

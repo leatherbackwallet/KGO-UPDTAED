@@ -3,7 +3,7 @@ import { User, Role } from '../models/index';
 import { hashPassword, comparePassword } from '../utils/hash';
 import { generateTokenPair, verifyRefreshToken } from '../utils/jwt';
 import { v4 as uuidv4 } from 'uuid';
-const { validate, sanitizeInput, schemas } = require('../middleware/validation');
+const { validate, sanitizeInput, schemas } = require('../middleware/validation.js');
 
 const router = express.Router();
 

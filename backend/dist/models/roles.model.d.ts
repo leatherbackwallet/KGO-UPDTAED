@@ -8,7 +8,7 @@ export interface IRole extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Role: mongoose.Model<IRole, {}, {}, {}, mongoose.Document<unknown, {}, IRole, {}> & IRole & Required<{
+export declare const Role: mongoose.Model<IRole, {}, {}, {}, mongoose.Document<unknown, {}, IRole, {}, {}> & IRole & Required<{
     _id: unknown;
 }> & {
     __v: number;

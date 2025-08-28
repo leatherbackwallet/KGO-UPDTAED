@@ -1,16 +1,20 @@
-const express = require('express');
-const router = express.Router();
-const { Category } = require('../models/categories.model');
-
-// GET /api/categories - Get all categories
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const categories_model_1 = require("../models/categories.model");
+const router = express_1.default.Router();
 router.get('/', async (req, res) => {
-  try {
-    const categories = await Category.find({ isActive: true }).sort('sortOrder');
-    res.json(categories);
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    res.status(500).json({ success: false, error: { message: 'Failed to fetch categories', code: 'FETCH_ERROR' } });
-  }
+    try {
+        const categories = await categories_model_1.Category.find({ isActive: true }).sort('sortOrder');
+        res.json(categories);
+    }
+    catch (error) {
+        console.error('Error fetching categories:', error);
+        res.status(500).json({ success: false, error: { message: 'Failed to fetch categories', code: 'FETCH_ERROR' } });
+    }
 });
-
-module.exports = router; 
+exports.default = router;
+//# sourceMappingURL=categories.js.map

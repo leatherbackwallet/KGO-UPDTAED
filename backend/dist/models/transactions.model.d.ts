@@ -17,7 +17,7 @@ export interface ITransaction extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Transaction: mongoose.Model<ITransaction, {}, {}, {}, mongoose.Document<unknown, {}, ITransaction, {}> & ITransaction & Required<{
+export declare const Transaction: mongoose.Model<ITransaction, {}, {}, {}, mongoose.Document<unknown, {}, ITransaction, {}, {}> & ITransaction & Required<{
     _id: unknown;
 }> & {
     __v: number;

@@ -28,7 +28,7 @@ export interface ILedger extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Ledger: mongoose.Model<ILedger, {}, {}, {}, mongoose.Document<unknown, {}, ILedger, {}> & ILedger & Required<{
+export declare const Ledger: mongoose.Model<ILedger, {}, {}, {}, mongoose.Document<unknown, {}, ILedger, {}, {}> & ILedger & Required<{
     _id: unknown;
 }> & {
     __v: number;

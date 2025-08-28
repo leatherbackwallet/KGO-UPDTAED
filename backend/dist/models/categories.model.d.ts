@@ -10,7 +10,7 @@ export interface ICategory extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Category: mongoose.Model<ICategory, {}, {}, {}, mongoose.Document<unknown, {}, ICategory, {}> & ICategory & Required<{
+export declare const Category: mongoose.Model<ICategory, {}, {}, {}, mongoose.Document<unknown, {}, ICategory, {}, {}> & ICategory & Required<{
     _id: unknown;
 }> & {
     __v: number;

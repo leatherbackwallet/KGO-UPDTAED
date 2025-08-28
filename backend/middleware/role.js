@@ -1,5 +1,5 @@
-const { User } = require('../models/users.model.ts');
-const { Role } = require('../models/roles.model.ts');
+const { User } = require('../models/users.model.js');
+const { Role } = require('../models/roles.model.js');
 
 module.exports = function (requiredRole) {
   return async (req, res, next) => {

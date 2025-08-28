@@ -65,7 +65,7 @@ export interface ISubscription extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Subscription: mongoose.Model<ISubscription, {}, {}, {}, mongoose.Document<unknown, {}, ISubscription, {}> & ISubscription & Required<{
+export declare const Subscription: mongoose.Model<ISubscription, {}, {}, {}, mongoose.Document<unknown, {}, ISubscription, {}, {}> & ISubscription & Required<{
     _id: unknown;
 }> & {
     __v: number;

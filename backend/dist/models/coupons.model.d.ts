@@ -15,7 +15,7 @@ export interface ICoupon extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Coupon: mongoose.Model<ICoupon, {}, {}, {}, mongoose.Document<unknown, {}, ICoupon, {}> & ICoupon & Required<{
+export declare const Coupon: mongoose.Model<ICoupon, {}, {}, {}, mongoose.Document<unknown, {}, ICoupon, {}, {}> & ICoupon & Required<{
     _id: unknown;
 }> & {
     __v: number;

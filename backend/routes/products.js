@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const { Product } = require('../models/products.model');
-const { Category } = require('../models/categories.model');
-const { ActivityLog } = require('../models/activityLogs.model');
-const { ProductAttribute } = require('../models/productAttributes.model');
-const { VendorProduct } = require('../models/vendorProducts.model');
-const { Review } = require('../models/reviews.model');
-const { Wishlist } = require('../models/wishlists.model');
-const { Notification } = require('../models/notifications.model');
-const auth = require('../middleware/auth');
-const role = require('../middleware/role');
-const { validate } = require('../middleware/validation');
+const { Product } = require('../models/products.model.js');
+const { Category } = require('../models/categories.model.js');
+const { ActivityLog } = require('../models/activityLogs.model.js');
+const { ProductAttribute } = require('../models/productAttributes.model.js');
+const { VendorProduct } = require('../models/vendorProducts.model.js');
+const { Review } = require('../models/reviews.model.js');
+const { Wishlist } = require('../models/wishlists.model.js');
+const { Notification } = require('../models/notifications.model.js');
+const auth = require('../middleware/auth.js');
+const role = require('../middleware/role.js');
+const { validate } = require('../middleware/validation.js');
 const mongoose = require('mongoose');
-const { cacheConfigs, invalidateProductCache } = require('../middleware/cache');
+const { cacheConfigs, invalidateProductCache } = require('../middleware/cache.js');
 
 // Get all products with caching
 router.get('/', cacheConfigs.products, async (req, res) => {

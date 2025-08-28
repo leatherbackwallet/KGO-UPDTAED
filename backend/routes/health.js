@@ -6,11 +6,11 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { Product } = require('../models/products.model');
-const { ProductAttribute } = require('../models/productAttributes.model');
-const { VendorProduct } = require('../models/vendorProducts.model');
-const { Review } = require('../models/reviews.model');
-const { Wishlist } = require('../models/wishlists.model');
+const { Product } = require('../models/products.model.js');
+const { ProductAttribute } = require('../models/productAttributes.model.js');
+const { VendorProduct } = require('../models/vendorProducts.model.js');
+const { Review } = require('../models/reviews.model.js');
+const { Wishlist } = require('../models/wishlists.model.js');
 
 // Enhanced health check with database integrity
 router.get('/', async (req, res) => {

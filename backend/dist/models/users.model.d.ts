@@ -38,7 +38,7 @@ export interface IUser extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const User: mongoose.Model<IUser, {}, {}, {}, mongoose.Document<unknown, {}, IUser, {}> & IUser & Required<{
+export declare const User: mongoose.Model<IUser, {}, {}, {}, mongoose.Document<unknown, {}, IUser, {}, {}> & IUser & Required<{
     _id: unknown;
 }> & {
     __v: number;

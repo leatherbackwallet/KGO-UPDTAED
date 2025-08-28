@@ -11,7 +11,7 @@ export interface IPage extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Page: mongoose.Model<IPage, {}, {}, {}, mongoose.Document<unknown, {}, IPage, {}> & IPage & Required<{
+export declare const Page: mongoose.Model<IPage, {}, {}, {}, mongoose.Document<unknown, {}, IPage, {}, {}> & IPage & Required<{
     _id: unknown;
 }> & {
     __v: number;

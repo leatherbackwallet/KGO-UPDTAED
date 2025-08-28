@@ -49,7 +49,7 @@ export interface IDeliveryRun extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const DeliveryRun: mongoose.Model<IDeliveryRun, {}, {}, {}, mongoose.Document<unknown, {}, IDeliveryRun, {}> & IDeliveryRun & Required<{
+export declare const DeliveryRun: mongoose.Model<IDeliveryRun, {}, {}, {}, mongoose.Document<unknown, {}, IDeliveryRun, {}, {}> & IDeliveryRun & Required<{
     _id: unknown;
 }> & {
     __v: number;

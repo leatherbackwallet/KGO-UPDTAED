@@ -8,7 +8,7 @@ export interface INotification extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Notification: mongoose.Model<INotification, {}, {}, {}, mongoose.Document<unknown, {}, INotification, {}> & INotification & Required<{
+export declare const Notification: mongoose.Model<INotification, {}, {}, {}, mongoose.Document<unknown, {}, INotification, {}, {}> & INotification & Required<{
     _id: unknown;
 }> & {
     __v: number;

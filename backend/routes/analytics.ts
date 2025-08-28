@@ -6,8 +6,8 @@
 import express from 'express';
 import { analyticsService } from '../services/analyticsService';
 import { Analytics } from '../models/analytics.model';
-const auth = require('../middleware/auth');
-const role = require('../middleware/role');
+const auth = require('../middleware/auth.js');
+const role = require('../middleware/role.js');
 
 const router = express.Router();
 

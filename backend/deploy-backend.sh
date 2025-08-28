@@ -111,7 +111,7 @@ if npm start &> /dev/null & then
     sleep 5
     
     # Check if server is running
-    if curl -s http://localhost:5001/api/health > /dev/null; then
+    if curl -s https://backend-theta-nine-60.vercel.app//api/health > /dev/null; then
         print_success "Server test passed!"
         kill $PID
     else
