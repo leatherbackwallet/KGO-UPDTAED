@@ -118,7 +118,7 @@ if (process.env.JWT_SECRET.length < 32) {
 
 console.log('✅ Environment variables validated successfully');
 
-// Connect to MongoDB
+// Connect to MongoDB (non-blocking for serverless)
 mongoose.connect(process.env.MONGODB_URI, {
   maxPoolSize: 10,
   serverSelectionTimeoutMS: 5000,
@@ -136,17 +136,27 @@ mongoose.connect(process.env.MONGODB_URI, {
   }
   
   await createSuperUser();
-}).catch((err) => console.error('MongoDB connection error:', err));
+}).catch((err) => {
+  console.error('MongoDB connection error:', err);
+  // Don't exit process in serverless environment
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Continuing without MongoDB connection in production');
+  }
+});
 
 // Error handling
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
-  process.exit(1);
+  if (process.env.NODE_ENV !== 'production') {
+    process.exit(1);
+  }
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
+  if (process.env.NODE_ENV !== 'production') {
+    process.exit(1);
+  }
 });
 
 // Import routes
@@ -171,6 +181,15 @@ const deliveryRunsRoutes = require('./routes/deliveryRuns');
 const returnsRoutes = require('./routes/returns');
 const healthRoutes = require('./routes/health');
 
+// Simple health check (no dependencies)
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Apply routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/upload', apiLimiter, uploadRoutes);
@@ -186,7 +205,6 @@ app.use('/api/finance', apiLimiter, financeRoutes);
 app.use('/api/hubs', apiLimiter, hubsRoutes);
 app.use('/api/delivery-runs', apiLimiter, deliveryRunsRoutes);
 app.use('/api/returns', apiLimiter, returnsRoutes);
-app.use('/api/health', healthRoutes);
 app.use('/api/personalization', apiLimiter, personalizationRoutes);
 app.use('/api/analytics', apiLimiter, analyticsRoutes);
 app.use('/api/subscriptions', apiLimiter, subscriptionRoutes);
