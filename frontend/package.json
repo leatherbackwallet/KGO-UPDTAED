@@ -18,7 +18,8 @@
     "nextjs",
     "marketplace",
     "frontend",
-    "ui"
+    "ui",
+    "client"
   ],
   "author": "KeralGiftsOnline Team",
   "license": "MIT",
