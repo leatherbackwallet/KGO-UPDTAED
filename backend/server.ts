@@ -5,7 +5,6 @@ import cors from 'cors';
 import path from 'path';
 import { User } from './models/users.model';
 import { Role } from './models/roles.model';
-import { Category } from './models/categories.model';
 import { hashPassword } from './utils/hash';
 import { ensureProductImagesDir } from './utils/fileUpload';
 const { generalLimiter, authLimiter, apiLimiter } = require('./middleware/rateLimit');
@@ -21,8 +20,7 @@ const corsOptions = {
     process.env.CORS_ORIGIN || 'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
-    'http://localhost:3003',
-    'http://localhost:3000'
+    'http://localhost:3003'
   ],
   credentials: true,
   optionsSuccessStatus: 200,
@@ -31,18 +29,14 @@ const corsOptions = {
   exposedHeaders: ['Content-Length', 'Content-Type']
 };
 
-// Apply rate limiting (enabled in all environments for security)
-app.use(generalLimiter);
-
-// Apply logging
-app.use(logger);
-
 // Middleware
+app.use(generalLimiter);
+app.use(logger);
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Serve static files from public directory (for legacy images) with caching
+// Serve static files
 app.use('/images', express.static(path.join(__dirname, '../public/images'), {
   setHeaders: (res, path) => {
     if (path.endsWith('.svg')) {
@@ -51,21 +45,19 @@ app.use('/images', express.static(path.join(__dirname, '../public/images'), {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // Cache for 1 year
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     res.setHeader('Expires', new Date(Date.now() + 31536000 * 1000).toUTCString());
   }
 }));
 
 // Create default superuser if not exists
 async function createSuperUser() {
-  // Only create superuser if explicitly enabled
   if (process.env.CREATE_SUPERUSER !== 'true') {
     console.log('Superuser creation skipped (CREATE_SUPERUSER not set to true)');
     return;
   }
 
   try {
-    // First, ensure we have an admin role
     let adminRole = await Role.findOne({ name: 'admin' });
     if (!adminRole) {
       adminRole = await Role.create({
@@ -75,8 +67,6 @@ async function createSuperUser() {
         isActive: true
       });
       console.log('Admin role created');
-    } else {
-      console.log('Admin role already exists');
     }
 
     const email = process.env.ADMIN_EMAIL || 'admin@keralagiftsonline.com';
@@ -102,59 +92,46 @@ async function createSuperUser() {
   }
 }
 
-// Validate required environment variables
+// Validate environment variables
 if (!process.env.MONGODB_URI) {
   console.error('MONGODB_URI environment variable is required');
   process.exit(1);
 }
 
-// ⚠️ CRITICAL: Ensure MongoDB Atlas is always used, never local MongoDB
 if (!process.env.MONGODB_URI.includes('mongodb+srv://') || 
     !process.env.MONGODB_URI.includes('mongodb.net') ||
     process.env.MONGODB_URI.includes('localhost') ||
     process.env.MONGODB_URI.includes('127.0.0.1')) {
   console.error('❌ ERROR: MongoDB Atlas must be used. Local MongoDB is not allowed.');
-  console.error('❌ Current URI format is invalid');
-  console.error('✅ Expected format: mongodb+srv://username:password@cluster.mongodb.net/database');
   process.exit(1);
 }
 
-// Validate JWT secret
 if (!process.env.JWT_SECRET) {
   console.error('JWT_SECRET environment variable is required');
   process.exit(1);
 }
 
-// Validate JWT secret strength
 if (process.env.JWT_SECRET.length < 32) {
   console.error('JWT_SECRET must be at least 32 characters long for security');
   process.exit(1);
 }
 
 console.log('✅ Environment variables validated successfully');
-console.log('✅ Connecting to MongoDB Atlas...');
 
-// Connect to MongoDB with connection pooling
+// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
-  maxPoolSize: 10, // Maintain up to 10 socket connections
-  serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
-  socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-  bufferCommands: false, // Disable mongoose buffering
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  bufferCommands: false,
 }).then(async () => {
   console.log('MongoDB connected with connection pooling');
-  
-  // Ensure product images directory exists
   ensureProductImagesDir();
   console.log('Product images directory initialized');
-  
   await createSuperUser();
-})
-  .catch((err) => console.error('MongoDB connection error:', err));
+}).catch((err) => console.error('MongoDB connection error:', err));
 
-// Product images are now served via static file serving from /images/products/
-// No additional route needed - files are served directly from the file system
-
-// Add error handling for uncaught exceptions
+// Error handling
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
   process.exit(1);
@@ -165,19 +142,16 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-// Routes with rate limiting
+// Import routes
 import authRoutes from './routes/auth';
 import uploadRoutes from './routes/upload';
 import ordersRoutes from './routes/orders';
 import profileRoutes from './routes/profile';
-
-// Strategic Enhancement Routes
 import personalizationRoutes from './routes/personalization';
 import analyticsRoutes from './routes/analytics';
 import subscriptionRoutes from './routes/subscriptions';
 import contentRoutes from './routes/content';
 
-// Import other routes
 const productsRoutes = require('./routes/products');
 const categoriesRoutes = require('./routes/categories');
 const vendorsRoutes = require('./routes/vendors');
@@ -190,8 +164,7 @@ const deliveryRunsRoutes = require('./routes/deliveryRuns');
 const returnsRoutes = require('./routes/returns');
 const healthRoutes = require('./routes/health');
 
-// Apply specific rate limiting to routes (disabled in development)
-// Apply rate limiting to all routes (enabled in all environments for security)
+// Apply routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/upload', apiLimiter, uploadRoutes);
 app.use('/api/profile', apiLimiter, profileRoutes);
@@ -212,7 +185,7 @@ app.use('/api/analytics', apiLimiter, analyticsRoutes);
 app.use('/api/subscriptions', apiLimiter, subscriptionRoutes);
 app.use('/api/content', apiLimiter, contentRoutes);
 
-// Apply error logging middleware
+// Error logging middleware
 app.use(errorLogger);
 
 // Start server

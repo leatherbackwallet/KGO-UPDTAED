@@ -21,8 +21,7 @@ const corsOptions = {
         process.env.CORS_ORIGIN || 'http://localhost:3000',
         'http://localhost:3001',
         'http://localhost:3002',
-        'http://localhost:3003',
-        'http://localhost:3000'
+        'http://localhost:3003'
     ],
     credentials: true,
     optionsSuccessStatus: 200,
@@ -63,9 +62,6 @@ async function createSuperUser() {
             });
             console.log('Admin role created');
         }
-        else {
-            console.log('Admin role already exists');
-        }
         const email = process.env.ADMIN_EMAIL || 'admin@keralagiftsonline.com';
         const password = process.env.ADMIN_PASSWORD || 'SuperSecure123!';
         const existing = await users_model_1.User.findOne({ email });
@@ -98,8 +94,6 @@ if (!process.env.MONGODB_URI.includes('mongodb+srv://') ||
     process.env.MONGODB_URI.includes('localhost') ||
     process.env.MONGODB_URI.includes('127.0.0.1')) {
     console.error('❌ ERROR: MongoDB Atlas must be used. Local MongoDB is not allowed.');
-    console.error('❌ Current URI format is invalid');
-    console.error('✅ Expected format: mongodb+srv://username:password@cluster.mongodb.net/database');
     process.exit(1);
 }
 if (!process.env.JWT_SECRET) {
@@ -111,7 +105,6 @@ if (process.env.JWT_SECRET.length < 32) {
     process.exit(1);
 }
 console.log('✅ Environment variables validated successfully');
-console.log('✅ Connecting to MongoDB Atlas...');
 mongoose_1.default.connect(process.env.MONGODB_URI, {
     maxPoolSize: 10,
     serverSelectionTimeoutMS: 5000,
@@ -122,8 +115,7 @@ mongoose_1.default.connect(process.env.MONGODB_URI, {
     (0, fileUpload_1.ensureProductImagesDir)();
     console.log('Product images directory initialized');
     await createSuperUser();
-})
-    .catch((err) => console.error('MongoDB connection error:', err));
+}).catch((err) => console.error('MongoDB connection error:', err));
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
     process.exit(1);

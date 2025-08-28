@@ -38,6 +38,17 @@ const ProductsPage: React.FC = () => {
     fetchCategories();
     fetchProducts();
     setIsInitialLoad(false);
+    
+    // Add a fallback timeout to prevent infinite loading
+    const fallbackTimeout = setTimeout(() => {
+      if (loading) {
+        console.log('⚠️ Fallback timeout triggered - forcing loading to false');
+        setLoading(false);
+        setError('Request timed out. Please try again.');
+      }
+    }, 20000); // 20 seconds fallback
+    
+    return () => clearTimeout(fallbackTimeout);
   }, []);
 
   // Debounced search effect (only for filters, not initial load)
@@ -75,7 +86,14 @@ const ProductsPage: React.FC = () => {
       const apiUrl = `/products?${params.toString()}`;
       console.log('🔗 Full API URL:', `${api.defaults.baseURL}${apiUrl}`);
       
-      const response = await api.get(apiUrl);
+      // Add a timeout promise to catch hanging requests
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 15000);
+      });
+      
+      const apiPromise = api.get(apiUrl);
+      const response = await Promise.race([apiPromise, timeoutPromise]);
+      
       console.log('✅ API Response Status:', response.status);
       console.log('✅ API Response Headers:', response.headers);
       console.log('✅ API Response Data:', response.data);
