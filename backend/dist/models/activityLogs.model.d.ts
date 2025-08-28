@@ -11,9 +11,7 @@ export interface IActivityLog extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const ActivityLog: mongoose.Model<IActivityLog, {}, {}, {}, mongoose.Document<unknown, {}, IActivityLog, {}, {}> & IActivityLog & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const ActivityLog: mongoose.Model<IActivityLog, {}, {}, {}, mongoose.Document<unknown, {}, IActivityLog> & IActivityLog & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=activityLogs.model.d.ts.map

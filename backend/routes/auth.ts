@@ -3,12 +3,13 @@ import { User, Role } from '../models/index';
 import { hashPassword, comparePassword } from '../utils/hash';
 import { generateTokenPair, verifyRefreshToken } from '../utils/jwt';
 import { v4 as uuidv4 } from 'uuid';
+import { ensureDatabaseConnection } from '../middleware/database';
 const { validate, sanitizeInput, schemas } = require('../middleware/validation.js');
 
 const router = express.Router();
 
 // Register
-router.post('/register', sanitizeInput, validate(schemas.register), async (req, res) => {
+router.post('/register', sanitizeInput, validate(schemas.register), ensureDatabaseConnection, async (req, res) => {
   try {
     const { firstName, lastName, email, password, phone } = req.body;
     
@@ -165,7 +166,7 @@ router.post('/register', sanitizeInput, validate(schemas.register), async (req, 
 });
 
 // Login
-router.post('/login', sanitizeInput, validate(schemas.login), async (req, res) => {
+router.post('/login', sanitizeInput, validate(schemas.login), ensureDatabaseConnection, async (req, res) => {
   try {
     const { email, password } = req.body;
     

@@ -11,9 +11,7 @@ export interface IPage extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Page: mongoose.Model<IPage, {}, {}, {}, mongoose.Document<unknown, {}, IPage, {}, {}> & IPage & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const Page: mongoose.Model<IPage, {}, {}, {}, mongoose.Document<unknown, {}, IPage> & IPage & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=pages.model.d.ts.map

@@ -8,6 +8,7 @@ const multer_1 = __importDefault(require("multer"));
 const index_1 = require("../models/index");
 const hash_1 = require("../utils/hash");
 const fileUpload_1 = require("../utils/fileUpload");
+const database_1 = require("../middleware/database");
 const router = express_1.default.Router();
 const auth = require('../middleware/auth.js');
 const upload = (0, multer_1.default)({
@@ -24,7 +25,7 @@ const upload = (0, multer_1.default)({
         }
     },
 });
-router.get('/', auth, async (req, res) => {
+router.get('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -54,7 +55,7 @@ router.get('/', auth, async (req, res) => {
         });
     }
 });
-router.put('/', auth, async (req, res) => {
+router.put('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({

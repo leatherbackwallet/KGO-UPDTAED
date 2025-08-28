@@ -7,6 +7,7 @@ import multer from 'multer';
 import { User } from '../models/index';
 import { hashPassword, comparePassword } from '../utils/hash';
 import { uploadImage, deleteImage } from '../utils/fileUpload';
+import { ensureDatabaseConnection } from '../middleware/database';
 
 const router = express.Router();
 
@@ -37,7 +38,7 @@ interface AuthenticatedRequest extends express.Request {
 }
 
 // Get user profile
-router.get('/', auth, async (req: AuthenticatedRequest, res) => {
+router.get('/', auth, ensureDatabaseConnection, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
       return res.status(401).json({
@@ -71,7 +72,7 @@ router.get('/', auth, async (req: AuthenticatedRequest, res) => {
 });
 
 // Update user profile
-router.put('/', auth, async (req: AuthenticatedRequest, res) => {
+router.put('/', auth, ensureDatabaseConnection, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
       return res.status(401).json({

@@ -38,9 +38,7 @@ export interface IUser extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const User: mongoose.Model<IUser, {}, {}, {}, mongoose.Document<unknown, {}, IUser, {}, {}> & IUser & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const User: mongoose.Model<IUser, {}, {}, {}, mongoose.Document<unknown, {}, IUser> & IUser & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=users.model.d.ts.map

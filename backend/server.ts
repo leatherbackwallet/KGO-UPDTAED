@@ -1,12 +1,12 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import path from 'path';
 import { User } from './models/users.model';
 import { Role } from './models/roles.model';
 import { hashPassword } from './utils/hash';
 import { ensureProductImagesDir } from './utils/fileUpload';
+import { connectToDatabase } from './utils/database';
 const { generalLimiter, authLimiter, apiLimiter } = require('./middleware/rateLimit');
 const { logger, errorLogger } = require('./middleware/logger');
 
@@ -20,7 +20,9 @@ const corsOptions = {
     process.env.CORS_ORIGIN || 'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
-    'http://localhost:3003'
+    'http://localhost:3003',
+    'https://frontend-six-beta-63.vercel.app',
+    'https://frontend-alfk4upx0-joes-projects-c1b33cfe.vercel.app'
   ],
   credentials: true,
   optionsSuccessStatus: 200,
@@ -28,6 +30,9 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   exposedHeaders: ['Content-Length', 'Content-Type']
 };
+
+// Trust proxy for serverless environments (Vercel, etc.)
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(generalLimiter);
@@ -118,13 +123,8 @@ if (process.env.JWT_SECRET.length < 32) {
 
 console.log('✅ Environment variables validated successfully');
 
-// Connect to MongoDB (non-blocking for serverless)
-mongoose.connect(process.env.MONGODB_URI, {
-  maxPoolSize: 10,
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-  bufferCommands: false,
-}).then(async () => {
+// Initialize database connection (non-blocking for serverless)
+connectToDatabase().then(async () => {
   console.log('MongoDB connected with connection pooling');
   
   // Skip directory creation in production (Vercel serverless environment)
@@ -136,7 +136,7 @@ mongoose.connect(process.env.MONGODB_URI, {
   }
   
   await createSuperUser();
-}).catch((err) => {
+}).catch((err: Error) => {
   console.error('MongoDB connection error:', err);
   // Don't exit process in serverless environment
   if (process.env.NODE_ENV === 'production') {
@@ -181,13 +181,27 @@ const deliveryRunsRoutes = require('./routes/deliveryRuns');
 const returnsRoutes = require('./routes/returns');
 const healthRoutes = require('./routes/health');
 
-// Simple health check (no dependencies)
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
+// Enhanced health check with database status
+app.get('/api/health', async (req, res) => {
+  try {
+    const dbStatus = await connectToDatabase().then(() => 'connected').catch(() => 'disconnected');
+    
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      database: dbStatus,
+      version: '3.0.0'
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'error',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      database: 'error',
+      error: 'Database connection failed'
+    });
+  }
 });
 
 // Apply routes

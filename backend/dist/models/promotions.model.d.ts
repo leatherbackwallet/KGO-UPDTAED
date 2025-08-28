@@ -19,9 +19,7 @@ export interface IPromotion extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Promotion: mongoose.Model<IPromotion, {}, {}, {}, mongoose.Document<unknown, {}, IPromotion, {}, {}> & IPromotion & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const Promotion: mongoose.Model<IPromotion, {}, {}, {}, mongoose.Document<unknown, {}, IPromotion> & IPromotion & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=promotions.model.d.ts.map

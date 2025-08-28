@@ -19,9 +19,7 @@ export interface IDailyStats extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const DailyStats: mongoose.Model<IDailyStats, {}, {}, {}, mongoose.Document<unknown, {}, IDailyStats, {}, {}> & IDailyStats & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const DailyStats: mongoose.Model<IDailyStats, {}, {}, {}, mongoose.Document<unknown, {}, IDailyStats> & IDailyStats & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=dailyStats.model.d.ts.map

@@ -15,9 +15,7 @@ export interface IPayout extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Payout: mongoose.Model<IPayout, {}, {}, {}, mongoose.Document<unknown, {}, IPayout, {}, {}> & IPayout & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const Payout: mongoose.Model<IPayout, {}, {}, {}, mongoose.Document<unknown, {}, IPayout> & IPayout & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=payouts.model.d.ts.map

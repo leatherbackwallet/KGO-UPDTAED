@@ -22,9 +22,7 @@ export interface IReview extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Review: mongoose.Model<IReview, {}, {}, {}, mongoose.Document<unknown, {}, IReview, {}, {}> & IReview & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const Review: mongoose.Model<IReview, {}, {}, {}, mongoose.Document<unknown, {}, IReview> & IReview & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=reviews.model.d.ts.map

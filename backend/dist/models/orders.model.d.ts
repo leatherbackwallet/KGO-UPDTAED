@@ -38,9 +38,7 @@ export interface IOrder extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Order: mongoose.Model<IOrder, {}, {}, {}, mongoose.Document<unknown, {}, IOrder, {}, {}> & IOrder & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const Order: mongoose.Model<IOrder, {}, {}, {}, mongoose.Document<unknown, {}, IOrder> & IOrder & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=orders.model.d.ts.map

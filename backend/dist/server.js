@@ -5,13 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
-const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
 const users_model_1 = require("./models/users.model");
 const roles_model_1 = require("./models/roles.model");
 const hash_1 = require("./utils/hash");
 const fileUpload_1 = require("./utils/fileUpload");
+const database_1 = require("./utils/database");
 const { generalLimiter, authLimiter, apiLimiter } = require('./middleware/rateLimit');
 const { logger, errorLogger } = require('./middleware/logger');
 dotenv_1.default.config();
@@ -21,7 +21,9 @@ const corsOptions = {
         process.env.CORS_ORIGIN || 'http://localhost:3000',
         'http://localhost:3001',
         'http://localhost:3002',
-        'http://localhost:3003'
+        'http://localhost:3003',
+        'https://frontend-six-beta-63.vercel.app',
+        'https://frontend-alfk4upx0-joes-projects-c1b33cfe.vercel.app'
     ],
     credentials: true,
     optionsSuccessStatus: 200,
@@ -29,6 +31,7 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     exposedHeaders: ['Content-Length', 'Content-Type']
 };
+app.set('trust proxy', 1);
 app.use(generalLimiter);
 app.use(logger);
 app.use((0, cors_1.default)(corsOptions));
@@ -105,12 +108,7 @@ if (process.env.JWT_SECRET.length < 32) {
     process.exit(1);
 }
 console.log('✅ Environment variables validated successfully');
-mongoose_1.default.connect(process.env.MONGODB_URI, {
-    maxPoolSize: 10,
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-    bufferCommands: false,
-}).then(async () => {
+(0, database_1.connectToDatabase)().then(async () => {
     console.log('MongoDB connected with connection pooling');
     if (process.env.NODE_ENV !== 'production') {
         (0, fileUpload_1.ensureProductImagesDir)();
@@ -120,14 +118,23 @@ mongoose_1.default.connect(process.env.MONGODB_URI, {
         console.log('Skipping local file system initialization in production');
     }
     await createSuperUser();
-}).catch((err) => console.error('MongoDB connection error:', err));
+}).catch((err) => {
+    console.error('MongoDB connection error:', err);
+    if (process.env.NODE_ENV === 'production') {
+        console.log('Continuing without MongoDB connection in production');
+    }
+});
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'production') {
+        process.exit(1);
+    }
 });
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'production') {
+        process.exit(1);
+    }
 });
 const auth_1 = __importDefault(require("./routes/auth"));
 const upload_1 = __importDefault(require("./routes/upload"));
@@ -148,6 +155,27 @@ const hubsRoutes = require('./routes/hubs');
 const deliveryRunsRoutes = require('./routes/deliveryRuns');
 const returnsRoutes = require('./routes/returns');
 const healthRoutes = require('./routes/health');
+app.get('/api/health', async (req, res) => {
+    try {
+        const dbStatus = await (0, database_1.connectToDatabase)().then(() => 'connected').catch(() => 'disconnected');
+        res.json({
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            environment: process.env.NODE_ENV || 'development',
+            database: dbStatus,
+            version: '3.0.0'
+        });
+    }
+    catch (error) {
+        res.status(503).json({
+            status: 'error',
+            timestamp: new Date().toISOString(),
+            environment: process.env.NODE_ENV || 'development',
+            database: 'error',
+            error: 'Database connection failed'
+        });
+    }
+});
 app.use('/api/auth', authLimiter, auth_1.default);
 app.use('/api/upload', apiLimiter, upload_1.default);
 app.use('/api/profile', apiLimiter, profile_1.default);
@@ -162,12 +190,14 @@ app.use('/api/finance', apiLimiter, financeRoutes);
 app.use('/api/hubs', apiLimiter, hubsRoutes);
 app.use('/api/delivery-runs', apiLimiter, deliveryRunsRoutes);
 app.use('/api/returns', apiLimiter, returnsRoutes);
-app.use('/api/health', healthRoutes);
 app.use('/api/personalization', apiLimiter, personalization_1.default);
 app.use('/api/analytics', apiLimiter, analytics_1.default);
 app.use('/api/subscriptions', apiLimiter, subscriptions_1.default);
 app.use('/api/content', apiLimiter, content_1.default);
 app.use(errorLogger);
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT || 5001;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+exports.default = app;
 //# sourceMappingURL=server.js.map

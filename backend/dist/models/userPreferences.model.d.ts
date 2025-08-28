@@ -66,9 +66,7 @@ export interface IUserPreferences extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const UserPreferences: mongoose.Model<IUserPreferences, {}, {}, {}, mongoose.Document<unknown, {}, IUserPreferences, {}, {}> & IUserPreferences & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const UserPreferences: mongoose.Model<IUserPreferences, {}, {}, {}, mongoose.Document<unknown, {}, IUserPreferences> & IUserPreferences & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=userPreferences.model.d.ts.map

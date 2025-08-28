@@ -35,6 +35,7 @@ const generalLimiter = rateLimit({
   },
   standardHeaders: config.standardHeaders,
   legacyHeaders: config.legacyHeaders,
+  trustProxy: true, // Trust proxy headers for serverless environments
 });
 
 // Strict limiter for auth endpoints
@@ -50,6 +51,7 @@ const authLimiter = rateLimit({
   },
   standardHeaders: config.standardHeaders,
   legacyHeaders: config.legacyHeaders,
+  trustProxy: true, // Trust proxy headers for serverless environments
 });
 
 // API limiter for product endpoints
@@ -65,6 +67,7 @@ const apiLimiter = rateLimit({
   },
   standardHeaders: config.standardHeaders,
   legacyHeaders: config.legacyHeaders,
+  trustProxy: true, // Trust proxy headers for serverless environments
 });
 
 module.exports = {

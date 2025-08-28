@@ -166,9 +166,7 @@ export interface IAnalytics extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Analytics: mongoose.Model<IAnalytics, {}, {}, {}, mongoose.Document<unknown, {}, IAnalytics, {}, {}> & IAnalytics & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const Analytics: mongoose.Model<IAnalytics, {}, {}, {}, mongoose.Document<unknown, {}, IAnalytics> & IAnalytics & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=analytics.model.d.ts.map

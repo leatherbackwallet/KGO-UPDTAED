@@ -49,9 +49,7 @@ export interface IDeliveryRun extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const DeliveryRun: mongoose.Model<IDeliveryRun, {}, {}, {}, mongoose.Document<unknown, {}, IDeliveryRun, {}, {}> & IDeliveryRun & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const DeliveryRun: mongoose.Model<IDeliveryRun, {}, {}, {}, mongoose.Document<unknown, {}, IDeliveryRun> & IDeliveryRun & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=deliveryRuns.model.d.ts.map

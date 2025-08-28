@@ -20,9 +20,7 @@ export interface ISupportTicket extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const SupportTicket: mongoose.Model<ISupportTicket, {}, {}, {}, mongoose.Document<unknown, {}, ISupportTicket, {}, {}> & ISupportTicket & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const SupportTicket: mongoose.Model<ISupportTicket, {}, {}, {}, mongoose.Document<unknown, {}, ISupportTicket> & ISupportTicket & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=supportTickets.model.d.ts.map

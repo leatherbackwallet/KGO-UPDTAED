@@ -19,9 +19,7 @@ export interface IVendorDocument extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const VendorDocument: mongoose.Model<IVendorDocument, {}, {}, {}, mongoose.Document<unknown, {}, IVendorDocument, {}, {}> & IVendorDocument & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const VendorDocument: mongoose.Model<IVendorDocument, {}, {}, {}, mongoose.Document<unknown, {}, IVendorDocument> & IVendorDocument & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=vendorDocuments.model.d.ts.map

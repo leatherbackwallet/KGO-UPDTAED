@@ -6,9 +6,7 @@ export interface IProductAttribute extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const ProductAttribute: mongoose.Model<IProductAttribute, {}, {}, {}, mongoose.Document<unknown, {}, IProductAttribute, {}, {}> & IProductAttribute & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const ProductAttribute: mongoose.Model<IProductAttribute, {}, {}, {}, mongoose.Document<unknown, {}, IProductAttribute> & IProductAttribute & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=productAttributes.model.d.ts.map

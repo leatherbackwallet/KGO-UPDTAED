@@ -156,9 +156,7 @@ export interface IContent extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Content: mongoose.Model<IContent, {}, {}, {}, mongoose.Document<unknown, {}, IContent, {}, {}> & IContent & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const Content: mongoose.Model<IContent, {}, {}, {}, mongoose.Document<unknown, {}, IContent> & IContent & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=content.model.d.ts.map

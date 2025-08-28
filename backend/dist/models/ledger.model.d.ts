@@ -28,9 +28,7 @@ export interface ILedger extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Ledger: mongoose.Model<ILedger, {}, {}, {}, mongoose.Document<unknown, {}, ILedger, {}, {}> & ILedger & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const Ledger: mongoose.Model<ILedger, {}, {}, {}, mongoose.Document<unknown, {}, ILedger> & ILedger & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=ledger.model.d.ts.map

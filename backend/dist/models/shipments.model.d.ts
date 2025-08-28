@@ -18,9 +18,7 @@ export interface IShipment extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-export declare const Shipment: mongoose.Model<IShipment, {}, {}, {}, mongoose.Document<unknown, {}, IShipment, {}, {}> & IShipment & Required<{
-    _id: unknown;
-}> & {
-    __v: number;
+export declare const Shipment: mongoose.Model<IShipment, {}, {}, {}, mongoose.Document<unknown, {}, IShipment> & IShipment & {
+    _id: mongoose.Types.ObjectId;
 }, any>;
 //# sourceMappingURL=shipments.model.d.ts.map
