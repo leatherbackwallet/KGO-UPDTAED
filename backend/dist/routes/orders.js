@@ -5,10 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = require("../models/index");
+const database_1 = require("../middleware/database");
 const auth = require('../middleware/auth.js');
 const role = require('../middleware/role.js');
 const router = express_1.default.Router();
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod } = req.body;
         const address = recipientAddress || deliveryAddress || shippingAddress;
@@ -82,7 +83,7 @@ router.post('/', auth, async (req, res) => {
         });
     }
 });
-router.get('/', auth, role('admin'), async (req, res) => {
+router.get('/', auth, role('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const orders = await index_1.Order.find({ isDeleted: false })
             .populate('userId', 'firstName lastName email phone')
@@ -102,7 +103,7 @@ router.get('/', auth, role('admin'), async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 });
-router.get('/my', auth, async (req, res) => {
+router.get('/my', auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const orders = await index_1.Order.find({ userId: req.user.id, isDeleted: false })
             .populate({
@@ -121,7 +122,7 @@ router.get('/my', auth, async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 });
-router.put('/:id/status', auth, role('admin'), async (req, res) => {
+router.put('/:id/status', auth, role('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { status, notes } = req.body;
         if (!status) {
@@ -178,7 +179,7 @@ router.put('/:id/status', auth, role('admin'), async (req, res) => {
         });
     }
 });
-router.put('/:id/recipient', auth, async (req, res) => {
+router.put('/:id/recipient', auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { recipientAddress } = req.body;
         if (!recipientAddress || !recipientAddress.name || !recipientAddress.phone || !recipientAddress.address) {
@@ -245,7 +246,7 @@ router.put('/:id/recipient', auth, async (req, res) => {
         });
     }
 });
-router.delete('/:id', auth, role('admin'), async (req, res) => {
+router.delete('/:id', auth, role('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const order = await index_1.Order.findByIdAndUpdate(req.params.id, { isDeleted: true }, { new: true });
         if (!order)

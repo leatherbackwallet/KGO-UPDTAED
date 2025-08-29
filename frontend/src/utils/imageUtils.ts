@@ -9,7 +9,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 // Backend base URL for static files - remove /api suffix
 const STATIC_BASE_URL = API_BASE_URL?.replace('/api', '') || '';
 
-export const PRODUCT_IMAGES_PATH = `${STATIC_BASE_URL}/images/products`;
+// Use relative paths for frontend static assets like placeholders and category SVGs
+export const PRODUCT_IMAGES_PATH = `/images/products`;
 export const DEFAULT_PRODUCT_IMAGE = `${PRODUCT_IMAGES_PATH}/placeholder.svg`;
 
 /**
@@ -36,17 +37,38 @@ export function getProductImage(imagePath?: string, slug?: string): string {
   
   // If we have a relative path starting with /images/products/ (from database)
   if (imagePath.startsWith('/images/products/')) {
-    return `${STATIC_BASE_URL}${imagePath}`;
+    // Check if this is a local static asset (SVG files) vs uploaded product image
+    if (imagePath.endsWith('.svg')) {
+      // SVG files are served from frontend static folder
+      return imagePath;
+    } else {
+      // Uploaded product images are served from backend
+      return `${STATIC_BASE_URL}${imagePath}`;
+    }
   }
   
   // If we have a relative path starting with /images/ (from database)
   if (imagePath.startsWith('/images/')) {
-    return `${STATIC_BASE_URL}${imagePath}`;
+    // Check if this is a local static asset (SVG files) vs uploaded product image
+    if (imagePath.endsWith('.svg')) {
+      // SVG files are served from frontend static folder
+      return imagePath;
+    } else {
+      // Uploaded product images are served from backend
+      return `${STATIC_BASE_URL}${imagePath}`;
+    }
   }
   
   // If we have just a filename, assume it's in the products directory
   if (imagePath && !imagePath.includes('/')) {
-    return `${PRODUCT_IMAGES_PATH}/${imagePath}`;
+    // Check if this is a local static asset (SVG files) vs uploaded product image
+    if (imagePath.endsWith('.svg')) {
+      // SVG files are served from frontend static folder
+      return `${PRODUCT_IMAGES_PATH}/${imagePath}`;
+    } else {
+      // Uploaded product images are served from backend
+      return `${STATIC_BASE_URL}${PRODUCT_IMAGES_PATH}/${imagePath}`;
+    }
   }
   
   // Fallback to category-based SVG or default
