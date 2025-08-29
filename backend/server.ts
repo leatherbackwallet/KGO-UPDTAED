@@ -193,8 +193,11 @@ const deliveryRunsRoutes = require('./routes/deliveryRuns');
 const returnsRoutes = require('./routes/returns');
 const healthRoutes = require('./routes/health');
 
-// Enhanced health check with database status
-app.get('/api/health', async (req, res) => {
+// Apply health routes first
+app.use('/api/health', apiLimiter, healthRoutes);
+
+// Enhanced health check with database status (backup endpoint)
+app.get('/api/health-status', async (req, res) => {
   try {
     const dbStatus = await connectToDatabase().then(() => 'connected').catch(() => 'disconnected');
     

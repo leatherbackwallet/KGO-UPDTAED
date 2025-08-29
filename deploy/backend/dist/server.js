@@ -166,7 +166,8 @@ const hubsRoutes = require('./routes/hubs');
 const deliveryRunsRoutes = require('./routes/deliveryRuns');
 const returnsRoutes = require('./routes/returns');
 const healthRoutes = require('./routes/health');
-app.get('/api/health', async (req, res) => {
+app.use('/api/health', apiLimiter, healthRoutes);
+app.get('/api/health-status', async (req, res) => {
     try {
         const dbStatus = await (0, database_1.connectToDatabase)().then(() => 'connected').catch(() => 'disconnected');
         res.json({
