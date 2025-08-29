@@ -1,0 +1,42 @@
+runtime: nodejs20
+service: default
+entrypoint: node server.js
+
+env_variables:
+  NODE_ENV: production
+  PORT: 8080
+  
+  # Frontend Environment Variables
+  NEXT_PUBLIC_API_URL: "https://api-dot-onyourbehlf.uc.r.appspot.com/api"
+  NEXT_PUBLIC_APP_NAME: "OnYourBehlf"
+  NEXT_PUBLIC_APP_VERSION: "3.0.0"
+  NEXT_PUBLIC_ENABLE_ANALYTICS: "true"
+  NEXT_PUBLIC_ENABLE_DEBUG_MODE: "false"
+  NEXT_PUBLIC_WHATSAPP_NUMBER: "+918075030919"
+  FAST_REFRESH: "false"
+  
+  # API Configuration for frontend server
+  API_URL: "https://api-dot-onyourbehlf.uc.r.appspot.com"
+  FRONTEND_URL: "https://onyourbehlf.uc.r.appspot.com"
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
+  target_throughput_utilization: 0.6
+
+resources:
+  cpu: 1
+  memory_gb: 2
+  disk_size_gb: 10
+
+handlers:
+  # Health check endpoint
+  - url: /health
+    script: auto
+    secure: always
+
+  # All other requests go to the Next.js app
+  - url: /.*
+    script: auto
+    secure: always
