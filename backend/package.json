@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "build": "tsc",
+    "dev": "tsc && node dist/server.js",
     "start": "node dist/server.js"
   },
   "dependencies": {

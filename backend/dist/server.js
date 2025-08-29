@@ -17,12 +17,25 @@ const { logger, errorLogger } = require('./middleware/logger');
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const corsOptions = {
-    origin: [
-        process.env.CORS_ORIGIN || 'http://localhost:3000',
-        'http://localhost:3001',
-        'http://localhost:3002',
-        'http://localhost:3003'
-    ],
+    origin: function (origin, callback) {
+        const allowedOrigins = [
+            process.env.CORS_ORIGIN || 'http://localhost:3000',
+            process.env.FRONTEND_URL || 'http://localhost:3000',
+            'http://localhost:3001',
+            'http://localhost:3002',
+            'http://localhost:3003',
+            'https://onyourbehlf.uc.r.appspot.com'
+        ];
+        if (!origin)
+            return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        }
+        else {
+            console.log('CORS: Origin not allowed:', origin);
+            callback(new Error('Not allowed by CORS'), false);
+        }
+    },
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

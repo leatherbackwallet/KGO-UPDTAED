@@ -4,37 +4,19 @@ service: default
 env_variables:
   NODE_ENV: production
   PORT: 8080
-  # Database Configuration
-  MONGODB_URI: "mongodb+srv://kgo_admin:${MONGODB_PASSWORD}@kgo-cluster.mongodb.net/onyourbehlf?retryWrites=true&w=majority"
   
-  # JWT Configuration
-  JWT_SECRET: "${JWT_SECRET}"
-  JWT_EXPIRES_IN: "7d"
+  # Frontend Environment Variables
+  NEXT_PUBLIC_API_URL: "https://api-dot-onyourbehlf.uc.r.appspot.com/api"
+  NEXT_PUBLIC_APP_NAME: "OnYourBehlf"
+  NEXT_PUBLIC_APP_VERSION: "3.0.0"
+  NEXT_PUBLIC_ENABLE_ANALYTICS: "true"
+  NEXT_PUBLIC_ENABLE_DEBUG_MODE: "false"
+  NEXT_PUBLIC_WHATSAPP_NUMBER: "+918075030919"
+  FAST_REFRESH: "false"
   
-  # Cloudinary Configuration
-  CLOUDINARY_CLOUD_NAME: "${CLOUDINARY_CLOUD_NAME}"
-  CLOUDINARY_API_KEY: "${CLOUDINARY_API_KEY}"
-  CLOUDINARY_API_SECRET: "${CLOUDINARY_API_SECRET}"
-  
-  # Email Configuration
-  EMAIL_HOST: "${EMAIL_HOST}"
-  EMAIL_PORT: "${EMAIL_PORT}"
-  EMAIL_USER: "${EMAIL_USER}"
-  EMAIL_PASS: "${EMAIL_PASS}"
-  
-  # Payment Configuration
-  STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
-  STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
-  
-  # WhatsApp Configuration
-  WHATSAPP_API_KEY: "${WHATSAPP_API_KEY}"
-  WHATSAPP_PHONE_NUMBER_ID: "${WHATSAPP_PHONE_NUMBER_ID}"
-  
-  # Frontend URL
-  FRONTEND_URL: "https://onyourbehlf.ew.r.appspot.com"
-  
-  # API URL
-  API_URL: "https://api-dot-onyourbehlf.ew.r.appspot.com"
+  # API Configuration for frontend server
+  API_URL: "https://api-dot-onyourbehlf.uc.r.appspot.com"
+  FRONTEND_URL: "https://onyourbehlf.uc.r.appspot.com"
 
 automatic_scaling:
   target_cpu_utilization: 0.65
@@ -47,29 +29,15 @@ resources:
   memory_gb: 2
   disk_size_gb: 10
 
+entrypoint: node frontend/server.js
+
 handlers:
-  - url: /_next/static
-    static_dir: .next/static
+  # Health check endpoint
+  - url: /health
+    script: auto
     secure: always
-    http_headers:
-      Cache-Control: public, max-age=31536000, immutable
-      X-Content-Type-Options: nosniff
-      X-Frame-Options: DENY
-      X-XSS-Protection: 1; mode=block
-      Strict-Transport-Security: max-age=31536000; includeSubDomains
-      Referrer-Policy: strict-origin-when-cross-origin
 
-  - url: /static
-    static_dir: public
-    secure: always
-    http_headers:
-      Cache-Control: public, max-age=31536000
-      X-Content-Type-Options: nosniff
-      X-Frame-Options: DENY
-      X-XSS-Protection: 1; mode=block
-      Strict-Transport-Security: max-age=31536000; includeSubDomains
-      Referrer-Policy: strict-origin-when-cross-origin
-
+  # All other requests go to the Next.js app
   - url: /.*
     script: auto
     secure: always

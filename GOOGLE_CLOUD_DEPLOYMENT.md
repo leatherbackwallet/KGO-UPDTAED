@@ -61,9 +61,9 @@ MONGODB_PASSWORD=your_mongodb_password
 JWT_SECRET=your_jwt_secret_key
 
 # Cloudinary Configuration
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+CLOUDINARY_CLOUD_NAME=deojqbepy
+CLOUDINARY_API_KEY=476938714454695
+CLOUDINARY_API_SECRET=fQBjh1m4rF9ztey7u4FANZQUNhQ
 
 # Email Configuration
 EMAIL_HOST=your_email_host
@@ -84,8 +84,8 @@ WHATSAPP_PHONE_NUMBER_ID=your_whatsapp_phone_number_id
 
 ```bash
 # Set environment variables in Google Cloud
-gcloud app deploy app.yaml --set-env-vars MONGODB_PASSWORD=your_password,JWT_SECRET=your_secret
-gcloud app deploy frontend-app.yaml --set-env-vars MONGODB_PASSWORD=your_password,JWT_SECRET=your_secret
+gcloud app deploy app.yaml --set-env-vars MONGODB_PASSWORD=your_password,JWT_SECRET=your_secret,CLOUDINARY_CLOUD_NAME=deojqbepy,CLOUDINARY_API_KEY=476938714454695,CLOUDINARY_API_SECRET=fQBjh1m4rF9ztey7u4FANZQUNhQ
+gcloud app deploy frontend-app.yaml --set-env-vars MONGODB_PASSWORD=your_password,JWT_SECRET=your_secret,CLOUDINARY_CLOUD_NAME=deojqbepy,CLOUDINARY_API_KEY=476938714454695,CLOUDINARY_API_SECRET=fQBjh1m4rF9ztey7u4FANZQUNhQ
 ```
 
 ## Deployment
@@ -198,8 +198,8 @@ npm run deploy:frontend  # Deploy frontend only
 
 After deployment, your applications will be available at:
 
-- **Frontend**: `https://onyourbehlf.ew.r.appspot.com`
-- **Backend API**: `https://api-dot-onyourbehlf.ew.r.appspot.com`
+- **Frontend**: `https://onyourbehlf.uc.r.appspot.com`
+- **Backend API**: `https://api-dot-onyourbehlf.uc.r.appspot.com`
 
 ### Custom Domain Setup
 

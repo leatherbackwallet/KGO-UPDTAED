@@ -179,11 +179,9 @@ router.post('/', auth, role('admin'), async (req, res) => {
     // Create notification for product creation
     try {
       await Notification.create({
-        userId: req.user.id,
+        recipientId: req.user.id,
         title: 'Product Created Successfully',
-        message: `Product "${product.name}" has been created successfully`,
-        type: 'success',
-        relatedEntity: { type: 'Product', id: product._id }
+        message: `Product "${product.name}" has been created successfully`
       });
     } catch (notificationError) {
       console.error('Error creating notification:', notificationError);

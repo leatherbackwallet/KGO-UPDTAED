@@ -63,21 +63,20 @@ npm run build:backend
 print_status "Building frontend..."
 npm run build:frontend
 
-# Deploy frontend (default service) first
+# Deploy backend (api service) first
+print_status "Deploying backend to App Engine (api service)..."
+gcloud app deploy app.yaml --quiet
+
+# Deploy frontend (default service)
 print_status "Deploying frontend to App Engine (default service)..."
 gcloud app deploy frontend-app.yaml --quiet
 
-# Deploy backend
-print_status "Deploying backend to App Engine..."
-gcloud app deploy app.yaml --quiet
-
 # Get deployment URLs
-BACKEND_URL=$(gcloud app describe --format="value(defaultHostname)")
-FRONTEND_URL=$(gcloud app describe --format="value(defaultHostname)")
+PROJECT_DOMAIN=$(gcloud app describe --format="value(defaultHostname)")
 
 print_status "Deployment completed successfully!"
-print_status "Backend URL: https://api-dot-$BACKEND_URL"
-print_status "Frontend URL: https://$FRONTEND_URL"
+print_status "Backend API URL: https://api-dot-$PROJECT_DOMAIN"
+print_status "Frontend URL: https://$PROJECT_DOMAIN"
 
 # Optional: Set up custom domain
 read -p "Do you want to set up a custom domain? (y/n): " -n 1 -r

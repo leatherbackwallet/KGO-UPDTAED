@@ -1,40 +1,36 @@
 runtime: nodejs20
 service: api
+entrypoint: node backend/dist/server.js
 
 env_variables:
   NODE_ENV: production
   PORT: 8080
-  # Database Configuration
-  MONGODB_URI: "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/keralagiftsonline?retryWrites=true&w=majority"
+  # Database Configuration - Using consistent MongoDB Atlas URI
+  MONGODB_URI: "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/keralagiftsonline?retryWrites=true&w=majority&appName=KeralaGiftsOnline"
   
   # JWT Configuration
-  JWT_SECRET: "keralagiftsonline-super-secret-jwt-key-2024-production"
+  JWT_SECRET: "kerala-gifts-online-super-secure-jwt-secret-production-2024-minimum-32-chars"
+  JWT_REFRESH_SECRET: "kerala-gifts-online-refresh-token-secret-production-2024-minimum-32-chars"
+  JWT_ACCESS_TOKEN_EXPIRY: "15m"
+  JWT_REFRESH_TOKEN_EXPIRY: "7d"
   JWT_EXPIRES_IN: "7d"
+  
+  # Session Configuration
+  SESSION_SECRET: "kerala-gifts-online-session-secret-production-2024-minimum-32-chars"
   
   # Cloudinary Configuration
   CLOUDINARY_CLOUD_NAME: "deojqbepy"
   CLOUDINARY_API_KEY: "476938714454695"
   CLOUDINARY_API_SECRET: "fQBjh1m4rF9ztey7u4FANZQUNhQ"
   
-  # Email Configuration
-  EMAIL_HOST: "${EMAIL_HOST}"
-  EMAIL_PORT: "${EMAIL_PORT}"
-  EMAIL_USER: "${EMAIL_USER}"
-  EMAIL_PASS: "${EMAIL_PASS}"
-  
-  # Payment Configuration
-  STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
-  STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
-  
-  # WhatsApp Configuration
-  WHATSAPP_API_KEY: "${WHATSAPP_API_KEY}"
-  WHATSAPP_PHONE_NUMBER_ID: "${WHATSAPP_PHONE_NUMBER_ID}"
+  # CORS Configuration - Allow production frontend
+  CORS_ORIGIN: "https://onyourbehlf.uc.r.appspot.com"
   
   # Frontend URL
-  FRONTEND_URL: "https://onyourbehlf.ew.r.appspot.com"
+  FRONTEND_URL: "https://onyourbehlf.uc.r.appspot.com"
   
   # API URL
-  API_URL: "https://api-dot-onyourbehlf.ew.r.appspot.com"
+  API_URL: "https://api-dot-onyourbehlf.uc.r.appspot.com"
 
 automatic_scaling:
   target_cpu_utilization: 0.65
