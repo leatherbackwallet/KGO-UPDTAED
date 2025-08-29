@@ -13,9 +13,10 @@ const role = require('../middleware/role.js');
 const { validate } = require('../middleware/validation.js');
 const mongoose = require('mongoose');
 const { cacheConfigs, invalidateProductCache } = require('../middleware/cache.js');
+const { ensureDatabaseConnection } = require('../middleware/database.js');
 
 // Get all products with caching
-router.get('/', cacheConfigs.products, async (req, res) => {
+router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req, res) => {
   try {
     const { category, min, max, search, featured, occasions } = req.query;
     let filter = {};

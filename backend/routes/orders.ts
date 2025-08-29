@@ -5,13 +5,14 @@
 
 import express from 'express';
 import { Order, Product } from '../models/index';
+import { ensureDatabaseConnection } from '../middleware/database';
 const auth = require('../middleware/auth.js');
 const role = require('../middleware/role.js');
 
 const router = express.Router();
 
 // Create order (customer)
-router.post('/', auth, async (req: any, res) => {
+router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
   try {
     const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod } = req.body;
     
@@ -98,7 +99,7 @@ router.post('/', auth, async (req: any, res) => {
 });
 
 // Get all orders (admin)
-router.get('/', auth, role('admin'), async (req: any, res) => {
+router.get('/', auth, role('admin'), ensureDatabaseConnection, async (req: any, res) => {
   try {
     const orders = await Order.find({ isDeleted: false })
       .populate('userId', 'firstName lastName email phone')
@@ -119,7 +120,7 @@ router.get('/', auth, role('admin'), async (req: any, res) => {
 });
 
 // Get my orders (customer)
-router.get('/my', auth, async (req: any, res) => {
+router.get('/my', auth, ensureDatabaseConnection, async (req: any, res) => {
   try {
     const orders = await Order.find({ userId: req.user.id, isDeleted: false })
       .populate({
@@ -139,7 +140,7 @@ router.get('/my', auth, async (req: any, res) => {
 });
 
 // Update order status with timeline tracking (admin)
-router.put('/:id/status', auth, role('admin'), async (req: any, res) => {
+router.put('/:id/status', auth, role('admin'), ensureDatabaseConnection, async (req: any, res) => {
   try {
     const { status, notes } = req.body;
     
@@ -207,7 +208,7 @@ router.put('/:id/status', auth, role('admin'), async (req: any, res) => {
 });
 
 // Update order recipient (admin or order owner)
-router.put('/:id/recipient', auth, async (req: any, res) => {
+router.put('/:id/recipient', auth, ensureDatabaseConnection, async (req: any, res) => {
   try {
     const { recipientAddress } = req.body;
     
@@ -290,7 +291,7 @@ router.put('/:id/recipient', auth, async (req: any, res) => {
 });
 
 // Delete order (admin)
-router.delete('/:id', auth, role('admin'), async (req: any, res) => {
+router.delete('/:id', auth, role('admin'), ensureDatabaseConnection, async (req: any, res) => {
   try {
     const order = await Order.findByIdAndUpdate(req.params.id, { isDeleted: true }, { new: true });
     if (!order) return res.status(404).json({ message: 'Order not found' });

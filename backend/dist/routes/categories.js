@@ -5,8 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const categories_model_1 = require("../models/categories.model");
+const database_1 = require("../middleware/database");
 const router = express_1.default.Router();
-router.get('/', async (req, res) => {
+router.get('/', database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const categories = await categories_model_1.Category.find({ isActive: true }).sort('sortOrder');
         res.json(categories);

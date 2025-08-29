@@ -1,1 +1,4 @@
 node_modules
+
+# Sensitive documentation with credentials
+MASTER.md
