@@ -1,8 +1,1 @@
-{
-  "/_app": "pages/_app.js",
-  "/_document": "pages/_document.js",
-  "/_error": "pages/_error.js",
-  "/admin": "pages/admin.js",
-  "/products": "pages/products.js",
-  "/orders": "pages/orders.js"
-}
+{"/_app":"pages/_app.js","/_document":"pages/_document.js","/about":"pages/about.html","/admin":"pages/admin.html","/cart":"pages/cart.html","/checkout":"pages/checkout.html","/content":"pages/content.html","/":"pages/index.html","/login":"pages/login.html","/orders":"pages/orders.html","/products":"pages/products.html","/profile":"pages/profile.html","/products/[id]":"pages/products/[id].html","/register":"pages/register.html","/test-api":"pages/test-api.html","/subscription":"pages/subscription.html","/wishlist":"pages/wishlist.html","/_error":"pages/_error.js","/404":"pages/404.html"}
