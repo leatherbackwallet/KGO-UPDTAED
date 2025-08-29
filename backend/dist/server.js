@@ -21,9 +21,7 @@ const corsOptions = {
         process.env.CORS_ORIGIN || 'http://localhost:3000',
         'http://localhost:3001',
         'http://localhost:3002',
-        'http://localhost:3003',
-        'https://frontend-six-beta-63.vercel.app',
-        'https://frontend-alfk4upx0-joes-projects-c1b33cfe.vercel.app'
+        'http://localhost:3003'
     ],
     credentials: true,
     optionsSuccessStatus: 200,

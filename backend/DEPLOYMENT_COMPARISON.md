@@ -7,7 +7,7 @@ This guide compares different deployment options to help you choose the best app
 
 ## 📊 Quick Comparison Table
 
-| Feature | GoDaddy Hosting | Vercel + Railway | Vercel + Render | Full GoDaddy |
+| Feature | GoDaddy Hosting | Railway + Netlify | Render + Netlify | Full GoDaddy |
 |---------|----------------|------------------|-----------------|--------------|
 | **Cost (Monthly)** | $15-40 | $0-20 | $0-25 | $15-40 |
 | **Setup Difficulty** | Medium | Easy | Easy | Medium |
@@ -52,7 +52,7 @@ This guide compares different deployment options to help you choose the best app
 
 ---
 
-## ⚡ Option 2: Vercel + Railway (Recommended)
+## ⚡ Option 2: Railway + Netlify (Recommended)
 
 ### ✅ Advantages
 - **Excellent Performance** - Global CDN and optimized hosting
@@ -72,7 +72,7 @@ This guide compares different deployment options to help you choose the best app
 - **Cost Scaling** - Costs increase with usage
 
 ### 💰 Cost Breakdown
-- **Vercel (Frontend)**: $0-20/month (free tier available)
+- **Netlify (Frontend)**: $0-20/month (free tier available)
 - **Railway (Backend)**: $0-20/month (free tier available)
 - **Domain**: $10-15/year (already purchased)
 - **SSL Certificate**: Free (automatic)
@@ -86,7 +86,7 @@ This guide compares different deployment options to help you choose the best app
 
 ---
 
-## 🌐 Option 3: Vercel + Render
+## 🌐 Option 3: Render + Netlify
 
 ### ✅ Advantages
 - **Excellent Performance** - Optimized for Next.js
@@ -103,7 +103,7 @@ This guide compares different deployment options to help you choose the best app
 - **Service Dependencies** - Relies on external services
 
 ### 💰 Cost Breakdown
-- **Vercel (Frontend)**: $0-20/month (free tier available)
+- **Netlify (Frontend)**: $0-20/month (free tier available)
 - **Render (Backend)**: $0-25/month (free tier available)
 - **Domain**: $10-15/year (already purchased)
 - **SSL Certificate**: Free (automatic)
@@ -142,14 +142,14 @@ This guide compares different deployment options to help you choose the best app
 - Predictable costs
 
 ### For Intermediate Developers (2-5 years experience)
-**Recommended**: **Vercel + Railway**
+**Recommended**: **Railway + Netlify**
 - Better performance and scalability
 - Modern development workflow
 - Free tier to start
 - Better for long-term growth
 
 ### For Advanced Developers (5+ years experience)
-**Recommended**: **Vercel + Railway** or **Custom VPS**
+**Recommended**: **Railway + Netlify** or **Custom VPS**
 - Maximum control and performance
 - Advanced deployment strategies
 - Custom optimizations possible
@@ -167,13 +167,13 @@ This guide compares different deployment options to help you choose the best app
 
 ### If You Want to Deploy Today
 1. **GoDaddy Hosting** - Run `./deploy-godaddy.sh`
-2. **Vercel + Railway** - Follow `QUICK_DEPLOYMENT_START.md`
+2. **Railway + Netlify** - Follow `QUICK_DEPLOYMENT_START.md`
 
 ### If You Want the Best Performance
-1. **Vercel + Railway** - Follow `DEPLOYMENT_GUIDE.md`
+1. **Railway + Netlify** - Follow `DEPLOYMENT_GUIDE.md`
 
 ### If You Want the Lowest Cost
-1. **Vercel + Railway** (Free tiers) - Follow `QUICK_DEPLOYMENT_START.md`
+1. **Railway + Netlify** (Free tiers) - Follow `QUICK_DEPLOYMENT_START.md`
 
 ### If You Want the Easiest Management
 1. **GoDaddy Hosting** - Follow `GODADDY_DEPLOYMENT_GUIDE.md`
@@ -202,7 +202,7 @@ This guide compares different deployment options to help you choose the best app
 
 ### From GoDaddy to External Services
 1. **Export your data** from GoDaddy
-2. **Set up external hosting** (Vercel + Railway)
+2. **Set up external hosting** (Railway + Netlify)
 3. **Update DNS settings** to point to new services
 4. **Test thoroughly** before switching
 5. **Cancel GoDaddy hosting** after migration
@@ -220,7 +220,7 @@ This guide compares different deployment options to help you choose the best app
 
 ### For KeralGiftsOnline, I Recommend:
 
-**🏆 Vercel + Railway** for the following reasons:
+**🏆 Railway + Netlify** for the following reasons:
 
 1. **Performance**: Better loading speeds and user experience
 2. **Scalability**: Can handle traffic spikes and business growth
@@ -242,7 +242,7 @@ This guide compares different deployment options to help you choose the best app
 1. **Choose your deployment option** based on this comparison
 2. **Follow the appropriate guide**:
    - GoDaddy: `GODADDY_DEPLOYMENT_GUIDE.md`
-   - Vercel + Railway: `DEPLOYMENT_GUIDE.md`
+   - Railway + Netlify: `DEPLOYMENT_GUIDE.md`
    - Quick Start: `QUICK_DEPLOYMENT_START.md`
 3. **Run the deployment script** for your chosen option
 4. **Test your deployment** thoroughly

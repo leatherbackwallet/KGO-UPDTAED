@@ -20,9 +20,7 @@ const corsOptions = {
     process.env.CORS_ORIGIN || 'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
-    'http://localhost:3003',
-    'https://frontend-six-beta-63.vercel.app',
-    'https://frontend-alfk4upx0-joes-projects-c1b33cfe.vercel.app'
+    'http://localhost:3003'
   ],
   credentials: true,
   optionsSuccessStatus: 200,
@@ -31,7 +29,7 @@ const corsOptions = {
   exposedHeaders: ['Content-Length', 'Content-Type']
 };
 
-// Trust proxy for serverless environments (Vercel, etc.)
+// Trust proxy for production environments
 app.set('trust proxy', 1);
 
 // Middleware
@@ -127,7 +125,7 @@ console.log('✅ Environment variables validated successfully');
 connectToDatabase().then(async () => {
   console.log('MongoDB connected with connection pooling');
   
-  // Skip directory creation in production (Vercel serverless environment)
+  // Skip directory creation in production environments
   if (process.env.NODE_ENV !== 'production') {
     ensureProductImagesDir();
     console.log('Product images directory initialized');
@@ -233,5 +231,5 @@ if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
-// Export for Vercel serverless
+// Export for serverless environments
 export default app; 

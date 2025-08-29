@@ -5,7 +5,7 @@
 
 const axios = require('axios');
 
-const BASE_URL = 'https://backend-7p90rco7t-joes-projects-c1b33cfe.vercel.app';
+const BASE_URL = process.env.API_URL || 'http://localhost:5001';
 
 async function testHealthEndpoint() {
   try {

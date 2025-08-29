@@ -1,0 +1,53 @@
+runtime: nodejs20
+service: api
+
+env_variables:
+  NODE_ENV: production
+  PORT: 8080
+  # Database Configuration
+  MONGODB_URI: "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/keralagiftsonline?retryWrites=true&w=majority"
+  
+  # JWT Configuration
+  JWT_SECRET: "keralagiftsonline-super-secret-jwt-key-2024-production"
+  JWT_EXPIRES_IN: "7d"
+  
+  # Cloudinary Configuration
+  CLOUDINARY_CLOUD_NAME: "deojqbepy"
+  CLOUDINARY_API_KEY: "476938714454695"
+  CLOUDINARY_API_SECRET: "fQBjh1m4rF9ztey7u4FANZQUNhQ"
+  
+  # Email Configuration
+  EMAIL_HOST: "${EMAIL_HOST}"
+  EMAIL_PORT: "${EMAIL_PORT}"
+  EMAIL_USER: "${EMAIL_USER}"
+  EMAIL_PASS: "${EMAIL_PASS}"
+  
+  # Payment Configuration
+  STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
+  STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
+  
+  # WhatsApp Configuration
+  WHATSAPP_API_KEY: "${WHATSAPP_API_KEY}"
+  WHATSAPP_PHONE_NUMBER_ID: "${WHATSAPP_PHONE_NUMBER_ID}"
+  
+  # Frontend URL
+  FRONTEND_URL: "https://onyourbehlf.ew.r.appspot.com"
+  
+  # API URL
+  API_URL: "https://api-dot-onyourbehlf.ew.r.appspot.com"
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
+  target_throughput_utilization: 0.6
+
+resources:
+  cpu: 1
+  memory_gb: 1
+  disk_size_gb: 10
+
+handlers:
+  - url: /.*
+    script: auto
+    secure: always

@@ -38,8 +38,8 @@ cd backend
 
 ### 3. Deploy Frontend (10 minutes)
 
-**Option A: Vercel (Recommended)**
-1. Go to [vercel.com](https://vercel.com)
+**Option A: Netlify (Recommended)**
+1. Go to [netlify.com](https://netlify.com)
 2. Sign up with GitHub
 3. Import repository → Configure Next.js
 4. Set environment variables
@@ -57,19 +57,19 @@ cd frontend
 ```
 Type: CNAME
 Name: @
-Value: cname.vercel-dns.com
+Value: your-app-name.netlify.app
 TTL: 600
 
 Type: CNAME
 Name: www
-Value: cname.vercel-dns.com
+Value: your-app-name.netlify.app
 TTL: 600
 ```
 
-**In Vercel Dashboard:**
-1. Project Settings → Domains
-2. Add: `keralagiftsonline.in`
-3. Add: `www.keralagiftsonline.in`
+**In Netlify Dashboard:**
+1. Site Settings → Domain Management
+2. Add custom domain: `keralagiftsonline.in`
+3. Add custom domain: `www.keralagiftsonline.in`
 4. Follow verification steps
 
 ## 🔧 Required Environment Variables
@@ -97,7 +97,7 @@ NEXT_PUBLIC_WHATSAPP_NUMBER=+918075030919
 
 After deployment, you'll get:
 - **Backend**: `https://your-app-name.railway.app` (or similar)
-- **Frontend**: `https://your-app-name.vercel.app` (or similar)
+- **Frontend**: `https://your-app-name.netlify.app` (or similar)
 - **Final**: `https://keralagiftsonline.in`
 
 ## ✅ Quick Test

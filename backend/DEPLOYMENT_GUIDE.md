@@ -8,12 +8,12 @@ This guide will walk you through deploying your full-stack application to your G
 1. **GoDaddy Domain**: `keralagiftsonline.in` (already purchased)
 2. **MongoDB Atlas**: Cloud database (required per project rules)
 3. **Cloudinary Account**: For image/CDN hosting
-4. **Vercel Account**: For frontend deployment (recommended)
+4. **Netlify Account**: For frontend deployment (recommended)
 5. **Railway/Render/Heroku Account**: For backend deployment
 
 ## 🎯 Deployment Strategy
 
-- **Frontend**: Deploy to Vercel (optimized for Next.js)
+- **Frontend**: Deploy to Netlify (optimized for Next.js)
 - **Backend**: Deploy to Railway/Render/Heroku
 - **Database**: MongoDB Atlas (already configured)
 - **CDN**: Cloudinary (for images)
@@ -131,36 +131,35 @@ NEXT_PUBLIC_WHATSAPP_NUMBER=+918075030919
 
 ---
 
-## ⚡ Step 3: Deploy Frontend to Vercel
+## ⚡ Step 3: Deploy Frontend to Netlify
 
-1. **Sign up** at [vercel.com](https://vercel.com)
+1. **Sign up** at [netlify.com](https://netlify.com)
 2. **Import your GitHub repository**
 3. **Configure project**:
-   - **Framework Preset**: Next.js
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `.next`
-4. **Set environment variables** in Vercel dashboard:
+   - **Base directory**: `frontend`
+   - **Build command**: `npm run build`
+   - **Publish directory**: `.next`
+4. **Set environment variables** in Netlify dashboard:
    - Copy all variables from your frontend `.env.production` file
    - Update `NEXT_PUBLIC_API_URL` with your backend URL
-5. **Deploy** - Vercel will automatically deploy your Next.js app
-6. **Get your frontend URL** (e.g., `https://your-app-name.vercel.app`)
+5. **Deploy** - Netlify will automatically deploy your Next.js app
+6. **Get your frontend URL** (e.g., `https://your-app-name.netlify.app`)
 
 ---
 
 ## 🔗 Step 4: Configure GoDaddy Domain
 
-### 4.1 Point Domain to Frontend (Vercel)
+### 4.1 Point Domain to Frontend (Netlify)
 
 1. **Log into GoDaddy** and go to your domain management
 2. **Navigate to DNS settings** for `keralagiftsonline.in`
 3. **Add/Update DNS records**:
 
-   **For Vercel (Frontend)**:
+   **For Netlify (Frontend)**:
    ```
    Type: CNAME
    Name: @
-   Value: cname.vercel-dns.com
+   Value: your-app-name.netlify.app
    TTL: 600
    ```
 
@@ -168,15 +167,15 @@ NEXT_PUBLIC_WHATSAPP_NUMBER=+918075030919
    ```
    Type: CNAME
    Name: www
-   Value: cname.vercel-dns.com
+   Value: your-app-name.netlify.app
    TTL: 600
    ```
 
-4. **In Vercel dashboard**:
-   - Go to your project settings
+4. **In Netlify dashboard**:
+   - Go to your site settings
    - Add custom domain: `keralagiftsonline.in`
    - Add custom domain: `www.keralagiftsonline.in`
-   - Follow Vercel's instructions to verify domain ownership
+   - Follow Netlify's instructions to verify domain ownership
 
 ### 4.2 Point API Subdomain to Backend
 
@@ -241,7 +240,7 @@ export const apiClient = axios.create({
 ## 🛡️ Step 6: Security & SSL Configuration
 
 ### 6.1 SSL Certificates
-- **Vercel**: Automatically provides SSL certificates
+- **Netlify**: Automatically provides SSL certificates
 - **Railway/Render/Heroku**: Automatically provides SSL certificates
 - **GoDaddy**: Ensure SSL is enabled for your domain
 
@@ -302,7 +301,7 @@ const nextConfig = {
 ## 📊 Step 8: Monitoring & Analytics
 
 ### 8.1 Set up Monitoring
-- **Vercel Analytics**: Enable in Vercel dashboard
+- **Netlify Analytics**: Enable in Netlify dashboard
 - **Backend Monitoring**: Use Railway/Render/Heroku built-in monitoring
 - **Error Tracking**: Consider Sentry for error monitoring
 
@@ -340,10 +339,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Deploy to Vercel
+      - name: Deploy to Netlify
         run: |
-          # Vercel CLI commands
-          # or use Vercel's GitHub integration
+          # Netlify CLI commands
+          # or use Netlify's GitHub integration
 ```
 
 ---

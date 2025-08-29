@@ -1,0 +1,75 @@
+runtime: nodejs20
+service: default
+
+env_variables:
+  NODE_ENV: production
+  PORT: 8080
+  # Database Configuration
+  MONGODB_URI: "mongodb+srv://kgo_admin:${MONGODB_PASSWORD}@kgo-cluster.mongodb.net/onyourbehlf?retryWrites=true&w=majority"
+  
+  # JWT Configuration
+  JWT_SECRET: "${JWT_SECRET}"
+  JWT_EXPIRES_IN: "7d"
+  
+  # Cloudinary Configuration
+  CLOUDINARY_CLOUD_NAME: "${CLOUDINARY_CLOUD_NAME}"
+  CLOUDINARY_API_KEY: "${CLOUDINARY_API_KEY}"
+  CLOUDINARY_API_SECRET: "${CLOUDINARY_API_SECRET}"
+  
+  # Email Configuration
+  EMAIL_HOST: "${EMAIL_HOST}"
+  EMAIL_PORT: "${EMAIL_PORT}"
+  EMAIL_USER: "${EMAIL_USER}"
+  EMAIL_PASS: "${EMAIL_PASS}"
+  
+  # Payment Configuration
+  STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
+  STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
+  
+  # WhatsApp Configuration
+  WHATSAPP_API_KEY: "${WHATSAPP_API_KEY}"
+  WHATSAPP_PHONE_NUMBER_ID: "${WHATSAPP_PHONE_NUMBER_ID}"
+  
+  # Frontend URL
+  FRONTEND_URL: "https://onyourbehlf.ew.r.appspot.com"
+  
+  # API URL
+  API_URL: "https://api-dot-onyourbehlf.ew.r.appspot.com"
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
+  target_throughput_utilization: 0.6
+
+resources:
+  cpu: 1
+  memory_gb: 2
+  disk_size_gb: 10
+
+handlers:
+  - url: /_next/static
+    static_dir: .next/static
+    secure: always
+    http_headers:
+      Cache-Control: public, max-age=31536000, immutable
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: DENY
+      X-XSS-Protection: 1; mode=block
+      Strict-Transport-Security: max-age=31536000; includeSubDomains
+      Referrer-Policy: strict-origin-when-cross-origin
+
+  - url: /static
+    static_dir: public
+    secure: always
+    http_headers:
+      Cache-Control: public, max-age=31536000
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: DENY
+      X-XSS-Protection: 1; mode=block
+      Strict-Transport-Security: max-age=31536000; includeSubDomains
+      Referrer-Policy: strict-origin-when-cross-origin
+
+  - url: /.*
+    script: auto
+    secure: always

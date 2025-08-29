@@ -16,8 +16,7 @@ onYourBehlf/
 ```bash
 cd backend
 npm install
-cp env.example .env
-# Edit .env with your MongoDB Atlas credentials and other settings
+# Development environment is already configured in backend/.env
 npm run dev
 ```
 
@@ -25,8 +24,7 @@ npm run dev
 ```bash
 cd frontend
 npm install
-cp env.example .env.local
-# Edit .env.local with your backend API URL
+# Development environment is already configured in frontend/.env.local
 npm run dev
 ```
 
@@ -44,16 +42,27 @@ npm run dev
 
 ## Environment Configuration
 
-### Backend (.env)
-- MongoDB Atlas connection string
-- JWT secrets
-- Cloudinary CDN credentials
-- Server configuration
+We use a simplified environment structure with just two configurations:
 
-### Frontend (.env.local)
-- Backend API URL
-- Next.js configuration
-- External service integrations
+### Development Environment
+- **Backend**: `backend/.env` - Local development settings
+- **Frontend**: `frontend/.env.local` - Local development settings
+
+### Production Environment  
+- **Backend**: `backend/.env.production` - Production deployment settings
+- **Frontend**: `frontend/.env.production` - Production deployment settings
+
+### Environment Management
+Use the provided script to manage environments:
+```bash
+./switch-env.sh status       # Check current environment status
+./switch-env.sh development  # Switch to development mode
+./switch-env.sh production   # Switch to production mode
+```
+
+### Key Configuration Variables
+- **Backend**: MongoDB Atlas connection, JWT secrets, Cloudinary CDN, server settings
+- **Frontend**: Backend API URL, Next.js configuration, external service integrations
 
 ## API Communication
 

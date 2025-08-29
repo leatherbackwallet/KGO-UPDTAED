@@ -69,7 +69,7 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 ### 3. Server Deployment
 ```bash
-# Frontend Deployment (Vercel/Netlify recommended)
+# Frontend Deployment (Netlify recommended)
 - Connect GitHub repository
 - Set environment variables
 - Configure custom domain
@@ -134,17 +134,17 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 ## 🚀 DEPLOYMENT STEPS
 
-### Step 1: Frontend Deployment (Vercel)
+### Step 1: Frontend Deployment (Netlify)
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Install Netlify CLI
+npm i -g netlify-cli
 
-# Deploy to Vercel
+# Deploy to Netlify
 cd frontend
-vercel --prod
+netlify deploy --prod
 
 # Configure custom domain
-vercel domains add keralgiftsonline.in
+netlify domains:add keralgiftsonline.in
 ```
 
 ### Step 2: Backend Deployment (DigitalOcean)
