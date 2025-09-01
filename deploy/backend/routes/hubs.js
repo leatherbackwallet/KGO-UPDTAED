@@ -6,8 +6,8 @@
 const express = require('express');
 const router = express.Router();
 const { Hub } = require('../models/hubs.model');
-const auth = require('../middleware/auth.js');
-const role = require('../middleware/role.js');
+const auth = require('../middleware/auth');
+const role = require('../middleware/role');
 
 // Get all hubs (admin only)
 router.get('/', auth, role('admin'), async (req, res) => {
@@ -171,7 +171,7 @@ router.delete('/:id', auth, role('admin'), async (req, res) => {
     }
     
     // Check if hub is being used in any delivery runs
-    const DeliveryRun = require('../models/deliveryRuns.model.js');
+    const DeliveryRun = require('../models/deliveryRuns.model');
     const activeRuns = await DeliveryRun.find({ 
       assignedHubId: req.params.id,
       status: { $nin: ['completed', 'cancelled'] }

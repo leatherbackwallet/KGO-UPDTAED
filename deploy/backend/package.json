@@ -1,15 +1,12 @@
 {
-  "name": "keralagiftsonline-backend",
+  "name": "keralagiftsonline-backend-deploy",
   "version": "3.0.0",
-  "description": "KeralGiftsOnline.com Backend API",
-  "main": "server.js",
+  "description": "KeralGiftsOnline.com Backend Deployment Package",
+  "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc && node dist/server.js",
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "axios": "^1.5.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.41.3",
@@ -41,25 +38,6 @@
     "uuid": "^9.0.0",
     "winston": "^3.10.0",
     "zod": "^3.21.4"
-  },
-  "devDependencies": {
-    "@types/bcryptjs": "^2.4.2",
-    "@types/compression": "^1.7.2",
-    "@types/cors": "^2.8.13",
-    "@types/crypto-js": "^4.1.2",
-    "@types/express": "^4.17.17",
-    "@types/express-fileupload": "^1.4.1",
-    "@types/express-session": "^1.17.7",
-    "@types/jsonwebtoken": "^9.0.2",
-    "@types/lodash": "^4.14.195",
-    "@types/multer": "^1.4.7",
-    "@types/node": "^20.5.0",
-    "@types/node-cron": "^3.0.7",
-    "@types/nodemailer": "^6.4.9",
-    "@types/qrcode": "^1.5.2",
-    "@types/speakeasy": "^2.0.7",
-    "@types/uuid": "^9.0.2",
-    "typescript": "^5.1.6"
   },
   "engines": {
     "node": ">=18.0.0",

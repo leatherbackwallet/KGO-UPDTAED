@@ -1,22 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { Product } = require('../models/products.model.js');
-const { Category } = require('../models/categories.model.js');
-const { ActivityLog } = require('../models/activityLogs.model.js');
-const { ProductAttribute } = require('../models/productAttributes.model.js');
-const { VendorProduct } = require('../models/vendorProducts.model.js');
-const { Review } = require('../models/reviews.model.js');
-const { Wishlist } = require('../models/wishlists.model.js');
-const { Notification } = require('../models/notifications.model.js');
-const auth = require('../middleware/auth.js');
-const role = require('../middleware/role.js');
-const { validate } = require('../middleware/validation.js');
+const { Product } = require('../models/products.model');
+const { Category } = require('../models/categories.model');
+const { ActivityLog } = require('../models/activityLogs.model');
+const { ProductAttribute } = require('../models/productAttributes.model');
+const { VendorProduct } = require('../models/vendorProducts.model');
+const { Review } = require('../models/reviews.model');
+const { Wishlist } = require('../models/wishlists.model');
+const { Notification } = require('../models/notifications.model');
+const auth = require('../middleware/auth');
+const role = require('../middleware/role');
+const { validate } = require('../middleware/validation');
 const mongoose = require('mongoose');
-const { cacheConfigs, invalidateProductCache } = require('../middleware/cache.js');
-const { ensureDatabaseConnection } = require('../middleware/database.js');
+const { cacheConfigs, invalidateProductCache } = require('../middleware/cache');
 
 // Get all products with caching
-router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req, res) => {
+router.get('/', cacheConfigs.products, async (req, res) => {
   try {
     const { category, min, max, search, featured, occasions } = req.query;
     let filter = {};
@@ -180,9 +179,11 @@ router.post('/', auth, role('admin'), async (req, res) => {
     // Create notification for product creation
     try {
       await Notification.create({
-        recipientId: req.user.id,
+        userId: req.user.id,
         title: 'Product Created Successfully',
-        message: `Product "${product.name}" has been created successfully`
+        message: `Product "${product.name}" has been created successfully`,
+        type: 'success',
+        relatedEntity: { type: 'Product', id: product._id }
       });
     } catch (notificationError) {
       console.error('Error creating notification:', notificationError);
@@ -240,7 +241,7 @@ router.post('/', auth, role('admin'), async (req, res) => {
 // Update product (admin only)
 router.put('/:id', auth, role('admin'), async (req, res) => {
   try {
-    const { name, description, price, category, categories, stock, occasions, isFeatured, images, defaultImage } = req.body;
+    const { name, description, price, category, categories, stock, occasions, isFeatured } = req.body;
     
     // Prepare update data
     const updateData = {};
@@ -260,14 +261,6 @@ router.put('/:id', auth, role('admin'), async (req, res) => {
     if (stock !== undefined) updateData.stock = stock;
     if (occasions !== undefined) updateData.occasions = occasions;
     if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
-
-    // Handle images update (supports Cloudinary public IDs)
-    if (Array.isArray(images)) {
-      updateData.images = images;
-    }
-    if (typeof defaultImage === 'string' && defaultImage.length > 0) {
-      updateData.defaultImage = defaultImage;
-    }
     
     // Handle category update - support both 'category' and 'categories'
     const categoryData = categories || category;

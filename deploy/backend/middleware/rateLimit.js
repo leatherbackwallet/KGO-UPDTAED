@@ -5,27 +5,10 @@
 
 const rateLimit = require('express-rate-limit');
 
-// Get rate limiting configuration from environment variables
-const getRateLimitConfig = () => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-  return {
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes default
-    max: isProduction 
-      ? (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100)
-      : (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000), // Higher limit for development
-    authMax: parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS) || 5,
-    standardHeaders: true,
-    legacyHeaders: false,
-  };
-};
-
-const config = getRateLimitConfig();
-
 // General rate limiter
 const generalLimiter = rateLimit({
-  windowMs: config.windowMs,
-  max: config.max,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // Higher limit for development
   message: {
     success: false,
     error: {
@@ -33,15 +16,14 @@ const generalLimiter = rateLimit({
       code: 'RATE_LIMIT_EXCEEDED'
     }
   },
-  standardHeaders: config.standardHeaders,
-  legacyHeaders: config.legacyHeaders,
-  trustProxy: true, // Trust proxy headers for serverless environments
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // Strict limiter for auth endpoints
 const authLimiter = rateLimit({
-  windowMs: config.windowMs,
-  max: config.authMax,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 requests per windowMs
   message: {
     success: false,
     error: {
@@ -49,15 +31,14 @@ const authLimiter = rateLimit({
       code: 'AUTH_RATE_LIMIT_EXCEEDED'
     }
   },
-  standardHeaders: config.standardHeaders,
-  legacyHeaders: config.legacyHeaders,
-  trustProxy: true, // Trust proxy headers for serverless environments
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // API limiter for product endpoints
 const apiLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: config.max,
+  max: process.env.NODE_ENV === 'production' ? 30 : 300, // Higher limit for development
   message: {
     success: false,
     error: {
@@ -65,9 +46,8 @@ const apiLimiter = rateLimit({
       code: 'API_RATE_LIMIT_EXCEEDED'
     }
   },
-  standardHeaders: config.standardHeaders,
-  legacyHeaders: config.legacyHeaders,
-  trustProxy: true, // Trust proxy headers for serverless environments
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 module.exports = {

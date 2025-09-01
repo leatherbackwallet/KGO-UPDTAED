@@ -5,9 +5,9 @@
 
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth.js');
-const { Order } = require('../models/orders.model.js');
-const { Product } = require('../models/products.model.js');
+const auth = require('../middleware/auth');
+const { Order } = require('../models/orders.model');
+const { Product } = require('../models/products.model');
 
 // Get aggregated financial data
 router.get('/aggregates', auth, async (req, res) => {
@@ -49,7 +49,7 @@ router.get('/aggregates', auth, async (req, res) => {
     }
 
     // Get orders with date filter
-    const orders = await Order.find(dateFilter).populate('orderItems.productId');
+    const orders = await Order.find(dateFilter).populate('products.product');
     
     // Calculate financial metrics
     let totalRevenue = 0;
@@ -58,9 +58,9 @@ router.get('/aggregates', auth, async (req, res) => {
     let averageOrderValue = 0;
     
     const orderDetails = orders.map(order => {
-      const orderRevenue = order.totalPrice || 0;
-      const orderCost = order.orderItems.reduce((cost, item) => {
-        const product = item.productId;
+      const orderRevenue = order.totalAmount || 0;
+      const orderCost = order.products.reduce((cost, item) => {
+        const product = item.product;
         const productCost = (product?.costPrice || 0) * item.quantity;
         return cost + productCost;
       }, 0);
@@ -70,8 +70,8 @@ router.get('/aggregates', auth, async (req, res) => {
       
       return {
         orderId: order._id,
-        orderNumber: order.orderId,
-        customerName: order.shippingDetails?.recipientName || 'Unknown',
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
         date: order.createdAt,
         revenue: orderRevenue,
         cost: orderCost,
@@ -148,7 +148,7 @@ router.get('/orders', auth, async (req, res) => {
     const sortObject = {};
     switch (sortBy) {
       case 'revenue':
-        sortObject.totalPrice = sortOrder === 'desc' ? -1 : 1;
+        sortObject.totalAmount = sortOrder === 'desc' ? -1 : 1;
         break;
       case 'profit':
         // We'll sort after calculating profit
@@ -161,7 +161,7 @@ router.get('/orders', auth, async (req, res) => {
     // Get orders with pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const orders = await Order.find(dateFilter)
-      .populate('orderItems.productId')
+      .populate('products.product')
       .sort(sortObject)
       .skip(skip)
       .limit(parseInt(limit));
@@ -170,9 +170,9 @@ router.get('/orders', auth, async (req, res) => {
     
     // Calculate financial data for each order
     const orderBreakdown = orders.map(order => {
-      const revenue = order.totalPrice || 0;
-      const cost = order.orderItems.reduce((total, item) => {
-        const product = item.productId;
+      const revenue = order.totalAmount || 0;
+      const cost = order.products.reduce((total, item) => {
+        const product = item.product;
         const productCost = (product?.costPrice || 0) * item.quantity;
         return total + productCost;
       }, 0);
@@ -182,17 +182,17 @@ router.get('/orders', auth, async (req, res) => {
       
       return {
         orderId: order._id,
-        orderNumber: order.orderId,
-        customerName: order.shippingDetails?.recipientName || 'Unknown',
-        customerEmail: '', // Not available in current model
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
         date: order.createdAt,
-        status: order.orderStatus,
+        status: order.status,
         revenue,
         cost,
         profit,
         profitMargin,
-        items: order.orderItems.length,
-        paymentMethod: 'Unknown' // Not available in current model
+        items: order.products.length,
+        paymentMethod: order.paymentMethod
       };
     });
     
@@ -273,15 +273,15 @@ async function getPreviousPeriodData(period, startDate, endDate) {
     
     const previousOrders = await Order.find({
       createdAt: { $gte: previousStart, $lt: previousEnd }
-    }).populate('orderItems.productId');
+    }).populate('products.product');
     
     let totalRevenue = 0;
     let totalCost = 0;
     
     previousOrders.forEach(order => {
-      const orderRevenue = order.totalPrice || 0;
-      const orderCost = order.orderItems.reduce((cost, item) => {
-        const product = item.productId;
+      const orderRevenue = order.totalAmount || 0;
+      const orderCost = order.products.reduce((cost, item) => {
+        const product = item.product;
         const productCost = (product?.costPrice || 0) * item.quantity;
         return cost + productCost;
       }, 0);
@@ -311,7 +311,7 @@ async function getMonthlyData(startDate, endDate) {
       };
     }
     
-    const orders = await Order.find(dateFilter).populate('orderItems.productId');
+    const orders = await Order.find(dateFilter).populate('products.product');
     
     const monthlyData = {};
     
@@ -328,9 +328,9 @@ async function getMonthlyData(startDate, endDate) {
         };
       }
       
-      const orderRevenue = order.totalPrice || 0;
-      const orderCost = order.orderItems.reduce((cost, item) => {
-        const product = item.productId;
+      const orderRevenue = order.totalAmount || 0;
+      const orderCost = order.products.reduce((cost, item) => {
+        const product = item.product;
         const productCost = (product?.costPrice || 0) * item.quantity;
         return cost + productCost;
       }, 0);
@@ -360,7 +360,7 @@ async function getCategoryPerformance(startDate, endDate) {
     }
     
     const orders = await Order.find(dateFilter).populate({
-      path: 'orderItems.productId',
+      path: 'products.product',
       populate: {
         path: 'category',
         model: 'Category'
@@ -370,8 +370,8 @@ async function getCategoryPerformance(startDate, endDate) {
     const categoryData = {};
     
     orders.forEach(order => {
-      order.orderItems.forEach(item => {
-        const product = item.productId;
+      order.products.forEach(item => {
+        const product = item.product;
         if (product && product.category) {
           const categoryId = product.category._id || product.category;
           const categoryName = product.category.name || categoryId;

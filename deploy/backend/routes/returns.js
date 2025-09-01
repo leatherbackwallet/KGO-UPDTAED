@@ -5,10 +5,10 @@
 
 const express = require('express');
 const router = express.Router();
-const { Return } = require('../models/returns.model.js');
-const { Order } = require('../models/orders.model.js');
-const auth = require('../middleware/auth.js');
-const role = require('../middleware/role.js');
+const { Return } = require('../models/returns.model');
+const { Order } = require('../models/orders.model');
+const auth = require('../middleware/auth');
+const role = require('../middleware/role');
 
 // Get all returns (admin/support only)
 router.get('/', auth, role(['admin', 'support_agent']), async (req, res) => {

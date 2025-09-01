@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models/users.model.js');
-const { Role } = require('../models/roles.model.js');
-const auth = require('../middleware/auth.js');
-const role = require('../middleware/role.js');
+const { User } = require('../models/users.model');
+const { Role } = require('../models/roles.model');
+const auth = require('../middleware/auth');
+const role = require('../middleware/role');
 
 // Get all users (admin only)
 router.get('/', auth, role('admin'), async (req, res) => {
