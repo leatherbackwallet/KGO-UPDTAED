@@ -7,7 +7,7 @@ export default function About() {
     <>
       <Head>
         <title>About Us - Kerala Gifts Online</title>
-        <meta name="description" content="Learn about Kerala Gifts Online - Your trusted source for authentic Kerala gifts, celebration cakes, and traditional products delivered worldwide to the Kerala diaspora." />
+        <meta name="description" content="Learn about Kerala Gifts Online - Your trusted source for authentic Kerala gifts, custom cakes, and traditional products delivered worldwide to the Kerala diaspora." />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
@@ -21,14 +21,11 @@ export default function About() {
                 About Kerala Gifts Online
               </h1>
               <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-                Bringing the authentic taste and culture of Kerala to the global diaspora through carefully curated gifts and celebration cakes
+                Bringing the authentic taste and culture of Kerala to the global diaspora through carefully curated gifts and custom cakes
               </p>
-              <div className="flex justify-center space-x-4">
+              <div className="flex justify-center">
                 <Link href="/products" className="bg-white text-kgo-red px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                   Explore Products
-                </Link>
-                <Link href="/celebration" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-kgo-red transition-colors">
-                  Celebration Cakes
                 </Link>
               </div>
             </div>
@@ -125,7 +122,7 @@ export default function About() {
                 What We Offer
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                A diverse range of authentic Kerala products and celebration cakes
+                A diverse range of authentic Kerala products and custom cakes
               </p>
             </div>
 
@@ -146,7 +143,7 @@ export default function About() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Celebration Cakes</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Custom Cakes</h3>
                 <p className="text-gray-600">Custom cakes for special occasions</p>
               </div>
 

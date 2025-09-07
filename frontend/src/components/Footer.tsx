@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
               />
             </div>
             <p className="text-gray-300 mb-6 max-w-md">
-              Bringing the authentic taste and culture of Kerala to the global diaspora through carefully curated gifts and celebration cakes.
+              Bringing the authentic taste and culture of Kerala to the global diaspora through carefully curated gifts and custom cakes.
             </p>
             
             {/* Contact Information */}
@@ -45,11 +45,6 @@ const Footer: React.FC = () => {
               <li>
                 <Link href="/products" className="text-gray-300 hover:text-white transition-colors">
                   Products
-                </Link>
-              </li>
-              <li>
-                <Link href="/celebration" className="text-gray-300 hover:text-white transition-colors">
-                  Celebration Cakes
                 </Link>
               </li>
               <li>

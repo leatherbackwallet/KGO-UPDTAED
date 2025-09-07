@@ -17,6 +17,8 @@ const ProductsPage: React.FC = () => {
   const [error, setError] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showQuickView, setShowQuickView] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [autoRetryTimeout, setAutoRetryTimeout] = useState<NodeJS.Timeout | null>(null);
   
   // Filters
   const [search, setSearch] = useState('');
@@ -39,16 +41,12 @@ const ProductsPage: React.FC = () => {
     fetchProducts();
     setIsInitialLoad(false);
     
-    // Add a fallback timeout to prevent infinite loading
-    const fallbackTimeout = setTimeout(() => {
-      if (loading) {
-        console.log('⚠️ Fallback timeout triggered - forcing loading to false');
-        setLoading(false);
-        setError('Request timed out. Please try again.');
+    // Cleanup auto-retry timeout on unmount
+    return () => {
+      if (autoRetryTimeout) {
+        clearTimeout(autoRetryTimeout);
       }
-    }, 20000); // 20 seconds fallback
-    
-    return () => clearTimeout(fallbackTimeout);
+    };
   }, []);
 
   // Debounced search effect (only for filters, not initial load)
@@ -62,11 +60,11 @@ const ProductsPage: React.FC = () => {
     }
   }, [search, category, selectedOccasions, min, max, isInitialLoad]);
 
-  const fetchProducts = useCallback(async () => {
+  const fetchProducts = useCallback(async (isRetry = false) => {
     try {
       setLoading(true);
       setError('');
-      console.log('🔍 Fetching products...');
+      console.log('🔍 Fetching products...', isRetry ? `(Retry ${retryCount + 1})` : '');
       console.log('🔗 API Base URL:', api.defaults.baseURL);
       console.log('🔗 Environment:', process.env.NODE_ENV);
       console.log('🔗 NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
@@ -103,6 +101,7 @@ const ProductsPage: React.FC = () => {
       console.log('📦 First product:', productsData[0]);
       
       setProducts(Array.isArray(productsData) ? productsData : []);
+      setRetryCount(0); // Reset retry count on success
 
       // performanceMonitor.endTimer('products-fetch');
     } catch (err: any) {
@@ -110,13 +109,31 @@ const ProductsPage: React.FC = () => {
       console.error('❌ Error message:', err.message);
       console.error('❌ Error response:', err.response);
       console.error('❌ Error request:', err.request);
-      setError(err.response?.data?.error?.message || err.message || 'Failed to fetch products');
+      
+      const errorMessage = err.response?.data?.error?.message || err.message || 'Failed to fetch products';
+      setError(errorMessage);
       setProducts([]);
+      
+      // Auto-retry logic for network errors or timeouts
+      if (retryCount < 3 && (err.message === 'Request timeout' || err.code === 'NETWORK_ERROR' || !err.response)) {
+        const newRetryCount = retryCount + 1;
+        setRetryCount(newRetryCount);
+        
+        console.log(`🔄 Auto-retrying in ${newRetryCount * 2} seconds... (Attempt ${newRetryCount}/3)`);
+        
+        const retryTimeout = setTimeout(() => {
+          fetchProducts(true);
+        }, newRetryCount * 2000); // Exponential backoff: 2s, 4s, 6s
+        
+        setAutoRetryTimeout(retryTimeout);
+      } else {
+        console.log('❌ Max retries reached or non-retryable error');
+      }
     } finally {
       console.log('🏁 Setting loading to false');
       setLoading(false);
     }
-  }, [search, category, selectedOccasions, min, max]);
+  }, [search, category, selectedOccasions, min, max, retryCount]);
 
   const fetchCategories = async () => {
     try {
@@ -192,13 +209,26 @@ const ProductsPage: React.FC = () => {
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Products</h3>
-                <p className="text-gray-600 mb-4">{error}</p>
-                <button
-                  onClick={fetchProducts}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Try Again
-                </button>
+                <p className="text-gray-600 mb-2">{error}</p>
+                {retryCount > 0 && (
+                  <p className="text-sm text-gray-500 mb-4">
+                    Auto-retry attempt {retryCount}/3 in progress...
+                  </p>
+                )}
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => fetchProducts(false)}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Refresh Page
+                  </button>
+                </div>
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-12">

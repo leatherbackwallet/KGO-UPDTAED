@@ -22,6 +22,7 @@ export default function Home() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      setError('');
       const response = await api.get(`/products?featured=true&limit=8&_t=${Date.now()}`);
       const productsData = response.data?.data || response.data || [];
       setProducts(Array.isArray(productsData) ? productsData : []);
@@ -186,12 +187,20 @@ export default function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-green-900 mb-4">Error Loading Products</h3>
                 <p className="text-green-700 mb-6">{error}</p>
-                <button
-                  onClick={fetchProducts}
-                  className="bg-green-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-700 transition-colors"
-                >
-                  Try Again
-                </button>
+                <div className="flex gap-4 justify-center">
+                  <button
+                    onClick={fetchProducts}
+                    className="bg-green-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-700 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors"
+                  >
+                    Refresh Page
+                  </button>
+                </div>
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-16">
