@@ -1,4 +1,10 @@
 import mongoose, { Document } from 'mongoose';
+export interface IComboItem {
+    name: string;
+    unitPrice: number;
+    defaultQuantity: number;
+    unit: string;
+}
 export interface IProduct extends Document {
     name: string;
     description: string;
@@ -13,6 +19,9 @@ export interface IProduct extends Document {
     vendors?: mongoose.Types.ObjectId[];
     isFeatured: boolean;
     isDeleted: boolean;
+    isCombo: boolean;
+    comboBasePrice?: number;
+    comboItems?: IComboItem[];
     createdAt: Date;
     updatedAt: Date;
 }

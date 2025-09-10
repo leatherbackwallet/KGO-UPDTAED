@@ -4,7 +4,7 @@ import api from '../utils/api';
 import { getMultilingualText } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
-import { Product } from '../types/product';
+import { Product, ComboItem } from '../types/product';
 import { getProductImage, getOptimizedImagePath, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import FileUpload from './FileUpload';
 
@@ -31,6 +31,9 @@ const AdminProducts: React.FC = () => {
   const [uploadError, setUploadError] = useState<string>('');
   const [deletingProducts, setDeletingProducts] = useState<Set<string>>(new Set());
   const [recentlyDeleted, setRecentlyDeleted] = useState<Set<string>>(new Set());
+  
+  // Combo product state
+  const [comboItems, setComboItems] = useState<ComboItem[]>([]);
 
   // Preload all product images
   useEffect(() => {
@@ -131,6 +134,12 @@ const AdminProducts: React.FC = () => {
       });
       
       const productsData = response.data?.data || response.data || [];
+      console.log('🔍 Fetched products data:', productsData);
+      console.log('🔍 First product combo fields:', productsData[0] ? {
+        isCombo: productsData[0].isCombo,
+        comboBasePrice: productsData[0].comboBasePrice,
+        comboItems: productsData[0].comboItems
+      } : 'No products');
       setProducts(Array.isArray(productsData) ? productsData : []);
     } catch (err: any) {
       console.error('Error fetching products:', err);
@@ -154,16 +163,30 @@ const AdminProducts: React.FC = () => {
   };
 
   const handleEditProduct = (product: Product) => {
+    console.log('🔍 Editing product:', product);
+    console.log('🔍 Combo fields:', {
+      isCombo: product.isCombo,
+      comboBasePrice: product.comboBasePrice,
+      comboItems: product.comboItems
+    });
+    
     setSelectedProduct(product);
     setEditingProduct({
       name: product.name,
       description: product.description,
       price: product.price,
-              categories: product.categories,
+      categories: product.categories,
       stock: product.stock,
       occasions: product.occasions,
-      isFeatured: product.isFeatured
+      isFeatured: product.isFeatured,
+      isCombo: product.isCombo,
+      comboBasePrice: product.comboBasePrice,
+      comboItems: product.comboItems
     });
+    
+    // Initialize combo items state
+    setComboItems(product.comboItems || []);
+    console.log('🔍 Set combo items:', product.comboItems || []);
             // Convert existing images to the upload preview format, preserving Cloudinary IDs
         const existingImages = product.images || [];
         const formattedImages = existingImages.map((path: string) => {
@@ -217,7 +240,11 @@ const AdminProducts: React.FC = () => {
         categories: editingProduct.categories?.map(cat => typeof cat === 'string' ? cat : cat._id) || [],
         // Include images - use Cloudinary public_id only
         images: validImages.map(img => img.public_id),
-        defaultImage: validImages[0]?.public_id || undefined
+        defaultImage: validImages[0]?.public_id || undefined,
+        // Include combo-specific fields
+        isCombo: editingProduct.isCombo || false,
+        comboBasePrice: editingProduct.comboBasePrice || 0,
+        comboItems: editingProduct.comboItems || []
       };
 
       console.log('Sending validated new product data:', validatedData);
@@ -231,6 +258,7 @@ const AdminProducts: React.FC = () => {
         setShowModal(false);
         setSelectedProduct(null);
         setEditingProduct({});
+        setComboItems([]);
         setError(''); // Clear any previous errors
         setSuccess('Product added successfully!');
         setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
@@ -273,7 +301,11 @@ const AdminProducts: React.FC = () => {
           description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
           // Include images - use Cloudinary public_id only
           images: validImages.map(img => img.public_id),
-          defaultImage: validImages[0]?.public_id || undefined
+          defaultImage: validImages[0]?.public_id || undefined,
+          // Include combo-specific fields
+          isCombo: editingProduct.isCombo || false,
+          comboBasePrice: editingProduct.comboBasePrice || 0,
+          comboItems: editingProduct.comboItems || []
         };
 
       console.log('Sending validated update data:', validatedData);
@@ -288,6 +320,7 @@ const AdminProducts: React.FC = () => {
         setShowModal(false);
         setSelectedProduct(null);
         setEditingProduct({});
+        setComboItems([]);
         setError(''); // Clear any previous errors
         setSuccess('Product updated successfully!');
         setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
@@ -495,8 +528,12 @@ const AdminProducts: React.FC = () => {
             onClick={() => {
               setSelectedProduct(null);
               setEditingProduct({
-                stock: 200 // Set default stock to 200
+                stock: 200, // Set default stock to 200
+                isCombo: false,
+                comboBasePrice: 0,
+                comboItems: []
               });
+              setComboItems([]);
               setUploadedImages([]);
               setUploadError('');
               setShowModal(true);
@@ -683,6 +720,7 @@ const AdminProducts: React.FC = () => {
                   setShowModal(false);
                   setUploadedImages([]);
                   setUploadError('');
+                  setComboItems([]);
                 }}
                 className="text-gray-500 hover:text-gray-700"
               >
@@ -887,6 +925,208 @@ const AdminProducts: React.FC = () => {
                 </label>
               </div>
 
+              {/* Combo Product Section */}
+              <div className="border-t pt-4">
+                <div className="mb-4">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={editingProduct.isCombo || false}
+                      onChange={(e) => {
+                        const isCombo = e.target.checked;
+                        setEditingProduct({
+                          ...editingProduct,
+                          isCombo,
+                          comboBasePrice: isCombo ? (editingProduct.comboBasePrice || 0) : 0,
+                          comboItems: isCombo ? (editingProduct.comboItems || []) : []
+                        });
+                        if (!isCombo) {
+                          setComboItems([]);
+                        }
+                      }}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">Combo Product</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enable this to create a combo product with multiple items and customizable quantities
+                  </p>
+                </div>
+
+                {editingProduct.isCombo && (
+                  <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Combo Base Price (₹)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editingProduct.comboBasePrice || ''}
+                        onChange={(e) => setEditingProduct({
+                          ...editingProduct,
+                          comboBasePrice: parseFloat(e.target.value) || 0
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="e.g., 5000"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Base price for the combo (additional items will be added to this)
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Combo Items
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newItem: ComboItem = {
+                              name: '',
+                              unitPrice: 0,
+                              defaultQuantity: 1,
+                              unit: 'piece'
+                            };
+                            const newComboItems = [...comboItems, newItem];
+                            setComboItems(newComboItems);
+                            setEditingProduct({
+                              ...editingProduct,
+                              comboItems: newComboItems
+                            });
+                          }}
+                          className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                        >
+                          + Add Item
+                        </button>
+                      </div>
+
+                      {comboItems.map((item, index) => (
+                        <div key={index} className="bg-white p-3 rounded border mb-3">
+                          <div className="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Item Name
+                              </label>
+                              <input
+                                type="text"
+                                value={item.name}
+                                onChange={(e) => {
+                                  const newComboItems = [...comboItems];
+                                  newComboItems[index].name = e.target.value;
+                                  setComboItems(newComboItems);
+                                  setEditingProduct({
+                                    ...editingProduct,
+                                    comboItems: newComboItems
+                                  });
+                                }}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                                placeholder="e.g., Birthday Cake"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Unit
+                              </label>
+                              <select
+                                value={item.unit}
+                                onChange={(e) => {
+                                  const newComboItems = [...comboItems];
+                                  newComboItems[index].unit = e.target.value;
+                                  setComboItems(newComboItems);
+                                  setEditingProduct({
+                                    ...editingProduct,
+                                    comboItems: newComboItems
+                                  });
+                                }}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                              >
+                                <option value="piece">Piece</option>
+                                <option value="kg">Kilogram</option>
+                                <option value="set">Set</option>
+                                <option value="dozen">Dozen</option>
+                                <option value="gram">Gram</option>
+                                <option value="liter">Liter</option>
+                                <option value="box">Box</option>
+                                <option value="pack">Pack</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Unit Price (₹)
+                              </label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={item.unitPrice}
+                                onChange={(e) => {
+                                  const newComboItems = [...comboItems];
+                                  newComboItems[index].unitPrice = parseFloat(e.target.value) || 0;
+                                  setComboItems(newComboItems);
+                                  setEditingProduct({
+                                    ...editingProduct,
+                                    comboItems: newComboItems
+                                  });
+                                }}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                                placeholder="e.g., 1000"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Default Quantity
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.1"
+                                value={item.defaultQuantity}
+                                onChange={(e) => {
+                                  const newComboItems = [...comboItems];
+                                  newComboItems[index].defaultQuantity = parseFloat(e.target.value) || 0;
+                                  setComboItems(newComboItems);
+                                  setEditingProduct({
+                                    ...editingProduct,
+                                    comboItems: newComboItems
+                                  });
+                                }}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                                placeholder="e.g., 1"
+                              />
+                            </div>
+                          </div>
+                          <div className="mt-2 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newComboItems = comboItems.filter((_, i) => i !== index);
+                                setComboItems(newComboItems);
+                                setEditingProduct({
+                                  ...editingProduct,
+                                  comboItems: newComboItems
+                                });
+                              }}
+                              className="text-xs text-red-600 hover:text-red-800"
+                            >
+                              Remove Item
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {comboItems.length === 0 && (
+                        <p className="text-sm text-gray-500 text-center py-4">
+                          No combo items added yet. Click "Add Item" to get started.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Image Upload Section */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -935,6 +1175,7 @@ const AdminProducts: React.FC = () => {
                   setShowModal(false);
                   setUploadedImages([]);
                   setUploadError('');
+                  setComboItems([]);
                 }}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
               >

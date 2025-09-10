@@ -5,11 +5,22 @@
 
 import mongoose, { Document, Schema } from 'mongoose';
 
+export interface IComboItemConfiguration {
+  name: string;
+  unitPrice: number;
+  quantity: number;
+  unit: string;
+}
+
 export interface IOrderItem {
   productId: mongoose.Types.ObjectId;
   quantity: number;
   price: number;
   personalizationOptions?: Record<string, any>;
+  // Combo-specific fields
+  isCombo?: boolean;
+  comboBasePrice?: number;
+  comboItemConfigurations?: IComboItemConfiguration[];
 }
 
 export interface IShippingDetails {
@@ -48,6 +59,29 @@ export interface IOrder extends Document {
   updatedAt: Date;
 }
 
+const comboItemConfigurationSchema = new Schema<IComboItemConfiguration>({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  unitPrice: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  unit: {
+    type: String,
+    required: true,
+    trim: true
+  }
+});
+
 const orderItemSchema = new Schema<IOrderItem>({
   productId: {
     type: Schema.Types.ObjectId,
@@ -66,7 +100,18 @@ const orderItemSchema = new Schema<IOrderItem>({
   },
   personalizationOptions: {
     type: Schema.Types.Mixed
-  }
+  },
+  // Combo-specific fields
+  isCombo: {
+    type: Boolean,
+    default: false
+  },
+  comboBasePrice: {
+    type: Number,
+    min: 0,
+    default: 0
+  },
+  comboItemConfigurations: [comboItemConfigurationSchema]
 });
 
 const shippingDetailsSchema = new Schema<IShippingDetails>({

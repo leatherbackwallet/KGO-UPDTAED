@@ -1,9 +1,18 @@
 import mongoose, { Document } from 'mongoose';
+export interface IComboItemConfiguration {
+    name: string;
+    unitPrice: number;
+    quantity: number;
+    unit: string;
+}
 export interface IOrderItem {
     productId: mongoose.Types.ObjectId;
     quantity: number;
     price: number;
     personalizationOptions?: Record<string, any>;
+    isCombo?: boolean;
+    comboBasePrice?: number;
+    comboItemConfigurations?: IComboItemConfiguration[];
 }
 export interface IShippingDetails {
     recipientName: string;

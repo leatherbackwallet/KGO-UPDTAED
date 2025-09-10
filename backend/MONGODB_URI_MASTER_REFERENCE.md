@@ -9,7 +9,7 @@ mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?
 
 ### ❌ **NEVER USE THIS URI**
 ```
-mongodb+srv://dev:JthEecxEt7J4BYN5@improov-dev.u8zpctx.mongodb.net/keralagiftsonline?retryWrites=true&w=majority
+mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline
 ```
 
 ## 🚫 **ABSOLUTELY FORBIDDEN: LOCAL MONGODB**
@@ -226,7 +226,7 @@ If you see this error:
 ## 🎯 **Key Takeaways**
 
 1. **Always use the correct URI**: `mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net`
-2. **Never use the old URI**: `mongodb+srv://dev:JthEecxEt7J4BYN5@improov-dev.u8zpctx.mongodb.net/keralagiftsonline?retryWrites=true&w=majority`
+2. **Never use the old URI**: `mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/?retryWrites=true&w=majority&appName=KeralaGiftsOnline`
 3. **NEVER use local MongoDB**: `mongodb://localhost:27017/keralagiftsonline` is FORBIDDEN
 4. **Keep credentials secure**: Never commit `.env` files to version control
 5. **Test connections**: Always test database connectivity after changes

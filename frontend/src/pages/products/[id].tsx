@@ -16,6 +16,15 @@ interface Product {
   slug?: string;
   occasions?: string[];
   isFeatured?: boolean;
+  // Combo product fields
+  isCombo?: boolean;
+  comboBasePrice?: number;
+  comboItems?: Array<{
+    name: string;
+    unitPrice: number;
+    defaultQuantity: number;
+    unit: string;
+  }>;
 }
 
 const ProductDetailPage: React.FC = () => {
@@ -123,7 +132,14 @@ const ProductDetailPage: React.FC = () => {
                     Category: {getCategoryName()}
                   </p>
                   <div className="text-4xl font-bold text-gray-900 mb-4">
-                    ₹{product.price?.toFixed(2) || '0.00'}
+                    {product.isCombo ? (
+                      <div>
+                        <div>From ₹{product.comboBasePrice?.toFixed(2) || '0.00'}</div>
+                        <div className="text-sm text-blue-600 font-medium">Combo Product</div>
+                      </div>
+                    ) : (
+                      `₹${product.price?.toFixed(2) || '0.00'}`
+                    )}
                   </div>
                 </div>
 

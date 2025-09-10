@@ -4,7 +4,7 @@ import api from '../utils/api';
 import { getMultilingualText } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
-import { Product } from '../types/product';
+import { Product, ComboItem } from '../types/product';
 import { getProductImage, getOptimizedImagePath, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import FileUpload from './FileUpload';
 
@@ -31,6 +31,9 @@ const AdminProducts: React.FC = () => {
   const [uploadError, setUploadError] = useState<string>('');
   const [deletingProducts, setDeletingProducts] = useState<Set<string>>(new Set());
   const [recentlyDeleted, setRecentlyDeleted] = useState<Set<string>>(new Set());
+  
+  // Combo product state
+  const [comboItems, setComboItems] = useState<ComboItem[]>([]);
 
   // Preload all product images
   useEffect(() => {

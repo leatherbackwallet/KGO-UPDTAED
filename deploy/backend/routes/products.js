@@ -119,7 +119,7 @@ router.get('/:id', async (req, res) => {
 // Create product (admin only)
 router.post('/', auth, role('admin'), async (req, res) => {
   try {
-    const { name, description, price, categories, stock, images, occasions, vendors, isFeatured, slug, defaultImage } = req.body;
+    const { name, description, price, categories, stock, images, occasions, vendors, isFeatured, slug, defaultImage, isCombo, comboBasePrice, comboItems } = req.body;
     
     // Handle categories - could be array of ObjectIds or slugs
     let categoryIds = categories;
@@ -159,7 +159,10 @@ router.post('/', auth, role('admin'), async (req, res) => {
       vendors,
       isFeatured,
       slug,
-      defaultImage
+      defaultImage,
+      isCombo: isCombo || false,
+      comboBasePrice: comboBasePrice || 0,
+      comboItems: comboItems || []
     });
     
     // Log the product creation activity
@@ -241,7 +244,7 @@ router.post('/', auth, role('admin'), async (req, res) => {
 // Update product (admin only)
 router.put('/:id', auth, role('admin'), async (req, res) => {
   try {
-    const { name, description, price, category, categories, stock, occasions, isFeatured } = req.body;
+    const { name, description, price, category, categories, stock, occasions, isFeatured, images, defaultImage, isCombo, comboBasePrice, comboItems } = req.body;
     
     // Prepare update data
     const updateData = {};
@@ -261,6 +264,9 @@ router.put('/:id', auth, role('admin'), async (req, res) => {
     if (stock !== undefined) updateData.stock = stock;
     if (occasions !== undefined) updateData.occasions = occasions;
     if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
+    if (isCombo !== undefined) updateData.isCombo = isCombo;
+    if (comboBasePrice !== undefined) updateData.comboBasePrice = comboBasePrice;
+    if (comboItems !== undefined) updateData.comboItems = comboItems;
     
     // Handle category update - support both 'category' and 'categories'
     const categoryData = categories || category;

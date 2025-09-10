@@ -35,6 +35,28 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Order = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+const comboItemConfigurationSchema = new mongoose_1.Schema({
+    name: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    unitPrice: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    quantity: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    unit: {
+        type: String,
+        required: true,
+        trim: true
+    }
+});
 const orderItemSchema = new mongoose_1.Schema({
     productId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -53,7 +75,17 @@ const orderItemSchema = new mongoose_1.Schema({
     },
     personalizationOptions: {
         type: mongoose_1.Schema.Types.Mixed
-    }
+    },
+    isCombo: {
+        type: Boolean,
+        default: false
+    },
+    comboBasePrice: {
+        type: Number,
+        min: 0,
+        default: 0
+    },
+    comboItemConfigurations: [comboItemConfigurationSchema]
 });
 const shippingDetailsSchema = new mongoose_1.Schema({
     recipientName: {

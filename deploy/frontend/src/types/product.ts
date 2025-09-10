@@ -1,3 +1,10 @@
+export interface ComboItem {
+  name: string;
+  unitPrice: number;
+  defaultQuantity: number;
+  unit: string; // e.g., 'kg', 'set', 'piece', 'dozen'
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -12,6 +19,10 @@ export interface Product {
   isFeatured?: boolean;
   slug?: string;
   isDeleted?: boolean;
+  // Combo product fields
+  isCombo?: boolean;
+  comboBasePrice?: number;
+  comboItems?: ComboItem[];
   createdAt?: string;
   updatedAt?: string;
 } 

@@ -129,6 +129,9 @@ console.log('✅ Environment variables validated successfully');
         console.log('Skipping local file system initialization in production');
     }
     await createSuperUser();
+    const { scheduleWarmCache } = require('./middleware/cache');
+    scheduleWarmCache();
+    console.log('Cache warming scheduled');
 }).catch((err) => {
     console.error('MongoDB connection error:', err);
     if (process.env.NODE_ENV === 'production') {
@@ -166,6 +169,9 @@ const hubsRoutes = require('./routes/hubs');
 const deliveryRunsRoutes = require('./routes/deliveryRuns');
 const returnsRoutes = require('./routes/returns');
 const healthRoutes = require('./routes/health');
+const imagesRoutes = require('./routes/images');
+const featureFlagsRoutes = require('./routes/featureFlags');
+const monitoringRoutes = require('./routes/monitoring');
 app.use('/api/health', apiLimiter, healthRoutes);
 app.get('/api/health-status', async (req, res) => {
     try {
@@ -206,6 +212,9 @@ app.use('/api/personalization', apiLimiter, personalization_1.default);
 app.use('/api/analytics', apiLimiter, analytics_1.default);
 app.use('/api/subscriptions', apiLimiter, subscriptions_1.default);
 app.use('/api/content', apiLimiter, content_1.default);
+app.use('/api/images', apiLimiter, imagesRoutes);
+app.use('/api/feature-flags', apiLimiter, featureFlagsRoutes);
+app.use('/api/monitoring', apiLimiter, monitoringRoutes);
 app.use(errorLogger);
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {

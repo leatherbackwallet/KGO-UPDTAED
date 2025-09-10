@@ -1,71 +1,166 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import WishlistButton from './WishlistButton';
+import ComboOrderingModal from './ComboOrderingModal';
 import { getProductImage, getOptimizedImagePath, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import { getMultilingualText } from '../utils/api';
 import { Product } from '../types/product';
+import { ComboItemConfiguration } from '../utils/comboUtils';
+import { ProductImage } from './ProgressiveImage';
+import { useConnectionMonitor } from '../hooks/useConnectionMonitor';
+import { usePerformanceMonitor } from '../hooks/usePerformanceMonitor';
 
 interface ProductCardProps {
   product: Product;
   onQuickView: (product: Product) => void;
   onClick?: (product: Product) => void;
+  priority?: 'high' | 'normal' | 'low';
+  lazy?: boolean;
+  index?: number; // For virtual scrolling optimization
 }
 
-export default function ProductCard({ product, onQuickView, onClick }: ProductCardProps) {
+const ProductCard = memo<ProductCardProps>(({ 
+  product, 
+  onQuickView, 
+  onClick, 
+  priority = 'normal',
+  lazy = false,
+  index = 0
+}) => {
   const { addToCart } = useCart();
+  const { connectionQuality } = useConnectionMonitor();
   const [isHovered, setIsHovered] = useState(false);
+  const [showComboModal, setShowComboModal] = useState(false);
 
-  // Get the image path directly without caching
-  const baseImagePath = product.images?.[0] || product.defaultImage;
-  const imagePath = baseImagePath ? getOptimizedImagePath(baseImagePath, 'medium') : DEFAULT_PRODUCT_IMAGE;
+  // Performance monitoring
+  const performanceMonitor = usePerformanceMonitor({
+    componentName: `ProductCard-${product._id}`,
+    enabled: process.env.NODE_ENV === 'development',
+    logThreshold: 20 // Log renders > 20ms
+  });
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const target = e.target as HTMLImageElement;
-    console.error('Image failed to load:', target.src);
+  // Memoize expensive computations
+  const imageData = useMemo(() => {
+    const baseImagePath = product.images?.[0] || product.defaultImage;
+    const primaryImageUrl = baseImagePath ? getOptimizedImagePath(baseImagePath, 'medium') : null;
     
-    // Try fallback image paths
-    if (target.src !== DEFAULT_PRODUCT_IMAGE) {
-      target.src = DEFAULT_PRODUCT_IMAGE;
-    } else {
-      // If default image also fails, use a data URI placeholder
-      target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNTAgNzVMMTgwIDEwNUwxNTAgMTM1TDEyMCAxMDVMMTUwIDc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8dGV4dCB4PSIxNTAiIHk9IjE4MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjc3NDhEIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Qcm9kdWN0IEltYWdlPC90ZXh0Pgo8L3N2Zz4K';
-    }
-  };
+    // Build fallback chain
+    const fallbackUrls = [
+      // Try different sizes of the same image
+      baseImagePath ? getOptimizedImagePath(baseImagePath, 'small') : null,
+      baseImagePath ? getOptimizedImagePath(baseImagePath, 'thumb') : null,
+      // Try direct product image
+      baseImagePath ? getProductImage(baseImagePath) : null,
+    ].filter(Boolean) as string[];
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+    return {
+      primaryImageUrl,
+      fallbackUrls,
+      baseImagePath
+    };
+  }, [product.images, product.defaultImage]);
+
+  // Memoize product display data
+  const productDisplayData = useMemo(() => ({
+    name: getMultilingualText(product.name),
+    description: getMultilingualText(product.description),
+    price: product.price?.toFixed(2) || '0.00',
+    comboBasePrice: product.comboBasePrice?.toFixed(2) || '0.00',
+    stock: product.stock || 0,
+    isOutOfStock: (product.stock || 0) === 0,
+    imageAlt: getMultilingualText(product.name)
+  }), [product.name, product.description, product.price, product.comboBasePrice, product.stock]);
+
+  // Calculate optimal image dimensions based on connection quality
+  const imageDimensions = useMemo(() => {
+    const baseWidth = 300;
+    const baseHeight = 256; // h-64 = 16rem = 256px
+    
+    // Reduce image quality on poor connections
+    if (connectionQuality === 'poor') {
+      return { width: Math.round(baseWidth * 0.75), height: Math.round(baseHeight * 0.75) };
+    } else if (connectionQuality === 'good') {
+      return { width: baseWidth, height: baseHeight };
+    } else {
+      return { width: Math.round(baseWidth * 1.25), height: Math.round(baseHeight * 1.25) };
+    }
+  }, [connectionQuality]);
+
+  // Memoized event handlers to prevent unnecessary re-renders
+  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+
+  const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    addToCart({
-      product: product._id,
-      name: getMultilingualText(product.name),
-      price: product.price || 0,
-      image: getProductImage(product.images?.[0], product.slug),
-      quantity: 1,
-      stock: product.stock || 0
-    });
-  };
+    if (product.isCombo) {
+      setShowComboModal(true);
+    } else {
+      addToCart({
+        product: product._id,
+        name: productDisplayData.name,
+        price: product.price || 0,
+        image: getProductImage(product.images?.[0], product.slug),
+        quantity: 1,
+        stock: productDisplayData.stock
+      });
+    }
+  }, [product.isCombo, product._id, product.price, product.images, product.slug, productDisplayData.name, productDisplayData.stock, addToCart]);
 
-  const handleCardClick = () => {
-    // Always trigger quick view when card is clicked
+  const handleComboAddToCart = useCallback((comboConfig: {
+    productId: string;
+    quantity: number;
+    price: number;
+    isCombo: boolean;
+    comboBasePrice: number;
+    comboItemConfigurations: ComboItemConfiguration[];
+  }) => {
+    addToCart({
+      product: comboConfig.productId,
+      name: productDisplayData.name,
+      price: comboConfig.price,
+      image: getProductImage(product.images?.[0], product.slug),
+      quantity: comboConfig.quantity,
+      stock: productDisplayData.stock,
+      isCombo: comboConfig.isCombo,
+      comboBasePrice: comboConfig.comboBasePrice,
+      comboItemConfigurations: comboConfig.comboItemConfigurations
+    });
+  }, [productDisplayData.name, productDisplayData.stock, product.images, product.slug, addToCart]);
+
+  const handleCardClick = useCallback(() => {
     onQuickView(product);
-  };
+  }, [onQuickView, product]);
+
+  const handleCloseComboModal = useCallback(() => {
+    setShowComboModal(false);
+  }, []);
 
   return (
     <div 
       className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onClick={handleCardClick}
     >
       {/* Image Container */}
-      <div className="relative overflow-hidden">
-        <img
-          src={imagePath}
-          alt={getMultilingualText(product.name)}
-          className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={handleImageError}
+      <div className="relative overflow-hidden bg-gray-100">
+        <ProductImage
+          src={imageData.primaryImageUrl || DEFAULT_PRODUCT_IMAGE}
+          alt={productDisplayData.imageAlt}
+          productSlug={product.slug}
+          priority={priority}
+          lazy={lazy}
+          containerWidth={imageDimensions.width}
+          containerHeight={imageDimensions.height}
+          enableWebP={true}
+          enableResponsive={true}
+          autoResize={false}
+          quality={connectionQuality === 'poor' ? 60 : connectionQuality === 'good' ? 75 : 85}
+          className="w-full h-64 object-cover transition-all duration-300 group-hover:scale-105"
+          showLoadingProgress={true}
         />
         
         {/* Overlay with only Add to Cart action */}
@@ -75,7 +170,7 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
           <div className="flex gap-3">
             <button
               onClick={handleAddToCart}
-              disabled={(product.stock || 0) === 0}
+              disabled={productDisplayData.isOutOfStock}
               className="w-12 h-12 rounded-full bg-kgo-red flex items-center justify-center hover:bg-red-700 transition-all duration-200 hover:scale-110 disabled:bg-gray-400 disabled:cursor-not-allowed"
               aria-label="Add to cart"
             >
@@ -92,7 +187,7 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
         </div>
 
         {/* Stock Badge */}
-        {(product.stock || 0) === 0 && (
+        {productDisplayData.isOutOfStock && (
           <div className="absolute top-3 left-3">
             <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
               Out of Stock
@@ -113,20 +208,45 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
       {/* Product Info */}
       <div className="p-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-          {getMultilingualText(product.name)}
+          {productDisplayData.name}
         </h3>
         <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-          {getMultilingualText(product.description)}
+          {productDisplayData.description}
         </p>
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-gray-900">
-            ₹{product.price?.toFixed(2) || '0.00'}
-          </span>
+          <div>
+            {product.isCombo ? (
+              <div>
+                <span className="text-xl font-bold text-gray-900">
+                  From ₹{productDisplayData.comboBasePrice}
+                </span>
+                <div className="text-xs text-blue-600 font-medium">
+                  Combo Product
+                </div>
+              </div>
+            ) : (
+              <span className="text-xl font-bold text-gray-900">
+                ₹{productDisplayData.price}
+              </span>
+            )}
+          </div>
           <span className="text-sm text-gray-500">
-            {product.stock !== undefined ? `${product.stock} in stock` : 'Stock not available'}
+            {productDisplayData.stock > 0 ? `${productDisplayData.stock} in stock` : 'Out of stock'}
           </span>
         </div>
       </div>
+
+      {/* Combo Ordering Modal */}
+      <ComboOrderingModal
+        product={product}
+        isOpen={showComboModal}
+        onClose={handleCloseComboModal}
+        onAddToCart={handleComboAddToCart}
+      />
     </div>
   );
-}
+});
+
+ProductCard.displayName = 'ProductCard';
+
+export default ProductCard;

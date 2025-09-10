@@ -5,6 +5,13 @@
 
 import mongoose, { Document, Schema } from 'mongoose';
 
+export interface IComboItem {
+  name: string;
+  unitPrice: number;
+  defaultQuantity: number;
+  unit: string; // e.g., 'kg', 'set', 'piece', 'dozen'
+}
+
 export interface IProduct extends Document {
   name: string;
   description: string;
@@ -19,6 +26,10 @@ export interface IProduct extends Document {
   vendors?: mongoose.Types.ObjectId[]; // Multiple vendors
   isFeatured: boolean;
   isDeleted: boolean;
+  // Combo product fields
+  isCombo: boolean;
+  comboBasePrice?: number; // Base price for the combo
+  comboItems?: IComboItem[]; // Individual items in the combo
   createdAt: Date;
   updatedAt: Date;
 }
@@ -115,7 +126,41 @@ const productSchema = new Schema<IProduct>({
   isDeleted: {
     type: Boolean,
     default: false
-  }
+  },
+  // Combo product fields
+  isCombo: {
+    type: Boolean,
+    default: false
+  },
+  comboBasePrice: {
+    type: Number,
+    min: [0, 'Combo base price cannot be negative'],
+    default: 0
+  },
+  comboItems: [{
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    unitPrice: {
+      type: Number,
+      required: true,
+      min: [0, 'Unit price cannot be negative']
+    },
+    defaultQuantity: {
+      type: Number,
+      required: true,
+      min: [0, 'Default quantity cannot be negative'],
+      default: 1
+    },
+    unit: {
+      type: String,
+      required: true,
+      trim: true,
+      enum: ['kg', 'set', 'piece', 'dozen', 'gram', 'liter', 'box', 'pack']
+    }
+  }]
 }, {
   timestamps: true
 });

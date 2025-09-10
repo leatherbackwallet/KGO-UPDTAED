@@ -148,6 +148,11 @@ connectToDatabase().then(async () => {
   }
   
   await createSuperUser();
+  
+  // Initialize cache warming for frequently accessed data
+  const { scheduleWarmCache } = require('./middleware/cache');
+  scheduleWarmCache();
+  console.log('Cache warming scheduled');
 }).catch((err: Error) => {
   console.error('MongoDB connection error:', err);
   // Don't exit process in serverless environment
@@ -192,6 +197,9 @@ const hubsRoutes = require('./routes/hubs');
 const deliveryRunsRoutes = require('./routes/deliveryRuns');
 const returnsRoutes = require('./routes/returns');
 const healthRoutes = require('./routes/health');
+const imagesRoutes = require('./routes/images');
+const featureFlagsRoutes = require('./routes/featureFlags');
+const monitoringRoutes = require('./routes/monitoring');
 
 // Apply health routes first
 app.use('/api/health', apiLimiter, healthRoutes);
@@ -238,6 +246,9 @@ app.use('/api/personalization', apiLimiter, personalizationRoutes);
 app.use('/api/analytics', apiLimiter, analyticsRoutes);
 app.use('/api/subscriptions', apiLimiter, subscriptionRoutes);
 app.use('/api/content', apiLimiter, contentRoutes);
+app.use('/api/images', apiLimiter, imagesRoutes);
+app.use('/api/feature-flags', apiLimiter, featureFlagsRoutes);
+app.use('/api/monitoring', apiLimiter, monitoringRoutes);
 
 // Error logging middleware
 app.use(errorLogger);

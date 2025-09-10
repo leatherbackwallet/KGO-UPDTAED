@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { ComboItemConfiguration } from '../utils/comboUtils';
 
 export interface CartItem {
   product: string;
@@ -7,6 +8,10 @@ export interface CartItem {
   image: string;
   quantity: number;
   stock: number;
+  // Combo-specific fields
+  isCombo?: boolean;
+  comboBasePrice?: number;
+  comboItemConfigurations?: ComboItemConfiguration[];
 }
 
 interface CartContextType {
@@ -40,9 +45,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addToCart = (item: CartItem) => {
-    const existing = cart.find(i => i.product === item.product);
+    // For combo items, create a unique identifier based on product ID and configuration
+    const getItemKey = (cartItem: CartItem) => {
+      if (cartItem.isCombo && cartItem.comboItemConfigurations) {
+        const configString = JSON.stringify(cartItem.comboItemConfigurations.sort((a, b) => a.name.localeCompare(b.name)));
+        return `${cartItem.product}_${btoa(configString)}`;
+      }
+      return cartItem.product;
+    };
+
+    const itemKey = getItemKey(item);
+    const existing = cart.find(i => getItemKey(i) === itemKey);
+    
     if (existing) {
-      saveCart(cart.map(i => i.product === item.product ? { ...i, quantity: i.quantity + item.quantity } : i));
+      saveCart(cart.map(i => getItemKey(i) === itemKey ? { ...i, quantity: i.quantity + item.quantity } : i));
     } else {
       saveCart([...cart, item]);
     }

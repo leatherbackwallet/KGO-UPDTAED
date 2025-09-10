@@ -124,7 +124,40 @@ const productSchema = new mongoose_1.Schema({
     isDeleted: {
         type: Boolean,
         default: false
-    }
+    },
+    isCombo: {
+        type: Boolean,
+        default: false
+    },
+    comboBasePrice: {
+        type: Number,
+        min: [0, 'Combo base price cannot be negative'],
+        default: 0
+    },
+    comboItems: [{
+            name: {
+                type: String,
+                required: true,
+                trim: true
+            },
+            unitPrice: {
+                type: Number,
+                required: true,
+                min: [0, 'Unit price cannot be negative']
+            },
+            defaultQuantity: {
+                type: Number,
+                required: true,
+                min: [0, 'Default quantity cannot be negative'],
+                default: 1
+            },
+            unit: {
+                type: String,
+                required: true,
+                trim: true,
+                enum: ['kg', 'set', 'piece', 'dozen', 'gram', 'liter', 'box', 'pack']
+            }
+        }]
 }, {
     timestamps: true
 });
