@@ -220,12 +220,27 @@ const AdminProducts: React.FC = () => {
         defaultImage: validImages[0]?.public_id || undefined
       };
 
-      console.log('Sending validated new product data:', validatedData);
+      console.log('📦 Creating new product with data:', {
+        name: validatedData.name,
+        description: validatedData.description,
+        price: validatedData.price,
+        categories: validatedData.categories,
+        images: validatedData.images,
+        defaultImage: validatedData.defaultImage,
+        imageCount: validatedData.images?.length || 0
+      });
       
       const response = await api.post('/products', validatedData);
-      console.log('Add response:', response.data);
       
       if (response.data) {
+        console.log('✅ Product created successfully!', {
+          productId: response.data._id,
+          name: response.data.name,
+          images: response.data.images,
+          defaultImage: response.data.defaultImage,
+          status: 'SAVED_TO_DATABASE'
+        });
+        
         // Refresh the products list
         await fetchProducts();
         setShowModal(false);
@@ -235,6 +250,7 @@ const AdminProducts: React.FC = () => {
         setSuccess('Product added successfully!');
         setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
       } else {
+        console.error('❌ Product creation failed - no data returned');
         setError('Failed to add product');
       }
     } catch (err: any) {

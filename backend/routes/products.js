@@ -14,6 +14,7 @@ const { validate } = require('../middleware/validation.js');
 const mongoose = require('mongoose');
 const { cacheConfigs, invalidateProductCache } = require('../middleware/cache.js');
 const { ensureDatabaseConnection } = require('../middleware/database.js');
+const { verifyImageExists } = require('../utils/cloudinary.js');
 
 // Get all products with caching
 router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req, res) => {
@@ -149,6 +150,55 @@ router.post('/', auth, role('admin'), async (req, res) => {
       }
     }
     
+    // Verify image URLs if images are provided (only for Cloudinary images)
+    if (images && Array.isArray(images) && images.length > 0) {
+      const cloudinaryImages = images.filter(imageId => 
+        typeof imageId === 'string' && imageId.startsWith('keralagiftsonline/products/')
+      );
+      
+      if (cloudinaryImages.length > 0) {
+        console.log(`🔍 [Backend] Verifying ${cloudinaryImages.length} Cloudinary image URLs before product creation...`);
+        console.log(`📋 [Backend] Images to verify:`, cloudinaryImages);
+        
+        // Verify images in parallel for better performance
+        const imageVerificationResults = await Promise.all(
+          cloudinaryImages.map(async (imageId) => {
+            const verification = await verifyImageExists(imageId);
+            return { imageId, ...verification };
+          })
+        );
+        
+        // Check if any images failed verification
+        const failedImages = imageVerificationResults.filter(result => !result.accessible);
+        if (failedImages.length > 0) {
+          console.error('❌ [Backend] Image verification failed:', failedImages);
+          return res.status(400).json({
+            success: false,
+            error: {
+              message: 'Some images are not accessible. Please ensure all images are properly uploaded.',
+              code: 'IMAGE_VERIFICATION_FAILED',
+              details: failedImages.map(img => ({
+                imageId: img.imageId,
+                error: img.error
+              }))
+            }
+          });
+        }
+        
+        console.log('✅ [Backend] All Cloudinary images verified successfully');
+      }
+    }
+    
+    console.log('💾 [Backend] Creating product in database with data:', {
+      name,
+      price,
+      categories: categoryIds,
+      stock: stock || 200,
+      images,
+      defaultImage,
+      imageCount: images?.length || 0
+    });
+    
     const product = await Product.create({ 
       name, 
       description, 
@@ -161,6 +211,14 @@ router.post('/', auth, role('admin'), async (req, res) => {
       isFeatured,
       slug,
       defaultImage
+    });
+    
+    console.log('✅ [Backend] Product created successfully in database:', {
+      productId: product._id,
+      name: product.name,
+      images: product.images,
+      defaultImage: product.defaultImage,
+      status: 'SAVED_TO_DATABASE'
     });
     
     // Log the product creation activity
@@ -263,9 +321,60 @@ router.put('/:id', auth, role('admin'), async (req, res) => {
 
     // Handle images update (supports Cloudinary public IDs)
     if (Array.isArray(images)) {
+      const cloudinaryImages = images.filter(imageId => 
+        typeof imageId === 'string' && imageId.startsWith('keralagiftsonline/products/')
+      );
+      
+      if (cloudinaryImages.length > 0) {
+        console.log(`🔍 [Backend] Verifying ${cloudinaryImages.length} Cloudinary image URLs before product update...`);
+        console.log(`📋 [Backend] Images to verify for update:`, cloudinaryImages);
+        
+        // Verify images in parallel for better performance
+        const imageVerificationResults = await Promise.all(
+          cloudinaryImages.map(async (imageId) => {
+            const verification = await verifyImageExists(imageId);
+            return { imageId, ...verification };
+          })
+        );
+        
+        // Check if any images failed verification
+        const failedImages = imageVerificationResults.filter(result => !result.accessible);
+        if (failedImages.length > 0) {
+          console.error('❌ [Backend] Image verification failed during update:', failedImages);
+          return res.status(400).json({
+            success: false,
+            error: {
+              message: 'Some images are not accessible. Please ensure all images are properly uploaded.',
+              code: 'IMAGE_VERIFICATION_FAILED',
+              details: failedImages.map(img => ({
+                imageId: img.imageId,
+                error: img.error
+              }))
+            }
+          });
+        }
+        
+        console.log('✅ [Backend] All Cloudinary images verified successfully for update');
+      }
+      
       updateData.images = images;
     }
     if (typeof defaultImage === 'string' && defaultImage.length > 0) {
+      // Verify default image if it's a Cloudinary image
+      if (defaultImage.startsWith('keralagiftsonline/products/')) {
+        const verification = await verifyImageExists(defaultImage);
+        if (!verification.accessible) {
+          console.error('Default image verification failed:', verification);
+          return res.status(400).json({
+            success: false,
+            error: {
+              message: 'Default image is not accessible. Please ensure the image is properly uploaded.',
+              code: 'DEFAULT_IMAGE_VERIFICATION_FAILED',
+              details: { imageId: defaultImage, error: verification.error }
+            }
+          });
+        }
+      }
       updateData.defaultImage = defaultImage;
     }
     

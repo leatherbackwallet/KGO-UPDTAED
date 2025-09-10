@@ -27,5 +27,10 @@ export declare function listImages(folder?: string, options?: {
     max_results?: number;
     next_cursor?: string;
 }): Promise<any>;
+export declare function verifyImageExists(public_id: string, maxRetries?: number): Promise<{
+    exists: boolean;
+    accessible: boolean;
+    error?: string;
+}>;
 export default cloudinary;
 //# sourceMappingURL=cloudinary.d.ts.map
