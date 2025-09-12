@@ -41,9 +41,7 @@
     "typescript": "^5.1.6",
     "uuid": "^9.0.0",
     "winston": "^3.10.0",
-    "zod": "^3.21.4"
-  },
-  "devDependencies": {
+    "zod": "^3.21.4",
     "@types/bcryptjs": "^2.4.2",
     "@types/compression": "^1.7.2",
     "@types/cors": "^2.8.13",
@@ -61,6 +59,7 @@
     "@types/speakeasy": "^2.0.7",
     "@types/uuid": "^9.0.2"
   },
+  "devDependencies": {},
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"

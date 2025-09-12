@@ -6,6 +6,16 @@ const nextConfig = {
   poweredByHeader: false,
   generateEtags: false,
   
+  // API proxy configuration
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:5001/api/:path*',
+      },
+    ];
+  },
+  
   // Webpack configuration
   webpack: (config, { dev, isServer }) => {
     if (!isServer) {
