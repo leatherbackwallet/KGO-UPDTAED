@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
+import { useImageCache } from '../utils/imageCache';
 import { getMultilingualText } from '../utils/api';
 import { Product } from '../types/product';
 
@@ -15,9 +16,21 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  // Get the main image path directly
+  // Get the main image path for caching
   const mainImagePath = product?.images?.[selectedImage] || product?.defaultImage;
-  const imagePath = mainImagePath ? getProductImage(mainImagePath, product?.slug) : DEFAULT_PRODUCT_IMAGE;
+  
+  // Use image caching hook for the main image
+  const { data: cachedMainImageUrl, isLoading: mainImageLoading } = useImageCache(
+    mainImagePath,
+    product?.slug,
+    {
+      staleTime: 1000 * 60 * 60 * 24, // 24 hours
+      enabled: true
+    }
+  );
+
+  // Get the final main image path with fallback
+  const imagePath = cachedMainImageUrl || (mainImagePath ? getProductImage(mainImagePath, product?.slug) : DEFAULT_PRODUCT_IMAGE);
 
   if (!product || !isOpen) return null;
 
@@ -76,32 +89,33 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
               {/* Image Gallery */}
               <div className="space-y-4">
                 <div className="aspect-w-1 aspect-h-1 w-full">
-                  <img
-                    src={imagePath}
-                    alt={getMultilingualText(product.name)}
-                    className="w-full h-96 object-cover rounded-lg"
-                    onError={handleImageError}
-                  />
+                  {mainImageLoading ? (
+                    <div className="w-full h-96 bg-gray-200 flex items-center justify-center rounded-lg">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-kgo-red"></div>
+                    </div>
+                  ) : (
+                    <img
+                      src={imagePath}
+                      alt={getMultilingualText(product.name)}
+                      className="w-full h-96 object-cover rounded-lg"
+                      onError={handleImageError}
+                    />
+                  )}
                 </div>
                 
                 {/* Thumbnail images - Show all images like ProductModal */}
                 {product.images && product.images.length > 1 && (
                   <div className="grid grid-cols-4 gap-2">
                     {product.images.map((image, index) => (
-                      <button
+                      <ThumbnailImage
                         key={index}
+                        image={image}
+                        productSlug={product.slug}
+                        productName={getMultilingualText(product.name)}
+                        isSelected={selectedImage === index}
                         onClick={() => setSelectedImage(index)}
-                        className={`aspect-w-1 aspect-h-1 w-full rounded-lg overflow-hidden border-2 transition-colors ${
-                          selectedImage === index ? 'border-blue-500' : 'border-gray-200'
-                        }`}
-                      >
-                        <img
-                          src={getProductImage(image, product.slug)}
-                          alt={`${getMultilingualText(product.name)} ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          onError={handleImageError}
-                        />
-                      </button>
+                        onError={handleImageError}
+                      />
                     ))}
                   </div>
                 )}
@@ -184,5 +198,50 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
         </div>
       </div>
     </div>
+  );
+}
+
+// Thumbnail image component with caching
+interface ThumbnailImageProps {
+  image: string;
+  productSlug?: string;
+  productName: string;
+  isSelected: boolean;
+  onClick: () => void;
+  onError: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+}
+
+function ThumbnailImage({ image, productSlug, productName, isSelected, onClick, onError }: ThumbnailImageProps) {
+  const { data: cachedImageUrl, isLoading } = useImageCache(
+    image,
+    productSlug,
+    {
+      staleTime: 1000 * 60 * 60 * 24, // 24 hours
+      enabled: true
+    }
+  );
+
+  const imagePath = cachedImageUrl || getProductImage(image, productSlug);
+
+  return (
+    <button
+      onClick={onClick}
+      className={`aspect-w-1 aspect-h-1 w-full rounded-lg overflow-hidden border-2 transition-colors ${
+        isSelected ? 'border-blue-500' : 'border-gray-200'
+      }`}
+    >
+      {isLoading ? (
+        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-kgo-red"></div>
+        </div>
+      ) : (
+        <img
+          src={imagePath}
+          alt={`${productName} thumbnail`}
+          className="w-full h-full object-cover"
+          onError={onError}
+        />
+      )}
+    </button>
   );
 } 

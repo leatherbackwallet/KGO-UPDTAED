@@ -20,13 +20,20 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('wishlist');
-    if (stored) {
-      setWishlist(JSON.parse(stored));
+    // Only access localStorage on client side
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('wishlist');
+      if (stored) {
+        setWishlist(JSON.parse(stored));
+      }
+      setIsLoaded(true);
+    } else {
+      setIsLoaded(true);
     }
-    setIsLoaded(true);
+    setIsHydrated(true);
   }, []);
 
   const saveWishlist = (wishlist: WishlistItem[]) => {

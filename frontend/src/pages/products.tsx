@@ -25,6 +25,9 @@ const ProductsPage: React.FC = () => {
   const [min, setMin] = useState('');
   const [max, setMax] = useState('');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  
+  // Timeout reference for cleanup
+  const [fallbackTimeoutRef, setFallbackTimeoutRef] = useState<NodeJS.Timeout | null>(null);
 
   // Available occasions
   const occasions = [
@@ -48,7 +51,13 @@ const ProductsPage: React.FC = () => {
       }
     }, 20000); // 20 seconds fallback
     
-    return () => clearTimeout(fallbackTimeout);
+    // Store timeout reference for cleanup
+    setFallbackTimeoutRef(fallbackTimeout);
+    
+    return () => {
+      clearTimeout(fallbackTimeout);
+      setFallbackTimeoutRef(null);
+    };
   }, []);
 
   // Debounced search effect (only for filters, not initial load)
@@ -62,6 +71,16 @@ const ProductsPage: React.FC = () => {
     }
   }, [search, category, selectedOccasions, min, max, isInitialLoad]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (fallbackTimeoutRef) {
+        clearTimeout(fallbackTimeoutRef);
+        console.log('🧹 Cleaned up fallback timeout on unmount');
+      }
+    };
+  }, [fallbackTimeoutRef]);
+
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
@@ -70,6 +89,13 @@ const ProductsPage: React.FC = () => {
       console.log('🔗 API Base URL:', api.defaults.baseURL);
       console.log('🔗 Environment:', process.env.NODE_ENV);
       console.log('🔗 NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+      
+      // Clear any existing fallback timeout since we're starting a new request
+      if (fallbackTimeoutRef) {
+        clearTimeout(fallbackTimeoutRef);
+        setFallbackTimeoutRef(null);
+        console.log('🧹 Cleared existing fallback timeout');
+      }
       
       // performanceMonitor.startTimer('products-fetch');
 
@@ -116,7 +142,7 @@ const ProductsPage: React.FC = () => {
       console.log('🏁 Setting loading to false');
       setLoading(false);
     }
-  }, [search, category, selectedOccasions, min, max]);
+  }, [search, category, selectedOccasions, min, max, fallbackTimeoutRef]);
 
   const fetchCategories = async () => {
     try {
@@ -151,7 +177,7 @@ const ProductsPage: React.FC = () => {
     <>
       <Head>
         <title>Products - KeralGiftsOnline</title>
-        <meta name="description" content="Discover our collection of gifts, cakes, flowers, and celebration items" />
+        <meta name="description" content="Discover our collection of gifts, traditional products, and authentic Kerala items" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>

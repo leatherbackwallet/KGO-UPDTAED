@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import WishlistButton from './WishlistButton';
 import { getProductImage, getOptimizedImagePath, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
+import { useImageCache } from '../utils/imageCache';
 import { getMultilingualText } from '../utils/api';
 import { Product } from '../types/product';
 
@@ -16,13 +17,26 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
   const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
 
-  // Get the image path directly without caching
+  // Get the base image path for caching
   const baseImagePath = product.images?.[0] || product.defaultImage;
-  const imagePath = baseImagePath ? getOptimizedImagePath(baseImagePath, 'medium') : DEFAULT_PRODUCT_IMAGE;
+  
+  // Use image caching hook for optimized image loading
+  const { data: cachedImageUrl, isLoading: imageLoading, error: imageError } = useImageCache(
+    baseImagePath,
+    product.slug,
+    {
+      staleTime: 1000 * 60 * 60 * 24, // 24 hours
+      enabled: true
+    }
+  );
+
+  // Get the final image path with fallback
+  const imagePath = cachedImageUrl || (baseImagePath ? getOptimizedImagePath(baseImagePath, 'medium') : DEFAULT_PRODUCT_IMAGE);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
     console.error('Image failed to load:', target.src);
+    console.error('Image error details:', imageError);
     
     // Try fallback image paths
     if (target.src !== DEFAULT_PRODUCT_IMAGE) {
@@ -61,12 +75,18 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
     >
       {/* Image Container */}
       <div className="relative overflow-hidden">
-        <img
-          src={imagePath}
-          alt={getMultilingualText(product.name)}
-          className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={handleImageError}
-        />
+        {imageLoading ? (
+          <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-kgo-red"></div>
+          </div>
+        ) : (
+          <img
+            src={imagePath}
+            alt={getMultilingualText(product.name)}
+            className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={handleImageError}
+          />
+        )}
         
         {/* Overlay with only Add to Cart action */}
         <div className={`absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-300 ${

@@ -23,13 +23,20 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('cart');
-    if (stored) {
-      setCart(JSON.parse(stored));
+    // Only access localStorage on client side
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('cart');
+      if (stored) {
+        setCart(JSON.parse(stored));
+      }
+      setIsLoaded(true);
+    } else {
+      setIsLoaded(true);
     }
-    setIsLoaded(true);
+    setIsHydrated(true);
   }, []);
 
   const saveCart = (cart: CartItem[]) => {
