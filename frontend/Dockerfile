@@ -4,18 +4,16 @@ FROM node:20-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy root package.json and workspace configuration
-COPY package*.json ./
-COPY frontend/package*.json ./frontend/
+# Copy frontend package.json first for better Docker layer caching
+COPY frontend/package*.json ./
 
 # Install dependencies
-RUN npm ci --workspace=frontend
+RUN npm ci
 
 # Copy source code
-COPY frontend/ ./frontend/
+COPY frontend/ ./
 
 # Build the application
-WORKDIR /app/frontend
 RUN npm run build
 
 # Production stage
@@ -35,9 +33,10 @@ COPY frontend/package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
-COPY --from=builder /app/frontend/.next ./.next
-COPY --from=builder /app/frontend/public ./public
-COPY --from=builder /app/frontend/next.config.js ./
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/server.js ./
 
 # Change ownership to nodejs user
 RUN chown -R nodejs:nodejs /app
@@ -53,4 +52,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:8080/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

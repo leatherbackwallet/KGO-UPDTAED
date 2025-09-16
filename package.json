@@ -3,6 +3,10 @@
   "version": "3.0.0",
   "description": "KeralGiftsOnline.com - Unified Frontend + Backend Deployment",
   "main": "dist/server.js",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
     "start": "node dist/server.js",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
