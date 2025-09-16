@@ -85,3 +85,5 @@ export default function Document() {
     </Html>
   );
 }
+
+// Disable static generation for this page

@@ -109,3 +109,4 @@ print_status "   Frontend logs: gcloud app logs tail -s default"
 print_status ""
 print_status "🔍 To monitor your app:"
 print_status "   gcloud app browse"
+

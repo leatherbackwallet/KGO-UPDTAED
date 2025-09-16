@@ -306,4 +306,10 @@ export default function Home() {
     </>
   );
 }
-console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
+
+// Disable static generation for this page
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
+}

@@ -270,3 +270,10 @@ const ProductsPage: React.FC = () => {
 };
 
 export default ProductsPage;
+
+// Disable static generation for this page
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
+}
