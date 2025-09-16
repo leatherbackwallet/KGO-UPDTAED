@@ -532,7 +532,7 @@ class ProductionMonitoringService extends EventEmitter {
   }
 
   public getCurrentMetrics(): MonitoringMetrics | null {
-    return this.metrics.length > 0 ? this.metrics[this.metrics.length - 1] || null : null;
+    return this.metrics.length > 0 ? this.metrics[this.metrics.length - 1] ?? null : null;
   }
 
   public getAlertRules(): AlertRule[] {
@@ -545,7 +545,24 @@ class ProductionMonitoringService extends EventEmitter {
 
     const currentRule = this.alertRules[ruleIndex];
     if (currentRule) {
-      this.alertRules[ruleIndex] = { ...currentRule, ...updates };
+      // Ensure all required properties are present for exact optional property types
+      const updatedRule: AlertRule = {
+        id: currentRule.id,
+        name: currentRule.name,
+        metric: currentRule.metric,
+        threshold: currentRule.threshold,
+        operator: currentRule.operator,
+        severity: currentRule.severity,
+        enabled: currentRule.enabled,
+        cooldownPeriod: currentRule.cooldownPeriod,
+        ...updates
+      };
+      
+      // Only include lastTriggered if it exists
+      if (currentRule.lastTriggered !== undefined) {
+        updatedRule.lastTriggered = currentRule.lastTriggered;
+      }
+      this.alertRules[ruleIndex] = updatedRule;
     }
     return true;
   }
@@ -563,7 +580,7 @@ class ProductionMonitoringService extends EventEmitter {
       compliancePercentage: number;
     };
   }> {
-    return this.slaTargets.map(sla => ({
+    return this.slaTargets.map((sla: SLATarget) => ({
       sla,
       compliance: this.calculateSLACompliance(sla)
     }));

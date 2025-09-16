@@ -66,9 +66,6 @@ const GridItem: React.FC<GridItemProps> = ({ columnIndex, rowIndex, style, data 
       <ProductCard
         product={product}
         onQuickView={onQuickView}
-        priority={index < 8 ? 'high' : 'normal'}
-        lazy={index >= 8}
-        index={index}
       />
     </div>
   );
@@ -163,9 +160,6 @@ export const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
             key={product._id}
             product={product}
             onQuickView={onQuickView}
-            priority={index < 8 ? 'high' : 'normal'}
-            lazy={index >= 8}
-            index={index}
           />
         ))}
       </div>

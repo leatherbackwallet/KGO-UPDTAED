@@ -319,16 +319,21 @@ class CacheWarmingService {
         const baseUrl = process.env.API_URL || 'http://localhost:3001';
         const fullUrl = `${baseUrl}${endpoint.url}`;
         
-        const response = await fetch(fullUrl, {
+        const fetchOptions: RequestInit = {
           method: endpoint.method,
           headers: {
             'User-Agent': 'CacheWarmingService/1.0',
             'Cache-Control': 'no-cache',
             ...endpoint.headers
           },
-          body: endpoint.body ? JSON.stringify(endpoint.body) : null,
           signal: AbortSignal.timeout(this.config.timeout)
-        });
+        };
+        
+        if (endpoint.body) {
+          fetchOptions.body = JSON.stringify(endpoint.body);
+        }
+        
+        const response = await fetch(fullUrl, fetchOptions);
         
         const responseTime = Date.now() - startTime;
         
@@ -467,7 +472,7 @@ class CacheWarmingService {
       : 0;
     
     const lastWarmingTime = this.warmingHistory.length > 0
-      ? this.warmingHistory[this.warmingHistory.length - 1]?.timestamp || null
+      ? this.warmingHistory[this.warmingHistory.length - 1]?.timestamp ?? null
       : null;
     
     return {

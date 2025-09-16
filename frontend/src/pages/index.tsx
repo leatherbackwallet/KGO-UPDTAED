@@ -15,9 +15,11 @@ export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showQuickView, setShowQuickView] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    setIsHydrated(true);
     fetchProducts();
   }, []);
 
@@ -173,8 +175,11 @@ export default function Home() {
               <p className="text-xl text-green-700">Discover our most popular traditional items</p>
             </div>
 
-            {!isClient || loading ? (
-              // Professional skeleton loading for consistent SSR/CSR experience
+            {!isHydrated ? (
+              // Show skeleton during SSR to prevent hydration mismatch
+              <ProductSkeletonGrid count={8} />
+            ) : loading ? (
+              // Show skeleton during loading
               <ProductSkeletonGrid count={8} />
             ) : error ? (
               <div className="text-center py-16">

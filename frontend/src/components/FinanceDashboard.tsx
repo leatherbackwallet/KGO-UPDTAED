@@ -373,7 +373,7 @@ export default function FinanceDashboard() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ category, revenue }) => `${category}: ${formatCurrency(revenue)}`}
+                    label={(props: any) => `${props.category}: ${formatCurrency(props.revenue)}`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="revenue"

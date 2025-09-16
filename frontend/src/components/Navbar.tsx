@@ -67,7 +67,14 @@ export default function Navbar() {
 
             {/* User Menu */}
             <div className="flex items-center space-x-2">
-              {!isHydrated || isLoading ? (
+              {!isHydrated ? (
+                // Show skeleton during SSR to prevent hydration mismatch
+                <>
+                  <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="hidden sm:block w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+                </>
+              ) : isLoading ? (
+                // Show skeleton during loading
                 <>
                   <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
                   <div className="hidden sm:block w-20 h-4 bg-gray-200 rounded animate-pulse"></div>

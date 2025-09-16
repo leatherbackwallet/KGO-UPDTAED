@@ -19,6 +19,7 @@ const ProductsPage: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showQuickView, setShowQuickView] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   
   // Filters
   const [search, setSearch] = useState('');
@@ -58,6 +59,7 @@ const ProductsPage: React.FC = () => {
   useEffect(() => {
     // Set client flag to prevent hydration mismatch
     setIsClient(true);
+    setIsHydrated(true);
     
     fetchCategories();
     fetchProducts();
@@ -316,8 +318,19 @@ const ProductsPage: React.FC = () => {
 
           {/* Products Grid */}
           <div className="mt-8">
-            {!isClient || (loading && !initialLoadComplete) ? (
-              // Show professional skeleton loading during SSR and initial loading
+            {!isHydrated ? (
+              // Show skeleton loading during SSR - this ensures server and client render the same thing
+              <div className="space-y-6">
+                <ProductSkeletonGrid count={12} />
+                <div className="text-center">
+                  <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-full text-blue-600 text-sm font-medium">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                    Loading products...
+                  </div>
+                </div>
+              </div>
+            ) : loading && !initialLoadComplete ? (
+              // Show skeleton loading during initial client-side loading
               <div className="space-y-6">
                 <ProductSkeletonGrid count={12} />
                 <div className="text-center">

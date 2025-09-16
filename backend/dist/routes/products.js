@@ -1,22 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const { Product } = require('../models/products.model');
-const { Category } = require('../models/categories.model');
-const { ActivityLog } = require('../models/activityLogs.model');
-const { ProductAttribute } = require('../models/productAttributes.model');
-const { VendorProduct } = require('../models/vendorProducts.model');
-const { Review } = require('../models/reviews.model');
-const { Wishlist } = require('../models/wishlists.model');
-const { Notification } = require('../models/notifications.model');
-const auth = require('../middleware/auth');
-const role = require('../middleware/role');
-const { validate } = require('../middleware/validation');
+const { Product } = require('../models/products.model.js');
+const { Category } = require('../models/categories.model.js');
+const { ActivityLog } = require('../models/activityLogs.model.js');
+const { ProductAttribute } = require('../models/productAttributes.model.js');
+const { VendorProduct } = require('../models/vendorProducts.model.js');
+const { Review } = require('../models/reviews.model.js');
+const { Wishlist } = require('../models/wishlists.model.js');
+const { Notification } = require('../models/notifications.model.js');
+const auth = require('../middleware/auth.js');
+const role = require('../middleware/role.js');
+const { validate } = require('../middleware/validation.js');
 const mongoose = require('mongoose');
-const { cacheConfigs, invalidateProductCache } = require('../middleware/cache');
+const { cacheConfigs, invalidateProductCache } = require('../middleware/cache.js');
+const { ensureDatabaseConnection } = require('../middleware/database.js');
+const { verifyImageExists } = require('../utils/cloudinary.js');
 
-// Get all products with caching
-router.get('/', cacheConfigs.products, async (req, res) => {
+// Get all products with SMART caching (re-enabled with proper invalidation)
+router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req, res) => {
   try {
+    console.log('📦 [Products API] Fetching products with smart caching...');
     const { category, min, max, search, featured, occasions } = req.query;
     let filter = {};
     
@@ -79,11 +82,18 @@ router.get('/', cacheConfigs.products, async (req, res) => {
       ];
     }
     
+    // Add default filter to exclude deleted products
+    filter.isDeleted = { $ne: true };
+    
+    console.log('🔍 [Products API] Filter being applied:', JSON.stringify(filter, null, 2));
+    
     const products = await Product.find(filter)
       .populate('categories', 'name slug')
       .populate('vendors', 'storeName')
       .sort({ isFeatured: -1, createdAt: -1 })
       .limit(100); // Limit results for performance
+      
+    console.log('📦 [Products API] Found products:', products.length);
     
     // Set cache headers for product responses
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // Prevent browser caching
@@ -148,6 +158,55 @@ router.post('/', auth, role('admin'), async (req, res) => {
       }
     }
     
+    // Verify image URLs if images are provided (only for Cloudinary images)
+    if (images && Array.isArray(images) && images.length > 0) {
+      const cloudinaryImages = images.filter(imageId => 
+        typeof imageId === 'string' && imageId.startsWith('keralagiftsonline/products/')
+      );
+      
+      if (cloudinaryImages.length > 0) {
+        console.log(`🔍 [Backend] Verifying ${cloudinaryImages.length} Cloudinary image URLs before product creation...`);
+        console.log(`📋 [Backend] Images to verify:`, cloudinaryImages);
+        
+        // Verify images in parallel for better performance
+        const imageVerificationResults = await Promise.all(
+          cloudinaryImages.map(async (imageId) => {
+            const verification = await verifyImageExists(imageId);
+            return { imageId, ...verification };
+          })
+        );
+        
+        // Check if any images failed verification
+        const failedImages = imageVerificationResults.filter(result => !result.accessible);
+        if (failedImages.length > 0) {
+          console.error('❌ [Backend] Image verification failed:', failedImages);
+          return res.status(400).json({
+            success: false,
+            error: {
+              message: 'Some images are not accessible. Please ensure all images are properly uploaded.',
+              code: 'IMAGE_VERIFICATION_FAILED',
+              details: failedImages.map(img => ({
+                imageId: img.imageId,
+                error: img.error
+              }))
+            }
+          });
+        }
+        
+        console.log('✅ [Backend] All Cloudinary images verified successfully');
+      }
+    }
+    
+    console.log('💾 [Backend] Creating product in database with data:', {
+      name,
+      price,
+      categories: categoryIds,
+      stock: stock || 200,
+      images,
+      defaultImage,
+      imageCount: images?.length || 0
+    });
+    
     const product = await Product.create({ 
       name, 
       description, 
@@ -160,6 +219,14 @@ router.post('/', auth, role('admin'), async (req, res) => {
       isFeatured,
       slug,
       defaultImage
+    });
+    
+    console.log('✅ [Backend] Product created successfully in database:', {
+      productId: product._id,
+      name: product.name,
+      images: product.images,
+      defaultImage: product.defaultImage,
+      status: 'SAVED_TO_DATABASE'
     });
     
     // Log the product creation activity
@@ -179,11 +246,9 @@ router.post('/', auth, role('admin'), async (req, res) => {
     // Create notification for product creation
     try {
       await Notification.create({
-        userId: req.user.id,
+        recipientId: req.user.id,
         title: 'Product Created Successfully',
-        message: `Product "${product.name}" has been created successfully`,
-        type: 'success',
-        relatedEntity: { type: 'Product', id: product._id }
+        message: `Product "${product.name}" has been created successfully`
       });
     } catch (notificationError) {
       console.error('Error creating notification:', notificationError);
@@ -241,7 +306,7 @@ router.post('/', auth, role('admin'), async (req, res) => {
 // Update product (admin only)
 router.put('/:id', auth, role('admin'), async (req, res) => {
   try {
-    const { name, description, price, category, categories, stock, occasions, isFeatured } = req.body;
+    const { name, description, price, category, categories, stock, occasions, isFeatured, images, defaultImage } = req.body;
     
     // Prepare update data
     const updateData = {};
@@ -261,6 +326,65 @@ router.put('/:id', auth, role('admin'), async (req, res) => {
     if (stock !== undefined) updateData.stock = stock;
     if (occasions !== undefined) updateData.occasions = occasions;
     if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
+
+    // Handle images update (supports Cloudinary public IDs)
+    if (Array.isArray(images)) {
+      const cloudinaryImages = images.filter(imageId => 
+        typeof imageId === 'string' && imageId.startsWith('keralagiftsonline/products/')
+      );
+      
+      if (cloudinaryImages.length > 0) {
+        console.log(`🔍 [Backend] Verifying ${cloudinaryImages.length} Cloudinary image URLs before product update...`);
+        console.log(`📋 [Backend] Images to verify for update:`, cloudinaryImages);
+        
+        // Verify images in parallel for better performance
+        const imageVerificationResults = await Promise.all(
+          cloudinaryImages.map(async (imageId) => {
+            const verification = await verifyImageExists(imageId);
+            return { imageId, ...verification };
+          })
+        );
+        
+        // Check if any images failed verification
+        const failedImages = imageVerificationResults.filter(result => !result.accessible);
+        if (failedImages.length > 0) {
+          console.error('❌ [Backend] Image verification failed during update:', failedImages);
+          return res.status(400).json({
+            success: false,
+            error: {
+              message: 'Some images are not accessible. Please ensure all images are properly uploaded.',
+              code: 'IMAGE_VERIFICATION_FAILED',
+              details: failedImages.map(img => ({
+                imageId: img.imageId,
+                error: img.error
+              }))
+            }
+          });
+        }
+        
+        console.log('✅ [Backend] All Cloudinary images verified successfully for update');
+      }
+      
+      updateData.images = images;
+    }
+    if (typeof defaultImage === 'string' && defaultImage.length > 0) {
+      // Verify default image if it's a Cloudinary image
+      if (defaultImage.startsWith('keralagiftsonline/products/')) {
+        const verification = await verifyImageExists(defaultImage);
+        if (!verification.accessible) {
+          console.error('Default image verification failed:', verification);
+          return res.status(400).json({
+            success: false,
+            error: {
+              message: 'Default image is not accessible. Please ensure the image is properly uploaded.',
+              code: 'DEFAULT_IMAGE_VERIFICATION_FAILED',
+              details: { imageId: defaultImage, error: verification.error }
+            }
+          });
+        }
+      }
+      updateData.defaultImage = defaultImage;
+    }
     
     // Handle category update - support both 'category' and 'categories'
     const categoryData = categories || category;

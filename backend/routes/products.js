@@ -82,11 +82,18 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req, res
       ];
     }
     
+    // Add default filter to exclude deleted products
+    filter.isDeleted = { $ne: true };
+    
+    console.log('🔍 [Products API] Filter being applied:', JSON.stringify(filter, null, 2));
+    
     const products = await Product.find(filter)
       .populate('categories', 'name slug')
       .populate('vendors', 'storeName')
       .sort({ isFeatured: -1, createdAt: -1 })
       .limit(100); // Limit results for performance
+      
+    console.log('📦 [Products API] Found products:', products.length);
     
     // Set cache headers for product responses
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // Prevent browser caching

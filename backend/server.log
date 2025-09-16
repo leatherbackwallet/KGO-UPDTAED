@@ -1,0 +1,42 @@
+✅ Environment variables validated successfully
+Cache warming is disabled
+🚀 Server running on port 5001
+📊 Environment: development
+Mongoose connected to MongoDB
+✅ MongoDB connected successfully
+MongoDB connected with connection pooling
+Product images directory initialized
+Superuser creation skipped (CREATE_SUPERUSER not set to true)
+MongoDB connection error: TypeError: scheduleWarmCache is not a function
+    at /Users/josephjames/Projects/KGO/onYourBehlf/backend/dist/server.js:133:5
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2025-09-16T23:30:29.008Z] GET /api/products - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isDeleted": {
+    "$ne": true
+  }
+}
+📦 [Products API] Found products: 56
+[2025-09-16T23:30:29.297Z] GET /api/products - 200 (289ms)
+[2025-09-16T23:31:07.121Z] GET /api/products?_t=1758065467113 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isDeleted": {
+    "$ne": true
+  }
+}
+[2025-09-16T23:31:07.122Z] GET /api/categories - IP: ::1
+[2025-09-16T23:31:07.258Z] GET /api/categories - 200 (136ms)
+📦 [Products API] Found products: 56
+[2025-09-16T23:31:07.412Z] GET /api/products?_t=1758065467113 - 200 (291ms)
+[2025-09-16T23:31:07.627Z] GET /api/products?_t=1758065467623 - IP: ::1
+[2025-09-16T23:31:07.627Z] GET /api/products?_t=1758065467623 - 200 (0ms)
+[2025-09-16T23:31:12.334Z] GET /api/products?featured=true&limit=8 - IP: ::1
+[2025-09-16T23:31:12.334Z] GET /api/products?featured=true&limit=8 - 200 (0ms)
+[2025-09-16T23:31:13.531Z] GET /api/products?_t=1758065473525 - IP: ::1
+[2025-09-16T23:31:13.531Z] GET /api/products?_t=1758065473525 - 200 (0ms)
+[2025-09-16T23:31:13.535Z] GET /api/categories - IP: ::1
+[2025-09-16T23:31:13.536Z] GET /api/categories - 200 (1ms)
+[2025-09-16T23:31:14.031Z] GET /api/products?_t=1758065474028 - IP: ::1
+[2025-09-16T23:31:14.031Z] GET /api/products?_t=1758065474028 - 200 (0ms)

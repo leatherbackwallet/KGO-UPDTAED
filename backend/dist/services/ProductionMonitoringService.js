@@ -407,7 +407,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         return this.metrics.slice(-limit);
     }
     getCurrentMetrics() {
-        return this.metrics.length > 0 ? this.metrics[this.metrics.length - 1] || null : null;
+        return this.metrics.length > 0 ? this.metrics[this.metrics.length - 1] ?? null : null;
     }
     getAlertRules() {
         return [...this.alertRules];
@@ -418,7 +418,21 @@ class ProductionMonitoringService extends events_1.EventEmitter {
             return false;
         const currentRule = this.alertRules[ruleIndex];
         if (currentRule) {
-            this.alertRules[ruleIndex] = { ...currentRule, ...updates };
+            const updatedRule = {
+                id: currentRule.id,
+                name: currentRule.name,
+                metric: currentRule.metric,
+                threshold: currentRule.threshold,
+                operator: currentRule.operator,
+                severity: currentRule.severity,
+                enabled: currentRule.enabled,
+                cooldownPeriod: currentRule.cooldownPeriod,
+                ...updates
+            };
+            if (currentRule.lastTriggered !== undefined) {
+                updatedRule.lastTriggered = currentRule.lastTriggered;
+            }
+            this.alertRules[ruleIndex] = updatedRule;
         }
         return true;
     }
@@ -426,7 +440,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         return [...this.slaTargets];
     }
     getSLACompliance() {
-        return this.slaTargets.map(sla => ({
+        return this.slaTargets.map((sla) => ({
             sla,
             compliance: this.calculateSLACompliance(sla)
         }));
