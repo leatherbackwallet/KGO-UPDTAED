@@ -12,12 +12,12 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "start": "node dist/server.js",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm run dev",
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "cd backend && npm run build",
-    "build:frontend": "cd frontend && npm run build"
+    "build:frontend": "cd frontend && npm run build",
+    "deploy": "./deploy-consolidated.sh",
+    "deploy:setup": "./setup-single-trigger.sh",
+    "deploy:manual": "gcloud builds submit --config=cloudbuild-optimized.yaml ."
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
