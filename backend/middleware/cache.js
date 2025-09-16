@@ -47,8 +47,8 @@ const createCacheMiddleware = (ttl = 300, keyGenerator = null) => {
 
 // Specific cache configurations
 const cacheConfigs = {
-  // Product listings - cache for 30 seconds (reduced from 2 minutes)
-  products: createCacheMiddleware(30, (req) => {
+  // Product listings - cache for 10 seconds (conservative caching)
+  products: createCacheMiddleware(10, (req) => {
     const { search, category, min, max, occasions } = req.query;
     return `products:${search || ''}:${category || ''}:${min || ''}:${max || ''}:${occasions || ''}`;
   }),

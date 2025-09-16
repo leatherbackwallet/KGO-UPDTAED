@@ -16,9 +16,10 @@ const { cacheConfigs, invalidateProductCache } = require('../middleware/cache.js
 const { ensureDatabaseConnection } = require('../middleware/database.js');
 const { verifyImageExists } = require('../utils/cloudinary.js');
 
-// Get all products with caching
+// Get all products with SMART caching (re-enabled with proper invalidation)
 router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req, res) => {
   try {
+    console.log('📦 [Products API] Fetching products with smart caching...');
     const { category, min, max, search, featured, occasions } = req.query;
     let filter = {};
     
