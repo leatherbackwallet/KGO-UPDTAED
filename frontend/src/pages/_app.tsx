@@ -52,21 +52,8 @@ export default function App({ Component, pageProps }: AppProps) {
     );
   }
 
-  // For other pages, use context providers but only after hydration
-  if (!isClient) {
-    // Server-side rendering: minimal structure without context providers
-    return (
-      <ErrorBoundary>
-        <div className="flex flex-col min-h-screen">
-          <main className="flex-grow">
-            <Component {...pageProps} />
-          </main>
-        </div>
-      </ErrorBoundary>
-    );
-  }
-
-  // Client-side rendering: full structure with context providers
+  // Always wrap with AuthProvider to prevent context errors
+  // The AuthProvider handles SSR/client differences internally
   return (
     <ErrorBoundary>
       <AuthProvider>
@@ -76,9 +63,9 @@ export default function App({ Component, pageProps }: AppProps) {
               <main className="flex-grow">
                 <Component {...pageProps} />
               </main>
-              <Footer />
+              {isClient && <Footer />}
             </div>
-            <WhatsAppButton />
+            {isClient && <WhatsAppButton />}
           </WishlistProvider>
         </CartProvider>
       </AuthProvider>

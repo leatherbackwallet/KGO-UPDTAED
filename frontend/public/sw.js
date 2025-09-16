@@ -3,9 +3,14 @@
  * Provides advanced caching for product images and offline support
  */
 
-const CACHE_NAME = 'kgo-product-images-v1';
-const IMAGE_CACHE_NAME = 'kgo-images-v1';
-const API_CACHE_NAME = 'kgo-api-v1';
+const CACHE_NAME = 'kgo-product-images-v2';
+const IMAGE_CACHE_NAME = 'kgo-images-v2';
+const API_CACHE_NAME = 'kgo-api-v2';
+
+// Conservative caching settings
+const CACHE_EXPIRY_TIME = 1000 * 60 * 60 * 2; // 2 hours for API responses
+const IMAGE_CACHE_EXPIRY = 1000 * 60 * 60 * 24; // 24 hours for images
+const MAX_CACHE_ENTRIES = 50; // Limit cache size
 
 // Files to cache on install
 const STATIC_FILES = [

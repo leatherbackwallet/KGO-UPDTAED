@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
-import ProductSkeleton from '../components/ProductSkeleton';
+import ProductSkeleton, { ProductSkeletonGrid } from '../components/ProductSkeleton';
 import QuickViewModal from '../components/QuickViewModal';
 import api from '../utils/api';
 import { Product } from '../types/product';
@@ -14,8 +14,10 @@ export default function Home() {
   const [error, setError] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showQuickView, setShowQuickView] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     fetchProducts();
   }, []);
 
@@ -171,12 +173,9 @@ export default function Home() {
               <p className="text-xl text-green-700">Discover our most popular traditional items</p>
             </div>
 
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {[...Array(8)].map((_, i) => (
-                  <ProductSkeleton key={i} />
-                ))}
-              </div>
+            {!isClient || loading ? (
+              // Professional skeleton loading for consistent SSR/CSR experience
+              <ProductSkeletonGrid count={8} />
             ) : error ? (
               <div className="text-center py-16">
                 <div className="text-red-500 mb-6">

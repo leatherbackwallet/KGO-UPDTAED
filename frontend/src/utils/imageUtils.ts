@@ -194,4 +194,97 @@ export function generateSlug(name: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .trim();
+}
+
+/**
+ * Preload images for better UX - Professional ecommerce pattern
+ * @param imagePaths - Array of image paths to preload
+ * @param priority - High priority images load first
+ */
+export function preloadImages(imagePaths: string[], priority: 'high' | 'low' = 'low'): Promise<void[]> {
+  const preloadPromises = imagePaths.map((imagePath) => {
+    return new Promise<void>((resolve, reject) => {
+      const img = new Image();
+      
+      // Set loading priority based on browser support
+      if ('loading' in img) {
+        img.loading = priority === 'high' ? 'eager' : 'lazy';
+      }
+      
+      img.onload = () => {
+        console.log(`✅ Preloaded image: ${imagePath}`);
+        resolve();
+      };
+      
+      img.onerror = (error) => {
+        console.warn(`⚠️ Failed to preload image: ${imagePath}`, error);
+        resolve(); // Don't reject, just log and continue
+      };
+      
+      img.src = imagePath;
+    });
+  });
+  
+  return Promise.all(preloadPromises);
+}
+
+/**
+ * Create progressive image loading with placeholder
+ * @param imagePath - Main image path
+ * @param placeholderPath - Placeholder image path
+ * @returns Object with progressive loading states
+ */
+export function createProgressiveImageLoader(imagePath: string, placeholderPath?: string) {
+  return {
+    src: placeholderPath || DEFAULT_PRODUCT_IMAGE,
+    dataSrc: imagePath,
+    loading: 'lazy' as const,
+    onLoad: (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const img = e.target as HTMLImageElement;
+      if (img.dataset.src && img.src !== img.dataset.src) {
+        img.src = img.dataset.src;
+        img.classList.add('loaded');
+      }
+    },
+    onError: (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const img = e.target as HTMLImageElement;
+      if (img.src !== DEFAULT_PRODUCT_IMAGE) {
+        img.src = DEFAULT_PRODUCT_IMAGE;
+      }
+    }
+  };
+}
+
+/**
+ * Batch preload product images for current page
+ * Standard ecommerce practice - preload visible + next batch
+ */
+export function preloadProductImages(products: any[], currentPage: number, productsPerPage: number) {
+  // Calculate which images to preload
+  const startIndex = 0;
+  const endIndex = Math.min((currentPage + 1) * productsPerPage, products.length);
+  const visibleProducts = products.slice(startIndex, endIndex);
+  
+  // Extract image paths
+  const imagePaths = visibleProducts
+    .map(product => product.images?.[0] || product.defaultImage)
+    .filter(Boolean)
+    .map(imagePath => getOptimizedImagePath(imagePath, 'medium'));
+  
+  // Preload with high priority for current page, low for next batch
+  const currentPageEnd = currentPage * productsPerPage;
+  const currentPageImages = imagePaths.slice(0, currentPageEnd);
+  const nextBatchImages = imagePaths.slice(currentPageEnd);
+  
+  // Preload current page images with high priority
+  if (currentPageImages.length > 0) {
+    preloadImages(currentPageImages, 'high');
+  }
+  
+  // Preload next batch with low priority
+  if (nextBatchImages.length > 0) {
+    setTimeout(() => {
+      preloadImages(nextBatchImages, 'low');
+    }, 1000); // Delay to not block current page rendering
+  }
 } 
