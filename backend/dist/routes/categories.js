@@ -7,7 +7,7 @@ const express_1 = __importDefault(require("express"));
 const categories_model_1 = require("../models/categories.model");
 const database_1 = require("../middleware/database");
 const { cacheConfigs } = require('../middleware/cache');
-const { deduplicateRequests } = require('../middleware/requestBatching');
+const { deduplicateRequests } = require('../middleware/requestBatching.js');
 const router = express_1.default.Router();
 router.get('/', deduplicateRequests(), cacheConfigs.categories, database_1.ensureDatabaseConnection, async (req, res) => {
     try {

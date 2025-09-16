@@ -407,7 +407,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         return this.metrics.slice(-limit);
     }
     getCurrentMetrics() {
-        return this.metrics.length > 0 ? this.metrics[this.metrics.length - 1] : null;
+        return this.metrics.length > 0 ? this.metrics[this.metrics.length - 1] || null : null;
     }
     getAlertRules() {
         return [...this.alertRules];
@@ -416,7 +416,10 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         const ruleIndex = this.alertRules.findIndex(r => r.id === ruleId);
         if (ruleIndex === -1)
             return false;
-        this.alertRules[ruleIndex] = { ...this.alertRules[ruleIndex], ...updates };
+        const currentRule = this.alertRules[ruleIndex];
+        if (currentRule) {
+            this.alertRules[ruleIndex] = { ...currentRule, ...updates };
+        }
         return true;
     }
     getSLATargets() {

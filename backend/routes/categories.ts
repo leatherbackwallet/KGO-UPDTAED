@@ -2,7 +2,7 @@ import express from 'express';
 import { Category } from '../models/categories.model';
 import { ensureDatabaseConnection } from '../middleware/database';
 const { cacheConfigs } = require('../middleware/cache');
-const { deduplicateRequests } = require('../middleware/requestBatching');
+const { deduplicateRequests } = require('../middleware/requestBatching.js');
 
 const router = express.Router();
 

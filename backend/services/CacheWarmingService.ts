@@ -292,7 +292,7 @@ class CacheWarmingService {
           results.push(result.value);
         } else {
           results.push({
-            endpoint: batch[index].url,
+            endpoint: batch[index]?.url || 'unknown',
             success: false,
             responseTime: 0,
             error: result.reason?.message || 'Unknown error',
@@ -326,7 +326,7 @@ class CacheWarmingService {
             'Cache-Control': 'no-cache',
             ...endpoint.headers
           },
-          body: endpoint.body ? JSON.stringify(endpoint.body) : undefined,
+          body: endpoint.body ? JSON.stringify(endpoint.body) : null,
           signal: AbortSignal.timeout(this.config.timeout)
         });
         
@@ -467,7 +467,7 @@ class CacheWarmingService {
       : 0;
     
     const lastWarmingTime = this.warmingHistory.length > 0
-      ? this.warmingHistory[this.warmingHistory.length - 1].timestamp
+      ? this.warmingHistory[this.warmingHistory.length - 1]?.timestamp || null
       : null;
     
     return {

@@ -68,7 +68,12 @@ declare class ProductionMonitoringService extends EventEmitter {
     getSLATargets(): SLATarget[];
     getSLACompliance(): Array<{
         sla: SLATarget;
-        compliance: ReturnType<typeof this.calculateSLACompliance>;
+        compliance: {
+            isViolated: boolean;
+            currentValue: number;
+            targetValue: number;
+            compliancePercentage: number;
+        };
     }>;
     getBenchmarks(): PerformanceBenchmark[];
     getHealthStatus(): {

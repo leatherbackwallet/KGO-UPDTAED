@@ -53,7 +53,7 @@ class ProductionMonitoringService extends EventEmitter {
   private slaTargets: SLATarget[] = [];
   private benchmarks: Map<string, PerformanceBenchmark> = new Map();
   private isMonitoring: boolean = false;
-  private monitoringInterval?: NodeJS.Timeout;
+  private monitoringInterval?: NodeJS.Timeout | undefined;
 
   constructor() {
     super();
@@ -532,7 +532,7 @@ class ProductionMonitoringService extends EventEmitter {
   }
 
   public getCurrentMetrics(): MonitoringMetrics | null {
-    return this.metrics.length > 0 ? this.metrics[this.metrics.length - 1] : null;
+    return this.metrics.length > 0 ? this.metrics[this.metrics.length - 1] || null : null;
   }
 
   public getAlertRules(): AlertRule[] {
@@ -543,7 +543,10 @@ class ProductionMonitoringService extends EventEmitter {
     const ruleIndex = this.alertRules.findIndex(r => r.id === ruleId);
     if (ruleIndex === -1) return false;
 
-    this.alertRules[ruleIndex] = { ...this.alertRules[ruleIndex], ...updates };
+    const currentRule = this.alertRules[ruleIndex];
+    if (currentRule) {
+      this.alertRules[ruleIndex] = { ...currentRule, ...updates };
+    }
     return true;
   }
 
@@ -553,7 +556,12 @@ class ProductionMonitoringService extends EventEmitter {
 
   public getSLACompliance(): Array<{
     sla: SLATarget;
-    compliance: ReturnType<typeof this.calculateSLACompliance>;
+    compliance: {
+      isViolated: boolean;
+      currentValue: number;
+      targetValue: number;
+      compliancePercentage: number;
+    };
   }> {
     return this.slaTargets.map(sla => ({
       sla,

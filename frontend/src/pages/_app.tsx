@@ -1,61 +1,53 @@
-import React, { useEffect, useState } from 'react';
+import React, { Component, ReactNode, useState, useEffect } from 'react';
 import type { AppProps } from 'next/app';
 import { AuthProvider } from '../context/AuthContext';
 import { CartProvider } from '../context/CartContext';
 import { WishlistProvider } from '../context/WishlistContext';
-import ErrorBoundary from '../components/ErrorBoundary';
 import WhatsAppButton from '../components/WhatsAppButton';
 import Footer from '../components/Footer';
 import '../styles/globals.css';
 
-// Register service worker for caching
-function registerServiceWorker() {
-  if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then((registration) => {
-          console.log('Service Worker registered successfully:', registration);
-        })
-        .catch((error) => {
-          console.log('Service Worker registration failed:', error);
-        });
-    });
+// Simple ErrorBoundary without complex dependencies
+class SimpleErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean}> {
+  constructor(props: {children: ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
   }
-}
 
-// Check if this is a static error page that shouldn't use context
-function isStaticErrorPage(Component: any) {
-  return Component.name === 'Custom404' || Component.name === 'Custom500';
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1>
+            <button 
+              onClick={() => this.setState({ hasError: false })}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
 export default function App({ Component, pageProps }: AppProps) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Only register service worker on client side
-    if (typeof window !== 'undefined') {
-      registerServiceWorker();
-      setIsClient(true);
-    }
+    setIsClient(true);
   }, []);
 
-  // For static error pages, render without context providers
-  if (isStaticErrorPage(Component)) {
-    return (
-      <ErrorBoundary>
-        <div className="flex flex-col min-h-screen">
-          <main className="flex-grow">
-            <Component {...pageProps} />
-          </main>
-        </div>
-      </ErrorBoundary>
-    );
-  }
-
-  // Always wrap with AuthProvider to prevent context errors
-  // The AuthProvider handles SSR/client differences internally
   return (
-    <ErrorBoundary>
+    <SimpleErrorBoundary>
       <AuthProvider>
         <CartProvider>
           <WishlistProvider>
@@ -69,6 +61,6 @@ export default function App({ Component, pageProps }: AppProps) {
           </WishlistProvider>
         </CartProvider>
       </AuthProvider>
-    </ErrorBoundary>
+    </SimpleErrorBoundary>
   );
 }
