@@ -29,7 +29,7 @@ resources:
   memory_gb: 2
   disk_size_gb: 10
 
-entrypoint: node frontend/server.js
+entrypoint: node server.js
 
 handlers:
   # Health check endpoint

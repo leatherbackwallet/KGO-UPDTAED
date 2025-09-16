@@ -4,18 +4,16 @@ FROM node:20-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy root package.json and workspace configuration
-COPY package*.json ./
-COPY backend/package*.json ./backend/
+# Copy backend package.json first for better Docker layer caching
+COPY backend/package*.json ./
 
 # Install dependencies
-RUN npm ci --workspace=backend
+RUN npm ci
 
 # Copy source code
-COPY backend/ ./backend/
+COPY backend/ ./
 
 # Build the application
-WORKDIR /app/backend
 RUN npm run build
 
 # Production stage
@@ -35,8 +33,8 @@ COPY backend/package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
-COPY --from=builder /app/backend/dist ./dist
-COPY --from=builder /app/backend/public ./public
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/public ./public
 
 # Change ownership to nodejs user
 RUN chown -R nodejs:nodejs /app
