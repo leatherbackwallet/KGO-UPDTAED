@@ -654,3 +654,9 @@ export default function Profile() {
     </>
   );
 } 
+// Disable static generation for this page
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
+}

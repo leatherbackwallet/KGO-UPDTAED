@@ -141,3 +141,10 @@ export default function Login() {
     </div>
   );
 }
+
+// Disable static generation for this page
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
+}

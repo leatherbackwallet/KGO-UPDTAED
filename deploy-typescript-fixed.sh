@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Fixed Google Cloud Platform Deployment Script for OnYourBehlf
-# This script deploys both frontend and backend to Google App Engine with proper build handling
+# TypeScript Fixed Google Cloud Platform Deployment Script for OnYourBehlf
+# This script builds everything locally with proper TypeScript types and deploys
 
 set -e  # Exit on any error
 
@@ -24,7 +24,7 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-print_status "🚀 Starting Fixed Google Cloud Platform Deployment..."
+print_status "🚀 Starting TypeScript Fixed Google Cloud Platform Deployment..."
 
 # Check if gcloud is installed
 if ! command -v gcloud &> /dev/null; then
@@ -61,18 +61,31 @@ rm -rf backend/dist
 rm -rf frontend/.next
 rm -rf frontend/out
 
-# Build applications locally first to ensure they work
-print_status "🔧 Building backend locally..."
+# Build applications locally with proper TypeScript types
+print_status "🔧 Building backend with TypeScript types..."
 cd backend
 npm install
 npm run build
 cd ..
 
-print_status "🎨 Building frontend locally..."
+print_status "🎨 Building frontend..."
 cd frontend
 npm install
 npm run build
 cd ..
+
+# Verify builds exist
+if [ ! -d "backend/dist" ]; then
+    print_error "Backend build failed - dist directory not found"
+    exit 1
+fi
+
+if [ ! -d "frontend/.next" ]; then
+    print_error "Frontend build failed - .next directory not found"
+    exit 1
+fi
+
+print_status "✅ Local builds completed successfully with TypeScript types!"
 
 # Deploy backend (api service) first
 print_status "🔧 Deploying backend to App Engine (api service)..."
@@ -96,3 +109,4 @@ print_status "   Frontend logs: gcloud app logs tail -s default"
 print_status ""
 print_status "🔍 To monitor your app:"
 print_status "   gcloud app browse"
+

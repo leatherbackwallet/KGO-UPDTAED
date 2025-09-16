@@ -22,8 +22,7 @@ export default function Home() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      setError('');
-      const response = await api.get(`/products?featured=true&limit=8&_t=${Date.now()}`);
+      const response = await api.get(`/products?featured=true&limit=8`);
       const productsData = response.data?.data || response.data || [];
       setProducts(Array.isArray(productsData) ? productsData : []);
     } catch (err: any) {
@@ -48,9 +47,9 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>KeralGiftsOnline - Premium Gifts & Celebrations</title>
-        <meta name="description" content="Discover premium quality gifts, cakes, flowers, and celebration items. Fast delivery across Kerala with our advanced logistics network." />
-        <meta name="keywords" content="gifts, cakes, flowers, celebrations, Kerala, online shopping" />
+        <title>KeralGiftsOnline - Premium Gifts & Traditional Products</title>
+        <meta name="description" content="Discover premium quality gifts, traditional products, and authentic Kerala items. Fast delivery across Kerala with our advanced logistics network." />
+        <meta name="keywords" content="gifts, traditional products, Kerala, online shopping, authentic items" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
@@ -89,7 +88,7 @@ export default function Home() {
               </h1>
               <p className="text-xl md:text-2xl mb-8 text-green-100 leading-relaxed">
                 Premium quality gifts with fast delivery across Kerala.<br />
-                <span className="text-yellow-200 font-medium">Festive celebrations made special</span>
+                <span className="text-yellow-200 font-medium">Traditional products made special</span>
               </p>
             </div>
 
@@ -126,7 +125,7 @@ export default function Home() {
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-green-900 mb-4">Why Choose KeralGiftsOnline?</h2>
               <p className="text-xl text-green-700 max-w-3xl mx-auto">
-                We bring the spirit of Kerala's celebrations to your doorstep with premium quality and exceptional service
+                We bring the spirit of Kerala's culture to your doorstep with premium quality and exceptional service
               </p>
             </div>
             
@@ -148,7 +147,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <h3 className="text-2xl font-bold text-green-900 mb-4">Premium Quality</h3>
-                <p className="text-green-700 leading-relaxed">Handpicked selection of the finest gifts, cakes, and celebration items</p>
+                <p className="text-green-700 leading-relaxed">Handpicked selection of the finest gifts and traditional products</p>
               </div>
               
               <div className="group text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
@@ -158,7 +157,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <h3 className="text-2xl font-bold text-green-900 mb-4">Personal Touch</h3>
-                <p className="text-green-700 leading-relaxed">Personalized service and custom gift arrangements for every celebration</p>
+                <p className="text-green-700 leading-relaxed">Personalized service and custom gift arrangements for every occasion</p>
               </div>
             </div>
           </div>
@@ -169,7 +168,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-green-900 mb-4">Featured Products</h2>
-              <p className="text-xl text-green-700">Discover our most popular celebration items</p>
+              <p className="text-xl text-green-700">Discover our most popular traditional items</p>
             </div>
 
             {loading ? (
@@ -187,20 +186,12 @@ export default function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-green-900 mb-4">Error Loading Products</h3>
                 <p className="text-green-700 mb-6">{error}</p>
-                <div className="flex gap-4 justify-center">
-                  <button
-                    onClick={fetchProducts}
-                    className="bg-green-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-700 transition-colors"
-                  >
-                    Try Again
-                  </button>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors"
-                  >
-                    Refresh Page
-                  </button>
-                </div>
+                <button
+                  onClick={fetchProducts}
+                  className="bg-green-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-700 transition-colors"
+                >
+                  Try Again
+                </button>
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-16">
@@ -257,7 +248,7 @@ export default function Home() {
                 Celebrate Onam with Us
               </h2>
               <p className="text-xl text-green-100 mb-8 max-w-3xl mx-auto leading-relaxed">
-                Join thousands of happy customers who trust us for their celebrations. 
+                Join thousands of happy customers who trust us for their gift needs. 
                 From traditional to modern, we have everything you need to make your Onam special.
               </p>
             </div>
@@ -314,4 +305,11 @@ export default function Home() {
       `}</style>
     </>
   );
+}
+
+// Disable static generation for this page
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
 }

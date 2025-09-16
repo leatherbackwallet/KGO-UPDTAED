@@ -75,6 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [tokens, setTokens] = useState<TokenPair | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Check if token is expired
   const isTokenExpired = (expiry: number): boolean => {
@@ -126,10 +127,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         safeLocalStorage.removeItem('user');
       } finally {
         setIsLoading(false);
+        setIsHydrated(true);
       }
     };
 
-    initializeAuth();
+    // Only initialize on client side
+    if (typeof window !== 'undefined') {
+      initializeAuth();
+    } else {
+      setIsLoading(false);
+      setIsHydrated(true);
+    }
   }, []);
 
   const login = (tokenPair: TokenPair, userData: User) => {

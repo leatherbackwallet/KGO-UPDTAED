@@ -22,3 +22,9 @@ const SubscriptionPage: React.FC = () => {
 };
 
 export default SubscriptionPage; 
+// Disable static generation for this page
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
+}

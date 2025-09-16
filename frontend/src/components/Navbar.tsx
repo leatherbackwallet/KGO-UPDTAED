@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const { cart } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
@@ -36,7 +41,7 @@ export default function Navbar() {
             <Link href="/content" className="nav-link">
               Cultural Content
             </Link>
-            {user?.roleName === 'admin' && (
+            {isHydrated && user?.roleName === 'admin' && (
               <Link href="/subscription" className="nav-link">
                 Subscription
               </Link>
@@ -61,59 +66,66 @@ export default function Navbar() {
             </Link>
 
             {/* User Menu */}
-            {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex items-center space-x-2 nav-link"
-                >
-                  <div className="w-8 h-8 bg-kgo-red rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">
-                      {user.firstName?.charAt(0) || user.email?.charAt(0) || 'U'}
-                    </span>
-                  </div>
-                   <span className="hidden sm:block">{(user.firstName && user.lastName) ? `${user.firstName} ${user.lastName}` : user.email}</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+            <div className="flex items-center space-x-2">
+              {!isHydrated || isLoading ? (
+                <>
+                  <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="hidden sm:block w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+                </>
+              ) : user ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="flex items-center space-x-2 nav-link"
+                  >
+                    <div className="w-8 h-8 bg-kgo-red rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-medium">
+                        {user.firstName?.charAt(0) || user.email?.charAt(0) || 'U'}
+                      </span>
+                    </div>
+                     <span className="hidden sm:block">{(user.firstName && user.lastName) ? `${user.firstName} ${user.lastName}` : user.email}</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
 
-                {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                    <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Profile
-                    </Link>
-                    <Link href="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      My Orders
-                    </Link>
-                    <Link href="/wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Wishlist
-                    </Link>
-                    {user.roleName === 'admin' && (
-                      <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        Admin Dashboard
+                  {isMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                      <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Profile
                       </Link>
-                    )}
-                    <hr className="my-1" />
-                    <button
-                      onClick={logout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Link href="/login" className="text-gray-700 hover:text-purple-600 transition-colors">
-                  Login
-                </Link>
-                <Link href="/register" className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                  Register
-                </Link>
-              </div>
-            )}
+                      <Link href="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        My Orders
+                      </Link>
+                      <Link href="/wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Wishlist
+                      </Link>
+                      {user.roleName === 'admin' && (
+                        <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <hr className="my-1" />
+                      <button
+                        onClick={logout}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <Link href="/login" className="text-gray-700 hover:text-purple-600 transition-colors">
+                    Login
+                  </Link>
+                  <Link href="/register" className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                    Register
+                  </Link>
+                </>
+              )}
+            </div>
 
             {/* Mobile menu button */}
             <button
@@ -128,26 +140,28 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
-            <div className="flex flex-col space-y-4">
-              <Link href="/products" className="text-gray-700 hover:text-purple-600 transition-colors">
-                Products
-              </Link>
-              <Link href="/content" className="text-gray-700 hover:text-purple-600 transition-colors">
-                Cultural Content
-              </Link>
-              {user?.roleName === 'admin' && (
-                <Link href="/subscription" className="text-gray-700 hover:text-purple-600 transition-colors">
-                  Subscription
+        <div className="md:hidden">
+          {isMenuOpen && (
+            <div className="border-t border-gray-200 py-4">
+              <div className="flex flex-col space-y-4">
+                <Link href="/products" className="text-gray-700 hover:text-purple-600 transition-colors">
+                  Products
                 </Link>
-              )}
-              <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors">
-                About
-              </Link>
+                <Link href="/content" className="text-gray-700 hover:text-purple-600 transition-colors">
+                  Cultural Content
+                </Link>
+                {isHydrated && user?.roleName === 'admin' && (
+                  <Link href="/subscription" className="text-gray-700 hover:text-purple-600 transition-colors">
+                    Subscription
+                  </Link>
+                )}
+                <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors">
+                  About
+                </Link>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </nav>
   );

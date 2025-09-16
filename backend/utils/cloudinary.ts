@@ -187,4 +187,85 @@ export async function listImages(
   });
 }
 
+/**
+ * Verify that an image exists and is accessible on Cloudinary
+ * @param public_id - Cloudinary public ID
+ * @param maxRetries - Maximum number of retry attempts
+ * @returns Promise with verification result
+ */
+export async function verifyImageExists(public_id: string, maxRetries: number = 3): Promise<{
+  exists: boolean;
+  accessible: boolean;
+  error?: string;
+}> {
+  // First, check if the image exists in Cloudinary
+  console.log(`🔍 [Backend] Checking if image exists in Cloudinary: ${public_id}`);
+  try {
+    const resource = await cloudinary.api.resource(public_id);
+    if (!resource) {
+      console.log(`❌ [Backend] Image not found in Cloudinary: ${public_id}`);
+      return {
+        exists: false,
+        accessible: false,
+        error: 'Image not found in Cloudinary'
+      };
+    }
+    console.log(`✅ [Backend] Image exists in Cloudinary: ${public_id}`);
+  } catch (apiError) {
+    console.error(`❌ [Backend] Cloudinary API error for ${public_id}:`, apiError);
+    return {
+      exists: false,
+      accessible: false,
+      error: `Cloudinary API error: ${apiError}`
+    };
+  }
+
+  // Now verify the image URL is accessible with retry logic
+  const imageUrl = cloudinary.url(public_id, { secure: true });
+  console.log(`🌐 [Backend] Verifying image URL accessibility: ${imageUrl}`);
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🔄 [Backend] Attempt ${attempt}/${maxRetries} - Checking URL accessibility...`);
+      const response = await fetch(imageUrl, { 
+        method: 'HEAD',
+        // Add timeout to prevent hanging
+        signal: AbortSignal.timeout(10000)
+      });
+      
+      if (response.ok) {
+        console.log(`✅ [Backend] Image ${public_id} verified successfully on attempt ${attempt}`);
+        return {
+          exists: true,
+          accessible: true
+        };
+      }
+      
+      console.log(`⚠️ [Backend] Image ${public_id} not accessible on attempt ${attempt}: HTTP ${response.status}`);
+      
+      // If not the last attempt, wait before retrying
+      if (attempt < maxRetries) {
+        const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s
+        console.log(`⏳ [Backend] Retrying image verification in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    } catch (fetchError) {
+      console.log(`❌ [Backend] Image ${public_id} verification attempt ${attempt} failed:`, fetchError);
+      
+      // If not the last attempt, wait before retrying
+      if (attempt < maxRetries) {
+        const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s
+        console.log(`⏳ [Backend] Retrying image verification in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  return {
+    exists: true,
+    accessible: false,
+    error: `Image exists but not accessible after ${maxRetries} attempts`
+  };
+}
+
 export default cloudinary;

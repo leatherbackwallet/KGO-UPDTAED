@@ -107,3 +107,9 @@ const ContentPage: React.FC = () => {
 };
 
 export default ContentPage; 
+// Disable static generation for this page
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
+}

@@ -23,8 +23,8 @@ export default function Document() {
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://keralgiftsonline.in/" />
-        <meta property="og:title" content="KeralGiftsOnline - Premium Gifts & Celebrations" />
-        <meta property="og:description" content="Discover premium quality gifts, cakes, flowers, and celebration items. Fast delivery across Kerala with our advanced logistics network." />
+        <meta property="og:title" content="KeralGiftsOnline - Premium Gifts & Traditional Products" />
+        <meta property="og:description" content="Discover premium quality gifts, traditional products, and authentic Kerala items. Fast delivery across Kerala with our advanced logistics network." />
         <meta property="og:image" content="https://keralgiftsonline.in/images/og-image.jpg" />
         <meta property="og:site_name" content="KeralGiftsOnline" />
         <meta property="og:locale" content="en_US" />
@@ -32,8 +32,8 @@ export default function Document() {
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content="https://keralgiftsonline.in/" />
-        <meta property="twitter:title" content="KeralGiftsOnline - Premium Gifts & Celebrations" />
-        <meta property="twitter:description" content="Discover premium quality gifts, cakes, flowers, and celebration items. Fast delivery across Kerala with our advanced logistics network." />
+        <meta property="twitter:title" content="KeralGiftsOnline - Premium Gifts & Traditional Products" />
+        <meta property="twitter:description" content="Discover premium quality gifts, traditional products, and authentic Kerala items. Fast delivery across Kerala with our advanced logistics network." />
         <meta property="twitter:image" content="https://keralgiftsonline.in/images/og-image.jpg" />
         
         {/* Additional Meta Tags */}
@@ -59,7 +59,7 @@ export default function Document() {
               "name": "KeralGiftsOnline",
               "url": "https://keralgiftsonline.in",
               "logo": "https://keralgiftsonline.in/favicon.svg",
-              "description": "Premium quality gifts, cakes, flowers, and celebration items with fast delivery across Kerala",
+              "description": "Premium quality gifts, traditional products, and authentic Kerala items with fast delivery across Kerala",
               "address": {
                 "@type": "PostalAddress",
                 "addressCountry": "IN",
@@ -85,3 +85,5 @@ export default function Document() {
     </Html>
   );
 }
+
+// Disable static generation for this page

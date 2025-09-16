@@ -1,43 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const { Product } = require('../dist/models/products.model.js');
-const { Category } = require('../dist/models/categories.model.js');
-const { ActivityLog } = require('../dist/models/activityLogs.model.js');
-const { ProductAttribute } = require('../dist/models/productAttributes.model.js');
-const { VendorProduct } = require('../dist/models/vendorProducts.model.js');
-const { Review } = require('../dist/models/reviews.model.js');
-const { Wishlist } = require('../dist/models/wishlists.model.js');
-const { Notification } = require('../dist/models/notifications.model.js');
+const { Product } = require('../models/products.model.js');
+const { Category } = require('../models/categories.model.js');
+const { ActivityLog } = require('../models/activityLogs.model.js');
+const { ProductAttribute } = require('../models/productAttributes.model.js');
+const { VendorProduct } = require('../models/vendorProducts.model.js');
+const { Review } = require('../models/reviews.model.js');
+const { Wishlist } = require('../models/wishlists.model.js');
+const { Notification } = require('../models/notifications.model.js');
 const auth = require('../middleware/auth.js');
 const role = require('../middleware/role.js');
 const { validate } = require('../middleware/validation.js');
 const mongoose = require('mongoose');
 const { cacheConfigs, invalidateProductCache } = require('../middleware/cache.js');
 const { ensureDatabaseConnection } = require('../middleware/database.js');
-const { validateComboProduct, sanitizeComboProduct } = require('../utils/comboValidation.js');
-const { 
-  deduplicateRequests, 
-  batchRelatedData, 
-  enhanceProductsWithBatchLoading,
-  queueRequests 
-} = require('../middleware/requestBatching.js');
+const { verifyImageExists } = require('../utils/cloudinary.js');
 
-// Get all products with caching, deduplication, and batching
-router.get('/', 
-  deduplicateRequests(),
-  queueRequests({ priority: 'normal' }),
-  cacheConfigs.products, 
-  ensureDatabaseConnection,
-  batchRelatedData({ batchSize: 10, batchTimeout: 100 }),
-  enhanceProductsWithBatchLoading,
-  async (req, res) => {
+// Get all products with caching
+router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req, res) => {
   try {
-    // Check if batch loading already processed the request
-    if (req.batchedData) {
-      return res.json(req.batchedData);
-    }
-
-    // Fallback to original logic if batch loading didn't handle it
     const { category, min, max, search, featured, occasions } = req.query;
     let filter = {};
     
@@ -74,7 +55,7 @@ router.get('/',
           filter.categories = categoryDoc._id;
         } else {
           // If category not found, return empty results
-          return res.json({ success: true, data: [], count: 0 });
+          return res.json([]);
         }
       }
     }
@@ -106,6 +87,12 @@ router.get('/',
       .sort({ isFeatured: -1, createdAt: -1 })
       .limit(100); // Limit results for performance
     
+    // Set cache headers for product responses
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // Prevent browser caching
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('ETag', `"products-${products.length}-${Date.now()}"`);
+    
     res.json({
       success: true,
       data: products,
@@ -120,65 +107,21 @@ router.get('/',
   }
 });
 
-// Get single product with caching and deduplication
-router.get('/:id', 
-  deduplicateRequests(),
-  cacheConfigs.product, 
-  ensureDatabaseConnection, 
-  async (req, res) => {
+// Get single product
+router.get('/:id', async (req, res) => {
   try {
-    // Validate ObjectId format
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: { message: 'Invalid product ID format', code: 'INVALID_ID' } 
-      });
-    }
-
-    const product = await Product.findById(req.params.id)
-      .populate('categories', 'name slug')
-      .populate('vendors', 'storeName');
-    
-    if (!product) {
-      return res.status(404).json({ 
-        success: false, 
-        error: { message: 'Product not found', code: 'PRODUCT_NOT_FOUND' } 
-      });
-    }
-    
-    res.json({
-      success: true,
-      data: product
-    });
+    const product = await Product.findById(req.params.id).populate('categories', 'name slug').populate('vendors', 'storeName');
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json(product);
   } catch (err) {
-    console.error('Single product fetch error:', err);
-    res.status(500).json({ 
-      success: false,
-      error: { message: 'Failed to fetch product', code: 'FETCH_ERROR' } 
-    });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Create product (admin only)
 router.post('/', auth, role('admin'), async (req, res) => {
   try {
-    const { name, description, price, categories, stock, images, occasions, vendors, isFeatured, slug, defaultImage, isCombo, comboBasePrice, comboItems } = req.body;
-    
-    // Validate combo product data
-    const comboValidation = validateComboProduct({ isCombo, comboBasePrice, comboItems });
-    if (!comboValidation.isValid) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'Combo product validation failed',
-          code: 'COMBO_VALIDATION_ERROR',
-          details: comboValidation.errors
-        }
-      });
-    }
-    
-    // Sanitize combo product data
-    const sanitizedData = sanitizeComboProduct({ isCombo, comboBasePrice, comboItems });
+    const { name, description, price, categories, stock, images, occasions, vendors, isFeatured, slug, defaultImage } = req.body;
     
     // Handle categories - could be array of ObjectIds or slugs
     let categoryIds = categories;
@@ -207,6 +150,55 @@ router.post('/', auth, role('admin'), async (req, res) => {
       }
     }
     
+    // Verify image URLs if images are provided (only for Cloudinary images)
+    if (images && Array.isArray(images) && images.length > 0) {
+      const cloudinaryImages = images.filter(imageId => 
+        typeof imageId === 'string' && imageId.startsWith('keralagiftsonline/products/')
+      );
+      
+      if (cloudinaryImages.length > 0) {
+        console.log(`🔍 [Backend] Verifying ${cloudinaryImages.length} Cloudinary image URLs before product creation...`);
+        console.log(`📋 [Backend] Images to verify:`, cloudinaryImages);
+        
+        // Verify images in parallel for better performance
+        const imageVerificationResults = await Promise.all(
+          cloudinaryImages.map(async (imageId) => {
+            const verification = await verifyImageExists(imageId);
+            return { imageId, ...verification };
+          })
+        );
+        
+        // Check if any images failed verification
+        const failedImages = imageVerificationResults.filter(result => !result.accessible);
+        if (failedImages.length > 0) {
+          console.error('❌ [Backend] Image verification failed:', failedImages);
+          return res.status(400).json({
+            success: false,
+            error: {
+              message: 'Some images are not accessible. Please ensure all images are properly uploaded.',
+              code: 'IMAGE_VERIFICATION_FAILED',
+              details: failedImages.map(img => ({
+                imageId: img.imageId,
+                error: img.error
+              }))
+            }
+          });
+        }
+        
+        console.log('✅ [Backend] All Cloudinary images verified successfully');
+      }
+    }
+    
+    console.log('💾 [Backend] Creating product in database with data:', {
+      name,
+      price,
+      categories: categoryIds,
+      stock: stock || 200,
+      images,
+      defaultImage,
+      imageCount: images?.length || 0
+    });
+    
     const product = await Product.create({ 
       name, 
       description, 
@@ -218,10 +210,15 @@ router.post('/', auth, role('admin'), async (req, res) => {
       vendors,
       isFeatured,
       slug,
-      defaultImage,
-      isCombo: sanitizedData.isCombo,
-      comboBasePrice: sanitizedData.comboBasePrice,
-      comboItems: sanitizedData.comboItems
+      defaultImage
+    });
+    
+    console.log('✅ [Backend] Product created successfully in database:', {
+      productId: product._id,
+      name: product.name,
+      images: product.images,
+      defaultImage: product.defaultImage,
+      status: 'SAVED_TO_DATABASE'
     });
     
     // Log the product creation activity
@@ -301,22 +298,7 @@ router.post('/', auth, role('admin'), async (req, res) => {
 // Update product (admin only)
 router.put('/:id', auth, role('admin'), async (req, res) => {
   try {
-    const { name, description, price, category, categories, stock, occasions, isFeatured, images, defaultImage, isCombo, comboBasePrice, comboItems } = req.body;
-    
-    // Validate combo product data if provided
-    if (isCombo !== undefined || comboBasePrice !== undefined || comboItems !== undefined) {
-      const comboValidation = validateComboProduct({ isCombo, comboBasePrice, comboItems });
-      if (!comboValidation.isValid) {
-        return res.status(400).json({
-          success: false,
-          error: {
-            message: 'Combo product validation failed',
-            code: 'COMBO_VALIDATION_ERROR',
-            details: comboValidation.errors
-          }
-        });
-      }
-    }
+    const { name, description, price, category, categories, stock, occasions, isFeatured, images, defaultImage } = req.body;
     
     // Prepare update data
     const updateData = {};
@@ -336,20 +318,63 @@ router.put('/:id', auth, role('admin'), async (req, res) => {
     if (stock !== undefined) updateData.stock = stock;
     if (occasions !== undefined) updateData.occasions = occasions;
     if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
-    
-    // Handle combo fields with sanitization
-    if (isCombo !== undefined || comboBasePrice !== undefined || comboItems !== undefined) {
-      const sanitizedData = sanitizeComboProduct({ isCombo, comboBasePrice, comboItems });
-      if (isCombo !== undefined) updateData.isCombo = sanitizedData.isCombo;
-      if (comboBasePrice !== undefined) updateData.comboBasePrice = sanitizedData.comboBasePrice;
-      if (comboItems !== undefined) updateData.comboItems = sanitizedData.comboItems;
-    }
 
     // Handle images update (supports Cloudinary public IDs)
     if (Array.isArray(images)) {
+      const cloudinaryImages = images.filter(imageId => 
+        typeof imageId === 'string' && imageId.startsWith('keralagiftsonline/products/')
+      );
+      
+      if (cloudinaryImages.length > 0) {
+        console.log(`🔍 [Backend] Verifying ${cloudinaryImages.length} Cloudinary image URLs before product update...`);
+        console.log(`📋 [Backend] Images to verify for update:`, cloudinaryImages);
+        
+        // Verify images in parallel for better performance
+        const imageVerificationResults = await Promise.all(
+          cloudinaryImages.map(async (imageId) => {
+            const verification = await verifyImageExists(imageId);
+            return { imageId, ...verification };
+          })
+        );
+        
+        // Check if any images failed verification
+        const failedImages = imageVerificationResults.filter(result => !result.accessible);
+        if (failedImages.length > 0) {
+          console.error('❌ [Backend] Image verification failed during update:', failedImages);
+          return res.status(400).json({
+            success: false,
+            error: {
+              message: 'Some images are not accessible. Please ensure all images are properly uploaded.',
+              code: 'IMAGE_VERIFICATION_FAILED',
+              details: failedImages.map(img => ({
+                imageId: img.imageId,
+                error: img.error
+              }))
+            }
+          });
+        }
+        
+        console.log('✅ [Backend] All Cloudinary images verified successfully for update');
+      }
+      
       updateData.images = images;
     }
     if (typeof defaultImage === 'string' && defaultImage.length > 0) {
+      // Verify default image if it's a Cloudinary image
+      if (defaultImage.startsWith('keralagiftsonline/products/')) {
+        const verification = await verifyImageExists(defaultImage);
+        if (!verification.accessible) {
+          console.error('Default image verification failed:', verification);
+          return res.status(400).json({
+            success: false,
+            error: {
+              message: 'Default image is not accessible. Please ensure the image is properly uploaded.',
+              code: 'DEFAULT_IMAGE_VERIFICATION_FAILED',
+              details: { imageId: defaultImage, error: verification.error }
+            }
+          });
+        }
+      }
       updateData.defaultImage = defaultImage;
     }
     
@@ -519,116 +544,6 @@ router.delete('/:id', auth, role('admin'), async (req, res) => {
   }
 });
 
-// Batch endpoint for loading products with related data
-router.post('/batch', 
-  deduplicateRequests(),
-  queueRequests({ priority: 'high' }),
-  cacheConfigs.products,
-  ensureDatabaseConnection,
-  async (req, res) => {
-    try {
-      const { requests } = req.body;
-      
-      if (!Array.isArray(requests) || requests.length === 0) {
-        return res.status(400).json({
-          success: false,
-          error: { message: 'Invalid batch request format', code: 'INVALID_BATCH' }
-        });
-      }
-
-      // Limit batch size to prevent abuse
-      if (requests.length > 10) {
-        return res.status(400).json({
-          success: false,
-          error: { message: 'Batch size too large (max 10)', code: 'BATCH_TOO_LARGE' }
-        });
-      }
-
-      const results = await Promise.allSettled(
-        requests.map(async (request) => {
-          const { type, params = {} } = request;
-          
-          switch (type) {
-            case 'products':
-              const { category, featured, limit = 20 } = params;
-              let filter = {};
-              
-              if (category) {
-                if (mongoose.Types.ObjectId.isValid(category)) {
-                  filter.categories = category;
-                } else {
-                  const categoryDoc = await Category.findOne({ slug: category });
-                  if (categoryDoc) {
-                    filter.categories = categoryDoc._id;
-                  }
-                }
-              }
-              
-              if (featured) filter.isFeatured = true;
-              
-              const products = await Product.find(filter)
-                .populate('categories', 'name slug')
-                .populate('vendors', 'storeName')
-                .sort({ isFeatured: -1, createdAt: -1 })
-                .limit(Math.min(limit, 50));
-              
-              return { type: 'products', data: products, count: products.length };
-              
-            case 'categories':
-              const categories = await Category.find({ isActive: true })
-                .select('name slug isPopular')
-                .sort({ name: 1 })
-                .limit(50);
-              
-              return { type: 'categories', data: categories, count: categories.length };
-              
-            case 'featured-products':
-              const featuredProducts = await Product.find({ isFeatured: true })
-                .populate('categories', 'name slug')
-                .populate('vendors', 'storeName')
-                .sort({ createdAt: -1 })
-                .limit(params.limit || 10);
-              
-              return { type: 'featured-products', data: featuredProducts, count: featuredProducts.length };
-              
-            default:
-              throw new Error(`Unknown batch request type: ${type}`);
-          }
-        })
-      );
-
-      // Process results
-      const batchResponse = {
-        success: true,
-        results: results.map((result, index) => {
-          if (result.status === 'fulfilled') {
-            return {
-              success: true,
-              ...result.value
-            };
-          } else {
-            return {
-              success: false,
-              error: { 
-                message: result.reason.message || 'Batch request failed',
-                code: 'BATCH_ITEM_ERROR'
-              }
-            };
-          }
-        })
-      };
-
-      res.json(batchResponse);
-    } catch (err) {
-      console.error('Batch request error:', err);
-      res.status(500).json({
-        success: false,
-        error: { message: 'Batch processing failed', code: 'BATCH_ERROR' }
-      });
-    }
-  }
-);
-
 // Clear product cache (admin only)
 router.post('/clear-cache', auth, role('admin'), async (req, res) => {
   try {
@@ -642,25 +557,6 @@ router.post('/clear-cache', auth, role('admin'), async (req, res) => {
     res.status(500).json({ 
       success: false,
       error: { message: 'Failed to clear cache', code: 'CACHE_CLEAR_ERROR' } 
-    });
-  }
-});
-
-// Get request queue statistics (admin only)
-router.get('/queue-stats', auth, role('admin'), async (req, res) => {
-  try {
-    const { globalRequestQueue } = require('../middleware/requestBatching.js');
-    const stats = globalRequestQueue.getStats();
-    
-    res.json({
-      success: true,
-      data: stats
-    });
-  } catch (err) {
-    console.error('Queue stats error:', err);
-    res.status(500).json({
-      success: false,
-      error: { message: 'Failed to get queue stats', code: 'STATS_ERROR' }
     });
   }
 });

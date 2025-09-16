@@ -18,8 +18,37 @@ export default function FileUpload({
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Function to verify image URL is accessible with exponential backoff
+  const verifyImageUrl = useCallback(async (url: string, maxRetries: number = 5): Promise<boolean> => {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const response = await fetch(url, { 
+          method: 'HEAD',
+          // Add timeout to prevent hanging
+          signal: AbortSignal.timeout(5000)
+        });
+        if (response.ok) {
+          console.log(`Image URL verified successfully on attempt ${i + 1}`);
+          return true;
+        }
+      } catch (error) {
+        console.log(`Image URL verification attempt ${i + 1} failed:`, error);
+        if (i < maxRetries - 1) {
+          // Exponential backoff: 1s, 2s, 4s, 8s
+          const delay = Math.pow(2, i) * 1000;
+          console.log(`Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    console.error(`Image URL verification failed after ${maxRetries} attempts`);
+    return false;
+  }, []);
 
   const handleFileSelect = useCallback(async (file: File) => {
     // Validate file type
@@ -67,8 +96,48 @@ export default function FileUpload({
       }
 
       if (response.data.success) {
-        onUploadSuccess(response.data.data);
+        const uploadData = response.data.data;
+        
+        console.log('🖼️ Image Upload Success:', {
+          public_id: uploadData.public_id,
+          filename: uploadData.filename,
+          url: uploadData.url,
+          secure_url: uploadData.secure_url,
+          size: uploadData.size,
+          format: uploadData.format
+        });
+        
+        // Start verification phase immediately
+        setIsUploading(false);
+        setIsProcessing(true);
+        setProcessingMessage('Verifying image availability...');
+        
+        console.log('🔍 Starting image URL verification...', uploadData.secure_url || uploadData.url);
+        
+        // Verify the image URL is accessible (with retry logic)
+        const isUrlAccessible = await verifyImageUrl(uploadData.secure_url || uploadData.url);
+        
+        if (isUrlAccessible) {
+          console.log('✅ Image URL verification successful!', {
+            public_id: uploadData.public_id,
+            url: uploadData.secure_url || uploadData.url,
+            status: 'READY_FOR_PRODUCT_CREATION'
+          });
+          
+          setProcessingMessage('Image ready!');
+          // Small delay to show success message
+          await new Promise(resolve => setTimeout(resolve, 500));
+          onUploadSuccess(uploadData);
+        } else {
+          console.error('❌ Image URL verification failed!', {
+            public_id: uploadData.public_id,
+            url: uploadData.secure_url || uploadData.url,
+            status: 'NOT_ACCESSIBLE'
+          });
+          onUploadError?.('Image upload completed but URL is not accessible. Please try uploading again.');
+        }
       } else {
+        console.error('❌ Image upload failed:', response.data.error);
         onUploadError?.(response.data.error?.message || 'Upload failed');
       }
     } catch (error: any) {
@@ -76,6 +145,8 @@ export default function FileUpload({
       onUploadError?.(error.response?.data?.error?.message || 'Upload failed');
     } finally {
       setIsUploading(false);
+      setIsProcessing(false);
+      setProcessingMessage('');
     }
   }, [maxSize, onUploadSuccess, onUploadError]);
 
@@ -133,7 +204,7 @@ export default function FileUpload({
             isDragging 
               ? 'border-blue-500 bg-blue-50' 
               : 'border-gray-300 hover:border-gray-400'
-          } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+          } ${(isUploading || isProcessing) ? 'opacity-50 pointer-events-none' : ''}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -143,6 +214,11 @@ export default function FileUpload({
             <div className="flex flex-col items-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
               <p className="text-gray-600">Uploading...</p>
+            </div>
+          ) : isProcessing ? (
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mb-2"></div>
+              <p className="text-gray-600">{processingMessage}</p>
             </div>
           ) : (
             <div className="flex flex-col items-center">

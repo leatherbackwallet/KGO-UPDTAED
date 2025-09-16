@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
               />
             </div>
             <p className="text-gray-300 mb-6 max-w-md">
-              Bringing the authentic taste and culture of Kerala to the global diaspora through carefully curated gifts and custom cakes.
+              Bringing the authentic taste and culture of Kerala to the global diaspora through carefully curated gifts and traditional products.
             </p>
             
             {/* Contact Information */}

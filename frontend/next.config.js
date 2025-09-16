@@ -6,6 +6,33 @@ const nextConfig = {
   poweredByHeader: false,
   generateEtags: false,
   
+  // API proxy configuration - only for development
+  async rewrites() {
+    if (process.env.NODE_ENV === 'development') {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'http://localhost:5001/api/:path*',
+        },
+      ];
+    }
+    return [];
+  },
+  
+  // Disable static optimization for pages that use client-side features
+  trailingSlash: false,
+  output: 'standalone',
+  
+  // Environment variables for build time
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://api-dot-onyourbehlf.uc.r.appspot.com/api',
+    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'OnYourBehlf',
+    NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || '3.0.0',
+    NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS || 'true',
+    NEXT_PUBLIC_ENABLE_DEBUG_MODE: process.env.NEXT_PUBLIC_ENABLE_DEBUG_MODE || 'false',
+    NEXT_PUBLIC_WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+918075030919',
+  },
+  
   // Webpack configuration
   webpack: (config, { dev, isServer }) => {
     if (!isServer) {
@@ -28,10 +55,6 @@ const nextConfig = {
   images: {
     domains: ['localhost', 'res.cloudinary.com'],
     formats: ['image/webp', 'image/avif'],
-  },
-  
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY || '',
   },
   
   // Enhanced security headers

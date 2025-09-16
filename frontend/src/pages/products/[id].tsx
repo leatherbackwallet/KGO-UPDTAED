@@ -203,3 +203,9 @@ const ProductDetailPage: React.FC = () => {
 };
 
 export default ProductDetailPage; 
+// Disable static generation for this page
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
+}

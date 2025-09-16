@@ -9,6 +9,7 @@ exports.deleteImageFromCloudinary = deleteImageFromCloudinary;
 exports.getOptimizedImageUrl = getOptimizedImageUrl;
 exports.getImageMetadata = getImageMetadata;
 exports.listImages = listImages;
+exports.verifyImageExists = verifyImageExists;
 const cloudinary_1 = require("cloudinary");
 const multer_storage_cloudinary_1 = require("multer-storage-cloudinary");
 const multer_1 = __importDefault(require("multer"));
@@ -113,6 +114,66 @@ async function listImages(folder = 'keralagiftsonline/products', options = {}) {
         max_results: options.max_results || 100,
         next_cursor: options.next_cursor
     });
+}
+async function verifyImageExists(public_id, maxRetries = 3) {
+    console.log(`🔍 [Backend] Checking if image exists in Cloudinary: ${public_id}`);
+    try {
+        const resource = await cloudinary_1.v2.api.resource(public_id);
+        if (!resource) {
+            console.log(`❌ [Backend] Image not found in Cloudinary: ${public_id}`);
+            return {
+                exists: false,
+                accessible: false,
+                error: 'Image not found in Cloudinary'
+            };
+        }
+        console.log(`✅ [Backend] Image exists in Cloudinary: ${public_id}`);
+    }
+    catch (apiError) {
+        console.error(`❌ [Backend] Cloudinary API error for ${public_id}:`, apiError);
+        return {
+            exists: false,
+            accessible: false,
+            error: `Cloudinary API error: ${apiError}`
+        };
+    }
+    const imageUrl = cloudinary_1.v2.url(public_id, { secure: true });
+    console.log(`🌐 [Backend] Verifying image URL accessibility: ${imageUrl}`);
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            console.log(`🔄 [Backend] Attempt ${attempt}/${maxRetries} - Checking URL accessibility...`);
+            const response = await fetch(imageUrl, {
+                method: 'HEAD',
+                signal: AbortSignal.timeout(10000)
+            });
+            if (response.ok) {
+                console.log(`✅ [Backend] Image ${public_id} verified successfully on attempt ${attempt}`);
+                return {
+                    exists: true,
+                    accessible: true
+                };
+            }
+            console.log(`⚠️ [Backend] Image ${public_id} not accessible on attempt ${attempt}: HTTP ${response.status}`);
+            if (attempt < maxRetries) {
+                const delay = Math.pow(2, attempt - 1) * 1000;
+                console.log(`⏳ [Backend] Retrying image verification in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+        catch (fetchError) {
+            console.log(`❌ [Backend] Image ${public_id} verification attempt ${attempt} failed:`, fetchError);
+            if (attempt < maxRetries) {
+                const delay = Math.pow(2, attempt - 1) * 1000;
+                console.log(`⏳ [Backend] Retrying image verification in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+    return {
+        exists: true,
+        accessible: false,
+        error: `Image exists but not accessible after ${maxRetries} attempts`
+    };
 }
 exports.default = cloudinary_1.v2;
 //# sourceMappingURL=cloudinary.js.map
