@@ -40,3 +40,227 @@ MongoDB connection error: TypeError: scheduleWarmCache is not a function
 [2025-09-16T23:31:13.536Z] GET /api/categories - 200 (1ms)
 [2025-09-16T23:31:14.031Z] GET /api/products?_t=1758065474028 - IP: ::1
 [2025-09-16T23:31:14.031Z] GET /api/products?_t=1758065474028 - 200 (0ms)
+[2025-09-16T23:34:56.546Z] GET /api/products?featured=true&limit=8 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isFeatured": true,
+  "isDeleted": {
+    "$ne": true
+  }
+}
+📦 [Products API] Found products: 2
+[2025-09-16T23:34:56.705Z] GET /api/products?featured=true&limit=8 - 200 (159ms)
+[2025-09-16T23:34:58.544Z] GET /api/products?_t=1758065698538 - IP: ::1
+[2025-09-16T23:34:58.545Z] GET /api/products?_t=1758065698538 - 200 (1ms)
+[2025-09-16T23:34:58.545Z] GET /api/categories - IP: ::1
+[2025-09-16T23:34:58.546Z] GET /api/categories - 200 (1ms)
+[2025-09-16T23:34:59.045Z] GET /api/products?_t=1758065699041 - IP: ::1
+[2025-09-16T23:34:59.045Z] GET /api/products?_t=1758065699041 - 200 (0ms)
+[2025-09-16T23:35:57.324Z] GET /api/products?_t=1758065757318 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isDeleted": {
+    "$ne": true
+  }
+}
+[2025-09-16T23:35:57.325Z] GET /api/categories - IP: ::1
+[2025-09-16T23:35:57.326Z] GET /api/categories - 200 (1ms)
+📦 [Products API] Found products: 56
+[2025-09-16T23:35:57.599Z] GET /api/products?_t=1758065757318 - 200 (275ms)
+[2025-09-16T23:35:57.830Z] GET /api/products?_t=1758065757827 - IP: ::1
+[2025-09-16T23:35:57.831Z] GET /api/products?_t=1758065757827 - 200 (1ms)
+[2025-09-16T23:36:45.926Z] GET /api/products?_t=1758065805909 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isDeleted": {
+    "$ne": true
+  }
+}
+[2025-09-16T23:36:45.930Z] GET /api/categories - IP: ::1
+[2025-09-16T23:36:45.930Z] GET /api/categories - 200 (0ms)
+📦 [Products API] Found products: 56
+[2025-09-16T23:36:46.206Z] GET /api/products?_t=1758065805909 - 200 (280ms)
+[2025-09-16T23:36:46.420Z] GET /api/products?_t=1758065806417 - IP: ::1
+[2025-09-16T23:36:46.420Z] GET /api/products?_t=1758065806417 - 200 (0ms)
+Mongoose disconnected from MongoDB
+Mongoose connected to MongoDB
+[2025-09-16T23:37:37.068Z] GET /api/products?_t=1758065857062 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isDeleted": {
+    "$ne": true
+  }
+}
+[2025-09-16T23:37:37.069Z] GET /api/categories - IP: ::1
+[2025-09-16T23:37:37.069Z] GET /api/categories - 200 (0ms)
+[2025-09-16T23:37:37.576Z] GET /api/products?_t=1758065857572 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isDeleted": {
+    "$ne": true
+  }
+}
+📦 [Products API] Found products: 56
+[2025-09-16T23:37:38.147Z] GET /api/products?_t=1758065857062 - 200 (1079ms)
+📦 [Products API] Found products: 56
+[2025-09-16T23:37:38.736Z] GET /api/products?_t=1758065857572 - 200 (1160ms)
+[2025-09-16T23:38:33.875Z] OPTIONS /api/auth/login - IP: ::1
+[2025-09-16T23:38:33.877Z] POST /api/auth/login - IP: ::1
+[2025-09-16T23:38:34.401Z] POST /api/auth/login - 400 (524ms)
+Error Response: {
+  success: false,
+  error: { message: 'Invalid email or password', code: 'INVALID_CREDENTIALS' }
+}
+[2025-09-16T23:38:40.981Z] OPTIONS /api/auth/login - IP: ::1
+[2025-09-16T23:38:40.983Z] POST /api/auth/login - IP: ::1
+[2025-09-16T23:38:41.326Z] POST /api/auth/login - 200 (343ms)
+[2025-09-16T23:38:41.649Z] OPTIONS /api/products?featured=true&limit=8 - IP: ::1
+[2025-09-16T23:38:41.650Z] GET /api/products?featured=true&limit=8 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isFeatured": true,
+  "isDeleted": {
+    "$ne": true
+  }
+}
+📦 [Products API] Found products: 2
+[2025-09-16T23:38:41.792Z] GET /api/products?featured=true&limit=8 - 200 (142ms)
+[2025-09-16T23:38:42.663Z] OPTIONS /api/categories - IP: ::1
+[2025-09-16T23:38:42.664Z] OPTIONS /api/products?_t=1758065922660 - IP: ::1
+[2025-09-16T23:38:42.664Z] GET /api/products?_t=1758065922660 - IP: ::1
+[2025-09-16T23:38:42.665Z] GET /api/products?_t=1758065922660 - 200 (1ms)
+[2025-09-16T23:38:42.665Z] GET /api/categories - IP: ::1
+[2025-09-16T23:38:42.666Z] GET /api/categories - 200 (1ms)
+[2025-09-16T23:38:43.169Z] OPTIONS /api/products?_t=1758065923165 - IP: ::1
+[2025-09-16T23:38:43.171Z] GET /api/products?_t=1758065923165 - IP: ::1
+[2025-09-16T23:38:43.172Z] GET /api/products?_t=1758065923165 - 200 (1ms)
+[2025-09-16T23:39:44.961Z] OPTIONS /api/categories - IP: ::1
+[2025-09-16T23:39:44.961Z] OPTIONS /api/products?_t=1758065984954 - IP: ::1
+[2025-09-16T23:39:44.962Z] GET /api/products?_t=1758065984954 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isDeleted": {
+    "$ne": true
+  }
+}
+[2025-09-16T23:39:44.964Z] GET /api/categories - IP: ::1
+[2025-09-16T23:39:44.964Z] GET /api/categories - 200 (0ms)
+📦 [Products API] Found products: 56
+[2025-09-16T23:39:45.252Z] GET /api/products?_t=1758065984954 - 200 (290ms)
+[2025-09-16T23:39:45.465Z] OPTIONS /api/products?_t=1758065985462 - IP: ::1
+[2025-09-16T23:39:45.467Z] GET /api/products?_t=1758065985462 - IP: ::1
+[2025-09-16T23:39:45.467Z] GET /api/products?_t=1758065985462 - 200 (0ms)
+[2025-09-16T23:41:18.978Z] OPTIONS /api/products?featured=true&limit=8 - IP: ::1
+[2025-09-16T23:41:18.979Z] GET /api/products?featured=true&limit=8 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isFeatured": true,
+  "isDeleted": {
+    "$ne": true
+  }
+}
+📦 [Products API] Found products: 2
+[2025-09-16T23:41:19.132Z] GET /api/products?featured=true&limit=8 - 200 (153ms)
+[2025-09-16T23:41:20.744Z] OPTIONS /api/categories - IP: ::1
+[2025-09-16T23:41:20.745Z] OPTIONS /api/products?_t=1758066080740 - IP: ::1
+[2025-09-16T23:41:20.745Z] GET /api/products?_t=1758066080740 - IP: ::1
+[2025-09-16T23:41:20.745Z] GET /api/products?_t=1758066080740 - 200 (0ms)
+[2025-09-16T23:41:20.745Z] GET /api/categories - IP: ::1
+[2025-09-16T23:41:20.885Z] GET /api/categories - 200 (140ms)
+[2025-09-16T23:41:21.248Z] OPTIONS /api/products?_t=1758066081243 - IP: ::1
+[2025-09-16T23:41:21.250Z] GET /api/products?_t=1758066081243 - IP: ::1
+[2025-09-16T23:41:21.250Z] GET /api/products?_t=1758066081243 - 200 (0ms)
+[2025-09-16T23:41:25.951Z] OPTIONS /api/categories - IP: ::1
+[2025-09-16T23:41:25.951Z] OPTIONS /api/products?_t=1758066085945 - IP: ::1
+[2025-09-16T23:41:25.952Z] GET /api/products?_t=1758066085945 - IP: ::1
+[2025-09-16T23:41:25.952Z] GET /api/products?_t=1758066085945 - 200 (0ms)
+[2025-09-16T23:41:25.952Z] GET /api/categories - IP: ::1
+[2025-09-16T23:41:25.952Z] GET /api/categories - 200 (0ms)
+[2025-09-16T23:41:26.458Z] OPTIONS /api/products?_t=1758066086454 - IP: ::1
+[2025-09-16T23:41:26.462Z] GET /api/products?_t=1758066086454 - IP: ::1
+[2025-09-16T23:41:26.463Z] GET /api/products?_t=1758066086454 - 200 (1ms)
+[2025-09-16T23:41:28.028Z] OPTIONS /api/products?_t=1758066088024 - IP: ::1
+[2025-09-16T23:41:28.029Z] GET /api/products?_t=1758066088024 - IP: ::1
+[2025-09-16T23:41:28.029Z] GET /api/products?_t=1758066088024 - 200 (0ms)
+[2025-09-16T23:41:30.034Z] OPTIONS /api/products?_t=1758066090028 - IP: ::1
+[2025-09-16T23:41:30.034Z] GET /api/categories - IP: ::1
+[2025-09-16T23:41:30.034Z] GET /api/categories - 200 (0ms)
+[2025-09-16T23:41:30.035Z] GET /api/products?_t=1758066090028 - IP: ::1
+[2025-09-16T23:41:30.035Z] GET /api/products?_t=1758066090028 - 200 (0ms)
+[2025-09-16T23:41:30.541Z] OPTIONS /api/products?_t=1758066090538 - IP: ::1
+[2025-09-16T23:41:30.546Z] GET /api/products?_t=1758066090538 - IP: ::1
+[2025-09-16T23:41:30.546Z] GET /api/products?_t=1758066090538 - 200 (0ms)
+[2025-09-16T23:41:35.206Z] OPTIONS /api/categories - IP: ::1
+[2025-09-16T23:41:35.207Z] OPTIONS /api/products?_t=1758066095200 - IP: ::1
+[2025-09-16T23:41:35.207Z] GET /api/products?_t=1758066095200 - IP: ::1
+[2025-09-16T23:41:35.208Z] GET /api/products?_t=1758066095200 - 200 (1ms)
+[2025-09-16T23:41:35.208Z] GET /api/categories - IP: ::1
+[2025-09-16T23:41:35.209Z] GET /api/categories - 200 (1ms)
+[2025-09-16T23:41:35.713Z] OPTIONS /api/products?_t=1758066095710 - IP: ::1
+[2025-09-16T23:41:35.714Z] GET /api/products?_t=1758066095710 - IP: ::1
+[2025-09-16T23:41:35.715Z] GET /api/products?_t=1758066095710 - 200 (1ms)
+[2025-09-16T23:41:36.688Z] OPTIONS /api/products?_t=1758066096682 - IP: ::1
+[2025-09-16T23:41:36.689Z] GET /api/categories - IP: ::1
+[2025-09-16T23:41:36.689Z] GET /api/categories - 200 (0ms)
+[2025-09-16T23:41:36.689Z] GET /api/products?_t=1758066096682 - IP: ::1
+[2025-09-16T23:41:36.689Z] GET /api/products?_t=1758066096682 - 200 (0ms)
+[2025-09-16T23:41:37.194Z] OPTIONS /api/products?_t=1758066097192 - IP: ::1
+[2025-09-16T23:41:37.196Z] GET /api/products?_t=1758066097192 - IP: ::1
+[2025-09-16T23:41:37.196Z] GET /api/products?_t=1758066097192 - 200 (0ms)
+[2025-09-16T23:41:46.668Z] OPTIONS /api/categories - IP: ::1
+[2025-09-16T23:41:46.669Z] OPTIONS /api/products?_t=1758066106662 - IP: ::1
+[2025-09-16T23:41:46.669Z] GET /api/products?_t=1758066106662 - IP: ::1
+[2025-09-16T23:41:46.669Z] GET /api/products?_t=1758066106662 - 200 (0ms)
+[2025-09-16T23:41:46.670Z] GET /api/categories - IP: ::1
+[2025-09-16T23:41:46.670Z] GET /api/categories - 200 (0ms)
+[2025-09-16T23:41:47.176Z] OPTIONS /api/products?_t=1758066107172 - IP: ::1
+[2025-09-16T23:41:47.180Z] GET /api/products?_t=1758066107172 - IP: ::1
+[2025-09-16T23:41:47.180Z] GET /api/products?_t=1758066107172 - 200 (0ms)
+[2025-09-16T23:42:49.479Z] OPTIONS /api/products?_t=1758066169474 - IP: ::1
+[2025-09-16T23:42:49.480Z] GET /api/products?_t=1758066169474 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isDeleted": {
+    "$ne": true
+  }
+}
+📦 [Products API] Found products: 56
+[2025-09-16T23:42:49.767Z] GET /api/products?_t=1758066169474 - 200 (287ms)
+[2025-09-16T23:43:10.860Z] OPTIONS /api/users - IP: ::1
+[2025-09-16T23:43:10.861Z] OPTIONS /api/products - IP: ::1
+[2025-09-16T23:43:10.861Z] GET /api/products - IP: ::1
+[2025-09-16T23:43:10.861Z] GET /api/products - 200 (0ms)
+[2025-09-16T23:43:10.862Z] OPTIONS /api/orders - IP: ::1
+[2025-09-16T23:43:10.863Z] GET /api/users - IP: ::1
+[2025-09-16T23:43:10.864Z] GET /api/orders - IP: ::1
+[2025-09-16T23:43:11.416Z] GET /api/users - 200 (553ms)
+[2025-09-16T23:43:12.216Z] GET /api/orders - 200 (1352ms)
+[2025-09-16T23:43:13.059Z] OPTIONS /api/products?_t=1758066193056 - IP: ::1
+[2025-09-16T23:43:13.059Z] OPTIONS /api/categories - IP: ::1
+[2025-09-16T23:43:13.060Z] GET /api/products?_t=1758066193056 - IP: ::1
+[2025-09-16T23:43:13.060Z] GET /api/products?_t=1758066193056 - 200 (0ms)
+[2025-09-16T23:43:13.064Z] GET /api/categories - IP: ::1
+[2025-09-16T23:43:13.064Z] GET /api/categories - 200 (0ms)
+[2025-09-16T23:43:52.664Z] OPTIONS /api/categories - IP: ::1
+[2025-09-16T23:43:52.666Z] OPTIONS /api/products?_t=1758066232656 - IP: ::1
+[2025-09-16T23:43:52.669Z] GET /api/products?_t=1758066232656 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isDeleted": {
+    "$ne": true
+  }
+}
+[2025-09-16T23:43:52.674Z] GET /api/categories - IP: ::1
+[2025-09-16T23:43:52.674Z] GET /api/categories - 200 (0ms)
+[2025-09-16T23:43:53.169Z] OPTIONS /api/products?_t=1758066233165 - IP: ::1
+[2025-09-16T23:43:53.171Z] GET /api/products?_t=1758066233165 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isDeleted": {
+    "$ne": true
+  }
+}
+📦 [Products API] Found products: 56
+[2025-09-16T23:43:53.490Z] GET /api/products?_t=1758066233165 - 200 (319ms)
+📦 [Products API] Found products: 56
+[2025-09-16T23:43:53.942Z] GET /api/products?_t=1758066232656 - 200 (1273ms)
