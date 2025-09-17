@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth.js');
+const auth = require('../middleware/auth');
 
 // Merge guest cart data with user account
 router.post('/merge', auth, async (req, res) => {

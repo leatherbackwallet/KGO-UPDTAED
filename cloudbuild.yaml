@@ -15,7 +15,7 @@ steps:
         echo "Backend build completed"
     id: 'build-backend'
 
-  # Step 2: Deploy backend service immediately
+  # Step 2: Deploy backend service using root app.yaml (entrypoint cd's into backend)
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'app'
@@ -40,7 +40,7 @@ steps:
     id: 'build-frontend'
     waitFor: ['-']  # Run in parallel
 
-  # Step 4: Deploy frontend service immediately
+  # Step 4: Deploy frontend service using root frontend-app.yaml (entrypoint cd's into frontend)
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'app'

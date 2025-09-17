@@ -32,6 +32,17 @@ export interface IStatusHistory {
     notes?: string;
     updatedBy?: mongoose.Types.ObjectId;
 }
+export interface IPaymentDetails {
+    razorpayOrderId?: string;
+    razorpayPaymentId?: string;
+    paymentStatus: 'pending' | 'captured' | 'failed' | 'refunded';
+    paymentMethod?: string;
+    paidAt?: Date;
+    failedAt?: Date;
+    refundedAt?: Date;
+    refundAmount?: number;
+    currency: string;
+}
 export interface IOrder extends Document {
     orderId: string;
     userId: mongoose.Types.ObjectId;
@@ -39,8 +50,9 @@ export interface IOrder extends Document {
     shippingDetails: IShippingDetails;
     orderItems: IOrderItem[];
     totalPrice: number;
-    orderStatus: 'payment_done' | 'order_received' | 'collecting_items' | 'packing' | 'en_route' | 'delivered' | 'cancelled';
+    orderStatus: 'pending_payment' | 'payment_verified' | 'payment_failed' | 'order_received' | 'collecting_items' | 'packing' | 'en_route' | 'delivered' | 'cancelled';
     statusHistory: IStatusHistory[];
+    paymentDetails: IPaymentDetails;
     promotionId?: mongoose.Types.ObjectId;
     discountAmount: number;
     isDeleted: boolean;

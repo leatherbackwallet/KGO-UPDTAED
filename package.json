@@ -16,7 +16,7 @@
     "build:backend": "cd backend && npm run build",
     "build:frontend": "cd frontend && npm run build",
     "deploy": "chmod +x deploy-single.sh && ./deploy-single.sh",
-    "deploy:single": "gcloud builds submit --config=cloudbuild-single.yaml .",
+    "deploy:single": "gcloud builds submit --config=cloudbuild.yaml .",
     "deploy:check": "gcloud builds list --limit=5",
     "deploy:stop": "gcloud builds list --ongoing --format='value(id)' | xargs -I {} gcloud builds cancel {}"
   },

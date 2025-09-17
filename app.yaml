@@ -1,6 +1,6 @@
 runtime: nodejs20
 service: api
-entrypoint: node dist/server.js
+entrypoint: node server.js
 
 env_variables:
   NODE_ENV: production

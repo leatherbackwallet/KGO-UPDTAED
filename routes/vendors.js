@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { Vendor } = require('../models/vendors.model.js');
-const auth = require('../middleware/auth.js');
-const role = require('../middleware/role.js');
+const { Vendor } = require('../models/vendors.model');
+const auth = require('../middleware/auth');
+const role = require('../middleware/role');
 
 // GET /api/vendors - Get all active vendors
 router.get('/', async (req, res) => {

@@ -24,7 +24,9 @@ const corsOptions = {
             'http://localhost:3001',
             'http://localhost:3002',
             'http://localhost:3003',
-            'https://onyourbehlf.uc.r.appspot.com'
+            'https://onyourbehlf.uc.r.appspot.com',
+            'https://keralgiftsonline.in',
+            'https://www.keralgiftsonline.in'
         ];
         if (!origin)
             return callback(null, true);
@@ -177,6 +179,7 @@ const healthRoutes = require('./routes/health');
 const imagesRoutes = require('./routes/images');
 const featureFlagsRoutes = require('./routes/featureFlags');
 const monitoringRoutes = require('./routes/monitoring');
+const payments_1 = __importDefault(require("./routes/payments"));
 app.use('/api/health', apiLimiter, healthRoutes);
 app.get('/api/health-status', async (req, res) => {
     try {
@@ -206,6 +209,7 @@ app.use('/api/products', apiLimiter, productsRoutes);
 app.use('/api/categories', apiLimiter, categories_1.default);
 app.use('/api/vendors', apiLimiter, vendorsRoutes);
 app.use('/api/orders', apiLimiter, orders_1.default);
+app.use('/api/payments', apiLimiter, payments_1.default);
 app.use('/api/users', apiLimiter, usersRoutes);
 app.use('/api/wishlist', apiLimiter, wishlistRoutes);
 app.use('/api/cart', apiLimiter, cartRoutes);
@@ -221,7 +225,7 @@ app.use('/api/images', apiLimiter, imagesRoutes);
 app.use('/api/feature-flags', apiLimiter, featureFlagsRoutes);
 app.use('/api/monitoring', apiLimiter, monitoringRoutes);
 app.use(errorLogger);
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);

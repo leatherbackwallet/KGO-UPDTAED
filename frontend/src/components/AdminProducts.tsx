@@ -31,6 +31,7 @@ const AdminProducts: React.FC = () => {
   const [uploadError, setUploadError] = useState<string>('');
   const [deletingProducts, setDeletingProducts] = useState<Set<string>>(new Set());
   const [recentlyDeleted, setRecentlyDeleted] = useState<Set<string>>(new Set());
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   
   // Combo product state
   const [comboItems, setComboItems] = useState<ComboItem[]>([]);
@@ -514,52 +515,188 @@ const AdminProducts: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Products Management</h2>
-        <div className="flex space-x-3">
-          {process.env.NODE_ENV === 'development' && (
+    <div className="flex gap-6">
+      {/* Left Sidebar - CRUD Operations */}
+      <div className="w-80 flex-shrink-0">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Management</h3>
+          
+          <div className="space-y-3">
             <button
-              onClick={debugProducts}
-              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm"
+              onClick={() => {
+                setSelectedProduct(null);
+                setEditingProduct({
+                  stock: 200, // Set default stock to 200
+                  isCombo: false,
+                  comboBasePrice: 0,
+                  comboItems: []
+                });
+                setComboItems([]);
+                setUploadedImages([]);
+                setUploadError('');
+                setShowModal(true);
+              }}
+              className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Debug
+              + Add New Product
             </button>
-          )}
-          <button
-            onClick={clearCacheAndRefresh}
-            disabled={loading}
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Refreshing...
-              </div>
-            ) : (
-              'Refresh'
+            
+            <button
+              onClick={clearCacheAndRefresh}
+              disabled={loading}
+              className="w-full bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Refreshing...
+                </div>
+              ) : (
+                '🔄 Refresh Products'
+              )}
+            </button>
+            
+            {process.env.NODE_ENV === 'development' && (
+              <button
+                onClick={debugProducts}
+                className="w-full bg-yellow-600 text-white px-4 py-3 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
+              >
+                🐛 Debug Products
+              </button>
             )}
-          </button>
-          <button
-            onClick={() => {
-              setSelectedProduct(null);
-              setEditingProduct({
-                stock: 200, // Set default stock to 200
-                isCombo: false,
-                comboBasePrice: 0,
-                comboItems: []
-              });
-              setComboItems([]);
-              setUploadedImages([]);
-              setUploadError('');
-              setShowModal(true);
-            }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Add New Product
-          </button>
+          </div>
+          
+          {/* Product Actions */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Product Actions</h4>
+            
+            {/* Product Selection Dropdown */}
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-gray-600 mb-2">
+                Select Product to Edit/Delete:
+              </label>
+              <select
+                value={selectedProductId || ''}
+                onChange={(e) => setSelectedProductId(e.target.value || null)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Choose a product...</option>
+                {products.map((product) => (
+                  <option 
+                    key={product._id} 
+                    value={product._id}
+                    disabled={deletingProducts.has(product._id) || recentlyDeleted.has(product._id)}
+                  >
+                    {getMultilingualText(product.name)} - ₹{product.price?.toFixed(2) || '0.00'}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Selected Product Info */}
+            {selectedProductId && (() => {
+              const product = products.find(p => p._id === selectedProductId);
+              if (!product) return null;
+              
+              return (
+                <div className="bg-blue-50 rounded-lg p-3 mb-4 border border-blue-200">
+                  <div className="text-sm font-medium text-gray-900 mb-1">
+                    {getMultilingualText(product.name)}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    ₹{product.price?.toFixed(2) || '0.00'} • Stock: {product.stock || 0} • {product.isFeatured ? 'Featured' : 'Regular'}
+                  </div>
+                </div>
+              );
+            })()}
+            
+            {/* Action Buttons */}
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  const product = products.find(p => p._id === selectedProductId);
+                  if (product) {
+                    handleEditProduct(product);
+                  }
+                }}
+                disabled={!selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId)))}
+                className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
+                  !selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId)))
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                ✏️ Edit Selected Product
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (selectedProductId) {
+                    handleDeleteProduct(selectedProductId);
+                    setSelectedProductId(null);
+                  }
+                }}
+                disabled={!selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId)))}
+                className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
+                  !selectedProductId
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : selectedProductId && deletingProducts.has(selectedProductId)
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : selectedProductId && recentlyDeleted.has(selectedProductId)
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-red-600 text-white hover:bg-red-700'
+                }`}
+              >
+                {!selectedProductId
+                  ? '🗑️ Select Product to Delete'
+                  : selectedProductId && deletingProducts.has(selectedProductId)
+                  ? '🗑️ Deleting...'
+                  : selectedProductId && recentlyDeleted.has(selectedProductId)
+                  ? '🗑️ Deleted'
+                  : '🗑️ Delete Selected Product'
+                }
+              </button>
+              
+              {selectedProductId && (
+                <button
+                  onClick={() => setSelectedProductId(null)}
+                  className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  ✕ Clear Selection
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Stats</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total Products:</span>
+                <span className="font-medium">{products.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Featured:</span>
+                <span className="font-medium">{products.filter(p => p.isFeatured).length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">In Stock:</span>
+                <span className="font-medium">{products.filter(p => (p.stock || 0) > 0).length}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Products List</h2>
+            <p className="text-sm text-gray-600 mt-1">Click on any product row to select it, or use the dropdown in the sidebar</p>
+          </div>
+        </div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -600,26 +737,23 @@ const AdminProducts: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
                   Product
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
                   Categories
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
                   Occasions
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                   Price
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
                   Stock
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                   Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
                 </th>
               </tr>
             </thead>
@@ -628,24 +762,42 @@ const AdminProducts: React.FC = () => {
                 // Use cached image for each product
                 const imageUrl = getCachedImageUrl(product);
 
+                const isSelected = selectedProductId === product._id;
+                const isDisabled = deletingProducts.has(product._id) || recentlyDeleted.has(product._id);
+                
                 return (
-                  <tr key={product._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
+                  <tr 
+                    key={product._id} 
+                    className={`cursor-pointer transition-all duration-200 ${
+                      isSelected 
+                        ? 'bg-blue-50 border-l-4 border-blue-500 shadow-sm' 
+                        : isDisabled
+                        ? 'bg-gray-100 opacity-60 cursor-not-allowed'
+                        : 'hover:bg-gray-50 hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (!isDisabled) {
+                        setSelectedProductId(isSelected ? null : product._id);
+                      }
+                    }}
+                    title={isDisabled ? 'Product is being processed' : isSelected ? 'Click to deselect' : 'Click to select this product'}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0 h-12 w-12">
                           <img
-                            className="h-10 w-10 rounded-lg object-cover"
+                            className="h-12 w-12 rounded-lg object-cover"
                             src={imageUrl}
                             alt={getMultilingualText(product.name)}
                             onError={handleImageError}
                             style={{ opacity: 1 }} // No opacity change needed for preloaded images
                           />
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                        <div className="ml-4 min-w-0 flex-1">
+                          <div className="text-sm font-medium text-gray-900 mb-1">
                             {getMultilingualText(product.name)}
                           </div>
-                          <div className="text-sm text-gray-500 line-clamp-2">
+                          <div className="text-xs text-gray-500 break-words whitespace-normal leading-relaxed max-w-xs">
                             {getMultilingualText(product.description)}
                           </div>
                         </div>
@@ -676,39 +828,6 @@ const AdminProducts: React.FC = () => {
                         {product.isFeatured ? 'Featured' : 'Regular'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEditProduct(product)}
-                          disabled={deletingProducts.has(product._id) || recentlyDeleted.has(product._id)}
-                          className={`${
-                            deletingProducts.has(product._id) || recentlyDeleted.has(product._id)
-                              ? 'text-gray-400 cursor-not-allowed'
-                              : 'text-blue-600 hover:text-blue-900'
-                          }`}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(product._id)}
-                          disabled={deletingProducts.has(product._id) || recentlyDeleted.has(product._id)}
-                          className={`${
-                            deletingProducts.has(product._id)
-                              ? 'text-gray-400 cursor-not-allowed'
-                              : recentlyDeleted.has(product._id)
-                              ? 'text-gray-500 cursor-not-allowed'
-                              : 'text-red-600 hover:text-red-900'
-                          }`}
-                        >
-                          {deletingProducts.has(product._id) 
-                            ? 'Deleting...' 
-                            : recentlyDeleted.has(product._id)
-                            ? 'Deleted'
-                            : 'Delete'
-                          }
-                        </button>
-                      </div>
-                    </td>
                   </tr>
                 );
               }) : (
@@ -721,6 +840,7 @@ const AdminProducts: React.FC = () => {
             </tbody>
           </table>
         </div>
+      </div>
       </div>
 
       {/* Edit Modal */}

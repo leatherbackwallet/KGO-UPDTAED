@@ -23,7 +23,9 @@ const corsOptions = {
       'http://localhost:3001',
       'http://localhost:3002',
       'http://localhost:3003',
-      'https://onyourbehlf.uc.r.appspot.com'
+      'https://onyourbehlf.uc.r.appspot.com',
+      'https://keralgiftsonline.in',
+      'https://www.keralgiftsonline.in'
     ];
     
     // Allow requests with no origin (mobile apps, curl, etc.)
@@ -204,6 +206,7 @@ const healthRoutes = require('./routes/health');
 const imagesRoutes = require('./routes/images');
 const featureFlagsRoutes = require('./routes/featureFlags');
 const monitoringRoutes = require('./routes/monitoring');
+const paymentRoutes = require('./routes/payments.js');
 
 // Apply health routes first
 app.use('/api/health', apiLimiter, healthRoutes);
@@ -239,6 +242,7 @@ app.use('/api/products', apiLimiter, productsRoutes);
 app.use('/api/categories', apiLimiter, categoriesRoutes);
 app.use('/api/vendors', apiLimiter, vendorsRoutes);
 app.use('/api/orders', apiLimiter, ordersRoutes);
+app.use('/api/payments', apiLimiter, paymentRoutes);
 app.use('/api/users', apiLimiter, usersRoutes);
 app.use('/api/wishlist', apiLimiter, wishlistRoutes);
 app.use('/api/cart', apiLimiter, cartRoutes);

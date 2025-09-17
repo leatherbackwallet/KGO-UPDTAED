@@ -47,6 +47,7 @@
     "node-cron": "^3.0.2",
     "nodemailer": "^6.9.4",
     "qrcode": "^1.5.3",
+    "razorpay": "^2.9.6",
     "speakeasy": "^2.0.0",
     "typescript": "^5.1.6",
     "uuid": "^9.0.0",

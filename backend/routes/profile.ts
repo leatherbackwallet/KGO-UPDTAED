@@ -117,7 +117,7 @@ router.put('/', auth, ensureDatabaseConnection, async (req: AuthenticatedRequest
 });
 
 // Upload avatar
-router.post('/avatar', auth, upload.single('avatar'), async (req: AuthenticatedRequest, res) => {
+router.post('/avatar', auth, upload.single('avatar'), async (req: AuthenticatedRequest, res: any) => {
   try {
     if (!req.user?.id) {
       return res.status(401).json({
