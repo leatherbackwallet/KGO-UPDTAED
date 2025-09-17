@@ -129,9 +129,14 @@ console.log('✅ Environment variables validated successfully');
         console.log('Skipping local file system initialization in production');
     }
     await createSuperUser();
-    const { scheduleWarmCache } = require('./middleware/cache');
-    scheduleWarmCache();
-    console.log('Cache warming scheduled');
+    try {
+        const { scheduleWarmCache } = require('./middleware/cache');
+        scheduleWarmCache();
+        console.log('Cache warming scheduled');
+    }
+    catch (error) {
+        console.log('Cache warming is disabled');
+    }
 }).catch((err) => {
     console.error('MongoDB connection error:', err);
     if (process.env.NODE_ENV === 'production') {
@@ -216,7 +221,7 @@ app.use('/api/images', apiLimiter, imagesRoutes);
 app.use('/api/feature-flags', apiLimiter, featureFlagsRoutes);
 app.use('/api/monitoring', apiLimiter, monitoringRoutes);
 app.use(errorLogger);
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);

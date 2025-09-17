@@ -150,9 +150,13 @@ connectToDatabase().then(async () => {
   await createSuperUser();
   
   // Initialize cache warming for frequently accessed data
-  const { scheduleWarmCache } = require('./middleware/cache');
-  scheduleWarmCache();
-  console.log('Cache warming scheduled');
+  try {
+    const { scheduleWarmCache } = require('./middleware/cache');
+    scheduleWarmCache();
+    console.log('Cache warming scheduled');
+  } catch (error) {
+    console.log('Cache warming is disabled');
+  }
 }).catch((err: Error) => {
   console.error('MongoDB connection error:', err);
   // Don't exit process in serverless environment
@@ -254,7 +258,7 @@ app.use('/api/monitoring', apiLimiter, monitoringRoutes);
 app.use(errorLogger);
 
 // Start server
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);

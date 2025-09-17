@@ -1,0 +1,40 @@
+# Single Cloud Build Trigger Configuration
+# This replaces all existing triggers to prevent multiple concurrent builds
+
+name: onyourbehlf-single-deployment
+description: "Single consolidated deployment for OnYourBehlf frontend and backend"
+
+# Trigger configuration
+github:
+  owner: leatherbackwallet
+  name: onYourBehlf
+  push:
+    branch: ^main$  # Only trigger on main branch
+
+# Build configuration
+filename: cloudbuild-single.yaml
+
+# Substitutions
+substitutions:
+  _DEPLOY_ENV: production
+  _REGION: us-central1
+
+# Advanced settings
+includedFiles:
+  - "backend/**"
+  - "frontend/**"
+  - "app.yaml"
+  - "frontend-app.yaml"
+  - "cloudbuild-single.yaml"
+
+ignoredFiles:
+  - "README.md"
+  - "docs/**"
+  - "*.md"
+  - ".gitignore"
+  - ".env*"
+  - "node_modules/**"
+
+# Approval configuration (optional - remove if you want automatic deployment)
+# approvalConfig:
+#   approvalRequired: true
