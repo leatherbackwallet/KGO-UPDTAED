@@ -288,3 +288,19 @@ Error Response: {
 [2025-09-16T23:49:16.138Z] OPTIONS /api/products?_t=1758066556135 - IP: ::1
 [2025-09-16T23:49:16.140Z] GET /api/products?_t=1758066556135 - IP: ::1
 [2025-09-16T23:49:16.141Z] GET /api/products?_t=1758066556135 - 200 (1ms)
+[2025-09-17T00:10:54.306Z] OPTIONS /api/categories - IP: ::1
+[2025-09-17T00:10:54.306Z] OPTIONS /api/products?_t=1758067854299 - IP: ::1
+[2025-09-17T00:10:54.307Z] GET /api/products?_t=1758067854299 - IP: ::1
+📦 [Products API] Fetching products with smart caching...
+🔍 [Products API] Filter being applied: {
+  "isDeleted": {
+    "$ne": true
+  }
+}
+[2025-09-17T00:10:54.308Z] GET /api/categories - IP: ::1
+[2025-09-17T00:10:54.453Z] GET /api/categories - 200 (145ms)
+📦 [Products API] Found products: 56
+[2025-09-17T00:10:54.738Z] GET /api/products?_t=1758067854299 - 200 (431ms)
+[2025-09-17T00:10:54.822Z] OPTIONS /api/products?_t=1758067854821 - IP: ::1
+[2025-09-17T00:10:54.824Z] GET /api/products?_t=1758067854821 - IP: ::1
+[2025-09-17T00:10:54.824Z] GET /api/products?_t=1758067854821 - 200 (0ms)
