@@ -36,8 +36,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = __importStar(require("express"));
 const subscriptionService_1 = require("../services/subscriptionService");
 const subscriptions_model_1 = require("../models/subscriptions.model");
-const authenticateToken = require('../middleware/auth.js');
-const { validate } = require('../middleware/validation.js');
+const auth_1 = require("../middleware/auth");
+const validation_1 = require("../middleware/validation");
 const zod_1 = require("zod");
 const router = express.Router();
 const createSubscriptionSchema = zod_1.z.object({
@@ -50,7 +50,7 @@ const redeemPointsSchema = zod_1.z.object({
 const referralSchema = zod_1.z.object({
     referralCode: zod_1.z.string().min(3).max(20),
 });
-router.get('/benefits', authenticateToken, async (req, res) => {
+router.get('/benefits', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const benefits = await subscriptionService_1.SubscriptionService.getUserBenefits(userId);
@@ -70,7 +70,7 @@ router.get('/benefits', authenticateToken, async (req, res) => {
         });
     }
 });
-router.post('/create', authenticateToken, validate(createSubscriptionSchema), async (req, res) => {
+router.post('/create', auth_1.auth, (0, validation_1.validate)(createSubscriptionSchema), async (req, res) => {
     try {
         const userId = req.user.id;
         const { tier, billingCycle = 'monthly' } = req.body;
@@ -94,7 +94,7 @@ router.post('/create', authenticateToken, validate(createSubscriptionSchema), as
         });
     }
 });
-router.post('/cancel', authenticateToken, async (req, res) => {
+router.post('/cancel', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const subscription = await subscriptionService_1.SubscriptionService.cancelSubscription(userId);
@@ -117,7 +117,7 @@ router.post('/cancel', authenticateToken, async (req, res) => {
         });
     }
 });
-router.get('/loyalty-points', authenticateToken, async (req, res) => {
+router.get('/loyalty-points', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const subscription = await subscriptions_model_1.Subscription.findOne({
@@ -152,7 +152,7 @@ router.get('/loyalty-points', authenticateToken, async (req, res) => {
         });
     }
 });
-router.post('/redeem-points', authenticateToken, validate(redeemPointsSchema), async (req, res) => {
+router.post('/redeem-points', auth_1.auth, (0, validation_1.validate)(redeemPointsSchema), async (req, res) => {
     try {
         const userId = req.user.id;
         const { pointsToRedeem } = req.body;
@@ -177,7 +177,7 @@ router.post('/redeem-points', authenticateToken, validate(redeemPointsSchema), a
         });
     }
 });
-router.get('/upgrade-status', authenticateToken, async (req, res) => {
+router.get('/upgrade-status', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const upgradeStatus = await subscriptionService_1.SubscriptionService.canUpgradeTier(userId);
@@ -197,7 +197,7 @@ router.get('/upgrade-status', authenticateToken, async (req, res) => {
         });
     }
 });
-router.post('/process-referral', authenticateToken, validate(referralSchema), async (req, res) => {
+router.post('/process-referral', auth_1.auth, (0, validation_1.validate)(referralSchema), async (req, res) => {
     try {
         const referrerId = req.user.id;
         const { referralCode } = req.body;
@@ -256,7 +256,7 @@ router.post('/process-referral', authenticateToken, validate(referralSchema), as
         });
     }
 });
-router.get('/analytics', authenticateToken, async (req, res) => {
+router.get('/analytics', auth_1.auth, async (req, res) => {
     try {
         if (req.user.role !== 'admin') {
             return res.status(403).json({

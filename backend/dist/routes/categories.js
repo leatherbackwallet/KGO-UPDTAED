@@ -6,10 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const categories_model_1 = require("../models/categories.model");
 const database_1 = require("../middleware/database");
-const { cacheConfigs } = require('../middleware/cache');
-const { deduplicateRequests } = require('../middleware/requestBatching.js');
+const cache_1 = require("../middleware/cache");
+const requestBatching_1 = require("../middleware/requestBatching");
 const router = express_1.default.Router();
-router.get('/', deduplicateRequests(), cacheConfigs.categories, database_1.ensureDatabaseConnection, async (req, res) => {
+router.get('/', (0, requestBatching_1.deduplicateRequests)(), cache_1.cacheConfigs.categories, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const categories = await categories_model_1.Category.find({ isActive: true }).sort('sortOrder');
         res.json({

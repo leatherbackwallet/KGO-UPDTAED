@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const content_model_1 = require("../models/content.model");
 const userPreferences_model_1 = require("../models/userPreferences.model");
-const authenticateToken = require('../middleware/auth.js');
-const { validate } = require('../middleware/validation.js');
+const auth_1 = require("../middleware/auth");
+const validation_1 = require("../middleware/validation");
 const zod_1 = require("zod");
 const router = express_1.default.Router();
 const createContentSchema = zod_1.z.object({
@@ -175,7 +175,7 @@ router.get('/language', async (req, res) => {
         });
     }
 });
-router.get('/personalized', authenticateToken, async (req, res) => {
+router.get('/personalized', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const { limit = 10 } = req.query;
@@ -253,7 +253,7 @@ router.get('/:id', async (req, res) => {
         });
     }
 });
-router.post('/', authenticateToken, validate(createContentSchema), async (req, res) => {
+router.post('/', auth_1.auth, (0, validation_1.validate)(createContentSchema), async (req, res) => {
     try {
         if (req.user.role !== 'admin') {
             return res.status(403).json({
@@ -307,7 +307,7 @@ router.post('/', authenticateToken, validate(createContentSchema), async (req, r
         });
     }
 });
-router.put('/:id/engagement', validate(updateEngagementSchema), async (req, res) => {
+router.put('/:id/engagement', (0, validation_1.validate)(updateEngagementSchema), async (req, res) => {
     try {
         const { id } = req.params;
         const engagementData = req.body;
@@ -392,7 +392,7 @@ router.get('/search/:term', async (req, res) => {
         });
     }
 });
-router.get('/analytics', authenticateToken, async (req, res) => {
+router.get('/analytics', auth_1.auth, async (req, res) => {
     try {
         if (req.user.role !== 'admin') {
             return res.status(403).json({

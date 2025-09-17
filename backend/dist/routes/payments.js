@@ -8,7 +8,7 @@ const express_validator_1 = require("express-validator");
 const payment_service_1 = __importDefault(require("../services/payment.service"));
 const index_1 = require("../models/index");
 const database_1 = require("../middleware/database");
-const auth = require('../middleware/auth.js');
+const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
 const validatePaymentOrder = [
     (0, express_validator_1.body)('products').isArray().withMessage('Products must be an array'),
@@ -27,11 +27,11 @@ const validatePaymentVerification = [
     (0, express_validator_1.body)('razorpay_payment_id').notEmpty().withMessage('Razorpay payment ID is required'),
     (0, express_validator_1.body)('razorpay_signature').notEmpty().withMessage('Razorpay signature is required')
 ];
-router.post('/create-order', auth, database_1.ensureDatabaseConnection, validatePaymentOrder, async (req, res) => {
+router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentOrder, async (req, res) => {
     try {
         const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({
+            res.status(400).json({
                 success: false,
                 error: {
                     message: 'Validation failed',
@@ -39,112 +39,81 @@ router.post('/create-order', auth, database_1.ensureDatabaseConnection, validate
                     details: errors.array()
                 }
             });
+            return;
         }
-        const { products, recipientAddress, deliveryAddress, shippingAddress } = req.body;
-        const address = recipientAddress || deliveryAddress || shippingAddress;
-        let totalPrice = 0;
+        const { products, recipientAddress, orderNotes } = req.body;
+        const userId = req.user.id;
+        let totalAmount = 0;
         const orderItems = [];
         for (const item of products) {
             const product = await index_1.Product.findById(item.product);
             if (!product) {
-                return res.status(400).json({
+                res.status(400).json({
                     success: false,
-                    error: { message: 'Product not found', code: 'PRODUCT_NOT_FOUND' }
-                });
-            }
-            const itemPrice = product.price * item.quantity;
-            totalPrice += itemPrice;
-            orderItems.push({
-                productId: item.product,
-                quantity: item.quantity,
-                price: product.price
-            });
-        }
-        const shippingDetails = {
-            recipientName: address.name || `${req.user.firstName} ${req.user.lastName}`,
-            recipientPhone: address.phone || req.user.phone,
-            address: {
-                streetName: address.address?.streetName || address.street || address.streetName,
-                houseNumber: address.address?.houseNumber || address.houseNumber || '',
-                postalCode: address.address?.postalCode || address.postalCode || address.zipCode,
-                city: address.address?.city || address.city,
-                countryCode: address.address?.countryCode || address.countryCode || address.country || 'DE'
-            },
-            specialInstructions: address.additionalInstructions || address.specialInstructions || ''
-        };
-        const tempOrder = await index_1.Order.create({
-            userId: req.user.id,
-            requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            shippingDetails,
-            orderItems,
-            totalPrice,
-            orderStatus: 'pending_payment',
-            paymentDetails: {
-                paymentStatus: 'pending',
-                currency: 'INR'
-            },
-            statusHistory: [{
-                    status: 'pending_payment',
-                    timestamp: new Date(),
-                    notes: 'Order created, awaiting payment'
-                }]
-        });
-        const paymentOrderResult = await payment_service_1.default.createPaymentOrder({
-            amount: totalPrice,
-            currency: 'INR',
-            receipt: tempOrder.orderId,
-            notes: {
-                orderId: tempOrder.orderId,
-                userId: req.user.id.toString()
-            }
-        });
-        if (!paymentOrderResult.success) {
-            await index_1.Order.findByIdAndDelete(tempOrder._id);
-            return res.status(400).json(paymentOrderResult);
-        }
-        if (paymentOrderResult.data) {
-            tempOrder.paymentDetails.razorpayOrderId = paymentOrderResult.data.id;
-            await tempOrder.save();
-            return res.status(201).json({
-                success: true,
-                data: {
-                    message: 'Payment order created successfully',
-                    order: {
-                        id: tempOrder._id,
-                        orderId: tempOrder.orderId,
-                        totalPrice: tempOrder.totalPrice,
-                        status: tempOrder.orderStatus
-                    },
-                    payment: {
-                        id: paymentOrderResult.data.id,
-                        amount: paymentOrderResult.data.amount,
-                        currency: paymentOrderResult.data.currency,
-                        key: process.env.RAZORPAY_KEY_ID
+                    error: {
+                        message: `Product with ID ${item.product} not found`,
+                        code: 'PRODUCT_NOT_FOUND'
                     }
-                }
+                });
+                return;
+            }
+            if (product.stock < item.quantity) {
+                res.status(400).json({
+                    success: false,
+                    error: {
+                        message: `Insufficient stock for product ${product.name}`,
+                        code: 'INSUFFICIENT_STOCK'
+                    }
+                });
+                return;
+            }
+            const itemTotal = product.price * item.quantity;
+            totalAmount += itemTotal;
+            orderItems.push({
+                productId: product._id,
+                quantity: item.quantity,
+                price: product.price,
+                total: itemTotal
             });
         }
-        else {
-            await index_1.Order.findByIdAndDelete(tempOrder._id);
-            return res.status(400).json({
-                success: false,
-                error: { message: 'Payment order creation failed', code: 'PAYMENT_ORDER_FAILED' }
-            });
-        }
+        const razorpayOrder = await payment_service_1.default.createOrder(totalAmount, 'INR');
+        const order = new index_1.Order({
+            userId,
+            orderItems,
+            recipientAddress,
+            totalAmount,
+            orderNotes,
+            razorpayOrderId: razorpayOrder.id,
+            status: 'pending'
+        });
+        await order.save();
+        res.status(200).json({
+            success: true,
+            data: {
+                orderId: order._id,
+                razorpayOrderId: razorpayOrder.id,
+                amount: totalAmount,
+                currency: 'INR',
+                key: process.env.RAZORPAY_KEY_ID
+            }
+        });
     }
-    catch (err) {
-        console.error('Payment order creation error:', err);
-        return res.status(500).json({
+    catch (error) {
+        console.error('Error creating payment order:', error);
+        res.status(500).json({
             success: false,
-            error: { message: 'Server error', code: 'SERVER_ERROR' }
+            error: {
+                message: 'Failed to create payment order',
+                code: 'PAYMENT_ORDER_ERROR'
+            }
         });
     }
 });
-router.post('/verify', auth, database_1.ensureDatabaseConnection, validatePaymentVerification, async (req, res) => {
+router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentVerification, async (req, res) => {
     try {
         const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({
+            res.status(400).json({
                 success: false,
                 error: {
                     message: 'Validation failed',
@@ -152,128 +121,78 @@ router.post('/verify', auth, database_1.ensureDatabaseConnection, validatePaymen
                     details: errors.array()
                 }
             });
+            return;
         }
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-        const isSignatureValid = payment_service_1.default.verifyPaymentSignature({
-            razorpay_order_id,
-            razorpay_payment_id,
-            razorpay_signature
-        });
-        if (!isSignatureValid) {
-            return res.status(400).json({
+        const isValidSignature = payment_service_1.default.verifyPayment(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+        if (!isValidSignature) {
+            res.status(400).json({
                 success: false,
                 error: {
                     message: 'Invalid payment signature',
-                    code: 'INVALID_PAYMENT_SIGNATURE'
+                    code: 'INVALID_SIGNATURE'
                 }
             });
+            return;
         }
-        const order = await index_1.Order.findOne({
-            'paymentDetails.razorpayOrderId': razorpay_order_id,
-            userId: req.user.id
-        });
+        const order = await index_1.Order.findOneAndUpdate({ razorpayOrderId: razorpay_order_id }, {
+            status: 'confirmed',
+            razorpayPaymentId: razorpay_payment_id,
+            razorpaySignature: razorpay_signature,
+            paymentDate: new Date()
+        }, { new: true });
         if (!order) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 error: {
                     message: 'Order not found',
                     code: 'ORDER_NOT_FOUND'
                 }
             });
+            return;
         }
-        order.orderStatus = 'payment_verified';
-        order.paymentDetails = {
-            ...order.paymentDetails,
-            razorpayPaymentId: razorpay_payment_id,
-            paymentStatus: 'captured',
-            paidAt: new Date()
-        };
-        order.statusHistory.push({
-            status: 'payment_verified',
-            timestamp: new Date(),
-            notes: `Payment verified. Razorpay Payment ID: ${razorpay_payment_id}`
-        });
-        await order.save();
-        return res.status(200).json({
+        for (const item of order.orderItems) {
+            await index_1.Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
+        }
+        res.status(200).json({
             success: true,
             data: {
-                message: 'Payment verified successfully',
-                order: {
-                    id: order._id,
-                    orderId: order.orderId,
-                    totalPrice: order.totalPrice,
-                    status: order.orderStatus
-                }
+                orderId: order._id,
+                status: 'confirmed',
+                message: 'Payment verified successfully'
             }
         });
     }
-    catch (err) {
-        console.error('Payment verification error:', err);
-        return res.status(500).json({
+    catch (error) {
+        console.error('Error verifying payment:', error);
+        res.status(500).json({
             success: false,
-            error: { message: 'Server error', code: 'SERVER_ERROR' }
-        });
-    }
-});
-router.post('/webhook', express_1.default.raw({ type: 'application/json' }), async (req, res) => {
-    try {
-        const signature = req.headers['x-razorpay-signature'];
-        const body = req.body;
-        if (!signature) {
-            return res.status(400).json({
-                success: false,
-                error: { message: 'Missing webhook signature', code: 'MISSING_SIGNATURE' }
-            });
-        }
-        const isSignatureValid = payment_service_1.default.verifyWebhookSignature(body, signature);
-        if (!isSignatureValid) {
-            return res.status(400).json({
-                success: false,
-                error: { message: 'Invalid webhook signature', code: 'INVALID_SIGNATURE' }
-            });
-        }
-        const event = JSON.parse(body.toString());
-        await payment_service_1.default.processWebhookEvent(event);
-        return res.status(200).json({ success: true, message: 'Webhook processed successfully' });
-    }
-    catch (err) {
-        console.error('Webhook processing error:', err);
-        return res.status(500).json({
-            success: false,
-            error: { message: 'Webhook processing failed', code: 'WEBHOOK_ERROR' }
-        });
-    }
-});
-router.get('/order/:orderId', auth, database_1.ensureDatabaseConnection, async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        const order = await index_1.Order.findOne({
-            orderId,
-            userId: req.user.id
-        }).select('orderId paymentDetails orderStatus totalPrice');
-        if (!order) {
-            return res.status(404).json({
-                success: false,
-                error: { message: 'Order not found', code: 'ORDER_NOT_FOUND' }
-            });
-        }
-        return res.status(200).json({
-            success: true,
-            data: {
-                order: {
-                    orderId: order.orderId,
-                    status: order.orderStatus,
-                    totalPrice: order.totalPrice,
-                    paymentDetails: order.paymentDetails
-                }
+            error: {
+                message: 'Failed to verify payment',
+                code: 'PAYMENT_VERIFICATION_ERROR'
             }
         });
     }
-    catch (err) {
-        console.error('Get payment details error:', err);
-        return res.status(500).json({
+});
+router.get('/orders', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const orders = await index_1.Order.find({ userId })
+            .populate('orderItems.productId', 'name price images')
+            .sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            data: orders
+        });
+    }
+    catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({
             success: false,
-            error: { message: 'Server error', code: 'SERVER_ERROR' }
+            error: {
+                message: 'Failed to fetch orders',
+                code: 'ORDERS_FETCH_ERROR'
+            }
         });
     }
 });

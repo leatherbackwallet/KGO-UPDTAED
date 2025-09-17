@@ -5,10 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cloudinary_1 = require("../utils/cloudinary");
-const auth = require('../middleware/auth.js');
-const role = require('../middleware/role.js');
+const auth_1 = require("../middleware/auth");
+const role_1 = require("../middleware/role");
 const router = express_1.default.Router();
-router.post('/product-image', auth, role('admin'), (req, res) => {
+router.post('/product-image', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     const multer = require('multer');
     const memoryStorage = multer.memoryStorage();
     const memoryUpload = multer({ storage: memoryStorage });
@@ -52,7 +52,7 @@ router.post('/product-image', auth, role('admin'), (req, res) => {
         }
     });
 });
-router.post('/product-image-direct', auth, role('admin'), (req, res) => {
+router.post('/product-image-direct', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     const multer = require('multer');
     const memoryStorage = multer.memoryStorage();
     const memoryUpload = multer({ storage: memoryStorage });
@@ -98,7 +98,7 @@ router.post('/product-image-direct', auth, role('admin'), (req, res) => {
         }
     });
 });
-router.delete('/product-image/:public_id', auth, role('admin'), async (req, res) => {
+router.delete('/product-image/:public_id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { public_id } = req.params;
         if (!public_id) {
@@ -124,7 +124,7 @@ router.delete('/product-image/:public_id', auth, role('admin'), async (req, res)
         });
     }
 });
-router.get('/product-images', auth, role('admin'), async (req, res) => {
+router.get('/product-images', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { folder, max_results, next_cursor } = req.query;
         const images = await (0, cloudinary_1.listImages)(folder || 'keralagiftsonline/products', {
@@ -160,7 +160,7 @@ router.get('/product-images', auth, role('admin'), async (req, res) => {
         });
     }
 });
-router.get('/product-image/:public_id', auth, role('admin'), async (req, res) => {
+router.get('/product-image/:public_id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { public_id } = req.params;
         if (!public_id) {

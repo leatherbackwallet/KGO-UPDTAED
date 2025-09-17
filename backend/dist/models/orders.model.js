@@ -148,44 +148,6 @@ const statusHistorySchema = new mongoose_1.Schema({
         ref: 'User'
     }
 });
-const paymentDetailsSchema = new mongoose_1.Schema({
-    razorpayOrderId: {
-        type: String,
-        trim: true
-    },
-    razorpayPaymentId: {
-        type: String,
-        trim: true
-    },
-    paymentStatus: {
-        type: String,
-        enum: ['pending', 'captured', 'failed', 'refunded'],
-        default: 'pending'
-    },
-    paymentMethod: {
-        type: String,
-        trim: true
-    },
-    paidAt: {
-        type: Date
-    },
-    failedAt: {
-        type: Date
-    },
-    refundedAt: {
-        type: Date
-    },
-    refundAmount: {
-        type: Number,
-        min: 0,
-        default: 0
-    },
-    currency: {
-        type: String,
-        default: 'INR',
-        trim: true
-    }
-});
 const orderSchema = new mongoose_1.Schema({
     orderId: {
         type: String,
@@ -212,14 +174,10 @@ const orderSchema = new mongoose_1.Schema({
     },
     orderStatus: {
         type: String,
-        enum: ['pending_payment', 'payment_verified', 'payment_failed', 'order_received', 'collecting_items', 'packing', 'en_route', 'delivered', 'cancelled'],
-        default: 'pending_payment'
+        enum: ['payment_done', 'order_received', 'collecting_items', 'packing', 'en_route', 'delivered', 'cancelled'],
+        default: 'payment_done'
     },
     statusHistory: [statusHistorySchema],
-    paymentDetails: {
-        type: paymentDetailsSchema,
-        required: true
-    },
     promotionId: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Promotion'

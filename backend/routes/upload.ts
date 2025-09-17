@@ -1,12 +1,12 @@
 import express from 'express';
 import { upload, uploadImageToCloudinary, deleteImageFromCloudinary, listImages, getImageMetadata, getOptimizedImageUrl } from '../utils/cloudinary';
-const auth = require('../middleware/auth.js');
-const role = require('../middleware/role.js');
+import { auth } from '../middleware/auth';
+import { requireRole } from '../middleware/role';
 
 const router = express.Router();
 
 // Upload single image to Cloudinary CDN (memory upload + direct Cloudinary stream)
-router.post('/product-image', auth, role('admin'), (req, res) => {
+router.post('/product-image', auth, requireRole('admin'), (req, res) => {
   const multer = require('multer');
   const memoryStorage = multer.memoryStorage();
   const memoryUpload = multer({ storage: memoryStorage });
@@ -55,7 +55,7 @@ router.post('/product-image', auth, role('admin'), (req, res) => {
 });
 
 // Upload image with direct Cloudinary upload (alternative endpoint)
-router.post('/product-image-direct', auth, role('admin'), (req, res) => {
+router.post('/product-image-direct', auth, requireRole('admin'), (req, res) => {
   // Use multer memory storage to get the file buffer
   const multer = require('multer');
   const memoryStorage = multer.memoryStorage();
@@ -108,7 +108,7 @@ router.post('/product-image-direct', auth, role('admin'), (req, res) => {
 });
 
 // Delete uploaded image from Cloudinary
-router.delete('/product-image/:public_id', auth, role('admin'), async (req, res) => {
+router.delete('/product-image/:public_id', auth, requireRole('admin'), async (req, res) => {
   try {
     const { public_id } = req.params;
 
@@ -138,7 +138,7 @@ router.delete('/product-image/:public_id', auth, role('admin'), async (req, res)
 });
 
 // Get list of uploaded images from Cloudinary
-router.get('/product-images', auth, role('admin'), async (req, res) => {
+router.get('/product-images', auth, requireRole('admin'), async (req, res) => {
   try {
     const { folder, max_results, next_cursor } = req.query;
     
@@ -181,7 +181,7 @@ router.get('/product-images', auth, role('admin'), async (req, res) => {
 });
 
 // Get image metadata from Cloudinary
-router.get('/product-image/:public_id', auth, role('admin'), async (req, res) => {
+router.get('/product-image/:public_id', auth, requireRole('admin'), async (req, res) => {
   try {
     const { public_id } = req.params;
 

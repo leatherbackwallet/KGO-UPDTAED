@@ -7,8 +7,8 @@ import * as express from 'express';
 import { Request, Response } from 'express';
 import { SubscriptionService } from '../services/subscriptionService';
 import { Subscription, SubscriptionTier, SubscriptionStatus } from '../models/subscriptions.model';
-const authenticateToken = require('../middleware/auth.js');
-const { validate } = require('../middleware/validation.js');
+import { auth as authenticateToken } from '../middleware/auth';
+import { validate } from '../middleware/validation';
 import { z } from 'zod';
 
 // Type assertion helper for authenticated requests

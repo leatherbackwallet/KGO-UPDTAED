@@ -6,19 +6,84 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = require("../models/index");
 const database_1 = require("../middleware/database");
-const auth = require('../middleware/auth.js');
-const role = require('../middleware/role.js');
+const auth_1 = require("../middleware/auth");
+const role_1 = require("../middleware/role");
 const router = express_1.default.Router();
-router.post('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
-    return res.status(400).json({
-        success: false,
-        error: {
-            message: 'Direct order creation is disabled. Please use the payment flow at /api/payments/create-order',
-            code: 'DEPRECATED_ENDPOINT'
+router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
+    try {
+        const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod } = req.body;
+        const address = recipientAddress || deliveryAddress || shippingAddress;
+        if (!address) {
+            return res.status(400).json({
+                success: false,
+                error: { message: 'Recipient address is required', code: 'MISSING_ADDRESS' }
+            });
         }
-    });
+        let totalPrice = 0;
+        const orderItems = [];
+        for (const item of products) {
+            const product = await index_1.Product.findById(item.product);
+            if (!product) {
+                return res.status(400).json({
+                    success: false,
+                    error: { message: 'Product not found', code: 'PRODUCT_NOT_FOUND' }
+                });
+            }
+            const itemPrice = product.price * item.quantity;
+            totalPrice += itemPrice;
+            orderItems.push({
+                productId: item.product,
+                quantity: item.quantity,
+                price: product.price
+            });
+        }
+        const shippingDetails = {
+            recipientName: address.name || `${req.user.firstName} ${req.user.lastName}`,
+            recipientPhone: address.phone || req.user.phone,
+            address: {
+                streetName: address.address?.streetName || address.street || address.streetName,
+                houseNumber: address.address?.houseNumber || address.houseNumber || '',
+                postalCode: address.address?.postalCode || address.postalCode || address.zipCode,
+                city: address.address?.city || address.city,
+                countryCode: address.address?.countryCode || address.countryCode || address.country || 'DE'
+            },
+            specialInstructions: address.additionalInstructions || address.specialInstructions || ''
+        };
+        const order = await index_1.Order.create({
+            userId: req.user.id,
+            requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            shippingDetails,
+            orderItems,
+            totalPrice,
+            orderStatus: 'payment_done',
+            statusHistory: [{
+                    status: 'payment_done',
+                    timestamp: new Date(),
+                    notes: 'Order created and payment received'
+                }]
+        });
+        return res.status(201).json({
+            success: true,
+            data: {
+                message: 'Order created successfully',
+                order: {
+                    id: order._id,
+                    orderId: order.orderId,
+                    totalPrice: order.totalPrice,
+                    orderStatus: order.orderStatus
+                }
+            }
+        });
+    }
+    catch (err) {
+        console.error('Order creation error:', err);
+        return res.status(500).json({
+            success: false,
+            error: { message: 'Server error', code: 'SERVER_ERROR' }
+        });
+    }
 });
-router.get('/', auth, role('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
+router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const orders = await index_1.Order.find({ isDeleted: false })
             .populate('userId', 'firstName lastName email phone')
@@ -38,7 +103,7 @@ router.get('/', auth, role('admin'), database_1.ensureDatabaseConnection, async 
         return res.status(500).json({ message: 'Server error' });
     }
 });
-router.get('/my', auth, database_1.ensureDatabaseConnection, async (req, res) => {
+router.get('/my', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const orders = await index_1.Order.find({ userId: req.user.id, isDeleted: false })
             .populate({
@@ -57,7 +122,7 @@ router.get('/my', auth, database_1.ensureDatabaseConnection, async (req, res) =>
         return res.status(500).json({ message: 'Server error' });
     }
 });
-router.put('/:id/status', auth, role('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
+router.put('/:id/status', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { status, notes } = req.body;
         if (!status) {
@@ -114,7 +179,7 @@ router.put('/:id/status', auth, role('admin'), database_1.ensureDatabaseConnecti
         });
     }
 });
-router.put('/:id/recipient', auth, database_1.ensureDatabaseConnection, async (req, res) => {
+router.put('/:id/recipient', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { recipientAddress } = req.body;
         if (!recipientAddress || !recipientAddress.name || !recipientAddress.phone || !recipientAddress.address) {
@@ -181,7 +246,7 @@ router.put('/:id/recipient', auth, database_1.ensureDatabaseConnection, async (r
         });
     }
 });
-router.delete('/:id', auth, role('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
+router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const order = await index_1.Order.findByIdAndUpdate(req.params.id, { isDeleted: true }, { new: true });
         if (!order)

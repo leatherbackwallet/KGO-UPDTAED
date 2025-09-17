@@ -7,8 +7,8 @@ import { Role } from './models/roles.model';
 import { hashPassword } from './utils/hash';
 import { ensureProductImagesDir } from './utils/fileUpload';
 import { connectToDatabase } from './utils/database';
-const { generalLimiter, authLimiter, apiLimiter } = require('./middleware/rateLimit');
-const { logger, errorLogger } = require('./middleware/logger');
+import { generalLimiter, authLimiter, apiLimiter } from './middleware/rateLimit';
+import { logger, errorLogger } from './middleware/logger';
 
 dotenv.config();
 
@@ -49,7 +49,7 @@ const corsOptions = {
 app.set('trust proxy', 1);
 
 // Middleware
-app.use(generalLimiter);
+app.use(generalLimiter as any);
 app.use(logger);
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
@@ -192,24 +192,24 @@ import analyticsRoutes from './routes/analytics';
 import subscriptionRoutes from './routes/subscriptions';
 import contentRoutes from './routes/content';
 
-const productsRoutes = require('./routes/products');
+import productsRoutes from './routes/products';
 import categoriesRoutes from './routes/categories';
-const vendorsRoutes = require('./routes/vendors');
-const usersRoutes = require('./routes/users');
-const wishlistRoutes = require('./routes/wishlist');
-const cartRoutes = require('./routes/cart');
-const financeRoutes = require('./routes/finance');
-const hubsRoutes = require('./routes/hubs');
-const deliveryRunsRoutes = require('./routes/deliveryRuns');
-const returnsRoutes = require('./routes/returns');
-const healthRoutes = require('./routes/health');
-const imagesRoutes = require('./routes/images');
-const featureFlagsRoutes = require('./routes/featureFlags');
-const monitoringRoutes = require('./routes/monitoring');
-const paymentRoutes = require('./routes/payments.js');
+import vendorsRoutes from './routes/vendors';
+import usersRoutes from './routes/users';
+import wishlistRoutes from './routes/wishlist';
+import cartRoutes from './routes/cart';
+import financeRoutes from './routes/finance';
+import hubsRoutes from './routes/hubs';
+import deliveryRunsRoutes from './routes/deliveryRuns';
+import returnsRoutes from './routes/returns';
+import healthRoutes from './routes/health';
+import imagesRoutes from './routes/images';
+import featureFlagsRoutes from './routes/featureFlags';
+import monitoringRoutes from './routes/monitoring';
+import paymentRoutes from './routes/payments';
 
 // Apply health routes first
-app.use('/api/health', apiLimiter, healthRoutes);
+app.use('/api/health', apiLimiter as any, healthRoutes);
 
 // Enhanced health check with database status (backup endpoint)
 app.get('/api/health-status', async (req, res) => {
@@ -235,28 +235,28 @@ app.get('/api/health-status', async (req, res) => {
 });
 
 // Apply routes
-app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/upload', apiLimiter, uploadRoutes);
-app.use('/api/profile', apiLimiter, profileRoutes);
-app.use('/api/products', apiLimiter, productsRoutes);
-app.use('/api/categories', apiLimiter, categoriesRoutes);
-app.use('/api/vendors', apiLimiter, vendorsRoutes);
-app.use('/api/orders', apiLimiter, ordersRoutes);
-app.use('/api/payments', apiLimiter, paymentRoutes);
-app.use('/api/users', apiLimiter, usersRoutes);
-app.use('/api/wishlist', apiLimiter, wishlistRoutes);
-app.use('/api/cart', apiLimiter, cartRoutes);
-app.use('/api/finance', apiLimiter, financeRoutes);
-app.use('/api/hubs', apiLimiter, hubsRoutes);
-app.use('/api/delivery-runs', apiLimiter, deliveryRunsRoutes);
-app.use('/api/returns', apiLimiter, returnsRoutes);
-app.use('/api/personalization', apiLimiter, personalizationRoutes);
-app.use('/api/analytics', apiLimiter, analyticsRoutes);
-app.use('/api/subscriptions', apiLimiter, subscriptionRoutes);
-app.use('/api/content', apiLimiter, contentRoutes);
-app.use('/api/images', apiLimiter, imagesRoutes);
-app.use('/api/feature-flags', apiLimiter, featureFlagsRoutes);
-app.use('/api/monitoring', apiLimiter, monitoringRoutes);
+app.use('/api/auth', authLimiter as any, authRoutes);
+app.use('/api/upload', apiLimiter as any, uploadRoutes);
+app.use('/api/profile', apiLimiter as any, profileRoutes);
+app.use('/api/products', apiLimiter as any, productsRoutes);
+app.use('/api/categories', apiLimiter as any, categoriesRoutes);
+app.use('/api/vendors', apiLimiter as any, vendorsRoutes);
+app.use('/api/orders', apiLimiter as any, ordersRoutes);
+app.use('/api/payments', apiLimiter as any, paymentRoutes);
+app.use('/api/users', apiLimiter as any, usersRoutes);
+app.use('/api/wishlist', apiLimiter as any, wishlistRoutes);
+app.use('/api/cart', apiLimiter as any, cartRoutes);
+app.use('/api/finance', apiLimiter as any, financeRoutes);
+app.use('/api/hubs', apiLimiter as any, hubsRoutes);
+app.use('/api/delivery-runs', apiLimiter as any, deliveryRunsRoutes);
+app.use('/api/returns', apiLimiter as any, returnsRoutes);
+app.use('/api/personalization', apiLimiter as any, personalizationRoutes);
+app.use('/api/analytics', apiLimiter as any, analyticsRoutes);
+app.use('/api/subscriptions', apiLimiter as any, subscriptionRoutes);
+app.use('/api/content', apiLimiter as any, contentRoutes);
+app.use('/api/images', apiLimiter as any, imagesRoutes);
+app.use('/api/feature-flags', apiLimiter as any, featureFlagsRoutes);
+app.use('/api/monitoring', apiLimiter as any, monitoringRoutes);
 
 // Error logging middleware
 app.use(errorLogger);

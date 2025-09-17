@@ -1,123 +1,112 @@
-/**
- * Input Validation Middleware
- * Sanitizes and validates incoming request data
- */
-
-const { z } = require('zod');
-
-// Common validation schemas
-const emailSchema = z.string().email('Invalid email format').toLowerCase().trim();
-const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
-const phoneSchema = z.string().regex(/^[\+]?[0-9\s\-\(\)]{8,}$/, 'Invalid phone number format');
-
-// User registration validation
-const registerSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters').trim(),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters').trim(),
-  email: emailSchema,
-  password: passwordSchema,
-  phone: phoneSchema
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.schemas = exports.sanitizeInput = exports.validate = exports.productSchema = exports.refreshSchema = exports.loginSchema = exports.registerSchema = void 0;
+const zod_1 = require("zod");
+const emailSchema = zod_1.z.string().email('Invalid email format').toLowerCase().trim();
+const passwordSchema = zod_1.z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+const phoneSchema = zod_1.z.string().regex(/^[\+]?[0-9\s\-\(\)]{8,}$/, 'Invalid phone number format');
+exports.registerSchema = zod_1.z.object({
+    firstName: zod_1.z.string().min(2, 'First name must be at least 2 characters').trim(),
+    lastName: zod_1.z.string().min(2, 'Last name must be at least 2 characters').trim(),
+    email: emailSchema,
+    password: passwordSchema,
+    phone: phoneSchema
 });
-
-// User login validation
-const loginSchema = z.object({
-  email: emailSchema,
-  password: z.string().min(1, 'Password is required')
+exports.loginSchema = zod_1.z.object({
+    email: emailSchema,
+    password: zod_1.z.string().min(1, 'Password is required')
 });
-
-// Product creation validation
-const productSchema = z.object({
-  name: z.object({
-    en: z.string().min(1, 'English name is required'),
-    ml: z.string().min(1, 'Malayalam name is required')
-  }),
-  description: z.object({
-    en: z.string().min(1, 'English description is required'),
-    ml: z.string().min(1, 'Malayalam description is required')
-  }),
-  price: z.number().min(0, 'Price cannot be negative'),
-  categories: z.array(z.string()).optional(),
-  stock: z.number().min(0, 'Stock cannot be negative').optional(),
-  occasions: z.array(z.string()).optional(),
-  isFeatured: z.boolean().optional()
+exports.refreshSchema = zod_1.z.object({
+    refreshToken: zod_1.z.string().min(1, 'Refresh token is required')
 });
-
-// Validation middleware factory
+exports.productSchema = zod_1.z.object({
+    name: zod_1.z.object({
+        en: zod_1.z.string().min(1, 'English name is required'),
+        ml: zod_1.z.string().min(1, 'Malayalam name is required')
+    }),
+    description: zod_1.z.object({
+        en: zod_1.z.string().min(1, 'English description is required'),
+        ml: zod_1.z.string().min(1, 'Malayalam description is required')
+    }),
+    price: zod_1.z.number().min(0, 'Price cannot be negative'),
+    categories: zod_1.z.array(zod_1.z.string()).optional(),
+    stock: zod_1.z.number().min(0, 'Stock cannot be negative').optional(),
+    occasions: zod_1.z.array(zod_1.z.string()).optional(),
+    isFeatured: zod_1.z.boolean().optional()
+});
 const validate = (schema) => {
-  return (req, res, next) => {
-    try {
-      const validatedData = schema.parse(req.body);
-      req.body = validatedData;
-      next();
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => ({
-          field: err.path.join('.'),
-          message: err.message
-        }));
-        
-        return res.status(400).json({
-          success: false,
-          error: {
-            message: 'Validation failed',
-            code: 'VALIDATION_ERROR',
-            details: errors
-          }
-        });
-      }
-      
-      return res.status(500).json({
-        success: false,
-        error: {
-          message: 'Validation error',
-          code: 'VALIDATION_ERROR'
+    return (req, res, next) => {
+        try {
+            const validatedData = schema.parse(req.body);
+            req.body = validatedData;
+            next();
         }
-      });
-    }
-  };
+        catch (error) {
+            if (error instanceof zod_1.z.ZodError) {
+                const errors = error.errors.map(err => ({
+                    field: err.path.join('.'),
+                    message: err.message
+                }));
+                const response = {
+                    success: false,
+                    error: {
+                        message: 'Validation failed',
+                        code: 'VALIDATION_ERROR',
+                        details: errors
+                    }
+                };
+                res.status(400).json(response);
+                return;
+            }
+            const response = {
+                success: false,
+                error: {
+                    message: 'Validation error',
+                    code: 'VALIDATION_ERROR'
+                }
+            };
+            res.status(500).json(response);
+        }
+    };
 };
-
-// Sanitization middleware
+exports.validate = validate;
 const sanitizeInput = (req, res, next) => {
-  // Sanitize string inputs
-  const sanitizeString = (str) => {
-    if (typeof str !== 'string') return str;
-    return str
-      .trim()
-      .replace(/[<>]/g, '') // Remove potential HTML tags
-      .replace(/javascript:/gi, '') // Remove javascript: protocol
-      .replace(/on\w+=/gi, ''); // Remove event handlers
-  };
-
-  // Recursively sanitize object
-  const sanitizeObject = (obj) => {
-    if (typeof obj !== 'object' || obj === null) return obj;
-    
-    if (Array.isArray(obj)) {
-      return obj.map(sanitizeObject);
-    }
-    
-    const sanitized = {};
-    for (const [key, value] of Object.entries(obj)) {
-      sanitized[key] = typeof value === 'string' ? sanitizeString(value) : sanitizeObject(value);
-    }
-    return sanitized;
-  };
-
-  // Sanitize request body, query, and params
-  if (req.body) req.body = sanitizeObject(req.body);
-  if (req.query) req.query = sanitizeObject(req.query);
-  if (req.params) req.params = sanitizeObject(req.params);
-  
-  next();
+    const sanitizeString = (str) => {
+        if (typeof str !== 'string')
+            return str;
+        return str
+            .trim()
+            .replace(/[<>]/g, '')
+            .replace(/javascript:/gi, '')
+            .replace(/on\w+=/gi, '');
+    };
+    const sanitizeObject = (obj) => {
+        if (typeof obj !== 'object' || obj === null)
+            return obj;
+        if (Array.isArray(obj)) {
+            return obj.map(sanitizeObject);
+        }
+        const sanitized = {};
+        for (const [key, value] of Object.entries(obj)) {
+            sanitized[key] = typeof value === 'string' ? sanitizeString(value) : sanitizeObject(value);
+        }
+        return sanitized;
+    };
+    if (req.body)
+        req.body = sanitizeObject(req.body);
+    if (req.query)
+        req.query = sanitizeObject(req.query);
+    if (req.params)
+        req.params = sanitizeObject(req.params);
+    next();
 };
-
-module.exports = {
-  validate,
-  sanitizeInput,
-  schemas: {
-    register: registerSchema,
-    login: loginSchema,
-    product: productSchema
-  }
-}; 
+exports.sanitizeInput = sanitizeInput;
+exports.schemas = {
+    register: exports.registerSchema,
+    login: exports.loginSchema,
+    refresh: exports.refreshSchema,
+    product: exports.productSchema
+};
+//# sourceMappingURL=validation.js.map

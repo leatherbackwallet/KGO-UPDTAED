@@ -6,8 +6,8 @@
 import express from 'express';
 import { Content, IContent, ContentType, ContentStatus } from '../models/content.model';
 import { UserPreferences, IUserPreferences } from '../models/userPreferences.model';
-const authenticateToken = require('../middleware/auth.js');
-const { validate } = require('../middleware/validation.js');
+import { auth as authenticateToken } from '../middleware/auth';
+import { validate } from '../middleware/validation';
 import { z } from 'zod';
 
 const router = express.Router();

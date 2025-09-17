@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const personalizationService_1 = require("../services/personalizationService");
 const userPreferences_model_1 = require("../models/userPreferences.model");
-const auth = require('../middleware/auth.js');
-const { validate, sanitizeInput } = require('../middleware/validation.js');
+const auth_1 = require("../middleware/auth");
+const validation_1 = require("../middleware/validation");
 const zod_1 = require("zod");
 const router = express_1.default.Router();
 const updatePreferencesSchema = zod_1.z.object({
@@ -29,7 +29,7 @@ const culturalPreferencesSchema = zod_1.z.object({
     modernItems: zod_1.z.boolean(),
     dietaryRestrictions: zod_1.z.array(zod_1.z.string())
 });
-router.get('/recommendations', auth, async (req, res) => {
+router.get('/recommendations', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const limit = parseInt(req.query.limit) || 10;
@@ -50,7 +50,7 @@ router.get('/recommendations', auth, async (req, res) => {
         });
     }
 });
-router.get('/insights', auth, async (req, res) => {
+router.get('/insights', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const insights = await personalizationService_1.personalizationService.getUserInsights(userId);
@@ -67,7 +67,7 @@ router.get('/insights', auth, async (req, res) => {
         });
     }
 });
-router.post('/update-preferences', auth, sanitizeInput, validate(updatePreferencesSchema), async (req, res) => {
+router.post('/update-preferences', auth_1.auth, validation_1.sanitizeInput, (0, validation_1.validate)(updatePreferencesSchema), async (req, res) => {
     try {
         const userId = req.user.id;
         const { action, data } = req.body;
@@ -85,7 +85,7 @@ router.post('/update-preferences', auth, sanitizeInput, validate(updatePreferenc
         });
     }
 });
-router.get('/preferences', auth, async (req, res) => {
+router.get('/preferences', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const preferences = await userPreferences_model_1.UserPreferences.findOne({ userId });
@@ -108,7 +108,7 @@ router.get('/preferences', auth, async (req, res) => {
         });
     }
 });
-router.put('/cultural-preferences', auth, sanitizeInput, validate(culturalPreferencesSchema), async (req, res) => {
+router.put('/cultural-preferences', auth_1.auth, validation_1.sanitizeInput, (0, validation_1.validate)(culturalPreferencesSchema), async (req, res) => {
     try {
         const userId = req.user.id;
         const culturalPreferences = req.body;
@@ -135,7 +135,7 @@ router.put('/cultural-preferences', auth, sanitizeInput, validate(culturalPrefer
         });
     }
 });
-router.get('/festival-recommendations', auth, async (req, res) => {
+router.get('/festival-recommendations', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const festival = req.query.festival;
@@ -164,7 +164,7 @@ router.get('/festival-recommendations', auth, async (req, res) => {
         });
     }
 });
-router.get('/seasonal-recommendations', auth, async (req, res) => {
+router.get('/seasonal-recommendations', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const currentMonth = new Date().getMonth() + 1;
@@ -187,7 +187,7 @@ router.get('/seasonal-recommendations', auth, async (req, res) => {
         });
     }
 });
-router.get('/similar-users', auth, async (req, res) => {
+router.get('/similar-users', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const limit = parseInt(req.query.limit) || 10;
@@ -209,7 +209,7 @@ router.get('/similar-users', auth, async (req, res) => {
         });
     }
 });
-router.post('/track-behavior', auth, async (req, res) => {
+router.post('/track-behavior', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const { event, data } = req.body;
@@ -227,7 +227,7 @@ router.post('/track-behavior', auth, async (req, res) => {
         });
     }
 });
-router.get('/engagement-metrics', auth, async (req, res) => {
+router.get('/engagement-metrics', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const preferences = await userPreferences_model_1.UserPreferences.findOne({ userId });

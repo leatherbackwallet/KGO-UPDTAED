@@ -2,7 +2,7 @@
  * Profile Routes - User profile management including avatar, password reset, and address management
  */
 
-import express from 'express';
+import express, { Response } from 'express';
 import multer from 'multer';
 import { User } from '../models/index';
 import { hashPassword, comparePassword } from '../utils/hash';
@@ -12,7 +12,7 @@ import { ensureDatabaseConnection } from '../middleware/database';
 const router = express.Router();
 
 // Import auth middleware with proper typing
-const auth = require('../middleware/auth.js') as express.RequestHandler;
+import { auth } from '../middleware/auth';
 
 // Configure multer for file uploads
 const upload = multer({
@@ -117,7 +117,7 @@ router.put('/', auth, ensureDatabaseConnection, async (req: AuthenticatedRequest
 });
 
 // Upload avatar
-router.post('/avatar', auth, upload.single('avatar'), async (req: AuthenticatedRequest, res: any) => {
+router.post('/avatar', auth, upload.single('avatar') as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!req.user?.id) {
       return res.status(401).json({

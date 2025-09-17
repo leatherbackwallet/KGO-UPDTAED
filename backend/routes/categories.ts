@@ -1,8 +1,8 @@
 import express from 'express';
 import { Category } from '../models/categories.model';
 import { ensureDatabaseConnection } from '../middleware/database';
-const { cacheConfigs } = require('../middleware/cache');
-const { deduplicateRequests } = require('../middleware/requestBatching.js');
+import { cacheConfigs } from '../middleware/cache';
+import { deduplicateRequests } from '../middleware/requestBatching';
 
 const router = express.Router();
 

@@ -6,8 +6,8 @@
 import express from 'express';
 import { Order, Product } from '../models/index';
 import { ensureDatabaseConnection } from '../middleware/database';
-const auth = require('../middleware/auth.js');
-const role = require('../middleware/role.js');
+import { auth } from '../middleware/auth';
+import { requireRole } from '../middleware/role';
 
 const router = express.Router();
 
@@ -99,7 +99,7 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
 });
 
 // Get all orders (admin)
-router.get('/', auth, role('admin'), ensureDatabaseConnection, async (req: any, res) => {
+router.get('/', auth, requireRole('admin'), ensureDatabaseConnection, async (req: any, res) => {
   try {
     const orders = await Order.find({ isDeleted: false })
       .populate('userId', 'firstName lastName email phone')
@@ -140,7 +140,7 @@ router.get('/my', auth, ensureDatabaseConnection, async (req: any, res) => {
 });
 
 // Update order status with timeline tracking (admin)
-router.put('/:id/status', auth, role('admin'), ensureDatabaseConnection, async (req: any, res) => {
+router.put('/:id/status', auth, requireRole('admin'), ensureDatabaseConnection, async (req: any, res) => {
   try {
     const { status, notes } = req.body;
     
@@ -291,7 +291,7 @@ router.put('/:id/recipient', auth, ensureDatabaseConnection, async (req: any, re
 });
 
 // Delete order (admin)
-router.delete('/:id', auth, role('admin'), ensureDatabaseConnection, async (req: any, res) => {
+router.delete('/:id', auth, requireRole('admin'), ensureDatabaseConnection, async (req: any, res) => {
   try {
     const order = await Order.findByIdAndUpdate(req.params.id, { isDeleted: true }, { new: true });
     if (!order) return res.status(404).json({ message: 'Order not found' });

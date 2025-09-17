@@ -4,7 +4,7 @@ import { hashPassword, comparePassword } from '../utils/hash';
 import { generateTokenPair, verifyRefreshToken } from '../utils/jwt';
 import { v4 as uuidv4 } from 'uuid';
 import { ensureDatabaseConnection } from '../middleware/database';
-const { validate, sanitizeInput, schemas } = require('../middleware/validation.js');
+import { validate, sanitizeInput, schemas } from '../middleware/validation';
 
 const router = express.Router();
 

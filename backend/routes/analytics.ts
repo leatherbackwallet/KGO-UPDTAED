@@ -6,8 +6,8 @@
 import express from 'express';
 import { analyticsService } from '../services/analyticsService';
 import { Analytics } from '../models/analytics.model';
-const auth = require('../middleware/auth.js');
-const role = require('../middleware/role.js');
+import { auth } from '../middleware/auth';
+import { requireRole } from '../middleware/role';
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ const router = express.Router();
  * GET /api/analytics/summary
  * Get analytics summary for dashboard
  */
-router.get('/summary', auth, role(['admin']), async (req: any, res) => {
+router.get('/summary', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const summary = await analyticsService.getAnalyticsSummary();
 
@@ -36,7 +36,7 @@ router.get('/summary', auth, role(['admin']), async (req: any, res) => {
  * GET /api/analytics/generate
  * Generate comprehensive analytics for a date range
  */
-router.get('/generate', auth, role(['admin']), async (req: any, res) => {
+router.get('/generate', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const { startDate, endDate } = req.query;
 
@@ -69,7 +69,7 @@ router.get('/generate', auth, role(['admin']), async (req: any, res) => {
  * GET /api/analytics/customer
  * Get customer analytics
  */
-router.get('/customer', auth, role(['admin']), async (req: any, res) => {
+router.get('/customer', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const { startDate, endDate } = req.query;
     const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -97,7 +97,7 @@ router.get('/customer', auth, role(['admin']), async (req: any, res) => {
  * GET /api/analytics/sales
  * Get sales analytics
  */
-router.get('/sales', auth, role(['admin']), async (req: any, res) => {
+router.get('/sales', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const { startDate, endDate } = req.query;
     const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -125,7 +125,7 @@ router.get('/sales', auth, role(['admin']), async (req: any, res) => {
  * GET /api/analytics/products
  * Get product analytics
  */
-router.get('/products', auth, role(['admin']), async (req: any, res) => {
+router.get('/products', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const { startDate, endDate } = req.query;
     const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -153,7 +153,7 @@ router.get('/products', auth, role(['admin']), async (req: any, res) => {
  * GET /api/analytics/financial
  * Get financial analytics
  */
-router.get('/financial', auth, role(['admin']), async (req: any, res) => {
+router.get('/financial', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const { startDate, endDate } = req.query;
     const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -181,7 +181,7 @@ router.get('/financial', auth, role(['admin']), async (req: any, res) => {
  * GET /api/analytics/cultural
  * Get cultural analytics
  */
-router.get('/cultural', auth, role(['admin']), async (req: any, res) => {
+router.get('/cultural', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const { startDate, endDate } = req.query;
     const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -209,7 +209,7 @@ router.get('/cultural', auth, role(['admin']), async (req: any, res) => {
  * GET /api/analytics/operational
  * Get operational analytics
  */
-router.get('/operational', auth, role(['admin']), async (req: any, res) => {
+router.get('/operational', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const { startDate, endDate } = req.query;
     const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -237,7 +237,7 @@ router.get('/operational', auth, role(['admin']), async (req: any, res) => {
  * GET /api/analytics/predictive
  * Get predictive analytics
  */
-router.get('/predictive', auth, role(['admin']), async (req: any, res) => {
+router.get('/predictive', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const { startDate, endDate } = req.query;
     const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -265,7 +265,7 @@ router.get('/predictive', auth, role(['admin']), async (req: any, res) => {
  * GET /api/analytics/real-time
  * Get real-time metrics
  */
-router.get('/real-time', auth, role(['admin']), async (req: any, res) => {
+router.get('/real-time', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const analytics = await Analytics.findOne().sort({ createdAt: -1 });
 
@@ -293,7 +293,7 @@ router.get('/real-time', auth, role(['admin']), async (req: any, res) => {
  * GET /api/analytics/history
  * Get analytics history
  */
-router.get('/history', auth, role(['admin']), async (req: any, res) => {
+router.get('/history', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const { limit = 30, startDate, endDate } = req.query;
     
@@ -331,7 +331,7 @@ router.get('/history', auth, role(['admin']), async (req: any, res) => {
  * POST /api/analytics/export
  * Export analytics data
  */
-router.post('/export', auth, role(['admin']), async (req: any, res) => {
+router.post('/export', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const { startDate, endDate, format = 'json' } = req.body;
 
@@ -369,7 +369,7 @@ router.post('/export', auth, role(['admin']), async (req: any, res) => {
  * GET /api/analytics/dashboard
  * Get dashboard metrics
  */
-router.get('/dashboard', auth, role(['admin']), async (req: any, res) => {
+router.get('/dashboard', auth, requireRole('admin'), async (req: any, res) => {
   try {
     const summary = await analyticsService.getAnalyticsSummary();
 

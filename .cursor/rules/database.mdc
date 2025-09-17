@@ -1,0 +1,5 @@
+---
+description: always connect to keralagiftsonline database . 
+globs: always connect to keralagiftsonline database . never connect to test or local database. always connect to atlas mongodb and never to local db 
+alwaysApply: true
+---

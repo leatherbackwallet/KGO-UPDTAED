@@ -10,7 +10,7 @@ const hash_1 = require("../utils/hash");
 const fileUpload_1 = require("../utils/fileUpload");
 const database_1 = require("../middleware/database");
 const router = express_1.default.Router();
-const auth = require('../middleware/auth.js');
+const auth_1 = require("../middleware/auth");
 const upload = (0, multer_1.default)({
     storage: multer_1.default.memoryStorage(),
     limits: {
@@ -25,7 +25,7 @@ const upload = (0, multer_1.default)({
         }
     },
 });
-router.get('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
+router.get('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -55,7 +55,7 @@ router.get('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
         });
     }
 });
-router.put('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
+router.put('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -90,7 +90,7 @@ router.put('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
         });
     }
 });
-router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
+router.post('/avatar', auth_1.auth, upload.single('avatar'), async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -135,7 +135,7 @@ router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
         });
     }
 });
-router.delete('/avatar', auth, async (req, res) => {
+router.delete('/avatar', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -173,7 +173,7 @@ router.delete('/avatar', auth, async (req, res) => {
         });
     }
 });
-router.put('/password', auth, async (req, res) => {
+router.put('/password', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -224,7 +224,7 @@ router.put('/password', auth, async (req, res) => {
         });
     }
 });
-router.get('/addresses', auth, async (req, res) => {
+router.get('/addresses', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -252,7 +252,7 @@ router.get('/addresses', auth, async (req, res) => {
         });
     }
 });
-router.post('/addresses', auth, async (req, res) => {
+router.post('/addresses', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -318,7 +318,7 @@ router.post('/addresses', auth, async (req, res) => {
         });
     }
 });
-router.put('/addresses/:index', auth, async (req, res) => {
+router.put('/addresses/:index', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -392,7 +392,7 @@ router.put('/addresses/:index', auth, async (req, res) => {
         });
     }
 });
-router.delete('/addresses/:index', auth, async (req, res) => {
+router.delete('/addresses/:index', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -441,7 +441,7 @@ router.delete('/addresses/:index', auth, async (req, res) => {
         });
     }
 });
-router.put('/addresses/:index/default', auth, async (req, res) => {
+router.put('/addresses/:index/default', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({

@@ -8,9 +8,9 @@ const index_1 = require("../models/index");
 const hash_1 = require("../utils/hash");
 const jwt_1 = require("../utils/jwt");
 const database_1 = require("../middleware/database");
-const { validate, sanitizeInput, schemas } = require('../middleware/validation.js');
+const validation_1 = require("../middleware/validation");
 const router = express_1.default.Router();
-router.post('/register', sanitizeInput, validate(schemas.register), database_1.ensureDatabaseConnection, async (req, res) => {
+router.post('/register', validation_1.sanitizeInput, (0, validation_1.validate)(validation_1.schemas.register), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { firstName, lastName, email, password, phone } = req.body;
         if (!firstName || !lastName || !email || !password || !phone) {
@@ -141,7 +141,7 @@ router.post('/register', sanitizeInput, validate(schemas.register), database_1.e
         });
     }
 });
-router.post('/login', sanitizeInput, validate(schemas.login), database_1.ensureDatabaseConnection, async (req, res) => {
+router.post('/login', validation_1.sanitizeInput, (0, validation_1.validate)(validation_1.schemas.login), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
