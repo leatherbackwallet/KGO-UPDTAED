@@ -200,7 +200,16 @@ export default function Checkout() {
     try {
       // Place order using authenticated user's details
       await api.post('/orders', {
-        products: cart.map(item => ({ product: item.product, quantity: item.quantity })),
+        products: cart.map(item => ({
+          product: item.product,
+          quantity: item.quantity,
+          // Include combo-specific fields if it's a combo product
+          ...(item.isCombo && {
+            isCombo: item.isCombo,
+            comboBasePrice: item.comboBasePrice,
+            comboItemConfigurations: item.comboItemConfigurations
+          })
+        })),
         paymentMethod: guestData.paymentMethod,
         recipientAddress: {
           name: selectedRecipientAddress.name,

@@ -9,6 +9,7 @@ import paymentService from '../services/payment.service';
 import { Order, Product } from '../models/index';
 import { ensureDatabaseConnection } from '../middleware/database';
 import { auth } from '../middleware/auth';
+import { calculateComboPrice } from '../utils/comboUtils';
 
 const router = express.Router();
 
@@ -16,6 +17,14 @@ const validatePaymentOrder = [
     body('products').isArray().withMessage('Products must be an array'),
     body('products.*.product').isMongoId().withMessage('Invalid product ID'),
     body('products.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
+    // Combo product validation
+    body('products.*.isCombo').optional().isBoolean().withMessage('isCombo must be a boolean'),
+    body('products.*.comboBasePrice').optional().isNumeric().withMessage('comboBasePrice must be a number'),
+    body('products.*.comboItemConfigurations').optional().isArray().withMessage('comboItemConfigurations must be an array'),
+    body('products.*.comboItemConfigurations.*.name').optional().notEmpty().withMessage('Combo item name is required'),
+    body('products.*.comboItemConfigurations.*.unitPrice').optional().isNumeric().withMessage('Combo item unit price must be a number'),
+    body('products.*.comboItemConfigurations.*.quantity').optional().isNumeric().withMessage('Combo item quantity must be a number'),
+    body('products.*.comboItemConfigurations.*.unit').optional().notEmpty().withMessage('Combo item unit is required'),
     body('recipientAddress').isObject().withMessage('Recipient address is required'),
     body('recipientAddress.name').notEmpty().withMessage('Recipient name is required'),
     body('recipientAddress.phone').notEmpty().withMessage('Recipient phone is required'),
@@ -77,15 +86,68 @@ router.post('/create-order', auth, ensureDatabaseConnection, validatePaymentOrde
                 return;
             }
 
-            const itemTotal = product.price * item.quantity;
-            totalAmount += itemTotal;
-
-            orderItems.push({
+            let itemTotal: number;
+            let itemPrice: number;
+            let orderItemData: any = {
                 productId: product._id,
                 quantity: item.quantity,
-                price: product.price,
-                total: itemTotal
-            });
+                isCombo: false,
+                comboBasePrice: 0,
+                comboItemConfigurations: []
+            };
+
+            // Handle combo products
+            if (product.isCombo && item.isCombo) {
+                // Validate combo configuration
+                if (!item.comboItemConfigurations || !Array.isArray(item.comboItemConfigurations)) {
+                    res.status(400).json({
+                        success: false,
+                        error: {
+                            message: `Combo product ${product.name} requires comboItemConfigurations`,
+                            code: 'MISSING_COMBO_CONFIG'
+                        }
+                    });
+                    return;
+                }
+
+                // Validate combo base price matches
+                if (item.comboBasePrice !== product.comboBasePrice) {
+                    res.status(400).json({
+                        success: false,
+                        error: {
+                            message: `Combo base price mismatch for product ${product.name}`,
+                            code: 'COMBO_PRICE_MISMATCH'
+                        }
+                    });
+                    return;
+                }
+
+                // Recalculate combo price server-side
+                itemPrice = calculateComboPrice(product.comboBasePrice || 0, item.comboItemConfigurations);
+                itemTotal = itemPrice * item.quantity;
+
+                // Store combo configuration
+                orderItemData.isCombo = true;
+                orderItemData.comboBasePrice = product.comboBasePrice || 0;
+                orderItemData.comboItemConfigurations = item.comboItemConfigurations;
+                orderItemData.price = itemPrice;
+                orderItemData.total = itemTotal;
+            } else if (product.isCombo && !item.isCombo) {
+                // Combo product but not sent as combo - use base price
+                itemPrice = product.comboBasePrice || 0;
+                itemTotal = itemPrice * item.quantity;
+                orderItemData.price = itemPrice;
+                orderItemData.total = itemTotal;
+            } else {
+                // Regular product
+                itemPrice = product.price;
+                itemTotal = itemPrice * item.quantity;
+                orderItemData.price = itemPrice;
+                orderItemData.total = itemTotal;
+            }
+
+            totalAmount += itemTotal;
+            orderItems.push(orderItemData);
         }
 
         // Create Razorpay order

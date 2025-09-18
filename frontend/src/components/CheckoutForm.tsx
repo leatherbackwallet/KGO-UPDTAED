@@ -103,7 +103,13 @@ export default function CheckoutForm() {
       await api.post('/orders', {
         products: cart.map(item => ({
           product: item.product,
-          quantity: item.quantity
+          quantity: item.quantity,
+          // Include combo-specific fields if it's a combo product
+          ...(item.isCombo && {
+            isCombo: item.isCombo,
+            comboBasePrice: item.comboBasePrice,
+            comboItemConfigurations: item.comboItemConfigurations
+          })
         })),
         recipientAddress: {
           name: selectedRecipientAddress.name,

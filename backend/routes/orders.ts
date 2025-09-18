@@ -8,6 +8,7 @@ import { Order, Product } from '../models/index';
 import { ensureDatabaseConnection } from '../middleware/database';
 import { auth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
+import { calculateComboPrice } from '../utils/comboUtils';
 
 const router = express.Router();
 
@@ -38,14 +39,61 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
           error: { message: 'Product not found', code: 'PRODUCT_NOT_FOUND' } 
         });
       }
-      const itemPrice = product.price * item.quantity;
-      totalPrice += itemPrice;
-      
-      orderItems.push({
+
+      let itemPrice: number;
+      let orderItemData: any = {
         productId: item.product,
         quantity: item.quantity,
-        price: product.price
-      });
+        isCombo: false,
+        comboBasePrice: 0,
+        comboItemConfigurations: []
+      };
+
+      // Handle combo products
+      if (product.isCombo && item.isCombo) {
+        // Validate combo configuration
+        if (!item.comboItemConfigurations || !Array.isArray(item.comboItemConfigurations)) {
+          return res.status(400).json({
+            success: false,
+            error: {
+              message: `Combo product ${product.name} requires comboItemConfigurations`,
+              code: 'MISSING_COMBO_CONFIG'
+            }
+          });
+        }
+
+        // Validate combo base price matches
+        if (item.comboBasePrice !== product.comboBasePrice) {
+          return res.status(400).json({
+            success: false,
+            error: {
+              message: `Combo base price mismatch for product ${product.name}`,
+              code: 'COMBO_PRICE_MISMATCH'
+            }
+          });
+        }
+
+        // Recalculate combo price server-side
+        itemPrice = calculateComboPrice(product.comboBasePrice || 0, item.comboItemConfigurations);
+
+        // Store combo configuration
+        orderItemData.isCombo = true;
+        orderItemData.comboBasePrice = product.comboBasePrice || 0;
+        orderItemData.comboItemConfigurations = item.comboItemConfigurations;
+        orderItemData.price = itemPrice;
+      } else if (product.isCombo && !item.isCombo) {
+        // Combo product but not sent as combo - use base price
+        itemPrice = product.comboBasePrice || 0;
+        orderItemData.price = itemPrice;
+      } else {
+        // Regular product
+        itemPrice = product.price;
+        orderItemData.price = itemPrice;
+      }
+
+      const itemTotal = itemPrice * item.quantity;
+      totalPrice += itemTotal;
+      orderItems.push(orderItemData);
     }
     
     // Prepare shipping details - handle both new recipientAddress format and legacy formats
