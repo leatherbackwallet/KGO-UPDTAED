@@ -17,33 +17,33 @@ const auth_1 = require("../middleware/auth");
 const comboUtils_1 = require("../utils/comboUtils");
 const router = express_1.default.Router();
 const validatePaymentOrder = [
-    express_validator_1.default.expressValidator.body('products').isArray().withMessage('Products must be an array'),
-    express_validator_1.default.expressValidator.body('products.*.product').isMongoId().withMessage('Invalid product ID'),
-    express_validator_1.default.expressValidator.body('products.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
+    express_validator_1.default.body('products').isArray().withMessage('Products must be an array'),
+    express_validator_1.default.body('products.*.product').isMongoId().withMessage('Invalid product ID'),
+    express_validator_1.default.body('products.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
     // Combo product validation
-    express_validator_1.default.expressValidator.body('products.*.isCombo').optional().isBoolean().withMessage('isCombo must be a boolean'),
-    express_validator_1.default.expressValidator.body('products.*.comboBasePrice').optional().isNumeric().withMessage('comboBasePrice must be a number'),
-    express_validator_1.default.expressValidator.body('products.*.comboItemConfigurations').optional().isArray().withMessage('comboItemConfigurations must be an array'),
-    express_validator_1.default.expressValidator.body('products.*.comboItemConfigurations.*.name').optional().notEmpty().withMessage('Combo item name is required'),
-    express_validator_1.default.expressValidator.body('products.*.comboItemConfigurations.*.unitPrice').optional().isNumeric().withMessage('Combo item unit price must be a number'),
-    express_validator_1.default.expressValidator.body('products.*.comboItemConfigurations.*.quantity').optional().isNumeric().withMessage('Combo item quantity must be a number'),
-    express_validator_1.default.expressValidator.body('products.*.comboItemConfigurations.*.unit').optional().notEmpty().withMessage('Combo item unit is required'),
-    express_validator_1.default.expressValidator.body('recipientAddress').isObject().withMessage('Recipient address is required'),
-    express_validator_1.default.expressValidator.body('recipientAddress.name').notEmpty().withMessage('Recipient name is required'),
-    express_validator_1.default.expressValidator.body('recipientAddress.phone').notEmpty().withMessage('Recipient phone is required'),
-    express_validator_1.default.expressValidator.body('recipientAddress.address').isObject().withMessage('Address details are required'),
-    express_validator_1.default.expressValidator.body('recipientAddress.address.streetName').notEmpty().withMessage('Street name is required'),
-    express_validator_1.default.expressValidator.body('recipientAddress.address.postalCode').notEmpty().withMessage('Postal code is required'),
-    express_validator_1.default.expressValidator.body('recipientAddress.address.city').notEmpty().withMessage('City is required')
+    express_validator_1.default.body('products.*.isCombo').optional().isBoolean().withMessage('isCombo must be a boolean'),
+    express_validator_1.default.body('products.*.comboBasePrice').optional().isNumeric().withMessage('comboBasePrice must be a number'),
+    express_validator_1.default.body('products.*.comboItemConfigurations').optional().isArray().withMessage('comboItemConfigurations must be an array'),
+    express_validator_1.default.body('products.*.comboItemConfigurations.*.name').optional().notEmpty().withMessage('Combo item name is required'),
+    express_validator_1.default.body('products.*.comboItemConfigurations.*.unitPrice').optional().isNumeric().withMessage('Combo item unit price must be a number'),
+    express_validator_1.default.body('products.*.comboItemConfigurations.*.quantity').optional().isNumeric().withMessage('Combo item quantity must be a number'),
+    express_validator_1.default.body('products.*.comboItemConfigurations.*.unit').optional().notEmpty().withMessage('Combo item unit is required'),
+    express_validator_1.default.body('recipientAddress').isObject().withMessage('Recipient address is required'),
+    express_validator_1.default.body('recipientAddress.name').notEmpty().withMessage('Recipient name is required'),
+    express_validator_1.default.body('recipientAddress.phone').notEmpty().withMessage('Recipient phone is required'),
+    express_validator_1.default.body('recipientAddress.address').isObject().withMessage('Address details are required'),
+    express_validator_1.default.body('recipientAddress.address.streetName').notEmpty().withMessage('Street name is required'),
+    express_validator_1.default.body('recipientAddress.address.postalCode').notEmpty().withMessage('Postal code is required'),
+    express_validator_1.default.body('recipientAddress.address.city').notEmpty().withMessage('City is required')
 ];
 const validatePaymentVerification = [
-    express_validator_1.default.expressValidator.body('razorpay_order_id').notEmpty().withMessage('Razorpay order ID is required'),
-    express_validator_1.default.expressValidator.body('razorpay_payment_id').notEmpty().withMessage('Razorpay payment ID is required'),
-    express_validator_1.default.expressValidator.body('razorpay_signature').notEmpty().withMessage('Razorpay signature is required')
+    express_validator_1.default.body('razorpay_order_id').notEmpty().withMessage('Razorpay order ID is required'),
+    express_validator_1.default.body('razorpay_payment_id').notEmpty().withMessage('Razorpay payment ID is required'),
+    express_validator_1.default.body('razorpay_signature').notEmpty().withMessage('Razorpay signature is required')
 ];
 router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentOrder, async (req, res) => {
     try {
-        const errors = express_validator_1.default.expressValidator.validationResult(req);
+        const errors = express_validator_1.default.validationResult(req);
         if (!errors.isEmpty()) {
             res.status(400).json({
                 success: false,
@@ -179,7 +179,7 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
 });
 router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentVerification, async (req, res) => {
     try {
-        const errors = express_validator_1.default.expressValidator.validationResult(req);
+        const errors = express_validator_1.default.validationResult(req);
         if (!errors.isEmpty()) {
             res.status(400).json({
                 success: false,
