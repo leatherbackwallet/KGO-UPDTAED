@@ -105,36 +105,7 @@ const ProductsPage: React.FC = () => {
   }, [fallbackTimeoutRef]);
 
   // Smart lazy loading with intersection observer
-  useEffect(() => {
-    if (!isClient) return;
-
-    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && !loadingMore && products.length > currentPage * PRODUCTS_PER_PAGE) {
-          console.log('🔍 Lazy loading triggered - loading more products');
-          setCurrentPage(prev => prev + 1);
-          setLoadingMore(true);
-          setTimeout(() => setLoadingMore(false), 500);
-        }
-      });
-    };
-
-    // Create observer with preload threshold (trigger when element is 2 screens away)
-    observerRef.current = new IntersectionObserver(handleIntersection, {
-      rootMargin: `${window.innerHeight * PRELOAD_SCROLLS}px 0px 0px 0px`, // Preload 2 scrolls ahead
-      threshold: 0.1
-    });
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [isClient, loadingMore, products.length, currentPage, PRELOAD_SCROLLS]);
+  // No longer needed - showing all products at once
 
   const fetchProducts = useCallback(async (retryCount = 0) => {
     const MAX_RETRIES = 3;
@@ -160,6 +131,9 @@ const ProductsPage: React.FC = () => {
       if (selectedOccasions.length > 0) params.append('occasions', selectedOccasions.join(','));
       if (min) params.append('minPrice', min);
       if (max) params.append('maxPrice', max);
+      
+      // Fetch all products initially to avoid pagination issues
+      params.append('limit', '100');
       
       // Add cache busting parameter
       params.append('_t', Date.now().toString());
@@ -383,7 +357,7 @@ const ProductsPage: React.FC = () => {
               <>
                 {/* Professional Product Grid with Smooth Transitions */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {products.slice(0, currentPage * PRODUCTS_PER_PAGE).map((product, index) => (
+                  {products.map((product, index) => (
                     <div 
                       key={product._id}
                       className="opacity-0 animate-fade-in"
@@ -409,60 +383,12 @@ const ProductsPage: React.FC = () => {
                   )}
                 </div>
                 
-                {/* Professional Load More Section */}
-                {products.length > currentPage * PRODUCTS_PER_PAGE && (
-                  <div className="text-center mt-12">
-                    {/* Intersection observer target for smart lazy loading */}
-                    <div ref={loadMoreRef} className="h-4 mb-6"></div>
-                    
-                    {/* Professional loading indicator */}
-                    <div className="space-y-4">
-                      <div className="inline-flex items-center px-4 py-2 bg-gray-50 rounded-full text-gray-600 text-sm">
-                        Showing {currentPage * PRODUCTS_PER_PAGE} of {products.length} products
-                      </div>
-                      
-                      <button
-                        onClick={() => {
-                          console.log('🔍 Load more clicked - professional UX');
-                          setCurrentPage(prev => prev + 1);
-                          setLoadingMore(true);
-                          
-                          // Preload images for next batch
-                          const nextBatchStart = currentPage * PRODUCTS_PER_PAGE;
-                          const nextBatchEnd = Math.min((currentPage + 1) * PRODUCTS_PER_PAGE, products.length);
-                          const nextBatchProducts = products.slice(nextBatchStart, nextBatchEnd);
-                          
-                          if (nextBatchProducts.length > 0) {
-                            preloadProductImages(nextBatchProducts, 1, nextBatchProducts.length);
-                          }
-                          
-                          setTimeout(() => setLoadingMore(false), 800); // Smooth transition
-                        }}
-                        disabled={loadingMore}
-                        className="bg-gradient-to-r from-green-600 to-green-700 text-white px-10 py-4 rounded-full font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                      >
-                        {loadingMore ? (
-                          <div className="flex items-center">
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                            Loading {Math.min(PRODUCTS_PER_PAGE, products.length - currentPage * PRODUCTS_PER_PAGE)} more products...
-                          </div>
-                        ) : (
-                          <>
-                            <span className="flex items-center">
-                              Load More Products
-                              <span className="ml-2 bg-white bg-opacity-20 rounded-full px-2 py-1 text-xs font-bold">
-                                +{Math.min(PRODUCTS_PER_PAGE, products.length - currentPage * PRODUCTS_PER_PAGE)}
-                              </span>
-                              <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </span>
-                          </>
-                        )}
-                      </button>
-                    </div>
+                {/* Product count display */}
+                <div className="text-center mt-12">
+                  <div className="inline-flex items-center px-4 py-2 bg-gray-50 rounded-full text-gray-600 text-sm">
+                    Showing {products.length} products
                   </div>
-                )}
+                </div>
                 
                 {/* Reload Button if few products */}
                 {products.length > 0 && products.length <= 10 && (
