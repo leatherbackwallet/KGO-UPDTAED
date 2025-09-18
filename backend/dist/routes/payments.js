@@ -9,11 +9,19 @@ const payment_service_1 = __importDefault(require("../services/payment.service")
 const index_1 = require("../models/index");
 const database_1 = require("../middleware/database");
 const auth_1 = require("../middleware/auth");
+const comboUtils_1 = require("../utils/comboUtils");
 const router = express_1.default.Router();
 const validatePaymentOrder = [
     (0, express_validator_1.body)('products').isArray().withMessage('Products must be an array'),
     (0, express_validator_1.body)('products.*.product').isMongoId().withMessage('Invalid product ID'),
     (0, express_validator_1.body)('products.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
+    (0, express_validator_1.body)('products.*.isCombo').optional().isBoolean().withMessage('isCombo must be a boolean'),
+    (0, express_validator_1.body)('products.*.comboBasePrice').optional().isNumeric().withMessage('comboBasePrice must be a number'),
+    (0, express_validator_1.body)('products.*.comboItemConfigurations').optional().isArray().withMessage('comboItemConfigurations must be an array'),
+    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.name').optional().notEmpty().withMessage('Combo item name is required'),
+    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.unitPrice').optional().isNumeric().withMessage('Combo item unit price must be a number'),
+    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.quantity').optional().isNumeric().withMessage('Combo item quantity must be a number'),
+    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.unit').optional().notEmpty().withMessage('Combo item unit is required'),
     (0, express_validator_1.body)('recipientAddress').isObject().withMessage('Recipient address is required'),
     (0, express_validator_1.body)('recipientAddress.name').notEmpty().withMessage('Recipient name is required'),
     (0, express_validator_1.body)('recipientAddress.phone').notEmpty().withMessage('Recipient phone is required'),
@@ -67,14 +75,58 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
                 });
                 return;
             }
-            const itemTotal = product.price * item.quantity;
-            totalAmount += itemTotal;
-            orderItems.push({
+            let itemTotal;
+            let itemPrice;
+            let orderItemData = {
                 productId: product._id,
                 quantity: item.quantity,
-                price: product.price,
-                total: itemTotal
-            });
+                isCombo: false,
+                comboBasePrice: 0,
+                comboItemConfigurations: []
+            };
+            if (product.isCombo && item.isCombo) {
+                if (!item.comboItemConfigurations || !Array.isArray(item.comboItemConfigurations)) {
+                    res.status(400).json({
+                        success: false,
+                        error: {
+                            message: `Combo product ${product.name} requires comboItemConfigurations`,
+                            code: 'MISSING_COMBO_CONFIG'
+                        }
+                    });
+                    return;
+                }
+                if (item.comboBasePrice !== product.comboBasePrice) {
+                    res.status(400).json({
+                        success: false,
+                        error: {
+                            message: `Combo base price mismatch for product ${product.name}`,
+                            code: 'COMBO_PRICE_MISMATCH'
+                        }
+                    });
+                    return;
+                }
+                itemPrice = (0, comboUtils_1.calculateComboPrice)(product.comboBasePrice || 0, item.comboItemConfigurations);
+                itemTotal = itemPrice * item.quantity;
+                orderItemData.isCombo = true;
+                orderItemData.comboBasePrice = product.comboBasePrice || 0;
+                orderItemData.comboItemConfigurations = item.comboItemConfigurations;
+                orderItemData.price = itemPrice;
+                orderItemData.total = itemTotal;
+            }
+            else if (product.isCombo && !item.isCombo) {
+                itemPrice = product.comboBasePrice || 0;
+                itemTotal = itemPrice * item.quantity;
+                orderItemData.price = itemPrice;
+                orderItemData.total = itemTotal;
+            }
+            else {
+                itemPrice = product.price;
+                itemTotal = itemPrice * item.quantity;
+                orderItemData.price = itemPrice;
+                orderItemData.total = itemTotal;
+            }
+            totalAmount += itemTotal;
+            orderItems.push(orderItemData);
         }
         const razorpayOrder = await payment_service_1.default.createOrder(totalAmount, 'INR');
         const order = new index_1.Order({

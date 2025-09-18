@@ -619,9 +619,9 @@ const AdminProducts: React.FC = () => {
                     handleEditProduct(product);
                   }
                 }}
-                disabled={!selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId)))}
+                disabled={Boolean(!selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId))))}
                 className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
-                  !selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId)))
+                  Boolean(!selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId))))
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
@@ -636,7 +636,7 @@ const AdminProducts: React.FC = () => {
                     setSelectedProductId(null);
                   }
                 }}
-                disabled={!selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId)))}
+                disabled={Boolean(!selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId))))}
                 className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
                   !selectedProductId
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'

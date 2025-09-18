@@ -8,6 +8,7 @@ const index_1 = require("../models/index");
 const database_1 = require("../middleware/database");
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
+const comboUtils_1 = require("../utils/comboUtils");
 const router = express_1.default.Router();
 router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
@@ -29,13 +30,50 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                     error: { message: 'Product not found', code: 'PRODUCT_NOT_FOUND' }
                 });
             }
-            const itemPrice = product.price * item.quantity;
-            totalPrice += itemPrice;
-            orderItems.push({
+            let itemPrice;
+            let orderItemData = {
                 productId: item.product,
                 quantity: item.quantity,
-                price: product.price
-            });
+                isCombo: false,
+                comboBasePrice: 0,
+                comboItemConfigurations: []
+            };
+            if (product.isCombo && item.isCombo) {
+                if (!item.comboItemConfigurations || !Array.isArray(item.comboItemConfigurations)) {
+                    return res.status(400).json({
+                        success: false,
+                        error: {
+                            message: `Combo product ${product.name} requires comboItemConfigurations`,
+                            code: 'MISSING_COMBO_CONFIG'
+                        }
+                    });
+                }
+                if (item.comboBasePrice !== product.comboBasePrice) {
+                    return res.status(400).json({
+                        success: false,
+                        error: {
+                            message: `Combo base price mismatch for product ${product.name}`,
+                            code: 'COMBO_PRICE_MISMATCH'
+                        }
+                    });
+                }
+                itemPrice = (0, comboUtils_1.calculateComboPrice)(product.comboBasePrice || 0, item.comboItemConfigurations);
+                orderItemData.isCombo = true;
+                orderItemData.comboBasePrice = product.comboBasePrice || 0;
+                orderItemData.comboItemConfigurations = item.comboItemConfigurations;
+                orderItemData.price = itemPrice;
+            }
+            else if (product.isCombo && !item.isCombo) {
+                itemPrice = product.comboBasePrice || 0;
+                orderItemData.price = itemPrice;
+            }
+            else {
+                itemPrice = product.price;
+                orderItemData.price = itemPrice;
+            }
+            const itemTotal = itemPrice * item.quantity;
+            totalPrice += itemTotal;
+            orderItems.push(orderItemData);
         }
         const shippingDetails = {
             recipientName: address.name || `${req.user.firstName} ${req.user.lastName}`,

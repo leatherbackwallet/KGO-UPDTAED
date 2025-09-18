@@ -153,7 +153,7 @@ connectToDatabase().then(async () => {
   
   // Initialize cache warming for frequently accessed data
   try {
-    const { scheduleWarmCache } = require('./middleware/cache');
+    const { scheduleWarmCache } = await import('./middleware/cache');
     scheduleWarmCache();
     console.log('Cache warming scheduled');
   } catch (error) {

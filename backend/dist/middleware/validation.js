@@ -30,7 +30,7 @@ exports.productSchema = zod_1.z.object({
         en: zod_1.z.string().min(1, 'English description is required'),
         ml: zod_1.z.string().min(1, 'Malayalam description is required')
     }),
-    price: zod_1.z.number().min(0, 'Price cannot be negative'),
+    price: zod_1.z.number().int('Price must be a whole number').min(0, 'Price cannot be negative'),
     categories: zod_1.z.array(zod_1.z.string()).optional(),
     stock: zod_1.z.number().min(0, 'Stock cannot be negative').optional(),
     occasions: zod_1.z.array(zod_1.z.string()).optional(),
