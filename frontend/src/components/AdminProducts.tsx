@@ -906,11 +906,12 @@ const AdminProducts: React.FC = () => {
                   </label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="1"
+                    min="0"
                     value={editingProduct.price || ''}
                     onChange={(e) => setEditingProduct({
                       ...editingProduct,
-                      price: parseFloat(e.target.value) || 0
+                      price: parseInt(e.target.value) || 0
                     })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
@@ -1097,11 +1098,12 @@ const AdminProducts: React.FC = () => {
                       </label>
                       <input
                         type="number"
-                        step="0.01"
+                        step="1"
+                        min="0"
                         value={editingProduct.comboBasePrice || ''}
                         onChange={(e) => setEditingProduct({
                           ...editingProduct,
-                          comboBasePrice: parseFloat(e.target.value) || 0
+                          comboBasePrice: parseInt(e.target.value) || 0
                         })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="e.g., 5000"
@@ -1196,11 +1198,12 @@ const AdminProducts: React.FC = () => {
                               </label>
                               <input
                                 type="number"
-                                step="0.01"
+                                step="1"
+                                min="0"
                                 value={item.unitPrice}
                                 onChange={(e) => {
                                   const newComboItems = [...comboItems];
-                                  newComboItems[index].unitPrice = parseFloat(e.target.value) || 0;
+                                  newComboItems[index].unitPrice = parseInt(e.target.value) || 0;
                                   setComboItems(newComboItems);
                                   setEditingProduct({
                                     ...editingProduct,

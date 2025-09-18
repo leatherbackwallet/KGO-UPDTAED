@@ -36,7 +36,7 @@ export const productSchema = z.object({
     en: z.string().min(1, 'English description is required'),
     ml: z.string().min(1, 'Malayalam description is required')
   }),
-  price: z.number().min(0, 'Price cannot be negative'),
+  price: z.number().int('Price must be a whole number').min(0, 'Price cannot be negative'),
   categories: z.array(z.string()).optional(),
   stock: z.number().min(0, 'Stock cannot be negative').optional(),
   occasions: z.array(z.string()).optional(),

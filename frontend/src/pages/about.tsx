@@ -249,6 +249,110 @@ export default function About() {
           </div>
         </section>
 
+        {/* Our Policies Section */}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Our Policies
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Transparent guidelines that ensure the best experience for our valued customers
+              </p>
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
+                <div className="space-y-8">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-green rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">1</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Product Quality & Freshness</h3>
+                      <p className="text-gray-600 leading-relaxed">
+                        Items displayed and delivered may have slight changes according to availability of the item in that location to preserve the freshness, premium quality and food safety.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-red rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">2</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Pricing & Delivery</h3>
+                      <p className="text-gray-600 leading-relaxed">
+                        Prices shown includes product cost, Tax, purchase, service and one to one personal delivery anywhere in Kerala.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-green rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">3</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Standard Delivery Time</h3>
+                      <p className="text-gray-600 leading-relaxed">
+                        All orders take minimum 24 hours unless emergency option is not opted.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-red rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">4</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Same Day Delivery</h3>
+                      <p className="text-gray-600 leading-relaxed">
+                        Same day delivery can also be possible through direct call and is subjected to conditions such as distance, product availability and emergency delivery charge of <span className="font-semibold text-kgo-red">Rs. 500</span>.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-green rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">5</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Quality Assurance & Communication</h3>
+                      <p className="text-gray-600 leading-relaxed">
+                        Items selected by you will be delivered with utmost care, quality, and timelines without any compromise to your desired delivery location personally. Updates of the same will be communicated without fail. Videos and photos of delivery are optional and subjected to the interest of the person who receives the product due to their privacy and safety values.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-red rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">6</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Feedback & Support</h3>
+                      <p className="text-gray-600 leading-relaxed">
+                        You can leave your reviews, suggestions, or grievances at{' '}
+                        <a href="mailto:sales@keralagiftsonline.com" className="text-kgo-red hover:text-red-700 font-semibold underline">
+                          sales@keralagiftsonline.com
+                        </a>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-12 pt-8 border-t border-gray-200">
+                  <div className="bg-gradient-to-r from-kgo-green to-kgo-red p-6 rounded-xl text-white text-center">
+                    <h4 className="text-xl font-bold mb-2">Our Commitment to You</h4>
+                    <p className="text-lg opacity-90">
+                      We are dedicated to providing exceptional service and maintaining the highest standards of quality in every aspect of our business.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Contact Section */}
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

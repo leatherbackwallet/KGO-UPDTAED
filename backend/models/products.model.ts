@@ -60,7 +60,13 @@ const productSchema = new Schema<IProduct>({
   price: {
     type: Number,
     required: true,
-    min: [0, 'Price cannot be negative']
+    min: [0, 'Price cannot be negative'],
+    validate: {
+      validator: function(v: number) {
+        return Number.isInteger(v);
+      },
+      message: 'Price must be a whole number'
+    }
   },
   costPrice: {
     type: Number,
@@ -135,7 +141,13 @@ const productSchema = new Schema<IProduct>({
   comboBasePrice: {
     type: Number,
     min: [0, 'Combo base price cannot be negative'],
-    default: 0
+    default: 0,
+    validate: {
+      validator: function(v: number) {
+        return Number.isInteger(v);
+      },
+      message: 'Combo base price must be a whole number'
+    }
   },
   comboItems: [{
     name: {
@@ -146,7 +158,13 @@ const productSchema = new Schema<IProduct>({
     unitPrice: {
       type: Number,
       required: true,
-      min: [0, 'Unit price cannot be negative']
+      min: [0, 'Unit price cannot be negative'],
+      validate: {
+        validator: function(v: number) {
+          return Number.isInteger(v);
+        },
+        message: 'Unit price must be a whole number'
+      }
     },
     defaultQuantity: {
       type: Number,
