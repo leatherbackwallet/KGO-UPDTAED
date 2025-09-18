@@ -14,6 +14,7 @@ const role_1 = require("../middleware/role");
 const validation_1 = require("../middleware/validation");
 const zod_1 = require("zod");
 const router = express_1.default.Router();
+// Validation schemas
 const createCategorySchema = zod_1.z.object({
     name: zod_1.z.string().min(1, 'Category name is required').max(100, 'Category name too long'),
     description: zod_1.z.string().optional(),
@@ -30,6 +31,7 @@ const updateCategorySchema = zod_1.z.object({
 const assignProductsSchema = zod_1.z.object({
     productIds: zod_1.z.array(zod_1.z.string()).min(1, 'At least one product must be selected')
 });
+// GET /api/categories - Get all categories with caching and deduplication
 router.get('/', (0, requestBatching_1.deduplicateRequests)(), cache_1.cacheConfigs.categories, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { includeInactive = false } = req.query;
@@ -51,6 +53,7 @@ router.get('/', (0, requestBatching_1.deduplicateRequests)(), cache_1.cacheConfi
         });
     }
 });
+// GET /api/categories/:id - Get single category
 router.get('/:id', database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const category = await categories_model_1.Category.findById(req.params.id)
@@ -74,10 +77,14 @@ router.get('/:id', database_1.ensureDatabaseConnection, async (req, res) => {
         });
     }
 });
-router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, (0, validation_1.validate)(createCategorySchema), async (req, res) => {
+// POST /api/categories - Create new category
+router.post('/', auth_1.auth, 
+// requireRole('admin'), // Temporarily disabled for testing
+database_1.ensureDatabaseConnection, (0, validation_1.validate)(createCategorySchema), async (req, res) => {
     try {
         console.log('Creating category with data:', req.body);
         const { name, description, parentCategory, sortOrder } = req.body;
+        // Check if parent category exists
         if (parentCategory) {
             const parent = await categories_model_1.Category.findById(parentCategory);
             if (!parent || parent.isDeleted) {
@@ -87,10 +94,12 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, (0, validatio
                 });
             }
         }
+        // Generate slug from name
         const slug = name
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
+        // Check if slug already exists
         const existingCategory = await categories_model_1.Category.findOne({ slug });
         if (existingCategory) {
             return res.status(400).json({
@@ -121,6 +130,7 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, (0, validatio
         });
     }
 });
+// PUT /api/categories/:id - Update category
 router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, (0, validation_1.validate)(updateCategorySchema), async (req, res) => {
     try {
         const { name, description, parentCategory, sortOrder, isActive } = req.body;
@@ -131,6 +141,7 @@ router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ens
                 error: { message: 'Category not found', code: 'CATEGORY_NOT_FOUND' }
             });
         }
+        // Check if parent category exists
         if (parentCategory) {
             const parent = await categories_model_1.Category.findById(parentCategory);
             if (!parent || parent.isDeleted) {
@@ -140,8 +151,10 @@ router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ens
                 });
             }
         }
+        // Update fields
         if (name !== undefined) {
             category.name = name;
+            // Regenerate slug if name changed
             category.slug = name
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
@@ -170,6 +183,7 @@ router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ens
         });
     }
 });
+// DELETE /api/categories/:id - Soft delete category
 router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const category = await categories_model_1.Category.findById(req.params.id);
@@ -179,6 +193,7 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.
                 error: { message: 'Category not found', code: 'CATEGORY_NOT_FOUND' }
             });
         }
+        // Check if category has products
         const productsInCategory = await products_model_1.Product.countDocuments({
             categories: req.params.id,
             isDeleted: false
@@ -192,6 +207,7 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.
                 }
             });
         }
+        // Check if category has subcategories
         const subcategories = await categories_model_1.Category.countDocuments({
             parentCategory: req.params.id,
             isDeleted: false
@@ -205,6 +221,7 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.
                 }
             });
         }
+        // Soft delete
         category.isDeleted = true;
         category.isActive = false;
         await category.save();
@@ -221,6 +238,7 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.
         });
     }
 });
+// PUT /api/categories/:id/products - Assign products to category
 router.put('/:id/products', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, (0, validation_1.validate)(assignProductsSchema), async (req, res) => {
     try {
         const { productIds } = req.body;
@@ -231,6 +249,7 @@ router.put('/:id/products', auth_1.auth, (0, role_1.requireRole)('admin'), datab
                 error: { message: 'Category not found', code: 'CATEGORY_NOT_FOUND' }
             });
         }
+        // Verify all products exist
         const products = await products_model_1.Product.find({
             _id: { $in: productIds },
             isDeleted: false
@@ -241,6 +260,7 @@ router.put('/:id/products', auth_1.auth, (0, role_1.requireRole)('admin'), datab
                 error: { message: 'One or more products not found', code: 'PRODUCTS_NOT_FOUND' }
             });
         }
+        // Add category to all products
         await products_model_1.Product.updateMany({ _id: { $in: productIds } }, { $addToSet: { categories: req.params.id } });
         return res.json({
             success: true,
@@ -255,6 +275,7 @@ router.put('/:id/products', auth_1.auth, (0, role_1.requireRole)('admin'), datab
         });
     }
 });
+// GET /api/categories/:id/products - Get products in category
 router.get('/:id/products', database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const category = await categories_model_1.Category.findById(req.params.id);
@@ -283,4 +304,3 @@ router.get('/:id/products', database_1.ensureDatabaseConnection, async (req, res
     }
 });
 exports.default = router;
-//# sourceMappingURL=categories.js.map

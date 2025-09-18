@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Content Model - Multi-language content management and cultural content delivery
+ * Supports English and Malayalam with cultural context
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -211,10 +215,10 @@ const contentSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 contentSchema.index({ type: 1, status: 1 });
 contentSchema.index({ 'slug.en': 1 });
 contentSchema.index({ 'culturalContext.festival': 1 });
 contentSchema.index({ 'publishing.publishedAt': 1 });
 contentSchema.index({ 'publishing.isFeatured': 1 });
 exports.Content = mongoose_1.default.model('Content', contentSchema);
-//# sourceMappingURL=content.model.js.map

@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Orders Model - Parent order management with shipment and promotion support
+ * Orders can be fulfilled by one or more shipments
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -76,6 +80,7 @@ const orderItemSchema = new mongoose_1.Schema({
     personalizationOptions: {
         type: mongoose_1.Schema.Types.Mixed
     },
+    // Combo-specific fields
     isCombo: {
         type: Boolean,
         default: false
@@ -194,6 +199,7 @@ const orderSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Generate orderId before saving
 orderSchema.pre('save', function (next) {
     if (this.isNew && !this.orderId) {
         const timestamp = Date.now();
@@ -202,6 +208,7 @@ orderSchema.pre('save', function (next) {
     }
     next();
 });
+// Add status to history when status changes
 orderSchema.pre('save', function (next) {
     if (this.isModified('orderStatus')) {
         this.statusHistory.push({
@@ -211,10 +218,10 @@ orderSchema.pre('save', function (next) {
     }
     next();
 });
+// Indexes
 orderSchema.index({ userId: 1 });
 orderSchema.index({ orderStatus: 1, isDeleted: 1 });
 orderSchema.index({ requestedDeliveryDate: 1 });
 orderSchema.index({ promotionId: 1 });
 orderSchema.index({ createdAt: -1 });
 exports.Order = mongoose_1.default.model('Order', orderSchema);
-//# sourceMappingURL=orders.model.js.map

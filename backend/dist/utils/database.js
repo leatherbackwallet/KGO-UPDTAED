@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Database Connection Utility
+ * Handles MongoDB connection for serverless environments
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -9,6 +13,9 @@ exports.getConnectionStatus = getConnectionStatus;
 exports.disconnectFromDatabase = disconnectFromDatabase;
 const mongoose_1 = __importDefault(require("mongoose"));
 let isConnected = false;
+/**
+ * Connect to MongoDB with proper error handling for serverless
+ */
 async function connectToDatabase() {
     if (isConnected) {
         console.log('MongoDB already connected');
@@ -18,6 +25,7 @@ async function connectToDatabase() {
         if (!process.env.MONGODB_URI) {
             throw new Error('MONGODB_URI environment variable is required');
         }
+        // Validate Atlas connection
         if (!process.env.MONGODB_URI.includes('mongodb+srv://') ||
             !process.env.MONGODB_URI.includes('mongodb.net') ||
             process.env.MONGODB_URI.includes('localhost') ||
@@ -38,9 +46,15 @@ async function connectToDatabase() {
         throw error;
     }
 }
+/**
+ * Check if database is connected
+ */
 function isDatabaseConnected() {
     return isConnected && mongoose_1.default.connection.readyState === 1;
 }
+/**
+ * Get database connection status
+ */
 function getConnectionStatus() {
     const states = {
         0: 'disconnected',
@@ -50,6 +64,9 @@ function getConnectionStatus() {
     };
     return states[mongoose_1.default.connection.readyState] || 'unknown';
 }
+/**
+ * Disconnect from MongoDB (for cleanup)
+ */
 async function disconnectFromDatabase() {
     if (isConnected) {
         await mongoose_1.default.disconnect();
@@ -57,6 +74,7 @@ async function disconnectFromDatabase() {
         console.log('MongoDB disconnected');
     }
 }
+// Handle connection events
 mongoose_1.default.connection.on('connected', () => {
     console.log('Mongoose connected to MongoDB');
     isConnected = true;
@@ -69,6 +87,7 @@ mongoose_1.default.connection.on('disconnected', () => {
     console.log('Mongoose disconnected from MongoDB');
     isConnected = false;
 });
+// Graceful shutdown
 process.on('SIGINT', async () => {
     await disconnectFromDatabase();
     process.exit(0);
@@ -77,4 +96,3 @@ process.on('SIGTERM', async () => {
     await disconnectFromDatabase();
     process.exit(0);
 });
-//# sourceMappingURL=database.js.map

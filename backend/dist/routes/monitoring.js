@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Monitoring API Routes
+ * Provides endpoints for production monitoring, alerts, and performance metrics
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -7,6 +11,7 @@ const express_1 = __importDefault(require("express"));
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
 const router = express_1.default.Router();
+// Import monitoring services (these would be properly imported in TypeScript)
 let productionMonitoringService;
 let cacheWarmingService;
 try {
@@ -16,6 +21,10 @@ try {
 catch (error) {
     console.warn('Monitoring services not available:', error.message);
 }
+/**
+ * GET /api/monitoring/health
+ * Get overall system health status
+ */
 router.get('/health', (req, res) => {
     try {
         if (!productionMonitoringService) {
@@ -40,6 +49,10 @@ router.get('/health', (req, res) => {
         });
     }
 });
+/**
+ * GET /api/monitoring/metrics
+ * Get current and historical metrics
+ */
 router.get('/metrics', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         if (!productionMonitoringService) {
@@ -67,6 +80,10 @@ router.get('/metrics', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res)
         });
     }
 });
+/**
+ * GET /api/monitoring/alerts
+ * Get alert rules and recent alerts
+ */
 router.get('/alerts', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         if (!productionMonitoringService) {
@@ -91,6 +108,10 @@ router.get('/alerts', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) 
         });
     }
 });
+/**
+ * PUT /api/monitoring/alerts/:ruleId
+ * Update alert rule configuration
+ */
 router.put('/alerts/:ruleId', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         if (!productionMonitoringService) {
@@ -124,6 +145,10 @@ router.put('/alerts/:ruleId', auth_1.auth, (0, role_1.requireRole)('admin'), (re
         });
     }
 });
+/**
+ * GET /api/monitoring/sla
+ * Get SLA targets and compliance status
+ */
 router.get('/sla', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         if (!productionMonitoringService) {
@@ -149,6 +174,10 @@ router.get('/sla', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => 
         });
     }
 });
+/**
+ * GET /api/monitoring/benchmarks
+ * Get performance benchmarks
+ */
 router.get('/benchmarks', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         if (!productionMonitoringService) {
@@ -172,6 +201,10 @@ router.get('/benchmarks', auth_1.auth, (0, role_1.requireRole)('admin'), (req, r
         });
     }
 });
+/**
+ * GET /api/monitoring/cache
+ * Get cache warming statistics
+ */
 router.get('/cache', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         if (!cacheWarmingService) {
@@ -199,6 +232,10 @@ router.get('/cache', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) =
         });
     }
 });
+/**
+ * POST /api/monitoring/cache/warmup
+ * Trigger manual cache warmup
+ */
 router.post('/cache/warmup', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         if (!cacheWarmingService) {
@@ -231,6 +268,10 @@ router.post('/cache/warmup', auth_1.auth, (0, role_1.requireRole)('admin'), asyn
         });
     }
 });
+/**
+ * GET /api/monitoring/dashboard
+ * Get comprehensive dashboard data
+ */
 router.get('/dashboard', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         if (!productionMonitoringService) {
@@ -242,7 +283,7 @@ router.get('/dashboard', auth_1.auth, (0, role_1.requireRole)('admin'), (req, re
         }
         const healthStatus = productionMonitoringService.getHealthStatus();
         const currentMetrics = productionMonitoringService.getCurrentMetrics();
-        const recentMetrics = productionMonitoringService.getMetrics(24);
+        const recentMetrics = productionMonitoringService.getMetrics(24); // Last 24 data points
         const alertRules = productionMonitoringService.getAlertRules();
         const slaCompliance = productionMonitoringService.getSLACompliance();
         const benchmarks = productionMonitoringService.getBenchmarks();
@@ -261,7 +302,7 @@ router.get('/dashboard', auth_1.auth, (0, role_1.requireRole)('admin'), (req, re
                 alerts: {
                     rules: alertRules,
                     activeAlerts: alertRules.filter((rule) => rule.lastTriggered &&
-                        Date.now() - rule.lastTriggered.getTime() < 60 * 60 * 1000)
+                        Date.now() - rule.lastTriggered.getTime() < 60 * 60 * 1000) // Last hour
                 },
                 sla: slaCompliance,
                 benchmarks,
@@ -278,6 +319,10 @@ router.get('/dashboard', auth_1.auth, (0, role_1.requireRole)('admin'), (req, re
         });
     }
 });
+/**
+ * POST /api/monitoring/start
+ * Start monitoring services
+ */
 router.post('/start', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         if (productionMonitoringService) {
@@ -299,6 +344,10 @@ router.post('/start', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) 
         });
     }
 });
+/**
+ * POST /api/monitoring/stop
+ * Stop monitoring services
+ */
 router.post('/stop', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         if (productionMonitoringService) {
@@ -320,10 +369,16 @@ router.post('/stop', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) =
         });
     }
 });
+/**
+ * GET /api/monitoring/logs
+ * Get recent application logs (if available)
+ */
 router.get('/logs', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 100;
         const severity = req.query.severity || 'INFO';
+        // In a real implementation, this would fetch from your logging system
+        // For now, return a mock response
         const mockLogs = Array.from({ length: Math.min(limit, 20) }, (_, i) => ({
             timestamp: new Date(Date.now() - i * 60000),
             level: ['INFO', 'WARN', 'ERROR'][Math.floor(Math.random() * 3)],
@@ -352,6 +407,10 @@ router.get('/logs', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) =>
         });
     }
 });
+/**
+ * POST /api/monitoring/test-alert
+ * Test alert system (development/staging only)
+ */
 router.post('/test-alert', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         if (process.env.NODE_ENV === 'production') {
@@ -362,6 +421,7 @@ router.post('/test-alert', auth_1.auth, (0, role_1.requireRole)('admin'), (req, 
             return;
         }
         const { severity, message } = req.body;
+        // Simulate an alert
         const testAlert = {
             id: `test-alert-${Date.now()}`,
             severity: severity || 'medium',
@@ -385,4 +445,3 @@ router.post('/test-alert', auth_1.auth, (0, role_1.requireRole)('admin'), (req, 
     }
 });
 exports.default = router;
-//# sourceMappingURL=monitoring.js.map

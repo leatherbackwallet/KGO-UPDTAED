@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Review Model - Product and vendor review management
+ * Handles customer reviews, ratings, and vendor replies for products and vendors
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,12 +39,14 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Review = exports.ReviewType = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// Review type enum
 var ReviewType;
 (function (ReviewType) {
     ReviewType["PRODUCT"] = "product";
     ReviewType["VENDOR"] = "vendor";
     ReviewType["DELIVERY"] = "delivery";
 })(ReviewType || (exports.ReviewType = ReviewType = {}));
+// Review schema definition
 const reviewSchema = new mongoose_1.Schema({
     reviewType: {
         type: String,
@@ -115,10 +121,12 @@ const reviewSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 reviewSchema.index({ productId: 1, createdAt: -1 });
 reviewSchema.index({ vendorId: 1, createdAt: -1 });
 reviewSchema.index({ userId: 1, reviewType: 1 });
 reviewSchema.index({ rating: 1 });
+// Compound index to prevent duplicate reviews
 reviewSchema.index({
     userId: 1,
     orderId: 1,
@@ -137,6 +145,7 @@ reviewSchema.index({
     unique: true,
     partialFilterExpression: { vendorId: { $exists: true } }
 });
+// Pre-save middleware to validate review type and required fields
 reviewSchema.pre('save', function (next) {
     if (this.reviewType === ReviewType.PRODUCT && !this.productId) {
         return next(new Error('Product ID is required for product reviews'));
@@ -149,12 +158,13 @@ reviewSchema.pre('save', function (next) {
     }
     next();
 });
+// Virtual for review summary
 reviewSchema.virtual('summary').get(function () {
     if (this.comment && this.comment.length > 100) {
         return this.comment.substring(0, 100) + '...';
     }
     return this.comment;
 });
+// Ensure virtual fields are serialized
 reviewSchema.set('toJSON', { virtuals: true });
 exports.Review = mongoose_1.default.model('Review', reviewSchema);
-//# sourceMappingURL=reviews.model.js.map

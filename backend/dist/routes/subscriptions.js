@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Subscription Routes - Advanced Subscription and Loyalty Program Management
+ * Handles subscription management, billing, loyalty points, and cultural features
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -40,6 +44,7 @@ const auth_1 = require("../middleware/auth");
 const validation_1 = require("../middleware/validation");
 const zod_1 = require("zod");
 const router = express.Router();
+// Validation schemas
 const createSubscriptionSchema = zod_1.z.object({
     tier: zod_1.z.enum(['free', 'silver', 'gold', 'platinum']),
     billingCycle: zod_1.z.enum(['monthly', 'quarterly', 'yearly']).optional(),
@@ -50,6 +55,11 @@ const redeemPointsSchema = zod_1.z.object({
 const referralSchema = zod_1.z.object({
     referralCode: zod_1.z.string().min(3).max(20),
 });
+/**
+ * @route   GET /api/subscriptions/benefits
+ * @desc    Get user's subscription benefits
+ * @access  Private
+ */
 router.get('/benefits', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -70,6 +80,11 @@ router.get('/benefits', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * @route   POST /api/subscriptions/create
+ * @desc    Create or update user subscription
+ * @access  Private
+ */
 router.post('/create', auth_1.auth, (0, validation_1.validate)(createSubscriptionSchema), async (req, res) => {
     try {
         const userId = req.user.id;
@@ -94,6 +109,11 @@ router.post('/create', auth_1.auth, (0, validation_1.validate)(createSubscriptio
         });
     }
 });
+/**
+ * @route   POST /api/subscriptions/cancel
+ * @desc    Cancel user subscription
+ * @access  Private
+ */
 router.post('/cancel', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -117,6 +137,11 @@ router.post('/cancel', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * @route   GET /api/subscriptions/loyalty-points
+ * @desc    Get user's loyalty points
+ * @access  Private
+ */
 router.get('/loyalty-points', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -152,6 +177,11 @@ router.get('/loyalty-points', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * @route   POST /api/subscriptions/redeem-points
+ * @desc    Redeem loyalty points for discount
+ * @access  Private
+ */
 router.post('/redeem-points', auth_1.auth, (0, validation_1.validate)(redeemPointsSchema), async (req, res) => {
     try {
         const userId = req.user.id;
@@ -177,6 +207,11 @@ router.post('/redeem-points', auth_1.auth, (0, validation_1.validate)(redeemPoin
         });
     }
 });
+/**
+ * @route   GET /api/subscriptions/upgrade-status
+ * @desc    Check if user can upgrade subscription tier
+ * @access  Private
+ */
 router.get('/upgrade-status', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -197,10 +232,16 @@ router.get('/upgrade-status', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * @route   POST /api/subscriptions/process-referral
+ * @desc    Process referral bonus
+ * @access  Private
+ */
 router.post('/process-referral', auth_1.auth, (0, validation_1.validate)(referralSchema), async (req, res) => {
     try {
         const referrerId = req.user.id;
         const { referralCode } = req.body;
+        // Find the user who owns this referral code
         const referrerSubscription = await subscriptions_model_1.Subscription.findOne({
             'referrals.referralCode': referralCode,
             status: subscriptions_model_1.SubscriptionStatus.ACTIVE,
@@ -223,6 +264,7 @@ router.post('/process-referral', auth_1.auth, (0, validation_1.validate)(referra
                 },
             });
         }
+        // Check if this user has already been referred
         const existingReferral = await subscriptions_model_1.Subscription.findOne({
             userId: referrerId,
             'referrals.referredUsers': referrerSubscription.userId,
@@ -256,8 +298,14 @@ router.post('/process-referral', auth_1.auth, (0, validation_1.validate)(referra
         });
     }
 });
+/**
+ * @route   GET /api/subscriptions/analytics
+ * @desc    Get subscription analytics (Admin only)
+ * @access  Private (Admin)
+ */
 router.get('/analytics', auth_1.auth, async (req, res) => {
     try {
+        // Check if user is admin
         if (req.user.role !== 'admin') {
             return res.status(403).json({
                 success: false,
@@ -284,6 +332,11 @@ router.get('/analytics', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * @route   GET /api/subscriptions/tiers
+ * @desc    Get available subscription tiers
+ * @access  Public
+ */
 router.get('/tiers', async (req, res) => {
     try {
         const tiers = [
@@ -361,4 +414,3 @@ router.get('/tiers', async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=subscriptions.js.map

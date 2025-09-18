@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Hub Model - Physical packing stations or fulfillment centers
+ * Represents locations where gifts are prepared for final delivery in the hyperlocal logistics system
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,6 +39,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Hub = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// Hub schema definition
 const hubSchema = new mongoose_1.Schema({
     name: {
         type: String,
@@ -81,22 +86,27 @@ const hubSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 hubSchema.index({ name: 1 });
 hubSchema.index({ 'address.city': 1, 'address.state': 1 });
 hubSchema.index({ isActive: 1 });
+// Virtual for full address
 hubSchema.virtual('fullAddress').get(function () {
     const addr = this.address;
     return `${addr.street}, ${addr.city}, ${addr.state} - ${addr.postalCode}`;
 });
+// Virtual for hub summary
 hubSchema.virtual('summary').get(function () {
     return `${this.name} - ${this.address.city}, ${this.address.state}`;
 });
+// Ensure virtual fields are serialized
 hubSchema.set('toJSON', { virtuals: true });
+// Pre-save middleware to validate hub data
 hubSchema.pre('save', function (next) {
+    // Validate postal code format (Indian format)
     if (this.address.postalCode && !/^\d{6}$/.test(this.address.postalCode)) {
         return next(new Error('Postal code must be 6 digits'));
     }
     next();
 });
 exports.Hub = mongoose_1.default.model('Hub', hubSchema);
-//# sourceMappingURL=hubs.model.js.map

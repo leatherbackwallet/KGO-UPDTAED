@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Hubs Routes - Hub management for logistics system
+ * Handles CRUD operations for physical packing stations and fulfillment centers
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -8,6 +12,7 @@ const hubs_model_1 = require("../models/hubs.model");
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
 const router = express_1.default.Router();
+// Get all hubs (admin only)
 router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const hubs = await hubs_model_1.Hub.find().sort({ name: 1 });
@@ -24,6 +29,7 @@ router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) 
         });
     }
 });
+// Get single hub
 router.get('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const hub = await hubs_model_1.Hub.findById(req.params.id);
@@ -47,6 +53,7 @@ router.get('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, re
         });
     }
 });
+// Create new hub
 router.post('/', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const hub = new hubs_model_1.Hub(req.body);
@@ -64,6 +71,7 @@ router.post('/', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res)
         });
     }
 });
+// Update hub
 router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const hub = await hubs_model_1.Hub.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
@@ -87,6 +95,7 @@ router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, re
         });
     }
 });
+// Delete hub
 router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const hub = await hubs_model_1.Hub.findByIdAndDelete(req.params.id);
@@ -111,4 +120,3 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req,
     }
 });
 exports.default = router;
-//# sourceMappingURL=hubs.js.map

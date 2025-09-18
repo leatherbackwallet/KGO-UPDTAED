@@ -1,4 +1,9 @@
 "use strict";
+/**
+ * One-time admin setup script
+ * Run this script once to create the admin role and superuser
+ * Usage: npx ts-node scripts/setup-admin.ts
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -9,6 +14,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const users_model_1 = require("../models/users.model");
 const roles_model_1 = require("../models/roles.model");
 dotenv_1.default.config();
+// Ensure MongoDB Atlas is always used, never local MongoDB
 if (!process.env.MONGODB_URI?.includes('mongodb+srv://') ||
     !process.env.MONGODB_URI?.includes('mongodb.net') ||
     process.env.MONGODB_URI?.includes('localhost') ||
@@ -21,10 +27,13 @@ if (!process.env.MONGODB_URI?.includes('mongodb+srv://') ||
 const setupAdmin = async () => {
     try {
         console.log('🚀 Starting admin setup...');
+        // Connect to MongoDB Atlas
         await mongoose_1.default.connect(process.env.MONGODB_URI);
         console.log('✅ Connected to MongoDB Atlas');
+        // Check if admin role already exists
         let adminRole = await roles_model_1.Role.findOne({ name: 'admin' });
         if (!adminRole) {
+            // Create admin role
             adminRole = new roles_model_1.Role({
                 name: 'admin',
                 description: 'Administrator with full system access',
@@ -43,8 +52,10 @@ const setupAdmin = async () => {
         else {
             console.log('ℹ️  Admin role already exists');
         }
+        // Check if superuser already exists
         const existingAdmin = await users_model_1.User.findOne({ email: 'admin@keralagiftsonline.com' });
         if (!existingAdmin) {
+            // Create superuser
             const hashedPassword = await bcryptjs_1.default.hash('Admin@123', 12);
             const superuser = new users_model_1.User({
                 firstName: 'Super',
@@ -66,6 +77,7 @@ const setupAdmin = async () => {
         else {
             console.log('ℹ️  Superuser already exists');
         }
+        // Create additional roles if they don't exist
         const roles = [
             {
                 name: 'vendor',
@@ -118,5 +130,5 @@ const setupAdmin = async () => {
         console.log('🔌 Disconnected from MongoDB');
     }
 };
+// Run the setup
 setupAdmin();
-//# sourceMappingURL=setup-admin.js.map

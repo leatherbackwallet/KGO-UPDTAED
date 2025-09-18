@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Wishlist Routes - User wishlist management
+ * Handles adding, removing, and retrieving wishlist items
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -9,6 +13,7 @@ const wishlists_model_1 = require("../models/wishlists.model");
 const products_model_1 = require("../models/products.model");
 const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
+// Get user's wishlist with product details
 router.get('/', auth_1.auth, async (req, res) => {
     try {
         const wishlist = await wishlists_model_1.Wishlist.findOne({ userId: req.user.id })
@@ -40,9 +45,11 @@ router.get('/', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Add product to wishlist
 router.post('/add/:productId', auth_1.auth, async (req, res) => {
     try {
         const { productId } = req.params;
+        // Validate product exists
         const product = await products_model_1.Product.findById(productId);
         if (!product) {
             res.status(404).json({
@@ -51,6 +58,7 @@ router.post('/add/:productId', auth_1.auth, async (req, res) => {
             });
             return;
         }
+        // Find or create wishlist
         let wishlist = await wishlists_model_1.Wishlist.findOne({ userId: req.user.id });
         if (!wishlist) {
             wishlist = new wishlists_model_1.Wishlist({
@@ -59,6 +67,7 @@ router.post('/add/:productId', auth_1.auth, async (req, res) => {
             });
         }
         else {
+            // Check if product is already in wishlist
             if (wishlist.products.includes(productId)) {
                 res.status(400).json({
                     success: false,
@@ -69,6 +78,7 @@ router.post('/add/:productId', auth_1.auth, async (req, res) => {
             wishlist.products.push(productId);
         }
         await wishlist.save();
+        // Populate product details for response
         await wishlist.populate({
             path: 'products',
             select: 'name price images slug stock category description',
@@ -91,6 +101,7 @@ router.post('/add/:productId', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Remove product from wishlist
 router.delete('/remove/:productId', auth_1.auth, async (req, res) => {
     try {
         const { productId } = req.params;
@@ -102,8 +113,10 @@ router.delete('/remove/:productId', auth_1.auth, async (req, res) => {
             });
             return;
         }
+        // Remove product from wishlist
         wishlist.products = wishlist.products.filter((product) => product.toString() !== productId);
         await wishlist.save();
+        // Populate remaining products
         await wishlist.populate({
             path: 'products',
             select: 'name price images slug stock category description',
@@ -126,6 +139,7 @@ router.delete('/remove/:productId', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Clear entire wishlist
 router.delete('/clear', auth_1.auth, async (req, res) => {
     try {
         const wishlist = await wishlists_model_1.Wishlist.findOne({ userId: req.user.id });
@@ -155,6 +169,7 @@ router.delete('/clear', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Check if product is in wishlist
 router.get('/check/:productId', auth_1.auth, async (req, res) => {
     try {
         const { productId } = req.params;
@@ -180,6 +195,7 @@ router.get('/check/:productId', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Merge guest wishlist data with user account
 router.post('/merge', auth_1.auth, async (req, res) => {
     try {
         const { items } = req.body;
@@ -190,6 +206,7 @@ router.post('/merge', auth_1.auth, async (req, res) => {
             });
             return;
         }
+        // Find or create user's wishlist
         let wishlist = await wishlists_model_1.Wishlist.findOne({ userId: req.user.id });
         if (!wishlist) {
             wishlist = new wishlists_model_1.Wishlist({
@@ -197,8 +214,10 @@ router.post('/merge', auth_1.auth, async (req, res) => {
                 products: []
             });
         }
+        // Add guest wishlist items to user's wishlist
         const guestProductIds = items.map((item) => item.product);
         const existingProductIds = wishlist.products.map((id) => id.toString());
+        // Only add items that don't already exist
         const newProductIds = guestProductIds.filter((id) => !existingProductIds.includes(id));
         if (newProductIds.length > 0) {
             wishlist.products.push(...newProductIds.map(id => new mongoose_1.default.Types.ObjectId(id)));
@@ -223,4 +242,3 @@ router.post('/merge', auth_1.auth, async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=wishlist.js.map

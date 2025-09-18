@@ -1,6 +1,16 @@
 "use strict";
+/**
+ * Combo Product Utilities
+ * Handles combo product price calculations and configurations
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatComboPriceBreakdown = exports.createComboItemConfigurations = exports.validateComboItemConfig = exports.calculateComboPrice = void 0;
+/**
+ * Calculate the total price for a combo product based on base price and item configurations
+ * @param comboBasePrice - Base price for the combo
+ * @param comboItemConfigurations - Array of item configurations with quantities and unit prices
+ * @returns Total calculated price
+ */
 const calculateComboPrice = (comboBasePrice, comboItemConfigurations) => {
     if (!comboBasePrice || !Array.isArray(comboItemConfigurations)) {
         return comboBasePrice || 0;
@@ -8,6 +18,7 @@ const calculateComboPrice = (comboBasePrice, comboItemConfigurations) => {
     let totalPrice = comboBasePrice;
     comboItemConfigurations.forEach(item => {
         if (item.unitPrice && item.quantity) {
+            // Calculate additional cost for quantities above default
             const additionalQuantity = Math.max(0, item.quantity - (item.defaultQuantity || 1));
             const additionalCost = additionalQuantity * item.unitPrice;
             totalPrice += additionalCost;
@@ -16,6 +27,11 @@ const calculateComboPrice = (comboBasePrice, comboItemConfigurations) => {
     return totalPrice;
 };
 exports.calculateComboPrice = calculateComboPrice;
+/**
+ * Validate combo item configuration
+ * @param itemConfig - Item configuration to validate
+ * @returns Validation result with isValid and errors
+ */
 const validateComboItemConfig = (itemConfig) => {
     const errors = [];
     if (!itemConfig.name || typeof itemConfig.name !== 'string' || itemConfig.name.trim() === '') {
@@ -36,6 +52,12 @@ const validateComboItemConfig = (itemConfig) => {
     };
 };
 exports.validateComboItemConfig = validateComboItemConfig;
+/**
+ * Create combo item configuration from product combo items and custom quantities
+ * @param comboItems - Product's combo items definition
+ * @param customQuantities - Custom quantities for each item (keyed by item name)
+ * @returns Array of combo item configurations
+ */
 const createComboItemConfigurations = (comboItems, customQuantities = {}) => {
     if (!Array.isArray(comboItems)) {
         return [];
@@ -49,6 +71,12 @@ const createComboItemConfigurations = (comboItems, customQuantities = {}) => {
     }));
 };
 exports.createComboItemConfigurations = createComboItemConfigurations;
+/**
+ * Format combo price breakdown for display
+ * @param comboBasePrice - Base price for the combo
+ * @param comboItemConfigurations - Array of item configurations
+ * @returns Formatted price breakdown
+ */
 const formatComboPriceBreakdown = (comboBasePrice, comboItemConfigurations) => {
     const breakdown = {
         basePrice: comboBasePrice || 0,
@@ -74,4 +102,3 @@ const formatComboPriceBreakdown = (comboBasePrice, comboItemConfigurations) => {
     return breakdown;
 };
 exports.formatComboPriceBreakdown = formatComboPriceBreakdown;
-//# sourceMappingURL=comboUtils.js.map

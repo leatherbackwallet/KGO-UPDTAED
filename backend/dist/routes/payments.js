@@ -1,10 +1,15 @@
 "use strict";
+// @ts-nocheck
+/**
+ * Payments Routes - Payment processing and order management
+ * Handles Razorpay integration and payment verification
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const express_validator_1 = require("express-validator");
+const express_validator_1 = __importDefault(require("express-validator"));
 const payment_service_1 = __importDefault(require("../services/payment.service"));
 const index_1 = require("../models/index");
 const database_1 = require("../middleware/database");
@@ -12,32 +17,33 @@ const auth_1 = require("../middleware/auth");
 const comboUtils_1 = require("../utils/comboUtils");
 const router = express_1.default.Router();
 const validatePaymentOrder = [
-    (0, express_validator_1.body)('products').isArray().withMessage('Products must be an array'),
-    (0, express_validator_1.body)('products.*.product').isMongoId().withMessage('Invalid product ID'),
-    (0, express_validator_1.body)('products.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
-    (0, express_validator_1.body)('products.*.isCombo').optional().isBoolean().withMessage('isCombo must be a boolean'),
-    (0, express_validator_1.body)('products.*.comboBasePrice').optional().isNumeric().withMessage('comboBasePrice must be a number'),
-    (0, express_validator_1.body)('products.*.comboItemConfigurations').optional().isArray().withMessage('comboItemConfigurations must be an array'),
-    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.name').optional().notEmpty().withMessage('Combo item name is required'),
-    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.unitPrice').optional().isNumeric().withMessage('Combo item unit price must be a number'),
-    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.quantity').optional().isNumeric().withMessage('Combo item quantity must be a number'),
-    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.unit').optional().notEmpty().withMessage('Combo item unit is required'),
-    (0, express_validator_1.body)('recipientAddress').isObject().withMessage('Recipient address is required'),
-    (0, express_validator_1.body)('recipientAddress.name').notEmpty().withMessage('Recipient name is required'),
-    (0, express_validator_1.body)('recipientAddress.phone').notEmpty().withMessage('Recipient phone is required'),
-    (0, express_validator_1.body)('recipientAddress.address').isObject().withMessage('Address details are required'),
-    (0, express_validator_1.body)('recipientAddress.address.streetName').notEmpty().withMessage('Street name is required'),
-    (0, express_validator_1.body)('recipientAddress.address.postalCode').notEmpty().withMessage('Postal code is required'),
-    (0, express_validator_1.body)('recipientAddress.address.city').notEmpty().withMessage('City is required')
+    express_validator_1.default.expressValidator.body('products').isArray().withMessage('Products must be an array'),
+    express_validator_1.default.expressValidator.body('products.*.product').isMongoId().withMessage('Invalid product ID'),
+    express_validator_1.default.expressValidator.body('products.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
+    // Combo product validation
+    express_validator_1.default.expressValidator.body('products.*.isCombo').optional().isBoolean().withMessage('isCombo must be a boolean'),
+    express_validator_1.default.expressValidator.body('products.*.comboBasePrice').optional().isNumeric().withMessage('comboBasePrice must be a number'),
+    express_validator_1.default.expressValidator.body('products.*.comboItemConfigurations').optional().isArray().withMessage('comboItemConfigurations must be an array'),
+    express_validator_1.default.expressValidator.body('products.*.comboItemConfigurations.*.name').optional().notEmpty().withMessage('Combo item name is required'),
+    express_validator_1.default.expressValidator.body('products.*.comboItemConfigurations.*.unitPrice').optional().isNumeric().withMessage('Combo item unit price must be a number'),
+    express_validator_1.default.expressValidator.body('products.*.comboItemConfigurations.*.quantity').optional().isNumeric().withMessage('Combo item quantity must be a number'),
+    express_validator_1.default.expressValidator.body('products.*.comboItemConfigurations.*.unit').optional().notEmpty().withMessage('Combo item unit is required'),
+    express_validator_1.default.expressValidator.body('recipientAddress').isObject().withMessage('Recipient address is required'),
+    express_validator_1.default.expressValidator.body('recipientAddress.name').notEmpty().withMessage('Recipient name is required'),
+    express_validator_1.default.expressValidator.body('recipientAddress.phone').notEmpty().withMessage('Recipient phone is required'),
+    express_validator_1.default.expressValidator.body('recipientAddress.address').isObject().withMessage('Address details are required'),
+    express_validator_1.default.expressValidator.body('recipientAddress.address.streetName').notEmpty().withMessage('Street name is required'),
+    express_validator_1.default.expressValidator.body('recipientAddress.address.postalCode').notEmpty().withMessage('Postal code is required'),
+    express_validator_1.default.expressValidator.body('recipientAddress.address.city').notEmpty().withMessage('City is required')
 ];
 const validatePaymentVerification = [
-    (0, express_validator_1.body)('razorpay_order_id').notEmpty().withMessage('Razorpay order ID is required'),
-    (0, express_validator_1.body)('razorpay_payment_id').notEmpty().withMessage('Razorpay payment ID is required'),
-    (0, express_validator_1.body)('razorpay_signature').notEmpty().withMessage('Razorpay signature is required')
+    express_validator_1.default.expressValidator.body('razorpay_order_id').notEmpty().withMessage('Razorpay order ID is required'),
+    express_validator_1.default.expressValidator.body('razorpay_payment_id').notEmpty().withMessage('Razorpay payment ID is required'),
+    express_validator_1.default.expressValidator.body('razorpay_signature').notEmpty().withMessage('Razorpay signature is required')
 ];
 router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentOrder, async (req, res) => {
     try {
-        const errors = (0, express_validator_1.validationResult)(req);
+        const errors = express_validator_1.default.expressValidator.validationResult(req);
         if (!errors.isEmpty()) {
             res.status(400).json({
                 success: false,
@@ -51,6 +57,7 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
         }
         const { products, recipientAddress, orderNotes } = req.body;
         const userId = req.user.id;
+        // Calculate total amount
         let totalAmount = 0;
         const orderItems = [];
         for (const item of products) {
@@ -84,7 +91,9 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
                 comboBasePrice: 0,
                 comboItemConfigurations: []
             };
+            // Handle combo products
             if (product.isCombo && item.isCombo) {
+                // Validate combo configuration
                 if (!item.comboItemConfigurations || !Array.isArray(item.comboItemConfigurations)) {
                     res.status(400).json({
                         success: false,
@@ -95,6 +104,7 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
                     });
                     return;
                 }
+                // Validate combo base price matches
                 if (item.comboBasePrice !== product.comboBasePrice) {
                     res.status(400).json({
                         success: false,
@@ -105,8 +115,10 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
                     });
                     return;
                 }
+                // Recalculate combo price server-side
                 itemPrice = (0, comboUtils_1.calculateComboPrice)(product.comboBasePrice || 0, item.comboItemConfigurations);
                 itemTotal = itemPrice * item.quantity;
+                // Store combo configuration
                 orderItemData.isCombo = true;
                 orderItemData.comboBasePrice = product.comboBasePrice || 0;
                 orderItemData.comboItemConfigurations = item.comboItemConfigurations;
@@ -114,12 +126,14 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
                 orderItemData.total = itemTotal;
             }
             else if (product.isCombo && !item.isCombo) {
+                // Combo product but not sent as combo - use base price
                 itemPrice = product.comboBasePrice || 0;
                 itemTotal = itemPrice * item.quantity;
                 orderItemData.price = itemPrice;
                 orderItemData.total = itemTotal;
             }
             else {
+                // Regular product
                 itemPrice = product.price;
                 itemTotal = itemPrice * item.quantity;
                 orderItemData.price = itemPrice;
@@ -128,7 +142,9 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
             totalAmount += itemTotal;
             orderItems.push(orderItemData);
         }
+        // Create Razorpay order
         const razorpayOrder = await payment_service_1.default.createOrder(totalAmount, 'INR');
+        // Create order in database
         const order = new index_1.Order({
             userId,
             orderItems,
@@ -163,7 +179,7 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
 });
 router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentVerification, async (req, res) => {
     try {
-        const errors = (0, express_validator_1.validationResult)(req);
+        const errors = express_validator_1.default.expressValidator.validationResult(req);
         if (!errors.isEmpty()) {
             res.status(400).json({
                 success: false,
@@ -176,6 +192,7 @@ router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validat
             return;
         }
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        // Verify payment signature
         const isValidSignature = payment_service_1.default.verifyPayment(razorpay_order_id, razorpay_payment_id, razorpay_signature);
         if (!isValidSignature) {
             res.status(400).json({
@@ -187,6 +204,7 @@ router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validat
             });
             return;
         }
+        // Update order status
         const order = await index_1.Order.findOneAndUpdate({ razorpayOrderId: razorpay_order_id }, {
             status: 'confirmed',
             razorpayPaymentId: razorpay_payment_id,
@@ -203,6 +221,7 @@ router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validat
             });
             return;
         }
+        // Update product stock
         for (const item of order.orderItems) {
             await index_1.Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
         }
@@ -249,4 +268,3 @@ router.get('/orders', auth_1.auth, database_1.ensureDatabaseConnection, async (r
     }
 });
 exports.default = router;
-//# sourceMappingURL=payments.js.map

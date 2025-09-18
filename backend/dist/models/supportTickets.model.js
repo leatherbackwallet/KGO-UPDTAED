@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * SupportTicket Model - Customer support ticket management
+ * Handles customer issues, support conversations, and ticket assignment
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,12 +39,14 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SupportTicket = exports.TicketStatus = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// Ticket status enum
 var TicketStatus;
 (function (TicketStatus) {
     TicketStatus["OPEN"] = "open";
     TicketStatus["IN_PROGRESS"] = "in_progress";
     TicketStatus["CLOSED"] = "closed";
 })(TicketStatus || (exports.TicketStatus = TicketStatus = {}));
+// SupportTicket schema definition
 const supportTicketSchema = new mongoose_1.Schema({
     userId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -99,23 +105,30 @@ const supportTicketSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 supportTicketSchema.index({ userId: 1, status: 1 });
 supportTicketSchema.index({ assignedTo: 1, status: 1 });
 supportTicketSchema.index({ status: 1, createdAt: -1 });
 supportTicketSchema.index({ orderId: 1 });
+// Compound index for support agent queries
 supportTicketSchema.index({ assignedTo: 1, status: 1, createdAt: -1 });
+// Virtual for conversation count
 supportTicketSchema.virtual('conversationCount').get(function () {
     return this.conversation.length;
 });
+// Virtual for is open
 supportTicketSchema.virtual('isOpen').get(function () {
     return this.status === TicketStatus.OPEN;
 });
+// Virtual for is in progress
 supportTicketSchema.virtual('isInProgress').get(function () {
     return this.status === TicketStatus.IN_PROGRESS;
 });
+// Virtual for is closed
 supportTicketSchema.virtual('isClosed').get(function () {
     return this.status === TicketStatus.CLOSED;
 });
+// Virtual for last message
 supportTicketSchema.virtual('lastMessage').get(function () {
     if (this.conversation.length > 0) {
         const lastMsg = this.conversation[this.conversation.length - 1];
@@ -129,7 +142,9 @@ supportTicketSchema.virtual('lastMessage').get(function () {
     }
     return null;
 });
+// Ensure virtual fields are serialized
 supportTicketSchema.set('toJSON', { virtuals: true });
+// Instance method to add message
 supportTicketSchema.methods.addMessage = function (userId, message) {
     this.conversation.push({
         byUser: userId,
@@ -138,14 +153,15 @@ supportTicketSchema.methods.addMessage = function (userId, message) {
     });
     return this.save();
 };
+// Instance method to assign ticket
 supportTicketSchema.methods.assignTo = function (agentId) {
     this.assignedTo = agentId;
     this.status = TicketStatus.IN_PROGRESS;
     return this.save();
 };
+// Instance method to close ticket
 supportTicketSchema.methods.closeTicket = function () {
     this.status = TicketStatus.CLOSED;
     return this.save();
 };
 exports.SupportTicket = mongoose_1.default.model('SupportTicket', supportTicketSchema);
-//# sourceMappingURL=supportTickets.model.js.map

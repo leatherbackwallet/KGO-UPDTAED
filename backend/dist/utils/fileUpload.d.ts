@@ -1,5 +1,5 @@
 export declare function ensureProductImagesDir(): void;
-export declare function uploadImage(file: Express.Multer.File, customName?: string): Promise<{
+export declare function uploadImage(file: any, customName?: string): Promise<{
     filename: string;
     originalName: string;
     size: number;

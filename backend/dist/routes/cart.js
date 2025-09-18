@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Cart Routes - Shopping cart management
+ * Handles cart operations and guest data merging
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -6,6 +10,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
+// Merge guest cart data with user account
 router.post('/merge', auth_1.auth, async (req, res) => {
     try {
         const { items } = req.body;
@@ -16,6 +21,8 @@ router.post('/merge', auth_1.auth, async (req, res) => {
             });
             return;
         }
+        // In a real implementation, you would merge the guest cart with the user's cart
+        // For now, we'll just return success
         res.json({
             success: true,
             message: 'Cart merged successfully',
@@ -30,8 +37,10 @@ router.post('/merge', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Get user's cart
 router.get('/', auth_1.auth, async (req, res) => {
     try {
+        // In a real implementation, you would fetch the user's cart from the database
         res.json({
             success: true,
             data: {
@@ -49,6 +58,7 @@ router.get('/', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Add item to cart
 router.post('/add', auth_1.auth, async (req, res) => {
     try {
         const { productId, quantity = 1 } = req.body;
@@ -59,6 +69,7 @@ router.post('/add', auth_1.auth, async (req, res) => {
             });
             return;
         }
+        // In a real implementation, you would add the item to the user's cart
         res.json({
             success: true,
             message: 'Item added to cart successfully',
@@ -74,9 +85,11 @@ router.post('/add', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Remove item from cart
 router.delete('/remove/:productId', auth_1.auth, async (req, res) => {
     try {
         const { productId } = req.params;
+        // In a real implementation, you would remove the item from the user's cart
         res.json({
             success: true,
             message: 'Item removed from cart successfully',
@@ -91,6 +104,7 @@ router.delete('/remove/:productId', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Update cart item quantity
 router.put('/update/:productId', auth_1.auth, async (req, res) => {
     try {
         const { productId } = req.params;
@@ -102,6 +116,7 @@ router.put('/update/:productId', auth_1.auth, async (req, res) => {
             });
             return;
         }
+        // In a real implementation, you would update the item quantity in the user's cart
         res.json({
             success: true,
             message: 'Cart item updated successfully',
@@ -117,8 +132,10 @@ router.put('/update/:productId', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Clear cart
 router.delete('/clear', auth_1.auth, async (req, res) => {
     try {
+        // In a real implementation, you would clear the user's cart
         res.json({
             success: true,
             message: 'Cart cleared successfully'
@@ -133,4 +150,3 @@ router.delete('/clear', auth_1.auth, async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=cart.js.map

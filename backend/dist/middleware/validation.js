@@ -1,12 +1,18 @@
 "use strict";
+/**
+ * Input Validation Middleware
+ * Sanitizes and validates incoming request data
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.schemas = exports.sanitizeInput = exports.validate = exports.productSchema = exports.refreshSchema = exports.loginSchema = exports.registerSchema = void 0;
 const zod_1 = require("zod");
+// Common validation schemas
 const emailSchema = zod_1.z.string().email('Invalid email format').toLowerCase().trim();
 const passwordSchema = zod_1.z.string()
     .min(8, 'Password must be at least 8 characters')
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
 const phoneSchema = zod_1.z.string().regex(/^[\+]?[0-9\s\-\(\)]{8,}$/, 'Invalid phone number format');
+// User registration validation
 exports.registerSchema = zod_1.z.object({
     firstName: zod_1.z.string().min(2, 'First name must be at least 2 characters').trim(),
     lastName: zod_1.z.string().min(2, 'Last name must be at least 2 characters').trim(),
@@ -14,13 +20,16 @@ exports.registerSchema = zod_1.z.object({
     password: passwordSchema,
     phone: phoneSchema
 });
+// User login validation
 exports.loginSchema = zod_1.z.object({
     email: emailSchema,
     password: zod_1.z.string().min(1, 'Password is required')
 });
+// Token refresh validation
 exports.refreshSchema = zod_1.z.object({
     refreshToken: zod_1.z.string().min(1, 'Refresh token is required')
 });
+// Product creation validation
 exports.productSchema = zod_1.z.object({
     name: zod_1.z.object({
         en: zod_1.z.string().min(1, 'English name is required'),
@@ -36,6 +45,7 @@ exports.productSchema = zod_1.z.object({
     occasions: zod_1.z.array(zod_1.z.string()).optional(),
     isFeatured: zod_1.z.boolean().optional()
 });
+// Validation middleware factory
 const validate = (schema) => {
     return (req, res, next) => {
         try {
@@ -72,16 +82,19 @@ const validate = (schema) => {
     };
 };
 exports.validate = validate;
+// Sanitization middleware
 const sanitizeInput = (req, res, next) => {
+    // Sanitize string inputs
     const sanitizeString = (str) => {
         if (typeof str !== 'string')
             return str;
         return str
             .trim()
-            .replace(/[<>]/g, '')
-            .replace(/javascript:/gi, '')
-            .replace(/on\w+=/gi, '');
+            .replace(/[<>]/g, '') // Remove potential HTML tags
+            .replace(/javascript:/gi, '') // Remove javascript: protocol
+            .replace(/on\w+=/gi, ''); // Remove event handlers
     };
+    // Recursively sanitize object
     const sanitizeObject = (obj) => {
         if (typeof obj !== 'object' || obj === null)
             return obj;
@@ -94,6 +107,7 @@ const sanitizeInput = (req, res, next) => {
         }
         return sanitized;
     };
+    // Sanitize request body, query, and params
     if (req.body)
         req.body = sanitizeObject(req.body);
     if (req.query)
@@ -109,4 +123,3 @@ exports.schemas = {
     refresh: exports.refreshSchema,
     product: exports.productSchema
 };
-//# sourceMappingURL=validation.js.map

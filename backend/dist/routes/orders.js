@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Orders Routes - Order management for customers and admins
+ * Supports guest checkout and order tracking
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -10,9 +14,11 @@ const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
 const comboUtils_1 = require("../utils/comboUtils");
 const router = express_1.default.Router();
+// Create order (customer)
 router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod } = req.body;
+        // Use recipientAddress if provided, otherwise fall back to other address formats
         const address = recipientAddress || deliveryAddress || shippingAddress;
         if (!address) {
             return res.status(400).json({
@@ -20,6 +26,7 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                 error: { message: 'Recipient address is required', code: 'MISSING_ADDRESS' }
             });
         }
+        // Calculate total and prepare order items
         let totalPrice = 0;
         const orderItems = [];
         for (const item of products) {
@@ -38,7 +45,9 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                 comboBasePrice: 0,
                 comboItemConfigurations: []
             };
+            // Handle combo products
             if (product.isCombo && item.isCombo) {
+                // Validate combo configuration
                 if (!item.comboItemConfigurations || !Array.isArray(item.comboItemConfigurations)) {
                     return res.status(400).json({
                         success: false,
@@ -48,6 +57,7 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                         }
                     });
                 }
+                // Validate combo base price matches
                 if (item.comboBasePrice !== product.comboBasePrice) {
                     return res.status(400).json({
                         success: false,
@@ -57,17 +67,21 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                         }
                     });
                 }
+                // Recalculate combo price server-side
                 itemPrice = (0, comboUtils_1.calculateComboPrice)(product.comboBasePrice || 0, item.comboItemConfigurations);
+                // Store combo configuration
                 orderItemData.isCombo = true;
                 orderItemData.comboBasePrice = product.comboBasePrice || 0;
                 orderItemData.comboItemConfigurations = item.comboItemConfigurations;
                 orderItemData.price = itemPrice;
             }
             else if (product.isCombo && !item.isCombo) {
+                // Combo product but not sent as combo - use base price
                 itemPrice = product.comboBasePrice || 0;
                 orderItemData.price = itemPrice;
             }
             else {
+                // Regular product
                 itemPrice = product.price;
                 orderItemData.price = itemPrice;
             }
@@ -75,6 +89,7 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
             totalPrice += itemTotal;
             orderItems.push(orderItemData);
         }
+        // Prepare shipping details - handle both new recipientAddress format and legacy formats
         const shippingDetails = {
             recipientName: address.name || `${req.user.firstName} ${req.user.lastName}`,
             recipientPhone: address.phone || req.user.phone,
@@ -87,9 +102,10 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
             },
             specialInstructions: address.additionalInstructions || address.specialInstructions || ''
         };
+        // Create order
         const order = await index_1.Order.create({
             userId: req.user.id,
-            requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
             shippingDetails,
             orderItems,
             totalPrice,
@@ -121,6 +137,7 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
         });
     }
 });
+// Get all orders (admin)
 router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const orders = await index_1.Order.find({ isDeleted: false })
@@ -141,6 +158,7 @@ router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensure
         return res.status(500).json({ message: 'Server error' });
     }
 });
+// Get my orders (customer)
 router.get('/my', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const orders = await index_1.Order.find({ userId: req.user.id, isDeleted: false })
@@ -160,6 +178,7 @@ router.get('/my', auth_1.auth, database_1.ensureDatabaseConnection, async (req, 
         return res.status(500).json({ message: 'Server error' });
     }
 });
+// Update order status with timeline tracking (admin)
 router.put('/:id/status', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { status, notes } = req.body;
@@ -169,6 +188,7 @@ router.put('/:id/status', auth_1.auth, (0, role_1.requireRole)('admin'), databas
                 error: { message: 'Status is required', code: 'MISSING_STATUS' }
             });
         }
+        // Validate status
         const validStatuses = ['payment_done', 'order_received', 'collecting_items', 'packing', 'en_route', 'delivered', 'cancelled'];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({
@@ -183,6 +203,7 @@ router.put('/:id/status', auth_1.auth, (0, role_1.requireRole)('admin'), databas
                 error: { message: 'Order not found', code: 'ORDER_NOT_FOUND' }
             });
         }
+        // Update order status and add to history
         order.orderStatus = status;
         order.statusHistory.push({
             status,
@@ -191,6 +212,7 @@ router.put('/:id/status', auth_1.auth, (0, role_1.requireRole)('admin'), databas
             updatedBy: req.user.id
         });
         await order.save();
+        // Populate and return updated order
         const updatedOrder = await index_1.Order.findById(req.params.id)
             .populate('userId', 'firstName lastName email phone')
             .populate({
@@ -217,6 +239,7 @@ router.put('/:id/status', auth_1.auth, (0, role_1.requireRole)('admin'), databas
         });
     }
 });
+// Update order recipient (admin or order owner)
 router.put('/:id/recipient', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { recipientAddress } = req.body;
@@ -226,6 +249,7 @@ router.put('/:id/recipient', auth_1.auth, database_1.ensureDatabaseConnection, a
                 error: { message: 'Recipient address information is required', code: 'MISSING_RECIPIENT_INFO' }
             });
         }
+        // Check if order exists and user has permission to update it
         const existingOrder = await index_1.Order.findById(req.params.id);
         if (!existingOrder) {
             return res.status(404).json({
@@ -233,6 +257,7 @@ router.put('/:id/recipient', auth_1.auth, database_1.ensureDatabaseConnection, a
                 error: { message: 'Order not found', code: 'ORDER_NOT_FOUND' }
             });
         }
+        // Allow admin to update any order, or user to update their own order
         const isAdmin = req.user.roleName === 'admin';
         const isOrderOwner = existingOrder.userId.toString() === req.user.id;
         if (!isAdmin && !isOrderOwner) {
@@ -241,6 +266,7 @@ router.put('/:id/recipient', auth_1.auth, database_1.ensureDatabaseConnection, a
                 error: { message: 'You can only update your own orders', code: 'UNAUTHORIZED' }
             });
         }
+        // Prepare shipping details
         const shippingDetails = {
             recipientName: recipientAddress.name,
             recipientPhone: recipientAddress.phone,
@@ -284,6 +310,7 @@ router.put('/:id/recipient', auth_1.auth, database_1.ensureDatabaseConnection, a
         });
     }
 });
+// Delete order (admin)
 router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const order = await index_1.Order.findByIdAndUpdate(req.params.id, { isDeleted: true }, { new: true });
@@ -297,4 +324,3 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.
     }
 });
 exports.default = router;
-//# sourceMappingURL=orders.js.map

@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * ProductAttributes Model - Links products to their attribute values
+ * A linking collection that assigns values for specific attributes to products
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -55,8 +59,9 @@ const productAttributeSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Compound unique index to prevent duplicate attribute assignments
 productAttributeSchema.index({ productId: 1, attributeId: 1 }, { unique: true });
+// Additional indexes for efficient querying
 productAttributeSchema.index({ productId: 1 });
 productAttributeSchema.index({ attributeId: 1 });
 exports.ProductAttribute = mongoose_1.default.model('ProductAttribute', productAttributeSchema);
-//# sourceMappingURL=productAttributes.model.js.map

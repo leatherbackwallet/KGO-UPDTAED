@@ -1,10 +1,17 @@
 "use strict";
+/**
+ * Request Logging Middleware
+ * Logs all incoming requests and responses for debugging and monitoring
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorLogger = exports.logger = void 0;
+// Request logging middleware
 const logger = (req, res, next) => {
     const start = Date.now();
     const { method, url, ip, headers } = req;
+    // Log request
     console.log(`[${new Date().toISOString()}] ${method} ${url} - IP: ${ip}`);
+    // Log request body for non-GET requests (excluding sensitive data)
     if (method !== 'GET' && req.body) {
         const sanitizedBody = { ...req.body };
         if (sanitizedBody.password)
@@ -13,19 +20,24 @@ const logger = (req, res, next) => {
             sanitizedBody.token = '[REDACTED]';
         console.log(`Request Body:`, sanitizedBody);
     }
+    // Override res.json to log responses
     const originalJson = res.json;
     res.json = function (data) {
         const duration = Date.now() - start;
         const statusCode = res.statusCode;
+        // Log response
         console.log(`[${new Date().toISOString()}] ${method} ${url} - ${statusCode} (${duration}ms)`);
+        // Log error responses
         if (statusCode >= 400) {
             console.error(`Error Response:`, data);
         }
+        // Call original json method
         return originalJson.call(this, data);
     };
     next();
 };
 exports.logger = logger;
+// Error logging middleware
 const errorLogger = (err, req, res, next) => {
     const { method, url, ip } = req;
     console.error(`[${new Date().toISOString()}] ERROR ${method} ${url} - IP: ${ip}`);
@@ -37,4 +49,3 @@ const errorLogger = (err, req, res, next) => {
     next(err);
 };
 exports.errorLogger = errorLogger;
-//# sourceMappingURL=logger.js.map

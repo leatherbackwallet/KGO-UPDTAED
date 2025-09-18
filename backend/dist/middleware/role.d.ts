@@ -1,9 +1,3 @@
 import { Request, Response, NextFunction } from 'express';
-interface AuthenticatedRequest extends Request {
-    user?: {
-        id: string;
-    };
-}
-export declare const requireRole: (requiredRole: string) => (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
-export {};
+export declare const requireRole: (requiredRole: string) => (req: Request, res: Response, next: NextFunction) => Promise<void>;
 //# sourceMappingURL=role.d.ts.map

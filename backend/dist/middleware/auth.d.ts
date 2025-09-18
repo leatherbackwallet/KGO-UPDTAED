@@ -1,11 +1,3 @@
 import { Request, Response, NextFunction } from 'express';
-interface AuthenticatedRequest extends Request {
-    user?: {
-        id: string;
-        email: string;
-        role?: string;
-    };
-}
-export declare const auth: (req: AuthenticatedRequest, res: Response, next: NextFunction) => void;
-export {};
+export declare const auth: (req: Request, res: Response, next: NextFunction) => void;
 //# sourceMappingURL=auth.d.ts.map

@@ -49,6 +49,7 @@ const rateLimit_1 = require("./middleware/rateLimit");
 const logger_1 = require("./middleware/logger");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+// CORS Configuration
 const corsOptions = {
     origin: function (origin, callback) {
         const allowedOrigins = [
@@ -61,6 +62,7 @@ const corsOptions = {
             'https://keralgiftsonline.in',
             'https://www.keralgiftsonline.in'
         ];
+        // Allow requests with no origin (mobile apps, curl, etc.)
         if (!origin)
             return callback(null, true);
         if (allowedOrigins.indexOf(origin) !== -1) {
@@ -77,12 +79,15 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     exposedHeaders: ['Content-Length', 'Content-Type']
 };
+// Trust proxy for production environments
 app.set('trust proxy', 1);
+// Middleware
 app.use(rateLimit_1.generalLimiter);
 app.use(logger_1.logger);
 app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
+// Serve static files
 app.use('/images', express_1.default.static(path_1.default.join(__dirname, '../public/images'), {
     setHeaders: (res, path) => {
         if (path.endsWith('.svg')) {
@@ -95,6 +100,7 @@ app.use('/images', express_1.default.static(path_1.default.join(__dirname, '../p
         res.setHeader('Expires', new Date(Date.now() + 31536000 * 1000).toUTCString());
     }
 }));
+// Create default superuser if not exists
 async function createSuperUser() {
     if (process.env.CREATE_SUPERUSER !== 'true') {
         console.log('Superuser creation skipped (CREATE_SUPERUSER not set to true)');
@@ -134,6 +140,7 @@ async function createSuperUser() {
         console.error('Error creating superuser:', error);
     }
 }
+// Validate environment variables
 if (!process.env.MONGODB_URI) {
     console.error('MONGODB_URI environment variable is required');
     process.exit(1);
@@ -154,8 +161,10 @@ if (process.env.JWT_SECRET.length < 32) {
     process.exit(1);
 }
 console.log('✅ Environment variables validated successfully');
+// Initialize database connection (non-blocking for serverless)
 (0, database_1.connectToDatabase)().then(async () => {
     console.log('MongoDB connected with connection pooling');
+    // Skip directory creation in production environments
     if (process.env.NODE_ENV !== 'production') {
         (0, fileUpload_1.ensureProductImagesDir)();
         console.log('Product images directory initialized');
@@ -164,6 +173,7 @@ console.log('✅ Environment variables validated successfully');
         console.log('Skipping local file system initialization in production');
     }
     await createSuperUser();
+    // Initialize cache warming for frequently accessed data
     try {
         const { scheduleWarmCache } = await Promise.resolve().then(() => __importStar(require('./middleware/cache')));
         scheduleWarmCache();
@@ -174,10 +184,12 @@ console.log('✅ Environment variables validated successfully');
     }
 }).catch((err) => {
     console.error('MongoDB connection error:', err);
+    // Don't exit process in serverless environment
     if (process.env.NODE_ENV === 'production') {
         console.log('Continuing without MongoDB connection in production');
     }
 });
+// Error handling
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
     if (process.env.NODE_ENV !== 'production') {
@@ -190,6 +202,7 @@ process.on('unhandledRejection', (reason, promise) => {
         process.exit(1);
     }
 });
+// Import routes
 const auth_1 = __importDefault(require("./routes/auth"));
 const upload_1 = __importDefault(require("./routes/upload"));
 const orders_1 = __importDefault(require("./routes/orders"));
@@ -213,7 +226,9 @@ const images_1 = __importDefault(require("./routes/images"));
 const featureFlags_1 = __importDefault(require("./routes/featureFlags"));
 const monitoring_1 = __importDefault(require("./routes/monitoring"));
 const payments_1 = __importDefault(require("./routes/payments"));
+// Apply health routes first
 app.use('/api/health', rateLimit_1.apiLimiter, health_1.default);
+// Enhanced health check with database status (backup endpoint)
 app.get('/api/health-status', async (req, res) => {
     try {
         const dbStatus = await (0, database_1.connectToDatabase)().then(() => 'connected').catch(() => 'disconnected');
@@ -235,6 +250,7 @@ app.get('/api/health-status', async (req, res) => {
         });
     }
 });
+// Apply routes
 app.use('/api/auth', rateLimit_1.authLimiter, auth_1.default);
 app.use('/api/upload', rateLimit_1.apiLimiter, upload_1.default);
 app.use('/api/profile', rateLimit_1.apiLimiter, profile_1.default);
@@ -257,11 +273,13 @@ app.use('/api/content', rateLimit_1.apiLimiter, content_1.default);
 app.use('/api/images', rateLimit_1.apiLimiter, images_1.default);
 app.use('/api/feature-flags', rateLimit_1.apiLimiter, featureFlags_1.default);
 app.use('/api/monitoring', rateLimit_1.apiLimiter, monitoring_1.default);
+// Error logging middleware
 app.use(logger_1.errorLogger);
+// Start server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
+// Export for serverless environments
 exports.default = app;
-//# sourceMappingURL=server.js.map

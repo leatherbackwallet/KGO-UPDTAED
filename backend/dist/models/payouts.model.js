@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Payout Model - Vendor payout management and tracking
+ * Handles vendor earnings, payout periods, and transaction references
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,12 +39,14 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Payout = exports.PayoutStatus = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// Payout status enum
 var PayoutStatus;
 (function (PayoutStatus) {
     PayoutStatus["PENDING"] = "pending";
     PayoutStatus["COMPLETED"] = "completed";
     PayoutStatus["FAILED"] = "failed";
 })(PayoutStatus || (exports.PayoutStatus = PayoutStatus = {}));
+// Payout schema definition
 const payoutSchema = new mongoose_1.Schema({
     vendorId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -83,34 +89,42 @@ const payoutSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 payoutSchema.index({ vendorId: 1, status: 1 });
 payoutSchema.index({ periodStartDate: 1, periodEndDate: 1 });
 payoutSchema.index({ status: 1, createdAt: -1 });
+// Compound index for vendor period queries
 payoutSchema.index({ vendorId: 1, periodStartDate: 1, periodEndDate: 1 });
+// Virtual for period duration
 payoutSchema.virtual('periodDuration').get(function () {
     if (this.periodStartDate && this.periodEndDate) {
         const duration = this.periodEndDate.getTime() - this.periodStartDate.getTime();
-        return Math.ceil(duration / (1000 * 60 * 60 * 24));
+        return Math.ceil(duration / (1000 * 60 * 60 * 24)); // Days
     }
     return null;
 });
+// Virtual for payout summary
 payoutSchema.virtual('summary').get(function () {
     return `Payout ${this.status.toUpperCase()} - ₹${this.amount} - ${this.orderIds.length} orders`;
 });
+// Virtual for is completed
 payoutSchema.virtual('isCompleted').get(function () {
     return this.status === PayoutStatus.COMPLETED;
 });
+// Ensure virtual fields are serialized
 payoutSchema.set('toJSON', { virtuals: true });
+// Pre-save middleware to validate payout data
 payoutSchema.pre('save', function (next) {
+    // If period dates are provided, end date should be after start date
     if (this.periodStartDate && this.periodEndDate) {
         if (this.periodEndDate <= this.periodStartDate) {
             return next(new Error('Period end date must be after start date'));
         }
     }
+    // For completed payouts, transaction reference should be present
     if (this.status === PayoutStatus.COMPLETED && !this.transactionReference) {
         return next(new Error('Transaction reference is required for completed payouts'));
     }
     next();
 });
 exports.Payout = mongoose_1.default.model('Payout', payoutSchema);
-//# sourceMappingURL=payouts.model.js.map

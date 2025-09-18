@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Returns Routes - Return Merchandise Authorization (RMA) management
+ * Handles the complete return workflow from request to resolution
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -9,6 +13,7 @@ const orders_model_1 = require("../models/orders.model");
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
 const router = express_1.default.Router();
+// Get all returns (admin/support only)
 router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { status, page = 1, limit = 20 } = req.query;
@@ -43,6 +48,7 @@ router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) 
         });
     }
 });
+// Get single return
 router.get('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const returnRequest = await returns_model_1.Return.findById(req.params.id)
@@ -68,9 +74,11 @@ router.get('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, re
         });
     }
 });
+// Create return request
 router.post('/', auth_1.auth, async (req, res) => {
     try {
         const { orderId, reason, items, description } = req.body;
+        // Validate order exists and belongs to user
         const order = await orders_model_1.Order.findOne({
             _id: orderId,
             userId: req.user.id
@@ -105,6 +113,7 @@ router.post('/', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Update return status (admin only)
 router.put('/:id/status', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { status, notes } = req.body;
@@ -134,6 +143,7 @@ router.put('/:id/status', auth_1.auth, (0, role_1.requireRole)('admin'), async (
         });
     }
 });
+// Process return (admin only)
 router.post('/:id/process', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { action, refundAmount, notes } = req.body;
@@ -166,4 +176,3 @@ router.post('/:id/process', auth_1.auth, (0, role_1.requireRole)('admin'), async
     }
 });
 exports.default = router;
-//# sourceMappingURL=returns.js.map

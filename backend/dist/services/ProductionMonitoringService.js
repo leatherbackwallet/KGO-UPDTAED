@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Production Monitoring Service
+ * Handles alerts, performance benchmarks, and SLA monitoring for reliability features
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.productionMonitoringService = void 0;
 const events_1 = require("events");
@@ -182,11 +186,15 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         try {
             const metrics = await this.gatherCurrentMetrics();
             this.metrics.push(metrics);
+            // Keep only last 1000 metrics (about 8 hours at 30s intervals)
             if (this.metrics.length > 1000) {
                 this.metrics = this.metrics.slice(-1000);
             }
+            // Check alert rules
             this.checkAlertRules(metrics);
+            // Update benchmarks
             this.updateBenchmarks(metrics);
+            // Check SLA compliance
             this.checkSLACompliance();
             this.emit('metrics-collected', metrics);
         }
@@ -196,25 +204,29 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         }
     }
     async gatherCurrentMetrics() {
+        // In production, these would be gathered from actual monitoring systems
+        // For now, we'll simulate with some realistic values and trends
         const now = new Date();
-        const recentMetrics = this.metrics.slice(-10);
+        const recentMetrics = this.metrics.slice(-10); // Last 10 data points
+        // Calculate trends based on recent data
         const avgErrorRate = recentMetrics.length > 0
             ? recentMetrics.reduce((sum, m) => sum + m.errorRate, 0) / recentMetrics.length
             : 1;
         const avgResponseTime = recentMetrics.length > 0
             ? recentMetrics.reduce((sum, m) => sum + m.averageResponseTime, 0) / recentMetrics.length
             : 800;
+        // Simulate realistic metrics with some variation
         const metrics = {
             timestamp: now,
-            errorRate: Math.max(0, avgErrorRate + (Math.random() - 0.5) * 2),
-            performanceImpact: (Math.random() - 0.5) * 10,
-            loadingFailureRate: Math.max(0, Math.random() * 3),
-            cacheHitRate: Math.max(0, Math.min(100, 85 + (Math.random() - 0.5) * 20)),
-            averageResponseTime: Math.max(100, avgResponseTime + (Math.random() - 0.5) * 400),
-            userFeedbackScore: Math.max(1, Math.min(5, 3.5 + (Math.random() - 0.5) * 2)),
-            activeUsers: Math.floor(Math.random() * 1000) + 500,
-            memoryUsage: Math.max(0, Math.min(100, 60 + (Math.random() - 0.5) * 40)),
-            cpuUsage: Math.max(0, Math.min(100, 45 + (Math.random() - 0.5) * 30))
+            errorRate: Math.max(0, avgErrorRate + (Math.random() - 0.5) * 2), // ±1% variation
+            performanceImpact: (Math.random() - 0.5) * 10, // -5% to +5%
+            loadingFailureRate: Math.max(0, Math.random() * 3), // 0-3%
+            cacheHitRate: Math.max(0, Math.min(100, 85 + (Math.random() - 0.5) * 20)), // 75-95%
+            averageResponseTime: Math.max(100, avgResponseTime + (Math.random() - 0.5) * 400), // ±200ms
+            userFeedbackScore: Math.max(1, Math.min(5, 3.5 + (Math.random() - 0.5) * 2)), // 2.5-4.5
+            activeUsers: Math.floor(Math.random() * 1000) + 500, // 500-1500 users
+            memoryUsage: Math.max(0, Math.min(100, 60 + (Math.random() - 0.5) * 40)), // 40-80%
+            cpuUsage: Math.max(0, Math.min(100, 45 + (Math.random() - 0.5) * 30)) // 30-60%
         };
         return metrics;
     }
@@ -222,6 +234,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         this.alertRules.forEach(rule => {
             if (!rule.enabled)
                 return;
+            // Check cooldown period
             if (rule.lastTriggered) {
                 const cooldownMs = rule.cooldownPeriod * 60 * 1000;
                 if (Date.now() - rule.lastTriggered.getTime() < cooldownMs) {
@@ -271,6 +284,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
     }
     async sendAlert(alert) {
         try {
+            // Send to webhook if configured
             if (process.env.WEBHOOK_URL) {
                 const webhookPayload = {
                     text: `🚨 ${alert.severity.toUpperCase()} Alert: ${alert.ruleName}`,
@@ -290,6 +304,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
                     body: JSON.stringify(webhookPayload)
                 });
             }
+            // Log to monitoring system
             console.log('Alert sent:', JSON.stringify(alert, null, 2));
         }
         catch (error) {
@@ -306,9 +321,13 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         }
     }
     updateBenchmarks(metrics) {
+        // Update Page Load Time benchmark (simulated)
         this.updateBenchmark('Page Load Time', metrics.averageResponseTime * 1.5);
+        // Update API Response Time benchmark
         this.updateBenchmark('API Response Time', metrics.averageResponseTime);
+        // Update Cache Hit Rate benchmark
         this.updateBenchmark('Cache Hit Rate', metrics.cacheHitRate);
+        // Update Error Recovery Rate benchmark (simulated)
         this.updateBenchmark('Error Recovery Rate', 100 - metrics.loadingFailureRate);
     }
     updateBenchmark(name, currentValue) {
@@ -318,14 +337,17 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         const previousValue = benchmark.current;
         benchmark.current = currentValue;
         benchmark.lastUpdated = new Date();
+        // Determine trend
         const changePercent = ((currentValue - benchmark.baseline) / benchmark.baseline) * 100;
         if (Math.abs(changePercent) < benchmark.threshold) {
             benchmark.trend = 'stable';
         }
         else if (changePercent > 0) {
+            // For metrics where higher is better (cache hit rate, error recovery rate)
             benchmark.trend = name.includes('Rate') ? 'improving' : 'degrading';
         }
         else {
+            // For metrics where lower is better (response time, load time)
             benchmark.trend = name.includes('Time') ? 'improving' : 'degrading';
         }
         this.benchmarks.set(name, benchmark);
@@ -344,6 +366,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         });
     }
     calculateSLACompliance(sla) {
+        // Get metrics for the specified period
         const periodMetrics = this.getMetricsForPeriod(sla.period);
         if (periodMetrics.length === 0) {
             return {
@@ -353,6 +376,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
                 compliancePercentage: 100
             };
         }
+        // Calculate average for the period
         const currentValue = periodMetrics.reduce((sum, m) => sum + m[sla.metric], 0) / periodMetrics.length;
         let isViolated = false;
         switch (sla.operator) {
@@ -403,6 +427,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         }
         return this.metrics.filter(m => m.timestamp >= cutoffTime);
     }
+    // Public API methods
     getMetrics(limit = 100) {
         return this.metrics.slice(-limit);
     }
@@ -418,6 +443,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
             return false;
         const currentRule = this.alertRules[ruleIndex];
         if (currentRule) {
+            // Ensure all required properties are present for exact optional property types
             const updatedRule = {
                 id: currentRule.id,
                 name: currentRule.name,
@@ -429,6 +455,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
                 cooldownPeriod: currentRule.cooldownPeriod,
                 ...updates
             };
+            // Only include lastTriggered if it exists
             if (currentRule.lastTriggered !== undefined) {
                 updatedRule.lastTriggered = currentRule.lastTriggered;
             }
@@ -455,6 +482,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
         }
         const issues = [];
         let status = 'healthy';
+        // Check critical thresholds
         if (currentMetrics.errorRate > 5) {
             issues.push('Critical error rate');
             status = 'critical';
@@ -463,6 +491,7 @@ class ProductionMonitoringService extends events_1.EventEmitter {
             issues.push('Critical loading failure rate');
             status = 'critical';
         }
+        // Check warning thresholds
         if (currentMetrics.errorRate > 2 && status !== 'critical') {
             issues.push('High error rate');
             status = 'warning';
@@ -480,4 +509,3 @@ class ProductionMonitoringService extends events_1.EventEmitter {
 }
 exports.productionMonitoringService = new ProductionMonitoringService();
 exports.default = exports.productionMonitoringService;
-//# sourceMappingURL=ProductionMonitoringService.js.map

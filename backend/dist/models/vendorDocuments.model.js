@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * VendorDocument Model - Vendor verification document management
+ * Handles GSTIN, FSSAI, PAN, and bank account document verification
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,6 +39,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VendorDocument = exports.DocumentStatus = exports.DocumentType = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// Document type enum
 var DocumentType;
 (function (DocumentType) {
     DocumentType["GSTIN"] = "GSTIN";
@@ -42,12 +47,14 @@ var DocumentType;
     DocumentType["PAN"] = "PAN";
     DocumentType["BANK_ACCOUNT"] = "BANK_ACCOUNT";
 })(DocumentType || (exports.DocumentType = DocumentType = {}));
+// Document status enum
 var DocumentStatus;
 (function (DocumentStatus) {
     DocumentStatus["PENDING"] = "pending";
     DocumentStatus["APPROVED"] = "approved";
     DocumentStatus["REJECTED"] = "rejected";
 })(DocumentStatus || (exports.DocumentStatus = DocumentStatus = {}));
+// VendorDocument schema definition
 const vendorDocumentSchema = new mongoose_1.Schema({
     vendorId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -81,8 +88,10 @@ const vendorDocumentSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 vendorDocumentSchema.index({ vendorId: 1, documentType: 1 }, { unique: true });
 vendorDocumentSchema.index({ status: 1, documentType: 1 });
+// Pre-save middleware to validate unique vendor-document type combination
 vendorDocumentSchema.pre('save', async function (next) {
     if (this.isNew || this.isModified('vendorId') || this.isModified('documentType')) {
         const existing = await mongoose_1.default.model('VendorDocument').findOne({
@@ -96,6 +105,7 @@ vendorDocumentSchema.pre('save', async function (next) {
     }
     next();
 });
+// Pre-save middleware to clear rejection reason when status changes to approved
 vendorDocumentSchema.pre('save', function (next) {
     if (this.status === DocumentStatus.APPROVED && this.rejectionReason) {
         this.rejectionReason = '';
@@ -103,4 +113,3 @@ vendorDocumentSchema.pre('save', function (next) {
     next();
 });
 exports.VendorDocument = mongoose_1.default.model('VendorDocument', vendorDocumentSchema);
-//# sourceMappingURL=vendorDocuments.model.js.map

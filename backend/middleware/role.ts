@@ -10,6 +10,8 @@ import { Role } from '../models/roles.model';
 interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
+    email: string;
+    role: string;
   };
 }
 

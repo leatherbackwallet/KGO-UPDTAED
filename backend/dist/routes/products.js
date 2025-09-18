@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Products Routes - Product management and catalog operations
+ * Handles product CRUD, search, filtering, and inventory management
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -13,6 +17,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const cache_1 = require("../middleware/cache");
 const database_1 = require("../middleware/database");
 const router = express_1.default.Router();
+// Get all products with SMART caching (re-enabled with proper invalidation)
 router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         console.log('🔍 [Products API] Fetching products with smart caching...');
@@ -22,6 +27,7 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
         console.log('🔍 [Products API] Collections:', await mongoose_1.default.connection.db?.listCollections().toArray());
         const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false } = req.query;
         let filter = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
+        // Apply filters
         if (category) {
             if (mongoose_1.default.Types.ObjectId.isValid(category)) {
                 filter.categories = category;
@@ -79,6 +85,7 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
         res.status(500).json({ success: false, error: 'Failed to fetch products' });
     }
 });
+// Get single product by ID
 router.get('/:id', database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const product = await products_model_1.Product.findById(req.params.id)
@@ -103,9 +110,11 @@ router.get('/:id', database_1.ensureDatabaseConnection, async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to fetch product' });
     }
 });
+// Create new product (admin only)
 router.post('/', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const productData = req.body;
+        // Validate required fields
         if (!productData.name || !productData.price || !productData.categories) {
             res.status(400).json({
                 success: false,
@@ -115,7 +124,9 @@ router.post('/', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensur
         }
         const product = new products_model_1.Product(productData);
         await product.save();
+        // Invalidate cache
         await (0, cache_1.invalidateProductCache)();
+        // Log activity
         await activityLogs_model_1.ActivityLog.create({
             userId: req.user?.id,
             action: 'CREATE_PRODUCT',
@@ -128,6 +139,7 @@ router.post('/', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensur
         res.status(500).json({ success: false, error: 'Failed to create product' });
     }
 });
+// Update product (admin only)
 router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const product = await products_model_1.Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true }).populate('categories', 'name slug');
@@ -135,7 +147,9 @@ router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ens
             res.status(404).json({ success: false, error: 'Product not found' });
             return;
         }
+        // Invalidate cache
         await (0, cache_1.invalidateProductCache)();
+        // Log activity
         await activityLogs_model_1.ActivityLog.create({
             userId: req.user?.id,
             action: 'UPDATE_PRODUCT',
@@ -148,6 +162,7 @@ router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ens
         res.status(500).json({ success: false, error: 'Failed to update product' });
     }
 });
+// Delete product (admin only)
 router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const product = await products_model_1.Product.findByIdAndDelete(req.params.id);
@@ -155,7 +170,9 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.
             res.status(404).json({ success: false, error: 'Product not found' });
             return;
         }
+        // Invalidate cache
         await (0, cache_1.invalidateProductCache)();
+        // Log activity
         await activityLogs_model_1.ActivityLog.create({
             userId: req.user?.id,
             action: 'DELETE_PRODUCT',
@@ -168,6 +185,7 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.
         res.status(500).json({ success: false, error: 'Failed to delete product' });
     }
 });
+// Get featured products
 router.get('/featured/list', database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const products = await products_model_1.Product.find({ isFeatured: true, isActive: true, isDeleted: false })
@@ -182,6 +200,7 @@ router.get('/featured/list', database_1.ensureDatabaseConnection, async (req, re
         res.status(500).json({ success: false, error: 'Failed to fetch featured products' });
     }
 });
+// Search products
 router.get('/search/query', database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { q, category, min, max, page = 1, limit = 20 } = req.query;
@@ -230,4 +249,3 @@ router.get('/search/query', database_1.ensureDatabaseConnection, async (req, res
     }
 });
 exports.default = router;
-//# sourceMappingURL=products.js.map

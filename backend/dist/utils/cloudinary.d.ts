@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 export declare const upload: multer.Multer;
-export declare function uploadImageToCloudinary(file: Express.Multer.File, options?: {
+export declare function uploadImageToCloudinary(file: any, options?: {
     folder?: string;
     transformation?: any[];
     public_id?: string;

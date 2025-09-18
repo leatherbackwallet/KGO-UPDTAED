@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Cache Warming Service
+ * Automated cache warming and maintenance procedures for optimal performance
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -16,11 +20,12 @@ class CacheWarmingService {
     getDefaultConfig() {
         return {
             enabled: process.env.CACHE_WARMING_ENABLED === 'true',
-            schedule: process.env.CACHE_WARMING_SCHEDULE || '0 */6 * * *',
+            schedule: process.env.CACHE_WARMING_SCHEDULE || '0 */6 * * *', // Every 6 hours
             concurrency: parseInt(process.env.CACHE_WARMING_CONCURRENCY || '5'),
-            timeout: parseInt(process.env.CACHE_WARMING_TIMEOUT || '30000'),
+            timeout: parseInt(process.env.CACHE_WARMING_TIMEOUT || '30000'), // 30 seconds
             retries: parseInt(process.env.CACHE_WARMING_RETRIES || '2'),
             endpoints: [
+                // Product-related endpoints
                 {
                     url: '/api/products?limit=50&sort=popular',
                     method: 'GET',
@@ -69,6 +74,7 @@ class CacheWarmingService {
                     successCount: 0,
                     failureCount: 0
                 },
+                // Image endpoints
                 {
                     url: '/api/images/popular',
                     method: 'GET',
@@ -77,6 +83,7 @@ class CacheWarmingService {
                     successCount: 0,
                     failureCount: 0
                 },
+                // Health and monitoring endpoints
                 {
                     url: '/api/health/check',
                     method: 'GET',
@@ -101,6 +108,7 @@ class CacheWarmingService {
             console.log('Cache warming is disabled');
             return;
         }
+        // Main cache warming job
         const mainJob = node_cron_1.default.schedule(this.config.schedule, async () => {
             await this.performCacheWarming();
         }, {
@@ -108,6 +116,7 @@ class CacheWarmingService {
             timezone: 'UTC'
         });
         this.scheduledJobs.set('main', mainJob);
+        // High-priority endpoints every hour
         const highPriorityJob = node_cron_1.default.schedule('0 * * * *', async () => {
             await this.warmHighPriorityEndpoints();
         }, {
@@ -115,6 +124,7 @@ class CacheWarmingService {
             timezone: 'UTC'
         });
         this.scheduledJobs.set('high-priority', highPriorityJob);
+        // Cache maintenance every 4 hours
         const maintenanceJob = node_cron_1.default.schedule('0 */4 * * *', async () => {
             await this.performCacheMaintenance();
         }, {
@@ -134,13 +144,15 @@ class CacheWarmingService {
             return;
         }
         this.isRunning = true;
+        // Start all scheduled jobs
         this.scheduledJobs.forEach((job, name) => {
             job.start();
             console.log(`Started cache warming job: ${name}`);
         });
+        // Perform initial cache warming
         setTimeout(() => {
             this.performInitialCacheWarming();
-        }, 5000);
+        }, 5000); // Wait 5 seconds after startup
         console.log('Cache warming service started');
     }
     stop() {
@@ -148,6 +160,7 @@ class CacheWarmingService {
             return;
         }
         this.isRunning = false;
+        // Stop all scheduled jobs
         this.scheduledJobs.forEach((job, name) => {
             job.stop();
             console.log(`Stopped cache warming job: ${name}`);
@@ -157,7 +170,9 @@ class CacheWarmingService {
     async performInitialCacheWarming() {
         console.log('Performing initial cache warming...');
         try {
+            // Warm high-priority endpoints first
             await this.warmHighPriorityEndpoints();
+            // Then warm medium priority endpoints
             const mediumPriorityEndpoints = this.config.endpoints.filter(e => e.priority === 'medium');
             await this.warmEndpoints(mediumPriorityEndpoints);
             console.log('Initial cache warming completed');
@@ -173,6 +188,7 @@ class CacheWarmingService {
             const results = await this.warmEndpoints(endpointsToWarm);
             this.logWarmingResults(results);
             this.updateEndpointStats(results);
+            // Report to monitoring service
             const successRate = results.filter(r => r.success).length / results.length * 100;
             console.log(`Cache warming completed: ${results.length} endpoints, ${successRate.toFixed(1)}% success rate`);
         }
@@ -204,6 +220,7 @@ class CacheWarmingService {
     }
     async warmEndpoints(endpoints) {
         const results = [];
+        // Process endpoints in batches based on concurrency setting
         for (let i = 0; i < endpoints.length; i += this.config.concurrency) {
             const batch = endpoints.slice(i, i + this.config.concurrency);
             const batchPromises = batch.map(endpoint => this.warmEndpoint(endpoint));
@@ -222,6 +239,7 @@ class CacheWarmingService {
                     });
                 }
             });
+            // Small delay between batches to avoid overwhelming the server
             if (i + this.config.concurrency < endpoints.length) {
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
@@ -250,6 +268,7 @@ class CacheWarmingService {
                 const response = await fetch(fullUrl, fetchOptions);
                 const responseTime = Date.now() - startTime;
                 if (response.ok) {
+                    // Consume the response to ensure it's fully processed
                     await response.text();
                     return {
                         endpoint: endpoint.url,
@@ -273,9 +292,11 @@ class CacheWarmingService {
                         timestamp: new Date()
                     };
                 }
+                // Exponential backoff for retries
                 await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
             }
         }
+        // This should never be reached, but TypeScript requires it
         return {
             endpoint: endpoint.url,
             success: false,
@@ -294,6 +315,7 @@ class CacheWarmingService {
                 console.warn(`  ${result.endpoint}: ${result.error}`);
             });
         }
+        // Keep warming history (last 1000 results)
         this.warmingHistory.push(...results);
         if (this.warmingHistory.length > 1000) {
             this.warmingHistory = this.warmingHistory.slice(-1000);
@@ -316,8 +338,11 @@ class CacheWarmingService {
     async performCacheMaintenance() {
         console.log('Performing cache maintenance...');
         try {
+            // Clear stale cache entries (this would depend on your cache implementation)
             await this.clearStaleCache();
+            // Optimize cache storage
             await this.optimizeCacheStorage();
+            // Update cache statistics
             await this.updateCacheStatistics();
             console.log('Cache maintenance completed');
         }
@@ -326,19 +351,26 @@ class CacheWarmingService {
         }
     }
     async clearStaleCache() {
+        // Implementation would depend on your cache system
+        // For example, with Redis:
+        // await redis.eval('return redis.call("del", unpack(redis.call("keys", ARGV[1])))', 0, 'cache:stale:*');
         console.log('Clearing stale cache entries...');
     }
     async optimizeCacheStorage() {
+        // Implementation would depend on your cache system
+        // For example, compacting cache files or optimizing memory usage
         console.log('Optimizing cache storage...');
     }
     async updateCacheStatistics() {
+        // Calculate and update cache statistics
         const stats = this.getCacheStatistics();
         console.log('Cache statistics updated:', stats);
     }
+    // Public API methods
     getCacheStatistics() {
         const totalEndpoints = this.config.endpoints.length;
         const activeEndpoints = this.config.endpoints.filter(e => e.lastWarmed).length;
-        const recentResults = this.warmingHistory.slice(-100);
+        const recentResults = this.warmingHistory.slice(-100); // Last 100 results
         const successRate = recentResults.length > 0
             ? recentResults.filter(r => r.success).length / recentResults.length * 100
             : 0;
@@ -396,4 +428,3 @@ class CacheWarmingService {
 }
 exports.cacheWarmingService = new CacheWarmingService();
 exports.default = exports.cacheWarmingService;
-//# sourceMappingURL=CacheWarmingService.js.map

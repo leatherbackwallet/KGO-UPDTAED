@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Finance Routes - Income and Expenditure Analytics
+ * Provides financial data for admin dashboard
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -8,9 +12,11 @@ const auth_1 = require("../middleware/auth");
 const orders_model_1 = require("../models/orders.model");
 const products_model_1 = require("../models/products.model");
 const router = express_1.default.Router();
+// Get aggregated financial data
 router.get('/aggregates', auth_1.auth, async (req, res) => {
     try {
         const { startDate, endDate, period } = req.query;
+        // Build date filter
         let dateFilter = {};
         if (startDate && endDate) {
             dateFilter.createdAt = {
@@ -18,6 +24,7 @@ router.get('/aggregates', auth_1.auth, async (req, res) => {
                 $lte: new Date(endDate)
             };
         }
+        // Get order statistics
         const orderStats = await orders_model_1.Order.aggregate([
             { $match: dateFilter },
             {
@@ -29,6 +36,7 @@ router.get('/aggregates', auth_1.auth, async (req, res) => {
                 }
             }
         ]);
+        // Get product statistics
         const productStats = await products_model_1.Product.aggregate([
             {
                 $group: {
@@ -55,6 +63,7 @@ router.get('/aggregates', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Get revenue trends
 router.get('/revenue/trends', auth_1.auth, async (req, res) => {
     try {
         const { period = 'month' } = req.query;
@@ -101,6 +110,7 @@ router.get('/revenue/trends', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Get top selling products
 router.get('/products/top-selling', auth_1.auth, async (req, res) => {
     try {
         const { limit = 10 } = req.query;
@@ -150,4 +160,3 @@ router.get('/products/top-selling', auth_1.auth, async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=finance.js.map

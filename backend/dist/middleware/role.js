@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Role-based Access Control Middleware
+ * Ensures users have the required role to access protected routes
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.requireRole = void 0;
 const users_model_1 = require("../models/users.model");
@@ -22,4 +26,3 @@ const requireRole = (requiredRole) => {
     };
 };
 exports.requireRole = requireRole;
-//# sourceMappingURL=role.js.map

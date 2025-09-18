@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Request Batching and Deduplication Middleware
+ * Optimizes network utilization by batching requests and preventing duplicate calls
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,8 +39,10 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.queueRequests = exports.globalRequestQueue = exports.enhanceProductsWithBatchLoading = exports.batchRelatedData = exports.deduplicateRequests = void 0;
 const crypto = __importStar(require("crypto"));
+// In-memory store for pending requests and batching
 const pendingRequests = new Map();
 const batchQueues = new Map();
+// Generate request signature for deduplication
 const generateRequestSignature = (req) => {
     const { method, originalUrl, query, body } = req;
     const signature = crypto.createHash('md5')
@@ -44,23 +50,30 @@ const generateRequestSignature = (req) => {
         .digest('hex');
     return signature;
 };
+// Request deduplication middleware
 const deduplicateRequests = () => {
     return (req, res, next) => {
+        // Only deduplicate GET requests
         if (req.method !== 'GET') {
             return next();
         }
         const signature = generateRequestSignature(req);
+        // Check if identical request is already pending
         if (pendingRequests.has(signature)) {
             const pendingRequest = pendingRequests.get(signature);
             if (pendingRequest) {
+                // Add this response to the pending request's response list
                 pendingRequest.responses.push(res);
+                // Don't call next() - this request will be handled when the original completes
                 return;
             }
         }
+        // Create new pending request entry
         pendingRequests.set(signature, {
             responses: [res],
             timestamp: Date.now()
         });
+        // Override res.json to handle multiple responses
         const originalJson = res.json;
         const originalStatus = res.status;
         const originalEnd = res.end;
@@ -68,10 +81,13 @@ const deduplicateRequests = () => {
         let statusCode = 200;
         res.json = function (data) {
             responseData = data;
+            // Get the pending request
             const pending = pendingRequests.get(signature);
             if (pending) {
+                // Send response to all waiting clients
                 pending.responses.forEach((response, index) => {
                     if (response !== res || index === 0) {
+                        // Copy headers from original response
                         Object.keys(res.getHeaders()).forEach(headerName => {
                             const headerValue = res.getHeader(headerName);
                             if (headerValue !== undefined) {
@@ -82,6 +98,7 @@ const deduplicateRequests = () => {
                         originalJson.call(response, data);
                     }
                 });
+                // Clean up
                 pendingRequests.delete(signature);
             }
             return this;
@@ -91,6 +108,7 @@ const deduplicateRequests = () => {
             return originalStatus.call(this, code);
         };
         res.end = function (data) {
+            // If no json was called, handle end directly
             if (!responseData && pendingRequests.has(signature)) {
                 const pending = pendingRequests.get(signature);
                 if (pending) {
@@ -109,12 +127,15 @@ const deduplicateRequests = () => {
     };
 };
 exports.deduplicateRequests = deduplicateRequests;
+// Batch loading middleware for related data
 const batchRelatedData = (batchConfig = {}) => {
-    const { batchSize = 10, batchTimeout = 100, enableBatching = true } = batchConfig;
+    const { batchSize = 10, batchTimeout = 100, // ms
+    enableBatching = true } = batchConfig;
     return (req, res, next) => {
         if (!enableBatching || req.method !== 'GET') {
             return next();
         }
+        // Check if this is a batchable request (products with categories)
         if (req.originalUrl.includes('/api/products') && !req.params.id) {
             req.batchable = true;
             req.batchType = 'products-with-categories';
@@ -123,6 +144,7 @@ const batchRelatedData = (batchConfig = {}) => {
     };
 };
 exports.batchRelatedData = batchRelatedData;
+// Enhanced products route with batch loading
 const enhanceProductsWithBatchLoading = async (req, res, next) => {
     if (!req.batchable) {
         return next();
@@ -131,6 +153,7 @@ const enhanceProductsWithBatchLoading = async (req, res, next) => {
         const { Product, Category } = require('../dist/models');
         const { category, min, max, search, featured, occasions } = req.query;
         let filter = {};
+        // Apply filters (same logic as original route)
         if (category) {
             if (require('mongoose').Types.ObjectId.isValid(category)) {
                 filter.categories = category;
@@ -166,29 +189,34 @@ const enhanceProductsWithBatchLoading = async (req, res, next) => {
                 { occasions: searchRegex }
             ];
         }
+        // Batch load products and categories in parallel
         const [products, categories] = await Promise.all([
             Product.find(filter)
                 .populate('categories', 'name slug')
                 .populate('vendors', 'storeName')
                 .sort({ isFeatured: -1, createdAt: -1 })
                 .limit(100),
+            // Pre-load categories for potential filtering
             Category.find({ isActive: true }).select('name slug isPopular').limit(50)
         ]);
+        // Attach categories to request for potential use
         req.preloadedCategories = categories;
+        // Set the products data
         req.batchedData = {
             success: true,
             data: products,
             count: products.length,
-            categories: categories
+            categories: categories // Include categories in response for frontend caching
         };
         next();
     }
     catch (error) {
         console.error('Batch loading error:', error);
-        next();
+        next(); // Fall back to normal processing
     }
 };
 exports.enhanceProductsWithBatchLoading = enhanceProductsWithBatchLoading;
+// Request queue management for optimal network utilization
 class RequestQueue {
     constructor(options = {}) {
         this.maxConcurrent = options.maxConcurrent || 5;
@@ -209,6 +237,7 @@ class RequestQueue {
                 reject,
                 timestamp: Date.now()
             };
+            // Insert based on priority
             if (priority === 'high') {
                 this.queue.unshift(request);
             }
@@ -238,7 +267,7 @@ class RequestQueue {
         }
         finally {
             this.active--;
-            this.process();
+            this.process(); // Process next request
         }
     }
     getStats() {
@@ -249,10 +278,13 @@ class RequestQueue {
         };
     }
 }
+// Global request queue instance
 exports.globalRequestQueue = new RequestQueue({ maxConcurrent: 10 });
+// Queue middleware for high-traffic endpoints
 const queueRequests = (options = {}) => {
     const { priority = 'normal', queueTimeout = 5000 } = options;
     return (req, res, next) => {
+        // Only queue expensive operations
         const shouldQueue = req.originalUrl.includes('/api/products') ||
             req.originalUrl.includes('/api/categories') ||
             req.originalUrl.includes('/api/search');
@@ -261,15 +293,18 @@ const queueRequests = (options = {}) => {
         }
         const requestFn = () => {
             return new Promise((resolve, reject) => {
+                // Set up timeout
                 const timeout = setTimeout(() => {
                     reject(new Error('Request timeout'));
                 }, queueTimeout);
+                // Override res.json to resolve promise
                 const originalJson = res.json;
                 res.json = function (data) {
                     clearTimeout(timeout);
                     resolve(data);
                     return originalJson.call(this, data);
                 };
+                // Override error handling
                 const originalStatus = res.status;
                 res.status = function (code) {
                     if (code >= 400) {
@@ -281,6 +316,7 @@ const queueRequests = (options = {}) => {
                 next();
             });
         };
+        // Add to queue
         exports.globalRequestQueue.add(requestFn, priority)
             .catch(error => {
             console.error('Queued request failed:', error);
@@ -292,11 +328,13 @@ const queueRequests = (options = {}) => {
     };
 };
 exports.queueRequests = queueRequests;
+// Cleanup function for expired pending requests
 const cleanupExpiredRequests = () => {
     const now = Date.now();
-    const expiredThreshold = 30000;
+    const expiredThreshold = 30000; // 30 seconds
     for (const [signature, request] of pendingRequests.entries()) {
         if (now - request.timestamp > expiredThreshold) {
+            // Send timeout response to all waiting clients
             request.responses.forEach(res => {
                 if (!res.headersSent) {
                     res.status(408).json({
@@ -309,5 +347,5 @@ const cleanupExpiredRequests = () => {
         }
     }
 };
+// Schedule cleanup every 30 seconds
 setInterval(cleanupExpiredRequests, 30000);
-//# sourceMappingURL=requestBatching.js.map

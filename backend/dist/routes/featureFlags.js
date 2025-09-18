@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Feature Flags API Routes
+ * Manages feature flag configuration and rollout control
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -7,6 +11,7 @@ const express_1 = __importDefault(require("express"));
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
 const router = express_1.default.Router();
+// In-memory storage for feature flags (in production, use database)
 let featureFlags = {
     flags: {
         'enhanced-retry-logic': {
@@ -97,7 +102,12 @@ let featureFlags = {
     defaultEnabled: false,
     environment: process.env.NODE_ENV || 'development'
 };
+// Rollout metrics storage (in production, use monitoring service)
 let rolloutMetrics = {};
+/**
+ * GET /api/feature-flags
+ * Get all feature flags configuration
+ */
 router.get('/', (req, res) => {
     try {
         res.json(featureFlags);
@@ -110,6 +120,10 @@ router.get('/', (req, res) => {
         });
     }
 });
+/**
+ * GET /api/feature-flags/:flagName
+ * Get specific feature flag
+ */
 router.get('/:flagName', (req, res) => {
     try {
         const { flagName } = req.params;
@@ -134,6 +148,10 @@ router.get('/:flagName', (req, res) => {
         });
     }
 });
+/**
+ * PUT /api/feature-flags/:flagName
+ * Update feature flag configuration (admin only)
+ */
 router.put('/:flagName', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         const { flagName } = req.params;
@@ -145,6 +163,7 @@ router.put('/:flagName', auth_1.auth, (0, role_1.requireRole)('admin'), (req, re
             });
             return;
         }
+        // Validate rollout percentage
         if (updates.rolloutPercentage !== undefined) {
             if (updates.rolloutPercentage < 0 || updates.rolloutPercentage > 100) {
                 res.status(400).json({
@@ -154,6 +173,7 @@ router.put('/:flagName', auth_1.auth, (0, role_1.requireRole)('admin'), (req, re
                 return;
             }
         }
+        // Update flag
         featureFlags.flags[flagName] = {
             ...featureFlags.flags[flagName],
             ...updates,
@@ -162,6 +182,7 @@ router.put('/:flagName', auth_1.auth, (0, role_1.requireRole)('admin'), (req, re
                 lastModified: new Date()
             }
         };
+        // Log the change
         console.log(`Feature flag ${flagName} updated by ${req.user.email}:`, updates);
         res.json({
             success: true,
@@ -177,6 +198,10 @@ router.put('/:flagName', auth_1.auth, (0, role_1.requireRole)('admin'), (req, re
         });
     }
 });
+/**
+ * POST /api/feature-flags/:flagName/rollback
+ * Emergency rollback of feature flag (admin only)
+ */
 router.post('/:flagName/rollback', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         const { flagName } = req.params;
@@ -188,6 +213,7 @@ router.post('/:flagName/rollback', auth_1.auth, (0, role_1.requireRole)('admin')
             });
             return;
         }
+        // Perform rollback
         featureFlags.flags[flagName] = {
             ...featureFlags.flags[flagName],
             enabled: false,
@@ -198,6 +224,7 @@ router.post('/:flagName/rollback', auth_1.auth, (0, role_1.requireRole)('admin')
                 rollbackReason: reason || 'Emergency rollback'
             }
         };
+        // Log the rollback
         console.log(`ROLLBACK: Feature flag ${flagName} rolled back by ${req.user.email}. Reason: ${reason}`);
         res.json({
             success: true,
@@ -213,6 +240,10 @@ router.post('/:flagName/rollback', auth_1.auth, (0, role_1.requireRole)('admin')
         });
     }
 });
+/**
+ * GET /api/feature-flags/:flagName/metrics
+ * Get rollout metrics for a feature flag
+ */
 router.get('/:flagName/metrics', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     try {
         const { flagName } = req.params;
@@ -223,12 +254,13 @@ router.get('/:flagName/metrics', auth_1.auth, (0, role_1.requireRole)('admin'), 
             });
             return;
         }
+        // Get metrics (in production, fetch from monitoring service)
         const metrics = rolloutMetrics[flagName] || {
             flagName,
             enabled: featureFlags.flags[flagName].enabled,
             rolloutPercentage: featureFlags.flags[flagName].rolloutPercentage,
             estimatedUsers: Math.floor((featureFlags.flags[flagName].rolloutPercentage / 100) * 1000),
-            errorRate: Math.random() * 5,
+            errorRate: Math.random() * 5, // Mock data
             performanceImpact: Math.random() * 10 - 5,
             userFeedback: Math.random() * 5,
             lastUpdated: new Date()
@@ -246,6 +278,10 @@ router.get('/:flagName/metrics', auth_1.auth, (0, role_1.requireRole)('admin'), 
         });
     }
 });
+/**
+ * POST /api/feature-flags/:flagName/metrics
+ * Update rollout metrics (for monitoring services)
+ */
 router.post('/:flagName/metrics', (req, res) => {
     try {
         const { flagName } = req.params;
@@ -275,6 +311,10 @@ router.post('/:flagName/metrics', (req, res) => {
         });
     }
 });
+/**
+ * GET /api/feature-flags/health/check
+ * Health check for feature flag system
+ */
 router.get('/health/check', (req, res) => {
     try {
         const totalFlags = Object.keys(featureFlags.flags).length;
@@ -302,4 +342,3 @@ router.get('/health/check', (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=featureFlags.js.map

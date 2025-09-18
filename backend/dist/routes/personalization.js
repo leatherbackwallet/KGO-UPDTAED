@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Personalization Routes - AI-powered recommendations and user insights
+ * Provides personalized product recommendations and user behavior analytics
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -10,6 +14,7 @@ const auth_1 = require("../middleware/auth");
 const validation_1 = require("../middleware/validation");
 const zod_1 = require("zod");
 const router = express_1.default.Router();
+// Validation schemas
 const updatePreferencesSchema = zod_1.z.object({
     action: zod_1.z.enum(['view_product', 'purchase', 'search', 'add_to_cart']),
     data: zod_1.z.object({
@@ -29,6 +34,10 @@ const culturalPreferencesSchema = zod_1.z.object({
     modernItems: zod_1.z.boolean(),
     dietaryRestrictions: zod_1.z.array(zod_1.z.string())
 });
+/**
+ * GET /api/personalization/recommendations
+ * Get personalized product recommendations for the user
+ */
 router.get('/recommendations', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -50,6 +59,10 @@ router.get('/recommendations', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * GET /api/personalization/insights
+ * Get user insights and analytics
+ */
 router.get('/insights', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -67,6 +80,10 @@ router.get('/insights', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * POST /api/personalization/update-preferences
+ * Update user preferences based on behavior
+ */
 router.post('/update-preferences', auth_1.auth, validation_1.sanitizeInput, (0, validation_1.validate)(updatePreferencesSchema), async (req, res) => {
     try {
         const userId = req.user.id;
@@ -85,6 +102,10 @@ router.post('/update-preferences', auth_1.auth, validation_1.sanitizeInput, (0, 
         });
     }
 });
+/**
+ * GET /api/personalization/preferences
+ * Get user preferences
+ */
 router.get('/preferences', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -108,6 +129,10 @@ router.get('/preferences', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * PUT /api/personalization/cultural-preferences
+ * Update cultural preferences
+ */
 router.put('/cultural-preferences', auth_1.auth, validation_1.sanitizeInput, (0, validation_1.validate)(culturalPreferencesSchema), async (req, res) => {
     try {
         const userId = req.user.id;
@@ -135,6 +160,10 @@ router.put('/cultural-preferences', auth_1.auth, validation_1.sanitizeInput, (0,
         });
     }
 });
+/**
+ * GET /api/personalization/festival-recommendations
+ * Get festival-specific recommendations
+ */
 router.get('/festival-recommendations', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -145,6 +174,7 @@ router.get('/festival-recommendations', auth_1.auth, async (req, res) => {
                 error: { message: 'Festival parameter is required', code: 'FESTIVAL_REQUIRED' }
             });
         }
+        // Get festival-specific recommendations
         const recommendations = await personalizationService_1.personalizationService.getRecommendations(userId, 20);
         const festivalRecommendations = recommendations.filter(rec => rec.reason.toLowerCase().includes(festival.toLowerCase()));
         return res.status(200).json({
@@ -164,6 +194,10 @@ router.get('/festival-recommendations', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * GET /api/personalization/seasonal-recommendations
+ * Get seasonal recommendations based on current month
+ */
 router.get('/seasonal-recommendations', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -187,6 +221,10 @@ router.get('/seasonal-recommendations', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * GET /api/personalization/similar-users
+ * Get recommendations based on similar users
+ */
 router.get('/similar-users', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -209,10 +247,15 @@ router.get('/similar-users', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * POST /api/personalization/track-behavior
+ * Track user behavior for analytics
+ */
 router.post('/track-behavior', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const { event, data } = req.body;
+        // Track the behavior event
         await personalizationService_1.personalizationService.updateUserPreferences(userId, event, data);
         return res.status(200).json({
             success: true,
@@ -227,6 +270,10 @@ router.post('/track-behavior', auth_1.auth, async (req, res) => {
         });
     }
 });
+/**
+ * GET /api/personalization/engagement-metrics
+ * Get user engagement metrics
+ */
 router.get('/engagement-metrics', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -258,4 +305,3 @@ router.get('/engagement-metrics', auth_1.auth, async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=personalization.js.map

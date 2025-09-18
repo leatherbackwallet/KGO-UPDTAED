@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Vendors Routes - Vendor management and operations
+ * Handles vendor listing and management for admin users
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -8,6 +12,7 @@ const vendors_model_1 = require("../models/vendors.model");
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
 const router = express_1.default.Router();
+// GET /api/vendors - Get all active vendors
 router.get('/', async (req, res) => {
     try {
         const vendors = await vendors_model_1.Vendor.find({ status: 'active' }).select('storeName _id');
@@ -18,6 +23,7 @@ router.get('/', async (req, res) => {
         res.status(500).json({ success: false, error: { message: 'Failed to fetch vendors', code: 'FETCH_ERROR' } });
     }
 });
+// GET /api/vendors/all - Get all vendors (admin only)
 router.get('/all', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const vendors = await vendors_model_1.Vendor.find().select('storeName _id status');
@@ -29,4 +35,3 @@ router.get('/all', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, re
     }
 });
 exports.default = router;
-//# sourceMappingURL=vendors.js.map

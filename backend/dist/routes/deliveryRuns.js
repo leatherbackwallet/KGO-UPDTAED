@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Delivery Runs Routes - Advanced logistics management
+ * Handles delivery run planning, execution, and tracking for hyperlocal delivery
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -8,16 +12,20 @@ const deliveryRuns_model_1 = require("../models/deliveryRuns.model");
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
 const router = express_1.default.Router();
+// Get all delivery runs (admin and delivery agents)
 router.get('/', auth_1.auth, async (req, res) => {
     try {
         const { status, deliveryAgentId, date } = req.query;
         const filter = {};
+        // Filter by status
         if (status) {
             filter.status = status;
         }
+        // Filter by delivery agent
         if (deliveryAgentId) {
             filter.deliveryAgentId = deliveryAgentId;
         }
+        // Filter by date
         if (date) {
             const startDate = new Date(date);
             const endDate = new Date(startDate);
@@ -44,6 +52,7 @@ router.get('/', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Get single delivery run
 router.get('/:id', auth_1.auth, async (req, res) => {
     try {
         const deliveryRun = await deliveryRuns_model_1.DeliveryRun.findById(req.params.id)
@@ -70,6 +79,7 @@ router.get('/:id', auth_1.auth, async (req, res) => {
         });
     }
 });
+// Create new delivery run
 router.post('/', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const deliveryRun = new deliveryRuns_model_1.DeliveryRun(req.body);
@@ -87,6 +97,7 @@ router.post('/', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res)
         });
     }
 });
+// Update delivery run
 router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const deliveryRun = await deliveryRuns_model_1.DeliveryRun.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
@@ -110,6 +121,7 @@ router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, re
         });
     }
 });
+// Start delivery run
 router.post('/:id/start', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const deliveryRun = await deliveryRuns_model_1.DeliveryRun.findByIdAndUpdate(req.params.id, {
@@ -137,6 +149,7 @@ router.post('/:id/start', auth_1.auth, (0, role_1.requireRole)('admin'), async (
         });
     }
 });
+// Complete delivery run
 router.post('/:id/complete', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const deliveryRun = await deliveryRuns_model_1.DeliveryRun.findByIdAndUpdate(req.params.id, {
@@ -165,4 +178,3 @@ router.post('/:id/complete', auth_1.auth, (0, role_1.requireRole)('admin'), asyn
     }
 });
 exports.default = router;
-//# sourceMappingURL=deliveryRuns.js.map

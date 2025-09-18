@@ -1,12 +1,17 @@
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
-declare namespace Express {
-  interface Request {
-    user?: {
-      id: string;
-      email: string;
-      role: string;
-      [key: string]: any;
-    };
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: string;
+        email?: string;
+        role?: string;
+        [key: string]: any;
+      };
+    }
   }
-} 
+}
+
+// Re-export Request and Response for convenience
+export { Request, Response }; 

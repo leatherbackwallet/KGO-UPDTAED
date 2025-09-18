@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Authentication Middleware
+ * Verifies JWT tokens and adds user information to requests
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.auth = void 0;
 const jwt_1 = require("../utils/jwt");
@@ -63,4 +67,3 @@ const auth = (req, res, next) => {
     }
 };
 exports.auth = auth;
-//# sourceMappingURL=auth.js.map

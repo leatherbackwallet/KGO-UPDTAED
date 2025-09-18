@@ -8,6 +8,7 @@ const cloudinary_1 = require("../utils/cloudinary");
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
 const router = express_1.default.Router();
+// Upload single image to Cloudinary CDN (memory upload + direct Cloudinary stream)
 router.post('/product-image', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
     const multer = require('multer');
     const memoryStorage = multer.memoryStorage();
@@ -52,10 +53,13 @@ router.post('/product-image', auth_1.auth, (0, role_1.requireRole)('admin'), (re
         }
     });
 });
+// Upload image with direct Cloudinary upload (alternative endpoint)
 router.post('/product-image-direct', auth_1.auth, (0, role_1.requireRole)('admin'), (req, res) => {
+    // Use multer memory storage to get the file buffer
     const multer = require('multer');
     const memoryStorage = multer.memoryStorage();
     const memoryUpload = multer({ storage: memoryStorage });
+    // Handle the file upload to memory first
     memoryUpload.single('image')(req, res, async (err) => {
         if (err) {
             console.error('Memory upload error:', err);
@@ -98,6 +102,7 @@ router.post('/product-image-direct', auth_1.auth, (0, role_1.requireRole)('admin
         }
     });
 });
+// Delete uploaded image from Cloudinary
 router.delete('/product-image/:public_id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { public_id } = req.params;
@@ -124,6 +129,7 @@ router.delete('/product-image/:public_id', auth_1.auth, (0, role_1.requireRole)(
         });
     }
 });
+// Get list of uploaded images from Cloudinary
 router.get('/product-images', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { folder, max_results, next_cursor } = req.query;
@@ -160,6 +166,7 @@ router.get('/product-images', auth_1.auth, (0, role_1.requireRole)('admin'), asy
         });
     }
 });
+// Get image metadata from Cloudinary
 router.get('/product-image/:public_id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { public_id } = req.params;
@@ -200,6 +207,7 @@ router.get('/product-image/:public_id', auth_1.auth, (0, role_1.requireRole)('ad
         });
     }
 });
+// Get optimized image URL with transformations
 router.get('/product-image/:public_id/optimized', async (req, res) => {
     try {
         const { public_id } = req.params;
@@ -234,4 +242,3 @@ router.get('/product-image/:public_id/optimized', async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=upload.js.map
