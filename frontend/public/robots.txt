@@ -1,23 +1,25 @@
 User-agent: *
 Allow: /
 
-# Sitemap location
+# Sitemap
 Sitemap: https://keralgiftsonline.in/sitemap.xml
 
 # Disallow admin and private areas
-Disallow: /admin
+Disallow: /admin/
 Disallow: /api/
 Disallow: /_next/
+Disallow: /test-api
 Disallow: /debug
-Disallow: /test*
-Disallow: /test-*
-Disallow: /celebration
 
 # Allow important pages
 Allow: /products
-Allow: /categories
 Allow: /about
-Allow: /contact
+Allow: /content
+Allow: /login
+Allow: /register
 
-# Crawl delay for respectful crawling
+# Crawl delay (optional)
 Crawl-delay: 1
+
+# Host directive
+Host: https://keralgiftsonline.in
