@@ -60,7 +60,9 @@ const corsOptions = {
             'http://localhost:3003',
             'https://onyourbehlf.uc.r.appspot.com',
             'https://keralgiftsonline.in',
-            'https://www.keralgiftsonline.in'
+            'https://keralagiftsonline.in',
+            'https://www.keralgiftsonline.in',
+            'https://www.keralagiftsonline.in'
         ];
         // Allow requests with no origin (mobile apps, curl, etc.)
         if (!origin)
@@ -225,7 +227,7 @@ const health_1 = __importDefault(require("./routes/health"));
 const images_1 = __importDefault(require("./routes/images"));
 const featureFlags_1 = __importDefault(require("./routes/featureFlags"));
 const monitoring_1 = __importDefault(require("./routes/monitoring"));
-const payments_1 = __importDefault(require("./routes/payments"));
+// import paymentRoutes from './routes/payments';
 // Apply health routes first
 app.use('/api/health', rateLimit_1.apiLimiter, health_1.default);
 // Enhanced health check with database status (backup endpoint)
@@ -258,7 +260,7 @@ app.use('/api/products', rateLimit_1.apiLimiter, products_1.default);
 app.use('/api/categories', rateLimit_1.apiLimiter, categories_1.default);
 app.use('/api/vendors', rateLimit_1.apiLimiter, vendors_1.default);
 app.use('/api/orders', rateLimit_1.apiLimiter, orders_1.default);
-app.use('/api/payments', rateLimit_1.apiLimiter, payments_1.default);
+// app.use('/api/payments', apiLimiter as any, paymentRoutes);
 app.use('/api/users', rateLimit_1.apiLimiter, users_1.default);
 app.use('/api/wishlist', rateLimit_1.apiLimiter, wishlist_1.default);
 app.use('/api/cart', rateLimit_1.apiLimiter, cart_1.default);
