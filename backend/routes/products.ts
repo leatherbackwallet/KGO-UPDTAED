@@ -25,9 +25,15 @@ const router = express.Router();
 // Get all products with SMART caching (re-enabled with proper invalidation)
 router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { category, min, max, search, featured, occasions, page = 1, limit = 20 } = req.query;
+    console.log('🔍 [Products API] Fetching products with smart caching...');
+    console.log('🔍 [Products API] Database name:', mongoose.connection.db?.databaseName);
+    console.log('🔍 [Products API] Connection state:', mongoose.connection.readyState);
+    console.log('🔍 [Products API] Connection URI:', mongoose.connection.host, mongoose.connection.port);
+    console.log('🔍 [Products API] Collections:', await mongoose.connection.db?.listCollections().toArray());
     
-    let filter: any = {};
+    const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false } = req.query;
+    
+    let filter: any = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
     
     // Apply filters
     if (category) {
@@ -211,7 +217,7 @@ router.delete('/:id', auth, requireRole('admin'), ensureDatabaseConnection, asyn
 // Get featured products
 router.get('/featured/list', ensureDatabaseConnection, async (req: Request, res: Response): Promise<void> => {
   try {
-    const products = await Product.find({ isFeatured: true, isActive: true })
+    const products = await Product.find({ isFeatured: true, isActive: true, isDeleted: false })
       .populate('categories', 'name slug')
       .populate('vendors', 'storeName')
       .sort({ createdAt: -1 })
@@ -235,6 +241,7 @@ router.get('/search/query', ensureDatabaseConnection, async (req: Request, res: 
     }
 
     let filter: any = {
+      isDeleted: false,
       $or: [
         { name: new RegExp(q as string, 'i') },
         { description: new RegExp(q as string, 'i') },

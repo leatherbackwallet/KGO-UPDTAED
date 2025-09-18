@@ -15,8 +15,13 @@ const database_1 = require("../middleware/database");
 const router = express_1.default.Router();
 router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
-        const { category, min, max, search, featured, occasions, page = 1, limit = 20 } = req.query;
-        let filter = {};
+        console.log('🔍 [Products API] Fetching products with smart caching...');
+        console.log('🔍 [Products API] Database name:', mongoose_1.default.connection.db?.databaseName);
+        console.log('🔍 [Products API] Connection state:', mongoose_1.default.connection.readyState);
+        console.log('🔍 [Products API] Connection URI:', mongoose_1.default.connection.host, mongoose_1.default.connection.port);
+        console.log('🔍 [Products API] Collections:', await mongoose_1.default.connection.db?.listCollections().toArray());
+        const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false } = req.query;
+        let filter = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
         if (category) {
             if (mongoose_1.default.Types.ObjectId.isValid(category)) {
                 filter.categories = category;
@@ -165,7 +170,7 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.
 });
 router.get('/featured/list', database_1.ensureDatabaseConnection, async (req, res) => {
     try {
-        const products = await products_model_1.Product.find({ isFeatured: true, isActive: true })
+        const products = await products_model_1.Product.find({ isFeatured: true, isActive: true, isDeleted: false })
             .populate('categories', 'name slug')
             .populate('vendors', 'storeName')
             .sort({ createdAt: -1 })
@@ -185,6 +190,7 @@ router.get('/search/query', database_1.ensureDatabaseConnection, async (req, res
             return;
         }
         let filter = {
+            isDeleted: false,
             $or: [
                 { name: new RegExp(q, 'i') },
                 { description: new RegExp(q, 'i') },
