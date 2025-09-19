@@ -7,6 +7,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        'kgo-red': '#DC2626', // Red-600
+      },
       animation: {
         'shimmer': 'shimmer 2s infinite',
         'float': 'float 6s ease-in-out infinite',
