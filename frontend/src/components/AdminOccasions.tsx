@@ -131,6 +131,26 @@ export default function AdminOccasions() {
     }
   };
 
+  const seedOccasions = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.post('/occasions/seed', {}, {
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
+      });
+      
+      if (response.data.success) {
+        setOccasions(response.data.data || []);
+        alert(`Successfully created ${response.data.count} occasions!`);
+      }
+    } catch (err: any) {
+      console.error('Error seeding occasions:', err);
+      setError(err.response?.data?.error?.message || 'Failed to seed occasions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -331,47 +351,164 @@ export default function AdminOccasions() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Occasions</h2>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          Add Occasion
-        </button>
+    <div className="flex gap-6">
+      {/* Left Sidebar - CRUD Operations */}
+      <div className="w-80 flex-shrink-0">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Occasion Management</h3>
+          
+          <div className="space-y-3">
+            <button
+              onClick={() => {
+                setEditingOccasion(null);
+                setFormData({
+                  name: '',
+                  description: '',
+                  icon: '',
+                  color: '#3B82F6',
+                  dateRange: {
+                    startMonth: 1,
+                    startDay: 1,
+                    endMonth: 1,
+                    endDay: 1,
+                    isRecurring: true
+                  },
+                  priority: {
+                    level: 'medium',
+                    boostMultiplier: 1.5
+                  },
+                  seasonalFlags: {
+                    isFestival: false,
+                    isHoliday: false,
+                    isPersonal: false,
+                    isSeasonal: false
+                  },
+                  sortOrder: 0
+                });
+                setShowForm(true);
+              }}
+              className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              + Add New Occasion
+            </button>
+            
+            <button
+              onClick={fetchOccasions}
+              disabled={loading}
+              className="w-full bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Refreshing...
+                </div>
+              ) : (
+                '🔄 Refresh Occasions'
+              )}
+            </button>
+            
+            {occasions.length === 0 && (
+              <button
+                onClick={seedOccasions}
+                disabled={loading}
+                className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                🌱 Seed Predefined Occasions
+              </button>
+            )}
+          </div>
+          
+          {/* Quick Stats */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Stats</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total Occasions:</span>
+                <span className="font-medium">{occasions.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Active:</span>
+                <span className="font-medium">{occasions.filter(o => o.isActive).length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Currently Active:</span>
+                <span className="font-medium">{occasions.filter(o => isCurrentlyActive(o)).length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Peak Priority:</span>
+                <span className="font-medium">{occasions.filter(o => o.priority.level === 'peak').length}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
+      {/* Main Content Area */}
+      <div className="flex-1 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Occasions List</h2>
+            <p className="text-sm text-gray-600 mt-1">Manage occasions with date ranges and seasonal prioritization</p>
+          </div>
         </div>
-      )}
 
-      {/* Search */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <div className="flex items-center space-x-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search occasions by name, description, or type..."
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+        {/* Search Bar */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex-1">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search occasions by name, description, or type..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                Clear
+              </button>
+            )}
           </div>
           {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              Clear
-            </button>
+            <div className="mt-2 text-sm text-gray-600">
+              Showing {filteredOccasions.length} of {occasions.length} occasions
+              {filteredOccasions.length === 0 && (
+                <span className="text-red-600 ml-2">• No occasions match your search</span>
+              )}
+            </div>
           )}
         </div>
-      </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                <div className="mt-2 text-sm text-red-700">{error}</div>
+              </div>
+              <button
+                onClick={() => setError(null)}
+                className="ml-4 text-red-400 hover:text-red-600"
+              >
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
 
       {/* Occasion Form Modal */}
       {showForm && (
@@ -643,133 +780,134 @@ export default function AdminOccasions() {
         </div>
       )}
 
-      {/* Occasions List */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Occasion
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date Range
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Priority
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredOccasions.map((occasion) => (
-                <tr key={occasion._id} className={!occasion.isActive ? 'opacity-60' : ''}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {occasion.icon && (
-                        <span className="text-2xl mr-3">{occasion.icon}</span>
-                      )}
-                      <div>
-                        <div className="text-sm font-medium text-gray-900 flex items-center">
-                          {occasion.name}
-                          {isCurrentlyActive(occasion) && (
-                            <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Active Now
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-500">{occasion.slug}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDateRange(occasion)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      PRIORITY_LEVELS.find(p => p.value === occasion.priority.level)?.color || 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {occasion.priority.level} ({occasion.priority.boostMultiplier}x)
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex flex-wrap gap-1">
-                      {occasion.seasonalFlags.isFestival && (
-                        <span className="inline-flex px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
-                          Festival
-                        </span>
-                      )}
-                      {occasion.seasonalFlags.isHoliday && (
-                        <span className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                          Holiday
-                        </span>
-                      )}
-                      {occasion.seasonalFlags.isPersonal && (
-                        <span className="inline-flex px-2 py-1 text-xs font-medium bg-pink-100 text-pink-800 rounded-full">
-                          Personal
-                        </span>
-                      )}
-                      {occasion.seasonalFlags.isSeasonal && (
-                        <span className="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                          Seasonal
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      occasion.isActive 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {occasion.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => handleEdit(occasion)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleToggleActive(occasion)}
-                      className={occasion.isActive ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'}
-                    >
-                      {occasion.isActive ? 'Deactivate' : 'Activate'}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(occasion)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Delete
-                    </button>
-                  </td>
+        {/* Occasions List */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Occasion
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date Range
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Priority
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {filteredOccasions.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-500">No occasions found</div>
-            <button
-              onClick={() => setShowForm(true)}
-              className="mt-4 text-indigo-600 hover:text-indigo-900"
-            >
-              Create your first occasion
-            </button>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredOccasions.map((occasion) => (
+                  <tr key={occasion._id} className={!occasion.isActive ? 'opacity-60' : ''}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        {occasion.icon && (
+                          <span className="text-2xl mr-3">{occasion.icon}</span>
+                        )}
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 flex items-center">
+                            {occasion.name}
+                            {isCurrentlyActive(occasion) && (
+                              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Active Now
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-500">{occasion.slug}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {formatDateRange(occasion)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        PRIORITY_LEVELS.find(p => p.value === occasion.priority.level)?.color || 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {occasion.priority.level} ({occasion.priority.boostMultiplier}x)
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex flex-wrap gap-1">
+                        {occasion.seasonalFlags.isFestival && (
+                          <span className="inline-flex px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
+                            Festival
+                          </span>
+                        )}
+                        {occasion.seasonalFlags.isHoliday && (
+                          <span className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                            Holiday
+                          </span>
+                        )}
+                        {occasion.seasonalFlags.isPersonal && (
+                          <span className="inline-flex px-2 py-1 text-xs font-medium bg-pink-100 text-pink-800 rounded-full">
+                            Personal
+                          </span>
+                        )}
+                        {occasion.seasonalFlags.isSeasonal && (
+                          <span className="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                            Seasonal
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        occasion.isActive 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {occasion.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <button
+                        onClick={() => handleEdit(occasion)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleToggleActive(occasion)}
+                        className={occasion.isActive ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'}
+                      >
+                        {occasion.isActive ? 'Deactivate' : 'Activate'}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(occasion)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {filteredOccasions.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-500">No occasions found</div>
+              <button
+                onClick={() => setShowForm(true)}
+                className="mt-4 text-indigo-600 hover:text-indigo-900"
+              >
+                Create your first occasion
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

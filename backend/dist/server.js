@@ -228,6 +228,7 @@ const images_1 = __importDefault(require("./routes/images"));
 const featureFlags_1 = __importDefault(require("./routes/featureFlags"));
 const monitoring_1 = __importDefault(require("./routes/monitoring"));
 const occasions_1 = __importDefault(require("./routes/occasions"));
+const occasions_seed_1 = __importDefault(require("./routes/occasions-seed"));
 // import paymentRoutes from './routes/payments';
 // Apply health routes first
 app.use('/api/health', rateLimit_1.apiLimiter, health_1.default);
@@ -277,6 +278,7 @@ app.use('/api/images', rateLimit_1.apiLimiter, images_1.default);
 app.use('/api/feature-flags', rateLimit_1.apiLimiter, featureFlags_1.default);
 app.use('/api/monitoring', rateLimit_1.apiLimiter, monitoring_1.default);
 app.use('/api/occasions', rateLimit_1.apiLimiter, occasions_1.default);
+app.use('/api/occasions', rateLimit_1.apiLimiter, occasions_seed_1.default);
 // Error logging middleware
 app.use(logger_1.errorLogger);
 // Start server

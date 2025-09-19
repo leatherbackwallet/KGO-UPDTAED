@@ -14,46 +14,28 @@ const { validate } = require('../middleware/validation');
 const mongoose = require('mongoose');
 const { cacheConfigs, invalidateProductCache } = require('../middleware/cache');
 
-// Get all products with caching
+// Get all products with SMART caching and pagination
 router.get('/', cacheConfigs.products, async (req, res) => {
   try {
-    const { category, min, max, search, featured, occasions } = req.query;
-    let filter = {};
+    console.log('🔍 [Products API] Fetching products with smart caching...');
+    console.log('🔍 [Products API] Database name:', mongoose.connection.db?.databaseName);
+    console.log('🔍 [Products API] Connection state:', mongoose.connection.readyState);
     
-    // Validate and sanitize query parameters
-    if (category && typeof category !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        error: { message: 'Invalid category parameter', code: 'INVALID_CATEGORY' } 
-      });
-    }
+    const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false, admin = false } = req.query;
     
-    if (min && (isNaN(Number(min)) || Number(min) < 0)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: { message: 'Invalid minimum price', code: 'INVALID_MIN_PRICE' } 
-      });
-    }
+    let filter = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
     
-    if (max && (isNaN(Number(max)) || Number(max) < 0)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: { message: 'Invalid maximum price', code: 'INVALID_MAX_PRICE' } 
-      });
-    }
-    
+    // Apply filters
     if (category) {
-      // Handle category filtering - could be ObjectId or slug
       if (mongoose.Types.ObjectId.isValid(category)) {
         filter.categories = category;
       } else {
-        // Try to find category by slug
         const categoryDoc = await Category.findOne({ slug: category });
         if (categoryDoc) {
           filter.categories = categoryDoc._id;
         } else {
-          // If category not found, return empty results
-          return res.json([]);
+          res.json({ success: true, data: [], count: 0 });
+          return;
         }
       }
     }
@@ -64,9 +46,9 @@ router.get('/', cacheConfigs.products, async (req, res) => {
     if (min) filter.price.$gte = Number(min);
     if (max) filter.price.$lte = Number(max);
     
-    // Handle occasions filtering
     if (occasions) {
-      const occasionArray = occasions.split(',').map(o => o.trim().toUpperCase());
+      // Handle both ObjectId and name-based filtering
+      const occasionArray = occasions.split(',').map(o => o.trim());
       filter.occasions = { $in: occasionArray };
     }
     
@@ -74,19 +56,33 @@ router.get('/', cacheConfigs.products, async (req, res) => {
       const searchRegex = new RegExp(search, 'i');
       filter.$or = [
         { 'name': searchRegex },
-        { 'description': searchRegex },
-        { occasions: searchRegex }
+        { 'description': searchRegex }
       ];
     }
     
-    const products = await Product.find(filter)
+    console.log('🔍 [Products API] Filter being applied:', JSON.stringify(filter, null, 2));
+    
+    const skip = (Number(page) - 1) * Number(limit);
+    
+    let query = Product.find(filter)
       .populate('categories', 'name slug')
       .populate('vendors', 'storeName')
-      .sort({ isFeatured: -1, createdAt: -1 })
-      .limit(100); // Limit results for performance
+      .populate('occasions', 'name slug dateRange priority seasonalFlags')
+      .sort({ isFeatured: -1, createdAt: -1 });
+    
+    // For admin requests or when limit is high (>=100), don't apply pagination limits
+    // This ensures all products are returned when requested
+    if (admin !== 'true' && Number(limit) < 100) {
+      query = query.skip(skip).limit(Number(limit));
+    }
+    
+    const products = await query;
+    const total = await Product.countDocuments(filter);
+    
+    console.log('📦 [Products API] Found products:', products.length, 'Total:', total);
     
     // Set cache headers for product responses
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // Prevent browser caching
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
     res.setHeader('ETag', `"products-${products.length}-${Date.now()}"`);
@@ -94,7 +90,11 @@ router.get('/', cacheConfigs.products, async (req, res) => {
     res.json({
       success: true,
       data: products,
-      count: products.length
+      count: products.length,
+      total,
+      page: Number(page),
+      pages: Number(limit) >= 100 ? 1 : Math.ceil(total / Number(limit)),
+      allProductsLoaded: Number(limit) >= 100 || admin === 'true' || products.length === total
     });
   } catch (err) {
     console.error('Products fetch error:', err);

@@ -29,11 +29,14 @@ const ProductsPage: React.FC = () => {
   const [max, setMax] = useState('');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [allProductsLoaded, setAllProductsLoaded] = useState(false);
+  
   // Timeout reference for cleanup
   const [fallbackTimeoutRef, setFallbackTimeoutRef] = useState<NodeJS.Timeout | null>(null);
-  
-  // Product display state
-  const [allProductsLoaded, setAllProductsLoaded] = useState(false);
   
   // Professional loading states
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
@@ -76,17 +79,6 @@ const ProductsPage: React.FC = () => {
     };
   }, []);
 
-  // Debounced search effect (only for filters, not initial load)
-  useEffect(() => {
-    if (!isInitialLoad) {
-      const timeoutId = setTimeout(() => {
-        fetchProducts();
-      }, 500);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [search, category, selectedOccasions, min, max, isInitialLoad]);
-
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -124,8 +116,9 @@ const ProductsPage: React.FC = () => {
       if (min) params.append('minPrice', min);
       if (max) params.append('maxPrice', max);
       
-      // Fetch all products initially to avoid pagination issues
-      params.append('limit', '100');
+      // Add pagination parameters
+      params.append('page', currentPage.toString());
+      params.append('limit', '100'); // Show 100 products per page
       
       // Add cache busting parameter
       params.append('_t', Date.now().toString());
@@ -148,6 +141,19 @@ const ProductsPage: React.FC = () => {
       const productsData = response.data?.data || response.data || [];
       console.log('📦 Products data length:', productsData.length);
       console.log('📦 First product:', productsData[0]?.name || 'No products');
+      
+      // Extract pagination information
+      const paginationInfo = response.data;
+      setTotalProducts(paginationInfo.total || productsData.length);
+      setTotalPages(paginationInfo.pages || 1);
+      setAllProductsLoaded(paginationInfo.allProductsLoaded || false);
+      
+      console.log('📊 Pagination Info:', {
+        total: paginationInfo.total,
+        pages: paginationInfo.pages,
+        currentPage: paginationInfo.page,
+        allProductsLoaded: paginationInfo.allProductsLoaded
+      });
       
       // Validate products data with detailed logging
       const validProducts = Array.isArray(productsData) ? productsData.filter((product, index) => {
@@ -209,7 +215,41 @@ const ProductsPage: React.FC = () => {
       console.log('🏁 Setting loading to false');
       setLoading(false);
     }
-  }, [search, category, selectedOccasions, min, max, fallbackTimeoutRef]);
+  }, [search, category, selectedOccasions, min, max, currentPage, fallbackTimeoutRef]);
+
+  // Handle page changes
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  // Reset pagination when filters change
+  const resetPagination = useCallback(() => {
+    setCurrentPage(1);
+    setTotalPages(1);
+    setTotalProducts(0);
+    setAllProductsLoaded(false);
+  }, []);
+
+  // Debounced search effect (only for filters, not initial load)
+  useEffect(() => {
+    if (!isInitialLoad) {
+      // Reset pagination when filters change
+      resetPagination();
+      
+      const timeoutId = setTimeout(() => {
+        fetchProducts();
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [search, category, selectedOccasions, min, max, isInitialLoad, resetPagination, fetchProducts]);
+
+  // Fetch products when page changes
+  useEffect(() => {
+    if (!isInitialLoad) {
+      fetchProducts();
+    }
+  }, [currentPage, isInitialLoad, fetchProducts]);
 
   const fetchCategories = async () => {
     try {
@@ -365,9 +405,62 @@ const ProductsPage: React.FC = () => {
                 {/* Product count display */}
                 <div className="text-center mt-12">
                   <div className="inline-flex items-center px-4 py-2 bg-gray-50 rounded-full text-gray-600 text-sm">
-                    {allProductsLoaded ? `Showing all ${products.length} products` : `Showing ${products.length} products`}
+                    {allProductsLoaded ? `Showing all ${products.length} products` : `Showing ${products.length} of ${totalProducts} products`}
                   </div>
                 </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center mt-8">
+                    <nav className="flex items-center space-x-2" aria-label="Pagination">
+                      {/* Previous Button */}
+                      <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      
+                      {/* Page Numbers */}
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum;
+                        if (totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+                        
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`px-3 py-2 text-sm font-medium rounded-md ${
+                              currentPage === pageNum
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                      
+                      {/* Next Button */}
+                      <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </nav>
+                  </div>
+                )}
                 
                 {/* Reload Button if few products */}
                 {products.length > 0 && products.length <= 10 && (
