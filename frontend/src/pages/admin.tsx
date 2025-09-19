@@ -12,7 +12,7 @@ import AdminTabs from '../components/AdminTabs';
 
 export default function Admin() {
   const { user } = useAuth();
-  const [tab, setTab] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'users' | 'finance' | 'returns'>('dashboard');
+  const [tab, setTab] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'users' | 'finance' | 'returns'>('products');
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },

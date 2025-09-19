@@ -32,6 +32,7 @@ const AdminProducts: React.FC = () => {
   const [deletingProducts, setDeletingProducts] = useState<Set<string>>(new Set());
   const [recentlyDeleted, setRecentlyDeleted] = useState<Set<string>>(new Set());
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   
   // Combo product state
   const [comboItems, setComboItems] = useState<ComboItem[]>([]);
@@ -483,6 +484,38 @@ const AdminProducts: React.FC = () => {
     }
   };
 
+  // Filter products based on search query
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return products;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    return products.filter(product => {
+      // Search in product name
+      const name = getMultilingualText(product.name).toLowerCase();
+      if (name.includes(query)) return true;
+
+      // Search in product description
+      const description = getMultilingualText(product.description).toLowerCase();
+      if (description.includes(query)) return true;
+
+      // Search in categories (handle products with no categories)
+      const categoryNames = getCategoryNames(product.categories || []).toLowerCase();
+      if (categoryNames.includes(query)) return true;
+
+      // Search in occasions (handle products with no occasions)
+      const occasionNames = getOccasionNames(product.occasions || []).toLowerCase();
+      if (occasionNames.includes(query)) return true;
+
+      // Search in price
+      const price = product.price?.toString() || '';
+      if (price.includes(query)) return true;
+
+      return false;
+    });
+  }, [products, searchQuery]);
+
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -581,7 +614,7 @@ const AdminProducts: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Choose a product...</option>
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <option 
                     key={product._id} 
                     value={product._id}
@@ -595,7 +628,7 @@ const AdminProducts: React.FC = () => {
 
             {/* Selected Product Info */}
             {selectedProductId && (() => {
-              const product = products.find(p => p._id === selectedProductId);
+              const product = filteredProducts.find(p => p._id === selectedProductId);
               if (!product) return null;
               
               return (
@@ -614,7 +647,7 @@ const AdminProducts: React.FC = () => {
             <div className="space-y-2">
               <button
                 onClick={() => {
-                  const product = products.find(p => p._id === selectedProductId);
+                  const product = filteredProducts.find(p => p._id === selectedProductId);
                   if (product) {
                     handleEditProduct(product);
                   }
@@ -698,6 +731,44 @@ const AdminProducts: React.FC = () => {
           </div>
         </div>
 
+        {/* Search Bar */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex-1">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search products by name, description, categories, occasions, or price..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="mt-2 text-sm text-gray-600">
+              Showing {filteredProducts.length} of {products.length} products
+              {filteredProducts.length === 0 && (
+                <span className="text-red-600 ml-2">• No products match your search</span>
+              )}
+            </div>
+          )}
+        </div>
+
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex justify-between items-start">
@@ -758,7 +829,7 @@ const AdminProducts: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products && products.length > 0 ? products.map((product) => {
+              {filteredProducts && filteredProducts.length > 0 ? filteredProducts.map((product) => {
                 // Use cached image for each product
                 const imageUrl = getCachedImageUrl(product);
 

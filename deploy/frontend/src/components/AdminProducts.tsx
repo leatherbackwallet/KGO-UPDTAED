@@ -31,6 +31,8 @@ const AdminProducts: React.FC = () => {
   const [uploadError, setUploadError] = useState<string>('');
   const [deletingProducts, setDeletingProducts] = useState<Set<string>>(new Set());
   const [recentlyDeleted, setRecentlyDeleted] = useState<Set<string>>(new Set());
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   
   // Combo product state
   const [comboItems, setComboItems] = useState<ComboItem[]>([]);
@@ -134,6 +136,12 @@ const AdminProducts: React.FC = () => {
       });
       
       const productsData = response.data?.data || response.data || [];
+      console.log('🔍 Fetched products data:', productsData);
+      console.log('🔍 First product combo fields:', productsData[0] ? {
+        isCombo: productsData[0].isCombo,
+        comboBasePrice: productsData[0].comboBasePrice,
+        comboItems: productsData[0].comboItems
+      } : 'No products');
       setProducts(Array.isArray(productsData) ? productsData : []);
     } catch (err: any) {
       console.error('Error fetching products:', err);
@@ -157,16 +165,30 @@ const AdminProducts: React.FC = () => {
   };
 
   const handleEditProduct = (product: Product) => {
+    console.log('🔍 Editing product:', product);
+    console.log('🔍 Combo fields:', {
+      isCombo: product.isCombo,
+      comboBasePrice: product.comboBasePrice,
+      comboItems: product.comboItems
+    });
+    
     setSelectedProduct(product);
     setEditingProduct({
       name: product.name,
       description: product.description,
       price: product.price,
-              categories: product.categories,
+      categories: product.categories,
       stock: product.stock,
       occasions: product.occasions,
-      isFeatured: product.isFeatured
+      isFeatured: product.isFeatured,
+      isCombo: product.isCombo,
+      comboBasePrice: product.comboBasePrice,
+      comboItems: product.comboItems
     });
+    
+    // Initialize combo items state
+    setComboItems(product.comboItems || []);
+    console.log('🔍 Set combo items:', product.comboItems || []);
             // Convert existing images to the upload preview format, preserving Cloudinary IDs
         const existingImages = product.images || [];
         const formattedImages = existingImages.map((path: string) => {
@@ -220,24 +242,45 @@ const AdminProducts: React.FC = () => {
         categories: editingProduct.categories?.map(cat => typeof cat === 'string' ? cat : cat._id) || [],
         // Include images - use Cloudinary public_id only
         images: validImages.map(img => img.public_id),
-        defaultImage: validImages[0]?.public_id || undefined
+        defaultImage: validImages[0]?.public_id || undefined,
+        // Include combo-specific fields
+        isCombo: editingProduct.isCombo || false,
+        comboBasePrice: editingProduct.comboBasePrice || 0,
+        comboItems: editingProduct.comboItems || []
       };
 
-      console.log('Sending validated new product data:', validatedData);
+      console.log('📦 Creating new product with data:', {
+        name: validatedData.name,
+        description: validatedData.description,
+        price: validatedData.price,
+        categories: validatedData.categories,
+        images: validatedData.images,
+        defaultImage: validatedData.defaultImage,
+        imageCount: validatedData.images?.length || 0
+      });
       
       const response = await api.post('/products', validatedData);
-      console.log('Add response:', response.data);
       
       if (response.data) {
+        console.log('✅ Product created successfully!', {
+          productId: response.data._id,
+          name: response.data.name,
+          images: response.data.images,
+          defaultImage: response.data.defaultImage,
+          status: 'SAVED_TO_DATABASE'
+        });
+        
         // Refresh the products list
         await fetchProducts();
         setShowModal(false);
         setSelectedProduct(null);
         setEditingProduct({});
+        setComboItems([]);
         setError(''); // Clear any previous errors
         setSuccess('Product added successfully!');
         setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
       } else {
+        console.error('❌ Product creation failed - no data returned');
         setError('Failed to add product');
       }
     } catch (err: any) {
@@ -276,7 +319,11 @@ const AdminProducts: React.FC = () => {
           description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
           // Include images - use Cloudinary public_id only
           images: validImages.map(img => img.public_id),
-          defaultImage: validImages[0]?.public_id || undefined
+          defaultImage: validImages[0]?.public_id || undefined,
+          // Include combo-specific fields
+          isCombo: editingProduct.isCombo || false,
+          comboBasePrice: editingProduct.comboBasePrice || 0,
+          comboItems: editingProduct.comboItems || []
         };
 
       console.log('Sending validated update data:', validatedData);
@@ -291,6 +338,7 @@ const AdminProducts: React.FC = () => {
         setShowModal(false);
         setSelectedProduct(null);
         setEditingProduct({});
+        setComboItems([]);
         setError(''); // Clear any previous errors
         setSuccess('Product updated successfully!');
         setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
@@ -436,6 +484,38 @@ const AdminProducts: React.FC = () => {
     }
   };
 
+  // Filter products based on search query
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return products;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    return products.filter(product => {
+      // Search in product name
+      const name = getMultilingualText(product.name).toLowerCase();
+      if (name.includes(query)) return true;
+
+      // Search in product description
+      const description = getMultilingualText(product.description).toLowerCase();
+      if (description.includes(query)) return true;
+
+      // Search in categories (handle products with no categories)
+      const categoryNames = getCategoryNames(product.categories || []).toLowerCase();
+      if (categoryNames.includes(query)) return true;
+
+      // Search in occasions (handle products with no occasions)
+      const occasionNames = getOccasionNames(product.occasions || []).toLowerCase();
+      if (occasionNames.includes(query)) return true;
+
+      // Search in price
+      const price = product.price?.toString() || '';
+      if (price.includes(query)) return true;
+
+      return false;
+    });
+  }, [products, searchQuery]);
+
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -468,48 +548,226 @@ const AdminProducts: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Products Management</h2>
-        <div className="flex space-x-3">
-          {process.env.NODE_ENV === 'development' && (
+    <div className="flex gap-6">
+      {/* Left Sidebar - CRUD Operations */}
+      <div className="w-80 flex-shrink-0">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Management</h3>
+          
+          <div className="space-y-3">
             <button
-              onClick={debugProducts}
-              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm"
+              onClick={() => {
+                setSelectedProduct(null);
+                setEditingProduct({
+                  stock: 200, // Set default stock to 200
+                  isCombo: false,
+                  comboBasePrice: 0,
+                  comboItems: []
+                });
+                setComboItems([]);
+                setUploadedImages([]);
+                setUploadError('');
+                setShowModal(true);
+              }}
+              className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Debug
+              + Add New Product
             </button>
-          )}
-          <button
-            onClick={clearCacheAndRefresh}
-            disabled={loading}
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Refreshing...
-              </div>
-            ) : (
-              'Refresh'
+            
+            <button
+              onClick={clearCacheAndRefresh}
+              disabled={loading}
+              className="w-full bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Refreshing...
+                </div>
+              ) : (
+                '🔄 Refresh Products'
+              )}
+            </button>
+            
+            {process.env.NODE_ENV === 'development' && (
+              <button
+                onClick={debugProducts}
+                className="w-full bg-yellow-600 text-white px-4 py-3 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
+              >
+                🐛 Debug Products
+              </button>
             )}
-          </button>
-          <button
-            onClick={() => {
-              setSelectedProduct(null);
-              setEditingProduct({
-                stock: 200 // Set default stock to 200
-              });
-              setUploadedImages([]);
-              setUploadError('');
-              setShowModal(true);
-            }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Add New Product
-          </button>
+          </div>
+          
+          {/* Product Actions */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Product Actions</h4>
+            
+            {/* Product Selection Dropdown */}
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-gray-600 mb-2">
+                Select Product to Edit/Delete:
+              </label>
+              <select
+                value={selectedProductId || ''}
+                onChange={(e) => setSelectedProductId(e.target.value || null)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Choose a product...</option>
+                {filteredProducts.map((product) => (
+                  <option 
+                    key={product._id} 
+                    value={product._id}
+                    disabled={deletingProducts.has(product._id) || recentlyDeleted.has(product._id)}
+                  >
+                    {getMultilingualText(product.name)} - ₹{product.price?.toFixed(2) || '0.00'}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Selected Product Info */}
+            {selectedProductId && (() => {
+              const product = filteredProducts.find(p => p._id === selectedProductId);
+              if (!product) return null;
+              
+              return (
+                <div className="bg-blue-50 rounded-lg p-3 mb-4 border border-blue-200">
+                  <div className="text-sm font-medium text-gray-900 mb-1">
+                    {getMultilingualText(product.name)}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    ₹{product.price?.toFixed(2) || '0.00'} • Stock: {product.stock || 0} • {product.isFeatured ? 'Featured' : 'Regular'}
+                  </div>
+                </div>
+              );
+            })()}
+            
+            {/* Action Buttons */}
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  const product = filteredProducts.find(p => p._id === selectedProductId);
+                  if (product) {
+                    handleEditProduct(product);
+                  }
+                }}
+                disabled={Boolean(!selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId))))}
+                className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
+                  Boolean(!selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId))))
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                ✏️ Edit Selected Product
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (selectedProductId) {
+                    handleDeleteProduct(selectedProductId);
+                    setSelectedProductId(null);
+                  }
+                }}
+                disabled={Boolean(!selectedProductId || (selectedProductId && (deletingProducts.has(selectedProductId) || recentlyDeleted.has(selectedProductId))))}
+                className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
+                  !selectedProductId
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : selectedProductId && deletingProducts.has(selectedProductId)
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : selectedProductId && recentlyDeleted.has(selectedProductId)
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-red-600 text-white hover:bg-red-700'
+                }`}
+              >
+                {!selectedProductId
+                  ? '🗑️ Select Product to Delete'
+                  : selectedProductId && deletingProducts.has(selectedProductId)
+                  ? '🗑️ Deleting...'
+                  : selectedProductId && recentlyDeleted.has(selectedProductId)
+                  ? '🗑️ Deleted'
+                  : '🗑️ Delete Selected Product'
+                }
+              </button>
+              
+              {selectedProductId && (
+                <button
+                  onClick={() => setSelectedProductId(null)}
+                  className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  ✕ Clear Selection
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Stats</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total Products:</span>
+                <span className="font-medium">{products.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Featured:</span>
+                <span className="font-medium">{products.filter(p => p.isFeatured).length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">In Stock:</span>
+                <span className="font-medium">{products.filter(p => (p.stock || 0) > 0).length}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Products List</h2>
+            <p className="text-sm text-gray-600 mt-1">Click on any product row to select it, or use the dropdown in the sidebar</p>
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex-1">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search products by name, description, categories, occasions, or price..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="mt-2 text-sm text-gray-600">
+              Showing {filteredProducts.length} of {products.length} products
+              {filteredProducts.length === 0 && (
+                <span className="text-red-600 ml-2">• No products match your search</span>
+              )}
+            </div>
+          )}
+        </div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -550,52 +808,67 @@ const AdminProducts: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
                   Product
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
                   Categories
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
                   Occasions
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                   Price
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
                   Stock
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                   Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products && products.length > 0 ? products.map((product) => {
+              {filteredProducts && filteredProducts.length > 0 ? filteredProducts.map((product) => {
                 // Use cached image for each product
                 const imageUrl = getCachedImageUrl(product);
 
+                const isSelected = selectedProductId === product._id;
+                const isDisabled = deletingProducts.has(product._id) || recentlyDeleted.has(product._id);
+                
                 return (
-                  <tr key={product._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
+                  <tr 
+                    key={product._id} 
+                    className={`cursor-pointer transition-all duration-200 ${
+                      isSelected 
+                        ? 'bg-blue-50 border-l-4 border-blue-500 shadow-sm' 
+                        : isDisabled
+                        ? 'bg-gray-100 opacity-60 cursor-not-allowed'
+                        : 'hover:bg-gray-50 hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (!isDisabled) {
+                        setSelectedProductId(isSelected ? null : product._id);
+                      }
+                    }}
+                    title={isDisabled ? 'Product is being processed' : isSelected ? 'Click to deselect' : 'Click to select this product'}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0 h-12 w-12">
                           <img
-                            className="h-10 w-10 rounded-lg object-cover"
+                            className="h-12 w-12 rounded-lg object-cover"
                             src={imageUrl}
                             alt={getMultilingualText(product.name)}
                             onError={handleImageError}
                             style={{ opacity: 1 }} // No opacity change needed for preloaded images
                           />
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                        <div className="ml-4 min-w-0 flex-1">
+                          <div className="text-sm font-medium text-gray-900 mb-1">
                             {getMultilingualText(product.name)}
                           </div>
-                          <div className="text-sm text-gray-500 line-clamp-2">
+                          <div className="text-xs text-gray-500 break-words whitespace-normal leading-relaxed max-w-xs">
                             {getMultilingualText(product.description)}
                           </div>
                         </div>
@@ -626,39 +899,6 @@ const AdminProducts: React.FC = () => {
                         {product.isFeatured ? 'Featured' : 'Regular'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEditProduct(product)}
-                          disabled={deletingProducts.has(product._id) || recentlyDeleted.has(product._id)}
-                          className={`${
-                            deletingProducts.has(product._id) || recentlyDeleted.has(product._id)
-                              ? 'text-gray-400 cursor-not-allowed'
-                              : 'text-blue-600 hover:text-blue-900'
-                          }`}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(product._id)}
-                          disabled={deletingProducts.has(product._id) || recentlyDeleted.has(product._id)}
-                          className={`${
-                            deletingProducts.has(product._id)
-                              ? 'text-gray-400 cursor-not-allowed'
-                              : recentlyDeleted.has(product._id)
-                              ? 'text-gray-500 cursor-not-allowed'
-                              : 'text-red-600 hover:text-red-900'
-                          }`}
-                        >
-                          {deletingProducts.has(product._id) 
-                            ? 'Deleting...' 
-                            : recentlyDeleted.has(product._id)
-                            ? 'Deleted'
-                            : 'Delete'
-                          }
-                        </button>
-                      </div>
-                    </td>
                   </tr>
                 );
               }) : (
@@ -671,6 +911,7 @@ const AdminProducts: React.FC = () => {
             </tbody>
           </table>
         </div>
+      </div>
       </div>
 
       {/* Edit Modal */}
@@ -686,6 +927,7 @@ const AdminProducts: React.FC = () => {
                   setShowModal(false);
                   setUploadedImages([]);
                   setUploadError('');
+                  setComboItems([]);
                 }}
                 className="text-gray-500 hover:text-gray-700"
               >
@@ -891,6 +1133,210 @@ const AdminProducts: React.FC = () => {
                 </label>
               </div>
 
+              {/* Combo Product Section */}
+              <div className="border-t pt-4">
+                <div className="mb-4">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={editingProduct.isCombo || false}
+                      onChange={(e) => {
+                        const isCombo = e.target.checked;
+                        setEditingProduct({
+                          ...editingProduct,
+                          isCombo,
+                          comboBasePrice: isCombo ? (editingProduct.comboBasePrice || 0) : 0,
+                          comboItems: isCombo ? (editingProduct.comboItems || []) : []
+                        });
+                        if (!isCombo) {
+                          setComboItems([]);
+                        }
+                      }}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">Combo Product</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enable this to create a combo product with multiple items and customizable quantities
+                  </p>
+                </div>
+
+                {editingProduct.isCombo && (
+                  <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Combo Base Price (₹)
+                      </label>
+                      <input
+                        type="number"
+                        step="1"
+                        min="0"
+                        value={editingProduct.comboBasePrice || ''}
+                        onChange={(e) => setEditingProduct({
+                          ...editingProduct,
+                          comboBasePrice: parseInt(e.target.value) || 0
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="e.g., 5000"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Base price for the combo (additional items will be added to this)
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Combo Items
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newItem: ComboItem = {
+                              name: '',
+                              unitPrice: 0,
+                              defaultQuantity: 1,
+                              unit: 'piece'
+                            };
+                            const newComboItems = [...comboItems, newItem];
+                            setComboItems(newComboItems);
+                            setEditingProduct({
+                              ...editingProduct,
+                              comboItems: newComboItems
+                            });
+                          }}
+                          className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                        >
+                          + Add Item
+                        </button>
+                      </div>
+
+                      {comboItems.map((item, index) => (
+                        <div key={index} className="bg-white p-3 rounded border mb-3">
+                          <div className="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Item Name
+                              </label>
+                              <input
+                                type="text"
+                                value={item.name}
+                                onChange={(e) => {
+                                  const newComboItems = [...comboItems];
+                                  newComboItems[index].name = e.target.value;
+                                  setComboItems(newComboItems);
+                                  setEditingProduct({
+                                    ...editingProduct,
+                                    comboItems: newComboItems
+                                  });
+                                }}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                                placeholder="e.g., Birthday Cake"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Unit
+                              </label>
+                              <select
+                                value={item.unit}
+                                onChange={(e) => {
+                                  const newComboItems = [...comboItems];
+                                  newComboItems[index].unit = e.target.value;
+                                  setComboItems(newComboItems);
+                                  setEditingProduct({
+                                    ...editingProduct,
+                                    comboItems: newComboItems
+                                  });
+                                }}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                              >
+                                <option value="piece">Piece</option>
+                                <option value="kg">Kilogram</option>
+                                <option value="set">Set</option>
+                                <option value="dozen">Dozen</option>
+                                <option value="gram">Gram</option>
+                                <option value="liter">Liter</option>
+                                <option value="box">Box</option>
+                                <option value="pack">Pack</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Unit Price (₹)
+                              </label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="0"
+                                value={item.unitPrice}
+                                onChange={(e) => {
+                                  const newComboItems = [...comboItems];
+                                  newComboItems[index].unitPrice = parseInt(e.target.value) || 0;
+                                  setComboItems(newComboItems);
+                                  setEditingProduct({
+                                    ...editingProduct,
+                                    comboItems: newComboItems
+                                  });
+                                }}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                                placeholder="e.g., 1000"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Default Quantity
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.1"
+                                value={item.defaultQuantity}
+                                onChange={(e) => {
+                                  const newComboItems = [...comboItems];
+                                  newComboItems[index].defaultQuantity = parseFloat(e.target.value) || 0;
+                                  setComboItems(newComboItems);
+                                  setEditingProduct({
+                                    ...editingProduct,
+                                    comboItems: newComboItems
+                                  });
+                                }}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                                placeholder="e.g., 1"
+                              />
+                            </div>
+                          </div>
+                          <div className="mt-2 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newComboItems = comboItems.filter((_, i) => i !== index);
+                                setComboItems(newComboItems);
+                                setEditingProduct({
+                                  ...editingProduct,
+                                  comboItems: newComboItems
+                                });
+                              }}
+                              className="text-xs text-red-600 hover:text-red-800"
+                            >
+                              Remove Item
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {comboItems.length === 0 && (
+                        <p className="text-sm text-gray-500 text-center py-4">
+                          No combo items added yet. Click "Add Item" to get started.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Image Upload Section */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -939,6 +1385,7 @@ const AdminProducts: React.FC = () => {
                   setShowModal(false);
                   setUploadedImages([]);
                   setUploadError('');
+                  setComboItems([]);
                 }}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
               >
