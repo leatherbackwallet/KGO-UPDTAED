@@ -195,6 +195,33 @@ const orderSchema = new mongoose_1.Schema({
     isDeleted: {
         type: Boolean,
         default: false
+    },
+    // Razorpay payment fields
+    razorpayOrderId: {
+        type: String,
+        trim: true
+    },
+    razorpayPaymentId: {
+        type: String,
+        trim: true
+    },
+    razorpaySignature: {
+        type: String,
+        trim: true
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'captured', 'failed', 'refunded'],
+        default: 'pending'
+    },
+    paymentDate: {
+        type: Date
+    },
+    razorpayPaymentDetails: {
+        type: mongoose_1.Schema.Types.Mixed
+    },
+    razorpayOrderDetails: {
+        type: mongoose_1.Schema.Types.Mixed
     }
 }, {
     timestamps: true

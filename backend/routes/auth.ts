@@ -305,4 +305,65 @@ router.post('/logout', async (req, res) => {
   }
 });
 
+// Guest checkout - create temporary user for guest orders
+router.post('/guest', sanitizeInput, ensureDatabaseConnection, async (req, res) => {
+  try {
+    const { fullName, email, phone, address } = req.body;
+    
+    // Validate required fields
+    if (!fullName || !email || !phone || !address) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Full name, email, phone, and address are required', code: 'MISSING_FIELDS' }
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim().toLowerCase())) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Please enter a valid email address', code: 'INVALID_EMAIL' }
+      });
+    }
+
+    // Create guest user data (don't save to database)
+    const guestUser = {
+      _id: `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      firstName: fullName.split(' ')[0] || fullName,
+      lastName: fullName.split(' ').slice(1).join(' ') || '',
+      email: email.trim().toLowerCase(),
+      phone: phone.trim(),
+      role: 'guest',
+      isGuest: true,
+      address: address,
+      createdAt: new Date()
+    };
+
+    // Generate temporary tokens for guest user
+    const tokens = generateTokenPair({ 
+      id: guestUser._id,
+      email: guestUser.email,
+      roleId: 'guest',
+      firstName: guestUser.firstName,
+      lastName: guestUser.lastName
+    });
+
+    res.json({
+      success: true,
+      data: {
+        user: guestUser,
+        tokens: tokens
+      }
+    });
+
+  } catch (err: any) {
+    console.error('Guest authentication error:', err);
+    return res.status(500).json({
+      success: false,
+      error: { message: 'Server error during guest authentication', code: 'SERVER_ERROR' }
+    });
+  }
+});
+
 export default router; 

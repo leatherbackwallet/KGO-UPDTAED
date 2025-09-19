@@ -55,6 +55,14 @@ export interface IOrder extends Document {
   promotionId?: mongoose.Types.ObjectId;
   discountAmount: number;
   isDeleted: boolean;
+  // Razorpay payment fields
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
+  paymentStatus?: 'pending' | 'captured' | 'failed' | 'refunded';
+  paymentDate?: Date;
+  razorpayPaymentDetails?: any;
+  razorpayOrderDetails?: any;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -219,6 +227,33 @@ const orderSchema = new Schema<IOrder>({
   isDeleted: {
     type: Boolean,
     default: false
+  },
+  // Razorpay payment fields
+  razorpayOrderId: {
+    type: String,
+    trim: true
+  },
+  razorpayPaymentId: {
+    type: String,
+    trim: true
+  },
+  razorpaySignature: {
+    type: String,
+    trim: true
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'captured', 'failed', 'refunded'],
+    default: 'pending'
+  },
+  paymentDate: {
+    type: Date
+  },
+  razorpayPaymentDetails: {
+    type: Schema.Types.Mixed
+  },
+  razorpayOrderDetails: {
+    type: Schema.Types.Mixed
   }
 }, {
   timestamps: true

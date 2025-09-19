@@ -31,6 +31,12 @@ env_variables:
   
   # API URL
   API_URL: "https://api-dot-onyourbehlf.uc.r.appspot.com"
+  
+  # Razorpay Configuration
+  RAZORPAY_KEY_ID: "rzp_live_RJUs4PJL0Hctlv"
+  RAZORPAY_KEY_SECRET: "kgZuBvXrRs1JEbEiQdzG7MeN"
+  RAZORPAY_WEBHOOK_SECRET: "esmeR2lda"
+  PAYMENT_CURRENCY: "INR"
 
 # Add health check configuration
 readiness_check:

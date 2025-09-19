@@ -6,8 +6,8 @@ export default function About() {
   return (
     <>
       <Head>
-        <title>About Us - Kerala Gifts Online</title>
-        <meta name="description" content="Learn about Kerala Gifts Online - Your trusted source for authentic Kerala gifts and traditional products delivered worldwide to the Kerala diaspora." />
+        <title>About Us - OnYourBehlf | Kerala Gifts Online</title>
+        <meta name="description" content="Learn about OnYourBehlf (Kerala Gifts Online) - Your trusted source for authentic Kerala gifts and traditional products delivered worldwide to the Kerala diaspora." />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
@@ -18,11 +18,16 @@ export default function About() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                About Kerala Gifts Online
+                About OnYourBehlf
               </h1>
               <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
                 Bringing the authentic taste and culture of Kerala to the global diaspora through carefully curated gifts and traditional products
               </p>
+              <div className="bg-white bg-opacity-20 rounded-lg p-4 mb-8">
+                <p className="text-lg font-semibold mb-2">Business Information</p>
+                <p className="text-sm opacity-90">Business Name: OnYourBehlf (Kerala Gifts Online)</p>
+                <p className="text-sm opacity-90">Billing Label: OnYourBehlf - Kerala Gifts Online</p>
+              </div>
               <div className="flex justify-center space-x-4">
                 <Link href="/products" className="bg-white text-kgo-red px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                   Explore Products
@@ -44,10 +49,10 @@ export default function About() {
                   Our Story
                 </h2>
                 <p className="text-lg text-gray-600 mb-6">
-                  Founded with a passion for sharing Kerala's rich cultural heritage, Kerala Gifts Online was born from the desire to connect the global Malayali diaspora with authentic products from their homeland.
+                  Founded with a passion for sharing Kerala's rich cultural heritage, OnYourBehlf (Kerala Gifts Online) was born from the desire to connect the global Malayali diaspora with authentic products from their homeland.
                 </p>
                 <p className="text-lg text-gray-600 mb-6">
-                  What started as a small initiative to bring traditional Kerala snacks and gifts to friends and family has grown into a trusted platform serving the global Malayali diaspora.
+                  What started as a small initiative to bring traditional Kerala snacks and gifts to friends and family has grown into a trusted platform serving the global Malayali diaspora under the brand name OnYourBehlf.
                 </p>
                 <p className="text-lg text-gray-600">
                   Today, we take pride in offering a carefully curated selection of products that represent the best of Kerala's traditions, flavors, and craftsmanship.
@@ -178,7 +183,7 @@ export default function About() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Why Choose Kerala Gifts Online?
+                Why Choose OnYourBehlf?
               </h2>
               <p className="text-xl max-w-3xl mx-auto">
                 We're committed to providing the best experience for our customers

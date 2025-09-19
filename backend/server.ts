@@ -210,7 +210,7 @@ import featureFlagsRoutes from './routes/featureFlags';
 import monitoringRoutes from './routes/monitoring';
 import occasionsRoutes from './routes/occasions';
 import occasionsSeedRoutes from './routes/occasions-seed';
-// import paymentRoutes from './routes/payments';
+import paymentRoutes from './routes/payments';
 
 // Apply health routes first
 app.use('/api/health', apiLimiter as any, healthRoutes);
@@ -246,7 +246,7 @@ app.use('/api/products', apiLimiter as any, productsRoutes);
 app.use('/api/categories', apiLimiter as any, categoriesRoutes);
 app.use('/api/vendors', apiLimiter as any, vendorsRoutes);
 app.use('/api/orders', apiLimiter as any, ordersRoutes);
-// app.use('/api/payments', apiLimiter as any, paymentRoutes);
+app.use('/api/payments', apiLimiter as any, paymentRoutes);
 app.use('/api/users', apiLimiter as any, usersRoutes);
 app.use('/api/wishlist', apiLimiter as any, wishlistRoutes);
 app.use('/api/cart', apiLimiter as any, cartRoutes);

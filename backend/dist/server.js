@@ -229,7 +229,7 @@ const featureFlags_1 = __importDefault(require("./routes/featureFlags"));
 const monitoring_1 = __importDefault(require("./routes/monitoring"));
 const occasions_1 = __importDefault(require("./routes/occasions"));
 const occasions_seed_1 = __importDefault(require("./routes/occasions-seed"));
-// import paymentRoutes from './routes/payments';
+const payments_1 = __importDefault(require("./routes/payments"));
 // Apply health routes first
 app.use('/api/health', rateLimit_1.apiLimiter, health_1.default);
 // Enhanced health check with database status (backup endpoint)
@@ -262,7 +262,7 @@ app.use('/api/products', rateLimit_1.apiLimiter, products_1.default);
 app.use('/api/categories', rateLimit_1.apiLimiter, categories_1.default);
 app.use('/api/vendors', rateLimit_1.apiLimiter, vendors_1.default);
 app.use('/api/orders', rateLimit_1.apiLimiter, orders_1.default);
-// app.use('/api/payments', apiLimiter as any, paymentRoutes);
+app.use('/api/payments', rateLimit_1.apiLimiter, payments_1.default);
 app.use('/api/users', rateLimit_1.apiLimiter, users_1.default);
 app.use('/api/wishlist', rateLimit_1.apiLimiter, wishlist_1.default);
 app.use('/api/cart', rateLimit_1.apiLimiter, cart_1.default);

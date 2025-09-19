@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import RecipientAddresses from './RecipientAddresses';
+import RazorpayPayment from './RazorpayPayment';
 import api from '../utils/api';
+import { validatePaymentResponse } from '../utils/razorpay';
 
 interface RecipientAddress {
   name: string;
@@ -40,6 +42,8 @@ export default function CheckoutForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPreviousRecipients, setShowPreviousRecipients] = useState(false);
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -100,7 +104,8 @@ export default function CheckoutForm() {
     }
 
     try {
-      await api.post('/orders', {
+      // Create payment order
+      const response = await api.post('/payments/create-order', {
         products: cart.map(item => ({
           product: item.product,
           quantity: item.quantity,
@@ -121,14 +126,53 @@ export default function CheckoutForm() {
         headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
 
-      setSuccess('Order placed successfully! Your gift will be delivered to the selected recipient.');
-      clearCart();
-      setSelectedRecipientAddress(null);
+      if (response.data.success) {
+        setPaymentData(response.data.data);
+        setShowPayment(true);
+      } else {
+        setError(response.data.error?.message || 'Failed to create payment order');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to place order');
+      setError(err.response?.data?.error?.message || 'Failed to create payment order');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePaymentSuccess = async (paymentResponse: any) => {
+    try {
+      setLoading(true);
+      
+      // Verify payment
+      const verifyResponse = await api.post('/payments/verify', paymentResponse, {
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
+      });
+
+      if (verifyResponse.data.success) {
+        setSuccess('Payment successful! Your order has been placed and will be delivered to the selected recipient.');
+        clearCart();
+        setSelectedRecipientAddress(null);
+        setShowPayment(false);
+        setPaymentData(null);
+      } else {
+        setError(verifyResponse.data.error?.message || 'Payment verification failed');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error?.message || 'Payment verification failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaymentError = (error: any) => {
+    setError(`Payment failed: ${error.description || error.message || 'Unknown error'}`);
+    setShowPayment(false);
+    setPaymentData(null);
+  };
+
+  const handlePaymentClose = () => {
+    setShowPayment(false);
+    setPaymentData(null);
   };
 
   if (!user) {
@@ -321,6 +365,16 @@ export default function CheckoutForm() {
           </div>
         )}
       </form>
+
+      {/* Razorpay Payment Component */}
+      {showPayment && paymentData && (
+        <RazorpayPayment
+          orderData={paymentData}
+          onSuccess={handlePaymentSuccess}
+          onError={handlePaymentError}
+          onClose={handlePaymentClose}
+        />
+      )}
     </div>
   );
 }

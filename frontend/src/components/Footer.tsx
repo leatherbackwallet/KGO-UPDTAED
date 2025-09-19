@@ -94,15 +94,21 @@ const Footer: React.FC = () => {
             <div className="text-gray-400 text-sm mb-4 md:mb-0">
               © {currentYear} Kerala Gifts Online. All rights reserved.
             </div>
-            <div className="flex space-x-6">
+            <div className="flex flex-wrap gap-4 justify-center md:justify-end">
+              <Link href="/contact" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Contact Us
+              </Link>
+              <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Terms & Conditions
+              </Link>
               <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Terms of Service
+              <Link href="/refund" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Refund Policy
               </Link>
               <Link href="/shipping" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Shipping Info
+                Shipping Policy
               </Link>
             </div>
           </div>

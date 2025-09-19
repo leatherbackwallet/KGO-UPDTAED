@@ -11,7 +11,9 @@ import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import AdminTabs from '../components/AdminTabs';
 import RecipientAddresses from '../components/RecipientAddresses';
+import RazorpayPayment from '../components/RazorpayPayment';
 import api from '../utils/api';
+import { validatePaymentResponse } from '../utils/razorpay';
 
 type TabType = 'login' | 'guest';
 
@@ -92,6 +94,8 @@ export default function Checkout() {
   const [selectedRecipientAddress, setSelectedRecipientAddress] = useState<RecipientAddress | null>(null);
   const [previousOrderRecipients, setPreviousOrderRecipients] = useState<OrderRecipient[]>([]);
   const [showPreviousRecipients, setShowPreviousRecipients] = useState(false);
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   // Fetch previous order recipients when user is authenticated
   useEffect(() => {
@@ -183,6 +187,7 @@ export default function Checkout() {
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = 0; // Free shipping for now
   const total = subtotal + shipping;
+  
 
   // Handle authenticated user order placement
   const handleAuthenticatedOrder = async (e: React.FormEvent) => {
@@ -198,8 +203,8 @@ export default function Checkout() {
     }
 
     try {
-      // Place order using authenticated user's details
-      await api.post('/orders', {
+      // Create payment order
+      const response = await api.post('/payments/create-order', {
         products: cart.map(item => ({
           product: item.product,
           quantity: item.quantity,
@@ -210,7 +215,6 @@ export default function Checkout() {
             comboItemConfigurations: item.comboItemConfigurations
           })
         })),
-        paymentMethod: guestData.paymentMethod,
         recipientAddress: {
           name: selectedRecipientAddress.name,
           phone: selectedRecipientAddress.phone,
@@ -221,19 +225,56 @@ export default function Checkout() {
         headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
 
-      setSuccess('Order placed successfully!');
-      
-      // Clear cart and localStorage only after successful order
-      clearCart();
-      localStorage.removeItem('cart');
-      localStorage.removeItem('wishlist');
-      
-      router.push('/orders');
+      if (response.data.success) {
+        setPaymentData(response.data.data);
+        setShowPayment(true);
+      } else {
+        setError(response.data.error?.message || 'Failed to create payment order');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Order placement failed');
+      setError(err.response?.data?.error?.message || 'Failed to create payment order');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePaymentSuccess = async (paymentResponse: any) => {
+    try {
+      setLoading(true);
+      
+      // Verify payment
+      const verifyResponse = await api.post('/payments/verify', paymentResponse, {
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
+      });
+
+      if (verifyResponse.data.success) {
+        setSuccess('Payment successful! Your order has been placed and will be delivered to the selected recipient.');
+        clearCart();
+        localStorage.removeItem('cart');
+        localStorage.removeItem('wishlist');
+        setSelectedRecipientAddress(null);
+        setShowPayment(false);
+        setPaymentData(null);
+        router.push('/orders');
+      } else {
+        setError(verifyResponse.data.error?.message || 'Payment verification failed');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error?.message || 'Payment verification failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaymentError = (error: any) => {
+    setError(`Payment failed: ${error.description || error.message || 'Unknown error'}`);
+    setShowPayment(false);
+    setPaymentData(null);
+  };
+
+  const handlePaymentClose = () => {
+    setShowPayment(false);
+    setPaymentData(null);
   };
 
   // Handle guest checkout
@@ -462,6 +503,16 @@ export default function Checkout() {
                                 </div>
                                 <button
                                   type="button"
+                                  onClick={() => {
+                                    setSelectedRecipientAddress({
+                                      name: recipient.recipientName,
+                                      phone: recipient.recipientPhone,
+                                      address: recipient.address,
+                                      additionalInstructions: recipient.specialInstructions,
+                                      isDefault: false
+                                    });
+                                    setShowPreviousRecipients(false);
+                                  }}
                                   className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                                 >
                                   Select
@@ -474,9 +525,13 @@ export default function Checkout() {
                     </div>
                   )}
                   
-                  {/* Saved Recipient Addresses */}
-                  <div className="mb-4">
-                    <h4 className="font-medium text-gray-900 mb-3">💾 Saved Recipient Addresses</h4>
+                  {/* Recipient Address Selection */}
+                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-3">📍 Select Recipient Address</h4>
+                    <p className="text-sm text-blue-800 mb-4">
+                      Choose where you want to send your Kerala gifts. You can select from previous addresses or add a new one.
+                    </p>
+                    
                     <RecipientAddresses
                       onAddressSelect={setSelectedRecipientAddress}
                       selectedAddress={selectedRecipientAddress}
@@ -504,22 +559,26 @@ export default function Checkout() {
                   )}
                 </div>
                 
-                <form onSubmit={handleAuthenticatedOrder}>
+                <form>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">Payment Method</label>
                       <select 
-                        value={guestData.paymentMethod}
-                        onChange={(e) => setGuestData({...guestData, paymentMethod: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="razorpay"
+                        disabled
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
                       >
                         <option value="razorpay">Razorpay (Credit/Debit Card)</option>
                       </select>
                     </div>
                     
                     <button 
-                      type="submit" 
+                      type="button" 
                       disabled={loading || !selectedRecipientAddress}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleAuthenticatedOrder(e);
+                      }}
                       className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
                     >
                       {loading ? 'Processing...' : `Pay ₹${total.toFixed(2)}`}
@@ -528,10 +587,20 @@ export default function Checkout() {
                 </form>
 
                 {!selectedRecipientAddress && (
-                  <div className="mt-4 text-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-yellow-800 text-sm">
-                      ⚠️ Please select a recipient address to continue with your order.
-                    </p>
+                  <div className="mt-4 text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="text-yellow-800 mb-3">
+                      <p className="font-medium">⚠️ Address Required</p>
+                      <p className="text-sm">Please select a recipient address to continue with your order.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setShowPreviousRecipients(true)}
+                        className="block w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                      >
+                        📋 Select from Previous Addresses
+                      </button>
+                      <p className="text-xs text-yellow-700">Or scroll up to add a new address</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -928,6 +997,16 @@ export default function Checkout() {
               )}
             </div>
           </div>
+        )}
+
+        {/* Razorpay Payment Component */}
+        {showPayment && paymentData && (
+          <RazorpayPayment
+            orderData={paymentData}
+            onSuccess={handlePaymentSuccess}
+            onError={handlePaymentError}
+            onClose={handlePaymentClose}
+          />
         )}
       </main>
     </>

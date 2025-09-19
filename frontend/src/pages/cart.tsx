@@ -3,11 +3,17 @@ import Navbar from '../components/Navbar';
 import CartItemCard from '../components/CartItemCard';
 import { useCart } from '../context/CartContext';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
+  const router = useRouter();
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleProceedToCheckout = () => {
+    router.push('/checkout');
+  };
 
   return (
     <>
@@ -95,7 +101,10 @@ export default function Cart() {
                   </div>
 
                   {/* Checkout Button */}
-                  <button className="w-full bg-gradient-to-r from-kgo-red to-red-700 text-white py-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:scale-105 shadow-lg mb-4">
+                  <button 
+                    onClick={handleProceedToCheckout}
+                    className="w-full bg-gradient-to-r from-kgo-red to-red-700 text-white py-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:scale-105 shadow-lg mb-4"
+                  >
                     Proceed to Checkout
                   </button>
 

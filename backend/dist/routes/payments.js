@@ -9,7 +9,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const express_validator_1 = __importDefault(require("express-validator"));
+const express_validator_1 = require("express-validator");
 const payment_service_1 = __importDefault(require("../services/payment.service"));
 const index_1 = require("../models/index");
 const database_1 = require("../middleware/database");
@@ -17,33 +17,33 @@ const auth_1 = require("../middleware/auth");
 const comboUtils_1 = require("../utils/comboUtils");
 const router = express_1.default.Router();
 const validatePaymentOrder = [
-    express_validator_1.default.body('products').isArray().withMessage('Products must be an array'),
-    express_validator_1.default.body('products.*.product').isMongoId().withMessage('Invalid product ID'),
-    express_validator_1.default.body('products.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
+    (0, express_validator_1.body)('products').isArray().withMessage('Products must be an array'),
+    (0, express_validator_1.body)('products.*.product').isMongoId().withMessage('Invalid product ID'),
+    (0, express_validator_1.body)('products.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
     // Combo product validation
-    express_validator_1.default.body('products.*.isCombo').optional().isBoolean().withMessage('isCombo must be a boolean'),
-    express_validator_1.default.body('products.*.comboBasePrice').optional().isNumeric().withMessage('comboBasePrice must be a number'),
-    express_validator_1.default.body('products.*.comboItemConfigurations').optional().isArray().withMessage('comboItemConfigurations must be an array'),
-    express_validator_1.default.body('products.*.comboItemConfigurations.*.name').optional().notEmpty().withMessage('Combo item name is required'),
-    express_validator_1.default.body('products.*.comboItemConfigurations.*.unitPrice').optional().isNumeric().withMessage('Combo item unit price must be a number'),
-    express_validator_1.default.body('products.*.comboItemConfigurations.*.quantity').optional().isNumeric().withMessage('Combo item quantity must be a number'),
-    express_validator_1.default.body('products.*.comboItemConfigurations.*.unit').optional().notEmpty().withMessage('Combo item unit is required'),
-    express_validator_1.default.body('recipientAddress').isObject().withMessage('Recipient address is required'),
-    express_validator_1.default.body('recipientAddress.name').notEmpty().withMessage('Recipient name is required'),
-    express_validator_1.default.body('recipientAddress.phone').notEmpty().withMessage('Recipient phone is required'),
-    express_validator_1.default.body('recipientAddress.address').isObject().withMessage('Address details are required'),
-    express_validator_1.default.body('recipientAddress.address.streetName').notEmpty().withMessage('Street name is required'),
-    express_validator_1.default.body('recipientAddress.address.postalCode').notEmpty().withMessage('Postal code is required'),
-    express_validator_1.default.body('recipientAddress.address.city').notEmpty().withMessage('City is required')
+    (0, express_validator_1.body)('products.*.isCombo').optional().isBoolean().withMessage('isCombo must be a boolean'),
+    (0, express_validator_1.body)('products.*.comboBasePrice').optional().isNumeric().withMessage('comboBasePrice must be a number'),
+    (0, express_validator_1.body)('products.*.comboItemConfigurations').optional().isArray().withMessage('comboItemConfigurations must be an array'),
+    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.name').optional().notEmpty().withMessage('Combo item name is required'),
+    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.unitPrice').optional().isNumeric().withMessage('Combo item unit price must be a number'),
+    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.quantity').optional().isNumeric().withMessage('Combo item quantity must be a number'),
+    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.unit').optional().notEmpty().withMessage('Combo item unit is required'),
+    (0, express_validator_1.body)('recipientAddress').isObject().withMessage('Recipient address is required'),
+    (0, express_validator_1.body)('recipientAddress.name').notEmpty().withMessage('Recipient name is required'),
+    (0, express_validator_1.body)('recipientAddress.phone').notEmpty().withMessage('Recipient phone is required'),
+    (0, express_validator_1.body)('recipientAddress.address').isObject().withMessage('Address details are required'),
+    (0, express_validator_1.body)('recipientAddress.address.streetName').notEmpty().withMessage('Street name is required'),
+    (0, express_validator_1.body)('recipientAddress.address.postalCode').notEmpty().withMessage('Postal code is required'),
+    (0, express_validator_1.body)('recipientAddress.address.city').notEmpty().withMessage('City is required')
 ];
 const validatePaymentVerification = [
-    express_validator_1.default.body('razorpay_order_id').notEmpty().withMessage('Razorpay order ID is required'),
-    express_validator_1.default.body('razorpay_payment_id').notEmpty().withMessage('Razorpay payment ID is required'),
-    express_validator_1.default.body('razorpay_signature').notEmpty().withMessage('Razorpay signature is required')
+    (0, express_validator_1.body)('razorpay_order_id').notEmpty().withMessage('Razorpay order ID is required'),
+    (0, express_validator_1.body)('razorpay_payment_id').notEmpty().withMessage('Razorpay payment ID is required'),
+    (0, express_validator_1.body)('razorpay_signature').notEmpty().withMessage('Razorpay signature is required')
 ];
 router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentOrder, async (req, res) => {
     try {
-        const errors = express_validator_1.default.validationResult(req);
+        const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
             res.status(400).json({
                 success: false,
@@ -179,7 +179,7 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
 });
 router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentVerification, async (req, res) => {
     try {
-        const errors = express_validator_1.default.validationResult(req);
+        const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
             res.status(400).json({
                 success: false,
@@ -245,6 +245,101 @@ router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validat
         });
     }
 });
+// Webhook endpoint for Razorpay payment status updates
+router.post('/webhook', express_1.default.raw({ type: 'application/json' }), async (req, res) => {
+    try {
+        const signature = req.headers['x-razorpay-signature'];
+        const body = req.body;
+        if (!signature) {
+            console.error('Missing Razorpay signature in webhook');
+            res.status(400).json({ success: false, error: 'Missing signature' });
+            return;
+        }
+        // Verify webhook signature
+        const isValidSignature = payment_service_1.default.verifyWebhookSignature(body.toString(), signature);
+        if (!isValidSignature) {
+            console.error('Invalid webhook signature');
+            res.status(400).json({ success: false, error: 'Invalid signature' });
+            return;
+        }
+        const event = JSON.parse(body.toString());
+        console.log('Razorpay webhook event:', event.event);
+        // Handle different webhook events
+        switch (event.event) {
+            case 'payment.captured':
+                await handlePaymentCaptured(event.payload.payment.entity);
+                break;
+            case 'payment.failed':
+                await handlePaymentFailed(event.payload.payment.entity);
+                break;
+            case 'order.paid':
+                await handleOrderPaid(event.payload.order.entity);
+                break;
+            default:
+                console.log('Unhandled webhook event:', event.event);
+        }
+        res.status(200).json({ success: true });
+    }
+    catch (error) {
+        console.error('Error processing webhook:', error);
+        res.status(500).json({ success: false, error: 'Webhook processing failed' });
+    }
+});
+// Helper function to handle payment captured event
+async function handlePaymentCaptured(payment) {
+    try {
+        const order = await index_1.Order.findOneAndUpdate({ razorpayPaymentId: payment.id }, {
+            status: 'confirmed',
+            paymentStatus: 'captured',
+            paymentDate: new Date(),
+            razorpayPaymentDetails: payment
+        }, { new: true });
+        if (order) {
+            console.log(`Payment captured for order: ${order._id}`);
+            // Update product stock
+            for (const item of order.orderItems) {
+                await index_1.Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
+            }
+        }
+    }
+    catch (error) {
+        console.error('Error handling payment captured:', error);
+    }
+}
+// Helper function to handle payment failed event
+async function handlePaymentFailed(payment) {
+    try {
+        const order = await index_1.Order.findOneAndUpdate({ razorpayPaymentId: payment.id }, {
+            status: 'failed',
+            paymentStatus: 'failed',
+            paymentDate: new Date(),
+            razorpayPaymentDetails: payment
+        }, { new: true });
+        if (order) {
+            console.log(`Payment failed for order: ${order._id}`);
+        }
+    }
+    catch (error) {
+        console.error('Error handling payment failed:', error);
+    }
+}
+// Helper function to handle order paid event
+async function handleOrderPaid(order) {
+    try {
+        const dbOrder = await index_1.Order.findOneAndUpdate({ razorpayOrderId: order.id }, {
+            status: 'confirmed',
+            paymentStatus: 'paid',
+            paymentDate: new Date(),
+            razorpayOrderDetails: order
+        }, { new: true });
+        if (dbOrder) {
+            console.log(`Order paid: ${dbOrder._id}`);
+        }
+    }
+    catch (error) {
+        console.error('Error handling order paid:', error);
+    }
+}
 router.get('/orders', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const userId = req.user.id;
