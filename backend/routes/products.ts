@@ -4,6 +4,7 @@
  */
 
 import express, { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { Product } from '../models/products.model';
 import { Category } from '../models/categories.model';
 import { ActivityLog } from '../models/activityLogs.model';
@@ -15,7 +16,6 @@ import { Notification } from '../models/notifications.model';
 import { auth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
 import { validate } from '../middleware/validation';
-import mongoose from 'mongoose';
 import { cacheConfigs, invalidateProductCache } from '../middleware/cache';
 import { ensureDatabaseConnection } from '../middleware/database';
 import { verifyImageExists } from '../utils/cloudinary';
@@ -57,16 +57,47 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
     if (max) filter.price.$lte = Number(max);
     
     if (occasions) {
-      const occasionArray = (occasions as string).split(',').map(o => o.trim().toUpperCase());
-      filter.occasions = { $in: occasionArray };
+      // Handle both ObjectId and name-based filtering
+      const occasionArray = (occasions as string).split(',').map(o => o.trim());
+      const occasionIds = [];
+      const occasionNames = [];
+      
+      for (const occasion of occasionArray) {
+        if (mongoose.Types.ObjectId.isValid(occasion)) {
+          occasionIds.push(occasion);
+        } else {
+          occasionNames.push(occasion);
+        }
+      }
+      
+      if (occasionIds.length > 0 && occasionNames.length > 0) {
+        // Mixed filtering - need to find occasion IDs by name first
+        const { Occasion } = await import('../models/occasions.model');
+        const occasionsByName = await Occasion.find({ 
+          name: { $in: occasionNames },
+          isActive: true,
+          isDeleted: false
+        }).select('_id');
+        const allOccasionIds = [...occasionIds, ...occasionsByName.map(o => o._id)];
+        filter.occasions = { $in: allOccasionIds };
+      } else if (occasionIds.length > 0) {
+        filter.occasions = { $in: occasionIds };
+      } else if (occasionNames.length > 0) {
+        const { Occasion } = await import('../models/occasions.model');
+        const occasionsByName = await Occasion.find({ 
+          name: { $in: occasionNames },
+          isActive: true,
+          isDeleted: false
+        }).select('_id');
+        filter.occasions = { $in: occasionsByName.map(o => o._id) };
+      }
     }
     
     if (search) {
       const searchRegex = new RegExp(search as string, 'i');
       filter.$or = [
         { 'name': searchRegex },
-        { 'description': searchRegex },
-        { occasions: searchRegex }
+        { 'description': searchRegex }
       ];
     }
 
@@ -75,6 +106,7 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
     let query = Product.find(filter)
       .populate('categories', 'name slug')
       .populate('vendors', 'storeName')
+      .populate('occasions', 'name slug dateRange priority seasonalFlags')
       .sort({ isFeatured: -1, createdAt: -1 });
     
     // For admin requests or when limit is high (>=100), don't apply pagination limits
@@ -251,8 +283,7 @@ router.get('/search/query', ensureDatabaseConnection, async (req: Request, res: 
       isDeleted: false,
       $or: [
         { name: new RegExp(q as string, 'i') },
-        { description: new RegExp(q as string, 'i') },
-        { occasions: new RegExp(q as string, 'i') }
+        { description: new RegExp(q as string, 'i') }
       ]
     };
 
@@ -271,6 +302,7 @@ router.get('/search/query', ensureDatabaseConnection, async (req: Request, res: 
     const products = await Product.find(filter)
       .populate('categories', 'name slug')
       .populate('vendors', 'storeName')
+      .populate('occasions', 'name slug dateRange priority seasonalFlags')
       .sort({ isFeatured: -1, createdAt: -1 })
       .skip(skip)
       .limit(Number(limit));

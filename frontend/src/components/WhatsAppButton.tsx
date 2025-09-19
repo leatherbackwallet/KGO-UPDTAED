@@ -4,12 +4,14 @@ interface WhatsAppButtonProps {
   phoneNumber?: string;
   message?: string;
   className?: string;
+  hideOnAdminPages?: boolean;
 }
 
 const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
   phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+918075030919',
   message = "Hi, I'm interested in your products. Can you help me?",
-  className = ''
+  className = '',
+  hideOnAdminPages = false
 }) => {
   const handleWhatsAppClick = () => {
     // Format phone number (remove any non-digit characters except +)
@@ -31,6 +33,11 @@ const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
       handleWhatsAppClick();
     }
   };
+
+  // Don't render the button if hideOnAdminPages is true
+  if (hideOnAdminPages) {
+    return null;
+  }
 
   return (
     <div

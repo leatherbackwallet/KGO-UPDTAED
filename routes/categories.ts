@@ -103,7 +103,7 @@ router.post('/',
       if (parentCategory) {
         const parent = await Category.findById(parentCategory);
         if (!parent || parent.isDeleted) {
-          return return res.status(400).json({
+          return res.status(400).json({
             success: false,
             error: { message: 'Parent category not found', code: 'PARENT_NOT_FOUND' }
           });
@@ -171,7 +171,7 @@ router.put('/:id',
       if (parentCategory) {
         const parent = await Category.findById(parentCategory);
         if (!parent || parent.isDeleted) {
-          return return res.status(400).json({
+          return res.status(400).json({
             success: false,
             error: { message: 'Parent category not found', code: 'PARENT_NOT_FOUND' }
           });

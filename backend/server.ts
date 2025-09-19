@@ -208,6 +208,7 @@ import healthRoutes from './routes/health';
 import imagesRoutes from './routes/images';
 import featureFlagsRoutes from './routes/featureFlags';
 import monitoringRoutes from './routes/monitoring';
+import occasionsRoutes from './routes/occasions';
 // import paymentRoutes from './routes/payments';
 
 // Apply health routes first
@@ -259,6 +260,7 @@ app.use('/api/content', apiLimiter as any, contentRoutes);
 app.use('/api/images', apiLimiter as any, imagesRoutes);
 app.use('/api/feature-flags', apiLimiter as any, featureFlagsRoutes);
 app.use('/api/monitoring', apiLimiter as any, monitoringRoutes);
+app.use('/api/occasions', apiLimiter as any, occasionsRoutes);
 
 // Error logging middleware
 app.use(errorLogger);

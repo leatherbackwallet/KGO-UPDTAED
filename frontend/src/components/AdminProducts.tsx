@@ -14,11 +14,39 @@ interface Category {
   slug: string;
 }
 
+interface Occasion {
+  _id: string;
+  name: string;
+  slug: string;
+  icon?: string;
+  color?: string;
+  dateRange: {
+    startMonth: number;
+    startDay: number;
+    endMonth: number;
+    endDay: number;
+    isRecurring: boolean;
+    specificYear?: number;
+  };
+  priority: {
+    level: 'low' | 'medium' | 'high' | 'peak';
+    boostMultiplier: number;
+  };
+  seasonalFlags: {
+    isFestival: boolean;
+    isHoliday: boolean;
+    isPersonal: boolean;
+    isSeasonal: boolean;
+  };
+  isActive: boolean;
+}
+
 const AdminProducts: React.FC = () => {
   const { user, tokens } = useAuth();
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [occasions, setOccasions] = useState<Occasion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -78,6 +106,31 @@ const AdminProducts: React.FC = () => {
     return baseImagePath ? getOptimizedImagePath(baseImagePath, 'medium') : DEFAULT_PRODUCT_IMAGE;
   };
 
+  // Helper function to check if an occasion is currently active
+  const isOccasionCurrentlyActive = (occasion: Occasion): boolean => {
+    const now = new Date();
+    const { startMonth, startDay, endMonth, endDay, isRecurring, specificYear } = occasion.dateRange;
+    
+    if (!isRecurring && specificYear && now.getFullYear() !== specificYear) {
+      return false;
+    }
+    
+    const currentMonth = now.getMonth() + 1;
+    const currentDay = now.getDate();
+    
+    const year = specificYear || now.getFullYear();
+    const startDate = new Date(year, startMonth - 1, startDay);
+    const endDate = new Date(year, endMonth - 1, endDay);
+    
+    if (endDate < startDate) {
+      endDate.setFullYear(year + 1);
+    }
+    
+    const current = new Date(year, currentMonth - 1, currentDay);
+    
+    return current >= startDate && current <= endDate;
+  };
+
   // Check authentication and admin role
   useEffect(() => {
     if (!user || !tokens?.accessToken) {
@@ -93,6 +146,7 @@ const AdminProducts: React.FC = () => {
     
     fetchProducts();
     fetchCategories();
+    fetchOccasions();
   }, [user, tokens, router]);
 
   const clearCacheAndRefresh = async () => {
@@ -152,6 +206,18 @@ const AdminProducts: React.FC = () => {
       setProducts([]); // Ensure products is always an array
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchOccasions = async () => {
+    try {
+      const response = await api.get('/occasions', {
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
+      });
+      setOccasions(response.data.data || []);
+    } catch (err: any) {
+      console.error('Error fetching occasions:', err);
+      // Don't set error for occasions as it's not critical
     }
   };
 
@@ -475,7 +541,13 @@ const AdminProducts: React.FC = () => {
   const getOccasionNames = (productOccasions: string[]) => {
     if (!productOccasions || productOccasions.length === 0) return 'No Occasions';
     
-    const occasionNames = productOccasions.map(occasion => occasion.replace('_', ' '));
+    // Map occasion IDs to names
+    const occasionNames = productOccasions.map(occasionId => {
+      const occasion = occasions.find(occ => occ._id === occasionId);
+      return occasion ? occasion.name : occasionId;
+    }).filter(Boolean);
+    
+    if (occasionNames.length === 0) return 'No Occasions';
     
     if (occasionNames.length === 1) {
       return occasionNames[0];
@@ -1071,17 +1143,13 @@ const AdminProducts: React.FC = () => {
                   Occasions (Optional - Select multiple)
                 </label>
                 <div className="border border-gray-300 rounded-md p-3 max-h-48 overflow-y-auto bg-gray-50">
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      'DIWALI', 'ANNIVERSARY', 'BIRTHDAY', 'CONDOLENCES', 'CONGRATULATION',
-                      'FATHERS DAY', 'GET WELL SOON', 'HOUSE WARMING', 'JUST BECAUSE',
-                      'MISS YOU', 'NEW BORN', 'ONAM', 'SYMPATHY', 'THANK YOU',
-                      'TRADITIONAL', 'WEDDING'
-                    ].map((occasion) => {
-                      const isSelected = editingProduct.occasions?.includes(occasion) || false;
+                  <div className="grid grid-cols-1 gap-2">
+                    {occasions.filter(occasion => occasion.isActive).map((occasion) => {
+                      const isSelected = editingProduct.occasions?.includes(occasion._id) || false;
+                      const isCurrentlyActive = isOccasionCurrentlyActive(occasion);
                       
                       return (
-                        <label key={occasion} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 p-1 rounded">
+                        <label key={occasion._id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 p-2 rounded">
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -1090,12 +1158,12 @@ const AdminProducts: React.FC = () => {
                               
                               if (e.target.checked) {
                                 // Add occasion if not already present
-                                if (!newOccasions.includes(occasion)) {
-                                  newOccasions.push(occasion);
+                                if (!newOccasions.includes(occasion._id)) {
+                                  newOccasions.push(occasion._id);
                                 }
                               } else {
                                 // Remove occasion
-                                newOccasions = newOccasions.filter(occ => occ !== occasion);
+                                newOccasions = newOccasions.filter(occ => occ !== occasion._id);
                               }
                               
                               setEditingProduct({
@@ -1105,9 +1173,25 @@ const AdminProducts: React.FC = () => {
                             }}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="text-sm text-gray-700">
-                            {occasion.replace('_', ' ')}
-                          </span>
+                          <div className="flex items-center space-x-2 flex-1">
+                            {occasion.icon && (
+                              <span className="text-lg">{occasion.icon}</span>
+                            )}
+                            <span className="text-sm text-gray-700">{occasion.name}</span>
+                            {isCurrentlyActive && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Active Now
+                              </span>
+                            )}
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              occasion.priority.level === 'peak' ? 'bg-red-100 text-red-800' :
+                              occasion.priority.level === 'high' ? 'bg-orange-100 text-orange-800' :
+                              occasion.priority.level === 'medium' ? 'bg-blue-100 text-blue-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {occasion.priority.level}
+                            </span>
+                          </div>
                         </label>
                       );
                     })}

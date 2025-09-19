@@ -38,6 +38,9 @@ export default function Navbar() {
             <Link href="/products" className="nav-link">
               Products
             </Link>
+            <Link href="/categories" className="nav-link">
+              Categories
+            </Link>
             <Link href="/content" className="nav-link">
               Cultural Content
             </Link>
@@ -148,6 +151,9 @@ export default function Navbar() {
               <div className="flex flex-col space-y-4">
                 <Link href="/products" className="text-gray-700 hover:text-purple-600 transition-colors">
                   Products
+                </Link>
+                <Link href="/categories" className="text-gray-700 hover:text-purple-600 transition-colors">
+                  Categories
                 </Link>
                 <Link href="/content" className="text-gray-700 hover:text-purple-600 transition-colors">
                   Cultural Content

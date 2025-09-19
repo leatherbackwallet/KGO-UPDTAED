@@ -3,17 +3,50 @@
  * Products Routes - Product management and catalog operations
  * Handles product CRUD, search, filtering, and inventory management
  */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const products_model_1 = require("../models/products.model");
 const categories_model_1 = require("../models/categories.model");
 const activityLogs_model_1 = require("../models/activityLogs.model");
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
-const mongoose_1 = __importDefault(require("mongoose"));
 const cache_1 = require("../middleware/cache");
 const database_1 = require("../middleware/database");
 const router = express_1.default.Router();
@@ -52,21 +85,54 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
         if (max)
             filter.price.$lte = Number(max);
         if (occasions) {
-            const occasionArray = occasions.split(',').map(o => o.trim().toUpperCase());
-            filter.occasions = { $in: occasionArray };
+            // Handle both ObjectId and name-based filtering
+            const occasionArray = occasions.split(',').map(o => o.trim());
+            const occasionIds = [];
+            const occasionNames = [];
+            for (const occasion of occasionArray) {
+                if (mongoose_1.default.Types.ObjectId.isValid(occasion)) {
+                    occasionIds.push(occasion);
+                }
+                else {
+                    occasionNames.push(occasion);
+                }
+            }
+            if (occasionIds.length > 0 && occasionNames.length > 0) {
+                // Mixed filtering - need to find occasion IDs by name first
+                const { Occasion } = await Promise.resolve().then(() => __importStar(require('../models/occasions.model')));
+                const occasionsByName = await Occasion.find({
+                    name: { $in: occasionNames },
+                    isActive: true,
+                    isDeleted: false
+                }).select('_id');
+                const allOccasionIds = [...occasionIds, ...occasionsByName.map(o => o._id)];
+                filter.occasions = { $in: allOccasionIds };
+            }
+            else if (occasionIds.length > 0) {
+                filter.occasions = { $in: occasionIds };
+            }
+            else if (occasionNames.length > 0) {
+                const { Occasion } = await Promise.resolve().then(() => __importStar(require('../models/occasions.model')));
+                const occasionsByName = await Occasion.find({
+                    name: { $in: occasionNames },
+                    isActive: true,
+                    isDeleted: false
+                }).select('_id');
+                filter.occasions = { $in: occasionsByName.map(o => o._id) };
+            }
         }
         if (search) {
             const searchRegex = new RegExp(search, 'i');
             filter.$or = [
                 { 'name': searchRegex },
-                { 'description': searchRegex },
-                { occasions: searchRegex }
+                { 'description': searchRegex }
             ];
         }
         const skip = (Number(page) - 1) * Number(limit);
         let query = products_model_1.Product.find(filter)
             .populate('categories', 'name slug')
             .populate('vendors', 'storeName')
+            .populate('occasions', 'name slug dateRange priority seasonalFlags')
             .sort({ isFeatured: -1, createdAt: -1 });
         // For admin requests or when limit is high (>=100), don't apply pagination limits
         // This ensures all products are returned when requested
@@ -217,8 +283,7 @@ router.get('/search/query', database_1.ensureDatabaseConnection, async (req, res
             isDeleted: false,
             $or: [
                 { name: new RegExp(q, 'i') },
-                { description: new RegExp(q, 'i') },
-                { occasions: new RegExp(q, 'i') }
+                { description: new RegExp(q, 'i') }
             ]
         };
         if (category) {
@@ -235,6 +300,7 @@ router.get('/search/query', database_1.ensureDatabaseConnection, async (req, res
         const products = await products_model_1.Product.find(filter)
             .populate('categories', 'name slug')
             .populate('vendors', 'storeName')
+            .populate('occasions', 'name slug dateRange priority seasonalFlags')
             .sort({ isFeatured: -1, createdAt: -1 })
             .skip(skip)
             .limit(Number(limit));

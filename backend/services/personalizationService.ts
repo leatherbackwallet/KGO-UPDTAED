@@ -227,7 +227,7 @@ class PersonalizationService {
   }
 
   /**
-   * Get seasonal recommendations
+   * Get seasonal recommendations using new occasion system
    */
   private async getSeasonalRecommendations(
     userPrefs: IUserPreferences,
@@ -235,30 +235,52 @@ class PersonalizationService {
   ): Promise<RecommendationResult[]> {
     const recommendations: RecommendationResult[] = [];
 
-    const currentMonth = new Date().getMonth() + 1;
-    const seasonalPreferences = userPrefs.aiPreferences.seasonalPreferences
-      .find(pref => pref.month === currentMonth);
+    try {
+      // Import the seasonal prioritization service
+      const { seasonalPrioritizationService } = await import('./seasonalPrioritizationService');
+      
+      // Get seasonal recommendations with prioritization
+      const seasonalData = await seasonalPrioritizationService.getSeasonalRecommendations(limit);
+      
+      if (seasonalData.products.length > 0) {
+        recommendations.push({
+          products: seasonalData.products.map(p => p.product),
+          score: 0.85, // Higher score for new system
+          reason: `Seasonal favorites for ${seasonalData.activeOccasions.map(o => o.name).join(', ')}`,
+          category: 'seasonal'
+        });
+      }
 
-    if (seasonalPreferences) {
-      for (const preference of seasonalPreferences.preferences) {
-        const seasonalProducts = await Product.find({
-          occasions: preference,
-          isDeleted: false,
-          stock: { $gt: 0 }
-        })
-        .populate('categories')
-        .limit(limit)
-        .sort({ isFeatured: -1 });
+      // Fallback to old system for backward compatibility
+      const currentMonth = new Date().getMonth() + 1;
+      const seasonalPreferences = userPrefs.aiPreferences.seasonalPreferences
+        .find(pref => pref.month === currentMonth);
 
-        if (seasonalProducts.length > 0) {
-          recommendations.push({
-            products: seasonalProducts,
-            score: 0.75,
-            reason: `Seasonal favorites for ${preference}`,
-            category: 'seasonal'
-          });
+      if (seasonalPreferences && recommendations.length === 0) {
+        for (const preference of seasonalPreferences.preferences) {
+          const seasonalProducts = await Product.find({
+            occasions: preference,
+            isDeleted: false,
+            stock: { $gt: 0 }
+          })
+          .populate('categories')
+          .populate('occasions', 'name slug dateRange priority seasonalFlags')
+          .limit(limit)
+          .sort({ isFeatured: -1 });
+
+          if (seasonalProducts.length > 0) {
+            recommendations.push({
+              products: seasonalProducts,
+              score: 0.75,
+              reason: `Seasonal favorites for ${preference}`,
+              category: 'seasonal'
+            });
+          }
         }
       }
+    } catch (error) {
+      console.error('Error getting seasonal recommendations:', error);
+      // Fallback to basic recommendations
     }
 
     return recommendations;

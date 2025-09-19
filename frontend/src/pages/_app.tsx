@@ -1,5 +1,6 @@
 import React, { Component, ReactNode, useState, useEffect } from 'react';
 import type { AppProps } from 'next/app';
+import { useRouter } from 'next/router';
 import { AuthProvider } from '../context/AuthContext';
 import { CartProvider } from '../context/CartContext';
 import { WishlistProvider } from '../context/WishlistContext';
@@ -39,25 +40,36 @@ class SimpleErrorBoundary extends Component<{children: ReactNode}, {hasError: bo
   }
 }
 
-export default function App({ Component, pageProps }: AppProps) {
+// Component that can use router hook
+function AppContent({ Component, pageProps }: AppProps) {
+  const router = useRouter();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  // Check if current route is an admin page
+  const isAdminPage = router.pathname.startsWith('/admin');
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-grow">
+        <Component {...pageProps} />
+      </main>
+      {isClient && <Footer />}
+      {isClient && <WhatsAppButton hideOnAdminPages={isAdminPage} />}
+    </div>
+  );
+}
+
+export default function App(props: AppProps) {
   return (
     <SimpleErrorBoundary>
       <AuthProvider>
         <CartProvider>
           <WishlistProvider>
-            <div className="flex flex-col min-h-screen">
-              <main className="flex-grow">
-                <Component {...pageProps} />
-              </main>
-              {isClient && <Footer />}
-            </div>
-            {isClient && <WhatsAppButton />}
+            <AppContent {...props} />
           </WishlistProvider>
         </CartProvider>
       </AuthProvider>

@@ -118,14 +118,8 @@ const productSchema = new mongoose_1.Schema({
         }
     },
     occasions: [{
-            type: String,
-            trim: true,
-            enum: [
-                'DIWALI', 'ANNIVERSARY', 'BIRTHDAY', 'CONDOLENCES', 'CONGRATULATION',
-                'FATHERS DAY', 'GET WELL SOON', 'HOUSE WARMING', 'JUST BECAUSE',
-                'MISS YOU', 'NEW BORN', 'ONAM', 'SYMPATHY', 'THANK YOU',
-                'TRADITIONAL', 'WEDDING'
-            ]
+            type: mongoose_1.Schema.Types.ObjectId,
+            ref: 'Occasion'
         }],
     vendors: [{
             type: mongoose_1.Schema.Types.ObjectId,

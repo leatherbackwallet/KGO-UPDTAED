@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import AdminDashboard from '../components/AdminDashboard';
 import AdminProducts from '../components/AdminProducts';
 import AdminCategories from '../components/AdminCategories';
+import AdminOccasions from '../components/AdminOccasions';
 import AdminOrders from '../components/AdminOrders';
 import AdminUsers from '../components/AdminUsers';
 import FinanceDashboard from '../components/FinanceDashboard';
@@ -12,12 +13,13 @@ import AdminTabs from '../components/AdminTabs';
 
 export default function Admin() {
   const { user } = useAuth();
-  const [tab, setTab] = useState<'dashboard' | 'products' | 'categories' | 'orders' | 'users' | 'finance' | 'returns'>('products');
+  const [tab, setTab] = useState<'dashboard' | 'products' | 'categories' | 'occasions' | 'orders' | 'users' | 'finance' | 'returns'>('products');
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'products', label: 'Products' },
     { id: 'categories', label: 'Categories' },
+    { id: 'occasions', label: 'Occasions' },
     { id: 'orders', label: 'Orders' },
     { id: 'users', label: 'Users' },
     { id: 'finance', label: 'Finance' },
@@ -56,6 +58,7 @@ export default function Admin() {
         {tab === 'dashboard' && <AdminDashboard />}
         {tab === 'products' && <AdminProducts />}
         {tab === 'categories' && <AdminCategories />}
+        {tab === 'occasions' && <AdminOccasions />}
         {tab === 'orders' && <AdminOrders />}
         {tab === 'users' && <AdminUsers />}
         {tab === 'finance' && <FinanceDashboard />}

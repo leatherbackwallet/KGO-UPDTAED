@@ -2,7 +2,7 @@ import express from 'express';
 import { Category } from '../models/categories.model';
 import { Product } from '../models/products.model';
 import { ensureDatabaseConnection } from '../middleware/database';
-import { cacheConfigs } from '../middleware/cache';
+import { cacheConfigs, invalidateCache } from '../middleware/cache';
 import { deduplicateRequests } from '../middleware/requestBatching';
 import { auth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
@@ -92,7 +92,7 @@ router.get('/:id',
 // POST /api/categories - Create new category
 router.post('/',
   auth,
-  // requireRole('admin'), // Temporarily disabled for testing
+  requireRole('admin'),
   ensureDatabaseConnection,
   validate(createCategorySchema),
   async (req, res) => {
@@ -128,6 +128,7 @@ router.post('/',
 
       const category = new Category({
         name,
+        slug, // Include the generated slug
         description,
         parentCategory: parentCategory || undefined,
         sortOrder: sortOrder || 0
@@ -135,6 +136,10 @@ router.post('/',
 
       await category.save();
       console.log('Category saved successfully:', category);
+
+      // Invalidate categories cache to ensure fresh data
+      invalidateCache('/api/categories');
+      console.log('Categories cache invalidated after creation');
 
       return res.status(201).json({
         success: true,
@@ -144,6 +149,7 @@ router.post('/',
     } catch (error: any) {
       console.error('Error creating category:', error);
       console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
       return res.status(500).json({
         success: false,
         error: { message: 'Failed to create category', code: 'CREATE_ERROR' }
@@ -196,6 +202,10 @@ router.put('/:id',
       if (isActive !== undefined) category.isActive = isActive;
 
       await category.save();
+
+      // Invalidate categories cache to ensure fresh data
+      invalidateCache('/api/categories');
+      console.log('Categories cache invalidated after update');
 
       return res.json({
         success: true,
@@ -264,6 +274,10 @@ router.delete('/:id',
       category.isActive = false;
       await category.save();
 
+      // Invalidate categories cache to ensure fresh data
+      invalidateCache('/api/categories');
+      console.log('Categories cache invalidated after deletion');
+
       return res.json({
         success: true,
         message: 'Category deleted successfully'
@@ -314,6 +328,11 @@ router.put('/:id/products',
         { _id: { $in: productIds } },
         { $addToSet: { categories: req.params.id } }
       );
+
+      // Invalidate both categories and products cache
+      invalidateCache('/api/categories');
+      invalidateCache('/api/products');
+      console.log('Categories and products cache invalidated after product assignment');
 
       return res.json({
         success: true,

@@ -3,13 +3,46 @@
  * Caching Middleware
  * Provides response caching for improved performance with ETag support
  */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateETag = exports.cache = exports.scheduleWarmCache = exports.warmCache = exports.clearCache = exports.getCacheStats = exports.invalidateUserCache = exports.invalidateCategoryCache = exports.invalidateProductCache = exports.invalidateCache = exports.cacheConfigs = exports.createCacheMiddleware = void 0;
 const node_cache_1 = __importDefault(require("node-cache"));
-const crypto_1 = __importDefault(require("crypto"));
+const crypto = __importStar(require("crypto"));
 const products_model_1 = require("../models/products.model");
 const categories_model_1 = require("../models/categories.model");
 // Create cache instance with 5 minutes default TTL
@@ -21,7 +54,7 @@ const cache = new node_cache_1.default({
 exports.cache = cache;
 // Generate ETag from data
 const generateETag = (data) => {
-    const hash = crypto_1.default.createHash('md5');
+    const hash = crypto.createHash('md5');
     hash.update(JSON.stringify(data));
     return `"${hash.digest('hex')}"`;
 };
@@ -99,6 +132,14 @@ exports.cacheConfigs = {
     categories: (0, exports.createCacheMiddleware)(1800, null, {
         enableETag: true,
         cacheControl: 'public, max-age=1800, stale-while-revalidate=300'
+    }),
+    // Occasions - cache for 15 minutes with ETag
+    occasions: (0, exports.createCacheMiddleware)(900, (req) => {
+        const { current, upcoming, seasonal, search, priority, type } = req.query;
+        return `occasions:${current || ''}:${upcoming || ''}:${seasonal || ''}:${search || ''}:${priority || ''}:${type || ''}`;
+    }, {
+        enableETag: true,
+        cacheControl: 'public, max-age=900, stale-while-revalidate=180'
     }),
     // User profile - cache for 1 minute, private cache
     profile: (0, exports.createCacheMiddleware)(60, (req) => `profile:${req.user?.id || 'anonymous'}`, {

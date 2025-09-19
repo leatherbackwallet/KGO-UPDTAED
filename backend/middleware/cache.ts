@@ -4,7 +4,7 @@
  */
 
 import NodeCache from 'node-cache';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 import { Product } from '../models/products.model';
 import { Category } from '../models/categories.model';
@@ -144,6 +144,15 @@ export const cacheConfigs = {
   categories: createCacheMiddleware(1800, null, {
     enableETag: true,
     cacheControl: 'public, max-age=1800, stale-while-revalidate=300'
+  }),
+  
+  // Occasions - cache for 15 minutes with ETag
+  occasions: createCacheMiddleware(900, (req: Request) => {
+    const { current, upcoming, seasonal, search, priority, type } = req.query;
+    return `occasions:${current || ''}:${upcoming || ''}:${seasonal || ''}:${search || ''}:${priority || ''}:${type || ''}`;
+  }, {
+    enableETag: true,
+    cacheControl: 'public, max-age=900, stale-while-revalidate=180'
   }),
   
   // User profile - cache for 1 minute, private cache

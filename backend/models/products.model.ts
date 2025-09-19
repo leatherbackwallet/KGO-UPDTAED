@@ -22,7 +22,7 @@ export interface IProduct extends Document {
   stock: number;
   images?: string[]; // Image filenames (e.g., "product-123.jpg")
   defaultImage?: string; // Default image filename
-  occasions?: string[]; // Array of occasion tags
+  occasions?: mongoose.Types.ObjectId[]; // Array of occasion references
   vendors?: mongoose.Types.ObjectId[]; // Multiple vendors
   isFeatured: boolean;
   isDeleted: boolean;
@@ -112,14 +112,8 @@ const productSchema = new Schema<IProduct>({
     }
   },
   occasions: [{
-    type: String,
-    trim: true,
-    enum: [
-      'DIWALI', 'ANNIVERSARY', 'BIRTHDAY', 'CONDOLENCES', 'CONGRATULATION',
-      'FATHERS DAY', 'GET WELL SOON', 'HOUSE WARMING', 'JUST BECAUSE',
-      'MISS YOU', 'NEW BORN', 'ONAM', 'SYMPATHY', 'THANK YOU',
-      'TRADITIONAL', 'WEDDING'
-    ]
+    type: Schema.Types.ObjectId,
+    ref: 'Occasion'
   }],
   vendors: [{
     type: Schema.Types.ObjectId,

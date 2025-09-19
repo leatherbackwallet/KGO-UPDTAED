@@ -1,0 +1,207 @@
+"use strict";
+/**
+ * Occasions Model - Enhanced with date ranges and seasonal prioritization
+ * Supports recurring and one-time occasions with smart product prioritization
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Occasion = void 0;
+const mongoose_1 = __importStar(require("mongoose"));
+const occasionSchema = new mongoose_1.Schema({
+    name: {
+        type: String,
+        required: true,
+        trim: true,
+        maxlength: 100
+    },
+    slug: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+        lowercase: true
+    },
+    description: {
+        type: String,
+        trim: true,
+        maxlength: 500
+    },
+    icon: {
+        type: String,
+        trim: true,
+        maxlength: 50
+    },
+    color: {
+        type: String,
+        trim: true,
+        validate: {
+            validator: function (v) {
+                if (!v)
+                    return true; // Allow empty
+                return /^#[0-9A-F]{6}$/i.test(v); // Hex color validation
+            },
+            message: 'Color must be a valid hex color code (e.g., #FF5733)'
+        }
+    },
+    // Date Range Schema
+    dateRange: {
+        startMonth: {
+            type: Number,
+            required: true,
+            min: 1,
+            max: 12
+        },
+        startDay: {
+            type: Number,
+            required: true,
+            min: 1,
+            max: 31
+        },
+        endMonth: {
+            type: Number,
+            required: true,
+            min: 1,
+            max: 12
+        },
+        endDay: {
+            type: Number,
+            required: true,
+            min: 1,
+            max: 31
+        },
+        isRecurring: {
+            type: Boolean,
+            default: true
+        },
+        specificYear: {
+            type: Number,
+            min: 2020,
+            max: 2030
+        }
+    },
+    // Priority Schema
+    priority: {
+        level: {
+            type: String,
+            enum: ['low', 'medium', 'high', 'peak'],
+            default: 'medium'
+        },
+        boostMultiplier: {
+            type: Number,
+            min: 1.0,
+            max: 3.0,
+            default: 1.5
+        }
+    },
+    // Seasonal Flags Schema
+    seasonalFlags: {
+        isFestival: {
+            type: Boolean,
+            default: false
+        },
+        isHoliday: {
+            type: Boolean,
+            default: false
+        },
+        isPersonal: {
+            type: Boolean,
+            default: false
+        },
+        isSeasonal: {
+            type: Boolean,
+            default: false
+        }
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    sortOrder: {
+        type: Number,
+        default: 0
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
+    }
+}, {
+    timestamps: true
+});
+// Generate slug from name before saving
+occasionSchema.pre('save', function (next) {
+    if (this.isModified('name') && !this.slug) {
+        this.slug = this.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+    }
+    next();
+});
+// Validate date range
+occasionSchema.pre('save', function (next) {
+    const { startMonth, startDay, endMonth, endDay } = this.dateRange;
+    // Basic validation
+    if (startMonth < 1 || startMonth > 12 || endMonth < 1 || endMonth > 12) {
+        return next(new Error('Invalid month values'));
+    }
+    if (startDay < 1 || startDay > 31 || endDay < 1 || endDay > 31) {
+        return next(new Error('Invalid day values'));
+    }
+    // Check if start date is before end date (considering year rollover)
+    const startDate = new Date(2024, startMonth - 1, startDay);
+    const endDate = new Date(2024, endMonth - 1, endDay);
+    // Handle year rollover (e.g., Dec 25 to Jan 5)
+    if (endDate < startDate) {
+        endDate.setFullYear(2025);
+    }
+    if (startDate > endDate) {
+        return next(new Error('Start date must be before or equal to end date'));
+    }
+    next();
+});
+// Indexes for performance
+occasionSchema.index({ slug: 1 });
+occasionSchema.index({ isActive: 1, isDeleted: 1 });
+occasionSchema.index({ sortOrder: 1 });
+occasionSchema.index({ 'dateRange.startMonth': 1, 'dateRange.startDay': 1 });
+occasionSchema.index({ 'dateRange.endMonth': 1, 'dateRange.endDay': 1 });
+occasionSchema.index({ 'priority.level': 1 });
+occasionSchema.index({ 'seasonalFlags.isFestival': 1 });
+occasionSchema.index({ 'seasonalFlags.isHoliday': 1 });
+occasionSchema.index({ 'seasonalFlags.isPersonal': 1 });
+occasionSchema.index({ 'seasonalFlags.isSeasonal': 1 });
+// Text search index
+occasionSchema.index({ name: 'text', description: 'text' });
+exports.Occasion = mongoose_1.default.model('Occasion', occasionSchema);
