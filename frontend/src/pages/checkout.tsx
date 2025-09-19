@@ -391,22 +391,22 @@ export default function Checkout() {
                     <p className="font-medium">{item.name}</p>
                     <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                   </div>
-                  <span className="font-semibold">${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-semibold">₹{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
             </div>
             <div className="border-t pt-4 mt-4">
               <div className="flex justify-between mb-2">
                 <span>Subtotal:</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between mb-2">
                 <span>Shipping:</span>
-                <span>${shipping.toFixed(2)}</span>
+                <span>₹{shipping.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-bold text-lg">
                 <span>Total:</span>
-                <span>${total.toFixed(2)}</span>
+                <span>₹{total.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -522,7 +522,7 @@ export default function Checkout() {
                       disabled={loading || !selectedRecipientAddress}
                       className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
                     >
-                      {loading ? 'Processing...' : `Pay $${total.toFixed(2)}`}
+                      {loading ? 'Processing...' : `Pay ₹${total.toFixed(2)}`}
                     </button>
                   </div>
                 </form>
@@ -708,7 +708,7 @@ export default function Checkout() {
                           disabled={loading}
                           className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400"
                         >
-                          {loading ? 'Processing...' : `Complete Order - $${total.toFixed(2)}`}
+                          {loading ? 'Processing...' : `Complete Order - ₹${total.toFixed(2)}`}
                         </button>
                       </div>
                     </form>

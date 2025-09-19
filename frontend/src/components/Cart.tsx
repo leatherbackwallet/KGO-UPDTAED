@@ -28,7 +28,7 @@ export default function Cart() {
                 />
                 <div className="flex-1">
                   <h3 className="font-semibold">{item.name}</h3>
-                  <p className="text-gray-600">${item.price.toFixed(2)}</p>
+                  <p className="text-gray-600">₹{item.price.toFixed(2)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <input
@@ -52,7 +52,7 @@ export default function Cart() {
           <div className="mt-6 pt-4 border-t">
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-semibold">Subtotal:</span>
-              <span className="text-lg font-bold">${subtotal.toFixed(2)}</span>
+              <span className="text-lg font-bold">₹{subtotal.toFixed(2)}</span>
             </div>
             <Link
               href="/checkout"

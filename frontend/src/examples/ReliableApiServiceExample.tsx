@@ -156,7 +156,7 @@ const ReliableApiServiceExample: React.FC = () => {
             {products.slice(0, 6).map((product, index) => (
               <div key={product._id || index} className="p-4 border rounded-lg">
                 <h3 className="font-semibold">{product.name}</h3>
-                <p className="text-gray-600">${product.price}</p>
+                <p className="text-gray-600">₹{product.price}</p>
                 {product.category && (
                   <p className="text-sm text-gray-500">Category: {product.category}</p>
                 )}

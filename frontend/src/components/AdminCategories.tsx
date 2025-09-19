@@ -329,7 +329,7 @@ export default function AdminCategories() {
                     />
                     <div className="flex-1">
                       <div className="font-medium">{product.name}</div>
-                      <div className="text-sm text-gray-500">${product.price}</div>
+                      <div className="text-sm text-gray-500">₹{product.price}</div>
                     </div>
                   </label>
                 ))}

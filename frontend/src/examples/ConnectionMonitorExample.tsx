@@ -186,7 +186,7 @@ export const ConnectionMonitorExample: React.FC = () => {
                 <div key={index} className="border rounded-lg p-4">
                   <h3 className="font-medium">{product.name || `Product ${index + 1}`}</h3>
                   <p className="text-gray-600 text-sm">{product.description || 'Sample product description'}</p>
-                  <p className="text-lg font-semibold mt-2">${product.price || '99.99'}</p>
+                  <p className="text-lg font-semibold mt-2">₹{product.price || '99.99'}</p>
                 </div>
               ))}
             </div>
