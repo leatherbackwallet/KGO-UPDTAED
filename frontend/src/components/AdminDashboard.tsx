@@ -49,7 +49,9 @@ export default function AdminDashboard() {
       // For now, we'll fetch basic data
       const [usersRes, productsRes, ordersRes] = await Promise.all([
         api.get<User[]>('/users', { headers: { Authorization: `Bearer ${tokens?.accessToken}` } }),
-        api.get<Product[]>('/products'),
+        api.get<Product[]>('/products', { 
+          params: { admin: true, includeDeleted: false }
+        }),
         api.get<Order[]>('/orders', { headers: { Authorization: `Bearer ${tokens?.accessToken}` } })
       ]);
 

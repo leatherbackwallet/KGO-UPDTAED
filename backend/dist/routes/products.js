@@ -25,7 +25,7 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
         console.log('🔍 [Products API] Connection state:', mongoose_1.default.connection.readyState);
         console.log('🔍 [Products API] Connection URI:', mongoose_1.default.connection.host, mongoose_1.default.connection.port);
         console.log('🔍 [Products API] Collections:', await mongoose_1.default.connection.db?.listCollections().toArray());
-        const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false } = req.query;
+        const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false, admin = false } = req.query;
         let filter = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
         // Apply filters
         if (category) {
@@ -64,12 +64,16 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
             ];
         }
         const skip = (Number(page) - 1) * Number(limit);
-        const products = await products_model_1.Product.find(filter)
+        let query = products_model_1.Product.find(filter)
             .populate('categories', 'name slug')
             .populate('vendors', 'storeName')
-            .sort({ isFeatured: -1, createdAt: -1 })
-            .skip(skip)
-            .limit(Number(limit));
+            .sort({ isFeatured: -1, createdAt: -1 });
+        // For admin requests or when limit is high (>=100), don't apply pagination limits
+        // This ensures all products are returned when requested
+        if (admin !== 'true' && Number(limit) < 100) {
+            query = query.skip(skip).limit(Number(limit));
+        }
+        const products = await query;
         const total = await products_model_1.Product.countDocuments(filter);
         res.json({
             success: true,
@@ -77,7 +81,8 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
             count: products.length,
             total,
             page: Number(page),
-            pages: Math.ceil(total / Number(limit))
+            pages: Number(limit) >= 100 ? 1 : Math.ceil(total / Number(limit)),
+            allProductsLoaded: Number(limit) >= 100 || admin === 'true' || products.length === total
         });
     }
     catch (error) {

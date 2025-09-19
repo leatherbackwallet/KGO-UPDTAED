@@ -128,10 +128,12 @@ const AdminProducts: React.FC = () => {
       setLoading(true);
       setError(''); // Clear any previous errors
       
-      // Add cache busting parameter to ensure fresh data
+      // Get all products for admin without pagination limits
       const response = await api.get('/products', {
         params: {
-          _t: Date.now() // Cache busting parameter
+          _t: Date.now(), // Cache busting parameter
+          admin: true, // Bypass pagination limits
+          includeDeleted: false // Only get active products
         }
       });
       
@@ -984,7 +986,7 @@ const AdminProducts: React.FC = () => {
                       ...editingProduct,
                       price: parseInt(e.target.value) || 0
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
 

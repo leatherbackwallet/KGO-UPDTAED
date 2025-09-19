@@ -81,7 +81,12 @@ export default function AdminCategories() {
 
   const fetchProducts = async () => {
     try {
-      const response = await api.get('/products');
+      const response = await api.get('/products', {
+        params: {
+          admin: true, // Bypass pagination limits
+          includeDeleted: false // Only get active products
+        }
+      });
       setProducts(response.data.data || []);
     } catch (err: any) {
       console.error('Error fetching products:', err);

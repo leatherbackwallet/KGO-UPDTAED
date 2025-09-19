@@ -31,7 +31,7 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
     console.log('🔍 [Products API] Connection URI:', mongoose.connection.host, mongoose.connection.port);
     console.log('🔍 [Products API] Collections:', await mongoose.connection.db?.listCollections().toArray());
     
-    const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false } = req.query;
+    const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false, admin = false } = req.query;
     
     let filter: any = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
     
@@ -72,12 +72,18 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
 
     const skip = (Number(page) - 1) * Number(limit);
     
-    const products = await Product.find(filter)
+    let query = Product.find(filter)
       .populate('categories', 'name slug')
       .populate('vendors', 'storeName')
-      .sort({ isFeatured: -1, createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit));
+      .sort({ isFeatured: -1, createdAt: -1 });
+    
+    // For admin requests or when limit is high (>=100), don't apply pagination limits
+    // This ensures all products are returned when requested
+    if (admin !== 'true' && Number(limit) < 100) {
+      query = query.skip(skip).limit(Number(limit));
+    }
+    
+    const products = await query;
 
     const total = await Product.countDocuments(filter);
 
@@ -87,7 +93,8 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
       count: products.length,
       total,
       page: Number(page),
-      pages: Math.ceil(total / Number(limit))
+      pages: Number(limit) >= 100 ? 1 : Math.ceil(total / Number(limit)),
+      allProductsLoaded: Number(limit) >= 100 || admin === 'true' || products.length === total
     });
   } catch (error) {
     console.error('Error fetching products:', error);

@@ -32,21 +32,14 @@ const ProductsPage: React.FC = () => {
   // Timeout reference for cleanup
   const [fallbackTimeoutRef, setFallbackTimeoutRef] = useState<NodeJS.Timeout | null>(null);
   
-  // Professional batch loading strategy
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+  // Product display state
   const [allProductsLoaded, setAllProductsLoaded] = useState(false);
-  const PRODUCTS_PER_PAGE = 12; // Standard ecommerce batch size
-  const PRELOAD_SCROLLS = 2; // Preload 2 scrolls worth of content
   
   // Professional loading states
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [showSkeletonOverlay, setShowSkeletonOverlay] = useState(false);
   
-  // Refs for intersection observer
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  // Removed unused intersection observer refs
 
   // Available occasions
   const occasions = [
@@ -104,8 +97,7 @@ const ProductsPage: React.FC = () => {
     };
   }, [fallbackTimeoutRef]);
 
-  // Smart lazy loading with intersection observer
-  // No longer needed - showing all products at once
+  // All products are loaded at once for better UX
 
   const fetchProducts = useCallback(async (retryCount = 0) => {
     const MAX_RETRIES = 3;
@@ -182,14 +174,13 @@ const ProductsPage: React.FC = () => {
         setInitialLoadComplete(true);
       }
       
-      // Set hasMore based on product count
+      // Set all products loaded flag
       setAllProductsLoaded(validProducts.length > 0);
-      setHasMore(validProducts.length > PRODUCTS_PER_PAGE);
       
-      // Professional image preloading - preload current + next batch
+      // Professional image preloading for all products
       if (validProducts.length > 0) {
         console.log('🖼️ Starting image preloading for better UX...');
-        preloadProductImages(validProducts, currentPage, PRODUCTS_PER_PAGE);
+        preloadProductImages(validProducts, 1, validProducts.length);
       }
       
     } catch (err: any) {
@@ -253,9 +244,7 @@ const ProductsPage: React.FC = () => {
   const debugProductsState = () => {
     console.log('🐛 Debug Products State:');
     console.log('Products array length:', products.length);
-    console.log('Current page:', currentPage);
-    console.log('Products per page:', PRODUCTS_PER_PAGE);
-    console.log('Products being displayed:', currentPage * PRODUCTS_PER_PAGE);
+    console.log('All products loaded:', allProductsLoaded);
     console.log('Loading state:', loading);
     console.log('Error state:', error);
     console.log('Is client:', isClient);
@@ -326,7 +315,6 @@ const ProductsPage: React.FC = () => {
                 <button
                   onClick={() => {
                     console.log('🔄 Error retry clicked');
-                    setCurrentPage(1); // Reset pagination
                     setProducts([]); // Clear current products
                     setError(''); // Clear error
                     fetchProducts(0); // Fetch fresh data
@@ -372,21 +360,12 @@ const ProductsPage: React.FC = () => {
                       />
                     </div>
                   ))}
-                  
-                  {/* Show skeleton cards for loading more */}
-                  {loadingMore && (
-                    <>
-                      {Array.from({ length: Math.min(PRODUCTS_PER_PAGE, 4) }).map((_, index) => (
-                        <ProductSkeleton key={`skeleton-${index}`} />
-                      ))}
-                    </>
-                  )}
                 </div>
                 
                 {/* Product count display */}
                 <div className="text-center mt-12">
                   <div className="inline-flex items-center px-4 py-2 bg-gray-50 rounded-full text-gray-600 text-sm">
-                    Showing {products.length} products
+                    {allProductsLoaded ? `Showing all ${products.length} products` : `Showing ${products.length} products`}
                   </div>
                 </div>
                 
@@ -403,7 +382,6 @@ const ProductsPage: React.FC = () => {
                       <button
                         onClick={() => {
                           console.log('🔄 Manual reload clicked');
-                          setCurrentPage(1); // Reset pagination
                           setProducts([]); // Clear current products
                           setError(''); // Clear any errors
                           fetchProducts(0); // Fetch fresh data
