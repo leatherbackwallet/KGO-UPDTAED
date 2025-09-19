@@ -96,6 +96,7 @@ export default function Checkout() {
   const [showPreviousRecipients, setShowPreviousRecipients] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPayment, setShowPayment] = useState(false);
+  const [guestTokens, setGuestTokens] = useState<any>(null);
 
   // Fetch previous order recipients when user is authenticated
   useEffect(() => {
@@ -242,19 +243,27 @@ export default function Checkout() {
     try {
       setLoading(true);
       
+      // Use guest tokens if available, otherwise use authenticated user tokens
+      const authToken = guestTokens?.accessToken || tokens?.accessToken;
+      
       // Verify payment
       const verifyResponse = await api.post('/payments/verify', paymentResponse, {
-        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
+        headers: { Authorization: `Bearer ${authToken}` }
       });
 
       if (verifyResponse.data.success) {
-        setSuccess('Payment successful! Your order has been placed and will be delivered to the selected recipient.');
+        const successMessage = guestTokens 
+          ? 'Payment successful! Your order has been placed and will be delivered to the provided address.'
+          : 'Payment successful! Your order has been placed and will be delivered to the selected recipient.';
+        
+        setSuccess(successMessage);
         clearCart();
         localStorage.removeItem('cart');
         localStorage.removeItem('wishlist');
         setSelectedRecipientAddress(null);
         setShowPayment(false);
         setPaymentData(null);
+        setGuestTokens(null); // Clear guest tokens
         router.push('/orders');
       } else {
         setError(verifyResponse.data.error?.message || 'Payment verification failed');
@@ -270,11 +279,13 @@ export default function Checkout() {
     setError(`Payment failed: ${error.description || error.message || 'Unknown error'}`);
     setShowPayment(false);
     setPaymentData(null);
+    setGuestTokens(null); // Clear guest tokens on error
   };
 
   const handlePaymentClose = () => {
     setShowPayment(false);
     setPaymentData(null);
+    setGuestTokens(null); // Clear guest tokens on close
   };
 
   // Handle guest checkout
@@ -285,32 +296,63 @@ export default function Checkout() {
     setLoading(true);
 
     try {
-      // Create guest user
-      const guestResponse = await api.post('/auth/guest', guestData);
+      // Create guest user - transform data to match backend expectations
+      const guestAuthData = {
+        fullName: guestData.name,
+        email: guestData.email,
+        phone: guestData.phone,
+        address: {
+          streetName: guestData.deliveryAddress.street,
+          houseNumber: guestData.deliveryAddress.houseNumber,
+          city: guestData.deliveryAddress.city,
+          postalCode: guestData.deliveryAddress.zipCode,
+          countryCode: guestData.deliveryAddress.country || 'IN'
+        }
+      };
+      
+      const guestResponse = await api.post('/auth/guest', guestAuthData);
       const data = guestResponse.data as { data: { tokens: any; user: any } };
       const { tokens: guestTokens, user: guestUser } = data.data;
+      
+      // Store guest tokens for payment verification
+      setGuestTokens(guestTokens);
 
       // Merge guest data with existing cart/wishlist
       await mergeGuestData(guestTokens.accessToken);
 
-      // Place order
-      await api.post('/orders', {
-        products: cart.map(item => ({ product: item.product, quantity: item.quantity })),
-        deliveryAddress: guestData.deliveryAddress,
-        paymentMethod: guestData.paymentMethod,
-
+      // Create payment order for Razorpay
+      const paymentResponse = await api.post('/payments/create-order', {
+        products: cart.map(item => ({
+          product: item.product,
+          quantity: item.quantity,
+          // Include combo-specific fields if it's a combo product
+          ...(item.isCombo && {
+            isCombo: item.isCombo,
+            comboBasePrice: item.comboBasePrice,
+            comboItemConfigurations: item.comboItemConfigurations
+          })
+        })),
+        recipientAddress: {
+          name: guestData.name,
+          phone: guestData.phone,
+          address: {
+            streetName: guestData.deliveryAddress.street,
+            houseNumber: guestData.deliveryAddress.houseNumber,
+            postalCode: guestData.deliveryAddress.zipCode,
+            city: guestData.deliveryAddress.city,
+            countryCode: guestData.deliveryAddress.country || 'IN'
+          }
+        }
       }, {
         headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
       });
 
-      setSuccess('Order placed successfully! Guest account created.');
-      
-      // Clear cart and localStorage only after successful order
-      clearCart();
-      localStorage.removeItem('cart');
-      localStorage.removeItem('wishlist');
-      
-      router.push('/orders');
+      if (paymentResponse.data.success) {
+        setPaymentData(paymentResponse.data.data);
+        setShowPayment(true);
+      } else {
+        setError(paymentResponse.data.error?.message || 'Failed to create payment order');
+      }
     } catch (err: any) {
       setError(err.response?.data?.error?.message || 'Guest checkout failed');
     } finally {
