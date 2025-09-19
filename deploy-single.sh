@@ -93,8 +93,8 @@ preflight_checks() {
         exit 1
     fi
     
-    if [ ! -f "cloudbuild-single.yaml" ]; then
-        print_error "cloudbuild-single.yaml not found!"
+    if [ ! -f "cloudbuild.yaml" ]; then
+        print_error "cloudbuild.yaml not found!"
         exit 1
     fi
     
@@ -119,7 +119,7 @@ deploy_application() {
     
     # Submit the build
     BUILD_ID=$(gcloud builds submit \
-        --config=cloudbuild-single.yaml \
+        --config=cloudbuild.yaml \
         --format="value(id)" \
         . 2>/dev/null)
     
