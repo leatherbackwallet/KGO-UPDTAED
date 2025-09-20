@@ -10,6 +10,7 @@ import { connectToDatabase } from './utils/database';
 import { generalLimiter, authLimiter, apiLimiter } from './middleware/rateLimit';
 import { logger, errorLogger } from './middleware/logger';
 
+// Load environment variables
 dotenv.config();
 
 const app = express();

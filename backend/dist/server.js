@@ -47,6 +47,7 @@ const fileUpload_1 = require("./utils/fileUpload");
 const database_1 = require("./utils/database");
 const rateLimit_1 = require("./middleware/rateLimit");
 const logger_1 = require("./middleware/logger");
+// Load environment variables
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 // CORS Configuration
