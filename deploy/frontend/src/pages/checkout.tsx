@@ -80,7 +80,7 @@ interface OrderRecipient {
 export default function Checkout() {
   const router = useRouter();
   const { cart, clearCart, refreshCart } = useCart();
-  const { user, login, tokens } = useAuth();
+  const { user, login, tokens, isLoading, isAuthenticated } = useAuth();
   const { wishlist } = useWishlist();
   
   const [activeTab, setActiveTab] = useState<TabType>('login');
@@ -362,6 +362,23 @@ export default function Checkout() {
     }
   };
 
+  // Show loading state while authentication is being initialized
+  if (isLoading) {
+    return (
+      <>
+        <Navbar />
+        <main className="max-w-4xl mx-auto py-8 px-4">
+          <div className="flex items-center justify-center min-h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading checkout...</p>
+            </div>
+          </div>
+        </main>
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar />
@@ -406,7 +423,7 @@ export default function Checkout() {
           <div className="bg-white p-6 rounded-lg shadow-sm border">
             <h2 className="text-xl font-semibold mb-4">Payment & Delivery</h2>
             
-            {user ? (
+            {isAuthenticated ? (
               // Authenticated user - show recipient selection and payment
               <div>
                 {/* Recipient Address Selection */}

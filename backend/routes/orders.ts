@@ -146,6 +146,124 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
   }
 });
 
+// Get order by ID with comprehensive transaction details
+router.get('/:orderId', auth, ensureDatabaseConnection, async (req: any, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    const order = await Order.findById(orderId)
+      .populate('userId', 'firstName lastName email phone')
+      .populate('orderItems.productId', 'name description images categories price')
+      .lean();
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: { message: 'Order not found', code: 'ORDER_NOT_FOUND' }
+      });
+    }
+
+    // Check if user can access this order (own order or admin)
+    const userId = typeof order.userId === 'string' ? order.userId : order.userId._id.toString();
+    if (userId !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        error: { message: 'Access denied', code: 'ACCESS_DENIED' }
+      });
+    }
+
+    // Format order with comprehensive transaction details
+    const formattedOrder = {
+      ...order,
+      transactionSummary: {
+        orderId: order.orderId,
+        transactionId: order.transactionId,
+        razorpayPaymentId: order.razorpayPaymentId,
+        razorpayOrderId: order.razorpayOrderId,
+        paymentMethod: order.paymentMethod,
+        paymentGateway: order.paymentGateway,
+        currency: order.currency,
+        amountPaid: order.amountPaid,
+        amountRefunded: order.amountRefunded,
+        refundStatus: order.refundStatus,
+        paymentStatus: order.paymentStatus,
+        paymentDate: order.paymentDate,
+        paymentVerifiedAt: order.paymentVerifiedAt,
+        webhookReceived: order.webhookReceived,
+        webhookEvents: order.webhookEvents,
+        failureReason: order.failureReason
+      }
+    };
+
+    res.status(200).json({
+      success: true,
+      data: { order: formattedOrder }
+    });
+  } catch (err: any) {
+    console.error('Error fetching order details:', err);
+    res.status(500).json({
+      success: false,
+      error: { message: 'Server error', code: 'SERVER_ERROR' }
+    });
+  }
+});
+
+// Generate PDF receipt for order
+router.get('/:orderId/receipt', auth, ensureDatabaseConnection, async (req: any, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    const order = await Order.findById(orderId)
+      .populate('userId', 'firstName lastName email phone')
+      .populate('orderItems.productId', 'name description images categories price')
+      .lean();
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: { message: 'Order not found', code: 'ORDER_NOT_FOUND' }
+      });
+    }
+
+    // Check if user can access this order (own order or admin)
+    const userId = typeof order.userId === 'string' ? order.userId : order.userId._id.toString();
+    if (userId !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        error: { message: 'Access denied', code: 'ACCESS_DENIED' }
+      });
+    }
+
+    // Import PDF service dynamically to avoid circular dependencies
+    const PDFService = (await import('../services/pdf.service')).default;
+    
+    // Generate PDF
+    const pdfBuffer = await PDFService.generateOrderReceipt({
+      order: order as any,
+      companyInfo: {
+        name: 'OnYourBehlf - Kerala Gifts Online',
+        address: 'Kerala, India',
+        phone: '+91-XXXXXXXXXX',
+        email: 'info@keralgiftsonline.in',
+        website: 'https://keralgiftsonline.in'
+      }
+    });
+
+    // Set response headers for PDF download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="receipt-${order.orderId}.pdf"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+
+    res.send(pdfBuffer);
+  } catch (err: any) {
+    console.error('Error generating PDF receipt:', err);
+    res.status(500).json({
+      success: false,
+      error: { message: 'Failed to generate PDF receipt', code: 'PDF_GENERATION_ERROR' }
+    });
+  }
+});
+
 // Get all orders (admin)
 router.get('/', auth, requireRole('admin'), ensureDatabaseConnection, async (req: any, res) => {
   try {

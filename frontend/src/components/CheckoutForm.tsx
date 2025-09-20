@@ -154,6 +154,10 @@ export default function CheckoutForm() {
         setSelectedRecipientAddress(null);
         setShowPayment(false);
         setPaymentData(null);
+        
+        // Redirect to order confirmation page with order ID
+        const orderId = verifyResponse.data.data.orderId;
+        window.location.href = `/order-confirmation/${orderId}`;
       } else {
         setError(verifyResponse.data.error?.message || 'Payment verification failed');
       }

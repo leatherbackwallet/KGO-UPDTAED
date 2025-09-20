@@ -112,8 +112,24 @@ export interface IOrder extends Document {
     notes?: any;
     created_at?: number;
   };
+  // Additional tracking fields for better transaction monitoring
+  transactionId?: string;
+  paymentMethod?: string;
+  paymentGateway?: string;
+  currency?: string;
+  amountPaid?: number;
+  amountRefunded?: number;
+  refundStatus?: 'none' | 'partial' | 'full';
+  refundDetails?: any;
   failureReason?: string;
   stockRestored?: boolean;
+  // Webhook tracking
+  webhookReceived?: boolean;
+  webhookEvents?: Array<{
+    event: string;
+    timestamp: Date;
+    data: any;
+  }>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -302,10 +318,45 @@ const orderSchema = new Schema<IOrder>({
   paymentVerifiedAt: {
     type: Date
   },
+  // Comprehensive Razorpay transaction tracking
   razorpayPaymentDetails: {
     type: Schema.Types.Mixed
   },
   razorpayOrderDetails: {
+    type: Schema.Types.Mixed
+  },
+  // Additional tracking fields for better transaction monitoring
+  transactionId: {
+    type: String,
+    trim: true
+  },
+  paymentMethod: {
+    type: String,
+    trim: true
+  },
+  paymentGateway: {
+    type: String,
+    default: 'razorpay'
+  },
+  currency: {
+    type: String,
+    default: 'INR'
+  },
+  amountPaid: {
+    type: Number,
+    min: 0
+  },
+  amountRefunded: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  refundStatus: {
+    type: String,
+    enum: ['none', 'partial', 'full'],
+    default: 'none'
+  },
+  refundDetails: {
     type: Schema.Types.Mixed
   },
   failureReason: {
@@ -314,7 +365,17 @@ const orderSchema = new Schema<IOrder>({
   stockRestored: {
     type: Boolean,
     default: false
-  }
+  },
+  // Webhook tracking
+  webhookReceived: {
+    type: Boolean,
+    default: false
+  },
+  webhookEvents: [{
+    event: String,
+    timestamp: Date,
+    data: Schema.Types.Mixed
+  }]
 }, {
   timestamps: true
 });

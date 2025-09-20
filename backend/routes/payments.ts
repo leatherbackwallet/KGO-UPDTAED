@@ -244,20 +244,33 @@ router.post('/verify', auth, ensureDatabaseConnection, validatePaymentVerificati
         const paymentDetails = await paymentService.getPaymentDetails(razorpay_payment_id);
         const orderDetails = await paymentService.getOrderDetails(razorpay_order_id);
 
-        // Update order status with proper payment verification
+        // Extract comprehensive transaction details
+        const transactionData = {
+            orderStatus: 'payment_done', // Only set to payment_done after successful verification
+            paymentStatus: 'captured', // Set payment status to captured
+            razorpayPaymentId: razorpay_payment_id,
+            razorpaySignature: razorpay_signature,
+            paymentDate: new Date(),
+            paymentVerifiedAt: new Date(),
+            // Store detailed Razorpay information
+            razorpayPaymentDetails: paymentDetails,
+            razorpayOrderDetails: orderDetails,
+            // Additional tracking fields
+            transactionId: paymentDetails.id || razorpay_payment_id,
+            paymentMethod: paymentDetails.method || 'unknown',
+            paymentGateway: 'razorpay',
+            currency: paymentDetails.currency || 'INR',
+            amountPaid: paymentDetails.amount ? paymentDetails.amount / 100 : 0, // Convert from paise
+            amountRefunded: 0,
+            refundStatus: 'none',
+            webhookReceived: false,
+            webhookEvents: []
+        };
+
+        // Update order status with comprehensive payment verification
         const order = await Order.findOneAndUpdate(
             { razorpayOrderId: razorpay_order_id },
-            {
-                orderStatus: 'payment_done', // Only set to payment_done after successful verification
-                paymentStatus: 'captured', // Set payment status to captured
-                razorpayPaymentId: razorpay_payment_id,
-                razorpaySignature: razorpay_signature,
-                paymentDate: new Date(),
-                paymentVerifiedAt: new Date(),
-                // Store detailed Razorpay information
-                razorpayPaymentDetails: paymentDetails,
-                razorpayOrderDetails: orderDetails
-            },
+            transactionData,
             { new: true }
         );
 
@@ -349,19 +362,37 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req: R
 // Helper function to handle payment captured event
 async function handlePaymentCaptured(payment: any) {
     try {
+        const webhookEvent = {
+            event: 'payment.captured',
+            timestamp: new Date(),
+            data: payment
+        };
+
         const order = await Order.findOneAndUpdate(
             { razorpayPaymentId: payment.id },
             {
-                status: 'confirmed',
-                paymentStatus: 'captured',
-                paymentDate: new Date(),
-                razorpayPaymentDetails: payment
+                $set: {
+                    orderStatus: 'payment_done',
+                    paymentStatus: 'captured',
+                    paymentDate: new Date(),
+                    razorpayPaymentDetails: payment,
+                    transactionId: payment.id,
+                    paymentMethod: payment.method || 'unknown',
+                    paymentGateway: 'razorpay',
+                    currency: payment.currency || 'INR',
+                    amountPaid: payment.amount ? payment.amount / 100 : 0,
+                    webhookReceived: true
+                },
+                $push: {
+                    webhookEvents: webhookEvent
+                }
             },
             { new: true }
         );
 
         if (order) {
             console.log(`Payment captured for order: ${order._id}`);
+            console.log(`Transaction ID: ${payment.id}, Amount: ₹${payment.amount ? payment.amount / 100 : 0}`);
             
             // Update product stock
             for (const item of order.orderItems) {
@@ -379,23 +410,42 @@ async function handlePaymentCaptured(payment: any) {
 // Helper function to handle payment failed event
 async function handlePaymentFailed(payment: any) {
     try {
+        const webhookEvent = {
+            event: 'payment.failed',
+            timestamp: new Date(),
+            data: payment
+        };
+
         const order = await Order.findOneAndUpdate(
             { razorpayPaymentId: payment.id },
             {
-                status: 'failed',
-                paymentStatus: 'failed',
-                paymentDate: new Date(),
-                razorpayPaymentDetails: payment,
-                // Add failure reason for better tracking
-                failureReason: payment.error_code || payment.error_description || 'Payment failed',
-                // Restore stock if it was decremented
-                stockRestored: false
+                $set: {
+                    orderStatus: 'cancelled',
+                    paymentStatus: 'failed',
+                    paymentDate: new Date(),
+                    razorpayPaymentDetails: payment,
+                    // Add failure reason for better tracking
+                    failureReason: payment.error_code || payment.error_description || 'Payment failed',
+                    // Additional tracking fields
+                    transactionId: payment.id,
+                    paymentMethod: payment.method || 'unknown',
+                    paymentGateway: 'razorpay',
+                    currency: payment.currency || 'INR',
+                    amountPaid: 0,
+                    webhookReceived: true,
+                    // Restore stock if it was decremented
+                    stockRestored: false
+                },
+                $push: {
+                    webhookEvents: webhookEvent
+                }
             },
             { new: true }
         );
 
         if (order) {
             console.log(`Payment failed for order: ${order._id}, Reason: ${payment.error_code || 'Unknown'}`);
+            console.log(`Transaction ID: ${payment.id}, Error: ${payment.error_description || 'Unknown error'}`);
             
             // Restore product stock if it was decremented
             if (!order.stockRestored) {

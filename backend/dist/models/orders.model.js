@@ -219,10 +219,45 @@ const orderSchema = new mongoose_1.Schema({
     paymentVerifiedAt: {
         type: Date
     },
+    // Comprehensive Razorpay transaction tracking
     razorpayPaymentDetails: {
         type: mongoose_1.Schema.Types.Mixed
     },
     razorpayOrderDetails: {
+        type: mongoose_1.Schema.Types.Mixed
+    },
+    // Additional tracking fields for better transaction monitoring
+    transactionId: {
+        type: String,
+        trim: true
+    },
+    paymentMethod: {
+        type: String,
+        trim: true
+    },
+    paymentGateway: {
+        type: String,
+        default: 'razorpay'
+    },
+    currency: {
+        type: String,
+        default: 'INR'
+    },
+    amountPaid: {
+        type: Number,
+        min: 0
+    },
+    amountRefunded: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
+    refundStatus: {
+        type: String,
+        enum: ['none', 'partial', 'full'],
+        default: 'none'
+    },
+    refundDetails: {
         type: mongoose_1.Schema.Types.Mixed
     },
     failureReason: {
@@ -231,7 +266,17 @@ const orderSchema = new mongoose_1.Schema({
     stockRestored: {
         type: Boolean,
         default: false
-    }
+    },
+    // Webhook tracking
+    webhookReceived: {
+        type: Boolean,
+        default: false
+    },
+    webhookEvents: [{
+            event: String,
+            timestamp: Date,
+            data: mongoose_1.Schema.Types.Mixed
+        }]
 }, {
     timestamps: true
 });
