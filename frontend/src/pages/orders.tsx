@@ -40,6 +40,7 @@ interface Order {
   items: OrderItem[];
   totalAmount: number;
   status: string;
+  paymentMethod?: string;
   recipientAddress: RecipientAddress;
   statusHistory?: Array<{
     status: string;
@@ -230,6 +231,11 @@ const OrdersPage: React.FC = () => {
                         <p className="text-lg font-semibold text-gray-900">
                           Total: ₹{order.totalAmount.toFixed(2)}
                         </p>
+                        {order.paymentMethod && (
+                          <p className="text-sm text-gray-600 mt-1">
+                            Payment: {order.paymentMethod === 'cod-test' ? 'COD (Cash on Delivery)' : 'Online Payment'}
+                          </p>
+                        )}
                         <OrderStatusTimeline currentStatus={order.status} statusHistory={order.statusHistory || []} />
                       </div>
                     </div>

@@ -95,6 +95,20 @@ let featureFlags: any = {
         createdAt: new Date(),
         lastModified: new Date()
       }
+    },
+    'cod-payment': {
+      name: 'cod-payment',
+      enabled: true,
+      rolloutPercentage: 100,
+      conditions: {
+        environment: ['development']
+      },
+      metadata: {
+        description: 'Cash on Delivery payment option (Development Only)',
+        owner: 'payment-team',
+        createdAt: new Date(),
+        lastModified: new Date()
+      }
     }
   },
   defaultEnabled: false,

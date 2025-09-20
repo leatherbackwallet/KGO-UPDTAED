@@ -5,6 +5,7 @@ export interface JWTPayload {
   id: string;
   email: string;
   roleId: string;
+  roleName: string;
   firstName: string;
   lastName: string;
   type: 'access' | 'refresh';

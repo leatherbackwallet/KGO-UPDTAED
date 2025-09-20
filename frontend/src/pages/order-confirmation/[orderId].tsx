@@ -80,24 +80,29 @@ interface Order {
 const OrderConfirmationPage: React.FC = () => {
   const router = useRouter();
   const { orderId } = router.query;
-  const { user } = useAuth();
+  const { user, tokens } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    if (orderId && user) {
+    if (orderId) {
       fetchOrderDetails();
     }
-  }, [orderId, user]);
+  }, [orderId]);
 
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/orders/${orderId}`, {
-        headers: { Authorization: `Bearer ${user?.accessToken}` }
-      });
+      const headers: any = {};
+      
+      // Add authorization header if user is authenticated
+      if (tokens?.accessToken) {
+        headers.Authorization = `Bearer ${tokens.accessToken}`;
+      }
+      
+      const response = await api.get(`/orders/${orderId}`, { headers });
       setOrder(response.data.data.order);
     } catch (err: any) {
       console.error('Error fetching order details:', err);
@@ -110,10 +115,14 @@ const OrderConfirmationPage: React.FC = () => {
   const handleDownloadReceipt = async () => {
     try {
       setDownloading(true);
-      const response = await api.get(`/orders/${orderId}/receipt`, {
-        headers: { Authorization: `Bearer ${user?.accessToken}` },
-        responseType: 'blob'
-      });
+      const headers: any = { responseType: 'blob' };
+      
+      // Add authorization header if user is authenticated
+      if (tokens?.accessToken) {
+        headers.Authorization = `Bearer ${tokens.accessToken}`;
+      }
+      
+      const response = await api.get(`/orders/${orderId}/receipt`, headers);
 
       // Create blob link to download file
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -181,7 +190,13 @@ const OrderConfirmationPage: React.FC = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Order Not Found</h2>
           <p className="text-gray-600 mb-4">{error || 'The order you are looking for does not exist.'}</p>
-          <a href="/orders" className="text-blue-600 hover:text-blue-800">View All Orders</a>
+          <div className="space-x-4">
+            {user ? (
+              <a href="/orders" className="text-blue-600 hover:text-blue-800">View All Orders</a>
+            ) : (
+              <a href="/" className="text-blue-600 hover:text-blue-800">Go Home</a>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -294,15 +309,15 @@ const OrderConfirmationPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-700">Payment Method</p>
-                    <p className="text-sm text-gray-900 capitalize">{order.transactionSummary.paymentMethod}</p>
+                    <p className="text-sm text-gray-900 capitalize">{order.transactionSummary?.paymentMethod || 'Unknown'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-700">Payment Status</p>
-                    <p className="text-sm text-green-600 font-semibold capitalize">{order.transactionSummary.paymentStatus}</p>
+                    <p className="text-sm text-green-600 font-semibold capitalize">{order.transactionSummary?.paymentStatus || 'Unknown'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-700">Amount Paid</p>
-                    <p className="text-sm text-gray-900">₹{order.transactionSummary.amountPaid.toFixed(2)}</p>
+                    <p className="text-sm text-gray-900">₹{order.transactionSummary?.amountPaid?.toFixed(2) || order.totalPrice?.toFixed(2) || '0.00'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-700">Payment Date</p>

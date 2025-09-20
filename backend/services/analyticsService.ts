@@ -8,6 +8,7 @@ import { User, IUser } from '../models/users.model';
 import { Product, IProduct } from '../models/products.model';
 import { Order, IOrder } from '../models/orders.model';
 import { UserPreferences, IUserPreferences } from '../models/userPreferences.model';
+import { Role } from '../models/roles.model';
 import { Subscription, SubscriptionTier } from '../models/subscriptions.model';
 import { Vendor, IVendor } from '../models/vendors.model';
 import { Review, IReview } from '../models/reviews.model';
@@ -95,13 +96,17 @@ class AnalyticsService {
    * Generate customer analytics
    */
   private async generateCustomerAnalytics(startDate: Date, endDate: Date) {
+    // Get admin role ID to exclude from customer count
+    const adminRole = await Role.findOne({ name: 'admin' });
+    const adminRoleId = adminRole?._id;
+
     const totalCustomers = await User.countDocuments({
-      roleId: { $ne: 'admin' },
+      ...(adminRoleId && { roleId: { $ne: adminRoleId } }),
       createdAt: { $lte: endDate }
     });
 
     const newCustomers = await User.countDocuments({
-      roleId: { $ne: 'admin' },
+      ...(adminRoleId && { roleId: { $ne: adminRoleId } }),
       createdAt: { $gte: startDate, $lte: endDate }
     });
 
@@ -312,8 +317,12 @@ class AnalyticsService {
   }
 
   private async calculateChurnRate(startDate: Date, endDate: Date): Promise<number> {
+    // Get admin role ID to exclude from customer count
+    const adminRole = await Role.findOne({ name: 'admin' });
+    const adminRoleId = adminRole?._id;
+
     const totalCustomers = await User.countDocuments({
-      roleId: { $ne: 'admin' },
+      ...(adminRoleId && { roleId: { $ne: adminRoleId } }),
       createdAt: { $lte: startDate }
     });
 

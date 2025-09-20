@@ -9,11 +9,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const users_model_1 = require("../models/users.model");
+const roles_model_1 = require("../models/roles.model");
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
+const apiSecurity_1 = require("../middleware/apiSecurity");
 const router = express_1.default.Router();
 // Get all users (admin only)
-router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
+router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), apiSecurity_1.validateAdminSession, apiSecurity_1.adminRateLimit, (0, apiSecurity_1.logSecurityEvent)('USER_LIST_ACCESS'), async (req, res) => {
     try {
         const users = await users_model_1.User.find({}, '-password').populate('roleId');
         res.json(users);
@@ -25,7 +27,13 @@ router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) 
 // Grant admin
 router.put('/:id/grant', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
-        const user = await users_model_1.User.findByIdAndUpdate(req.params.id, { roleId: 'admin' }, { new: true });
+        // Find the admin role first
+        const adminRole = await roles_model_1.Role.findOne({ name: 'admin' });
+        if (!adminRole) {
+            res.status(500).json({ message: 'Admin role not found' });
+            return;
+        }
+        const user = await users_model_1.User.findByIdAndUpdate(req.params.id, { roleId: adminRole._id }, { new: true });
         if (!user) {
             res.status(404).json({ message: 'User not found' });
             return;
@@ -39,7 +47,13 @@ router.put('/:id/grant', auth_1.auth, (0, role_1.requireRole)('admin'), async (r
 // Revoke admin
 router.put('/:id/revoke', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
-        const user = await users_model_1.User.findByIdAndUpdate(req.params.id, { roleId: 'user' }, { new: true });
+        // Find the customer role first
+        const customerRole = await roles_model_1.Role.findOne({ name: 'customer' });
+        if (!customerRole) {
+            res.status(500).json({ message: 'Customer role not found' });
+            return;
+        }
+        const user = await users_model_1.User.findByIdAndUpdate(req.params.id, { roleId: customerRole._id }, { new: true });
         if (!user) {
             res.status(404).json({ message: 'User not found' });
             return;

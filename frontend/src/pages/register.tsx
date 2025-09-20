@@ -66,8 +66,15 @@ export default function Register() {
       return false;
     }
     
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return false;
+    }
+    
+    // Password complexity validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    if (!passwordRegex.test(password)) {
+      setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
       return false;
     }
     

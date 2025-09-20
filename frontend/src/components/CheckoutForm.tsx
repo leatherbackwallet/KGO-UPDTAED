@@ -44,6 +44,7 @@ export default function CheckoutForm() {
   const [showPreviousRecipients, setShowPreviousRecipients] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPayment, setShowPayment] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('razorpay');
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -61,7 +62,8 @@ export default function CheckoutForm() {
       });
       
       // Extract unique recipients from previous orders
-      const recipients = res.data
+      const orders = res.data.data || res.data || [];
+      const recipients = orders
         .filter((order: any) => order.shippingDetails)
         .map((order: any) => order.shippingDetails)
         .filter((recipient: OrderRecipient, index: number, self: OrderRecipient[]) => 
@@ -104,7 +106,58 @@ export default function CheckoutForm() {
     }
 
     try {
-      // Create payment order
+      // Handle COD payment (development only)
+      if (paymentMethod === 'cod-test') {
+        if (process.env.NODE_ENV !== 'development') {
+          setError('COD payment is only available in development environment');
+          setLoading(false);
+          return;
+        }
+
+        // Create COD order directly
+        const codOrderResponse = await api.post('/orders', {
+          products: cart.map(item => ({
+            product: item.product,
+            quantity: item.quantity,
+            // Include combo-specific fields if it's a combo product
+            ...(item.isCombo && {
+              isCombo: item.isCombo,
+              comboBasePrice: item.comboBasePrice,
+              comboItemConfigurations: item.comboItemConfigurations
+            })
+          })),
+          recipientAddress: {
+            name: selectedRecipientAddress.name,
+            phone: selectedRecipientAddress.phone,
+            address: selectedRecipientAddress.address,
+            additionalInstructions: selectedRecipientAddress.additionalInstructions
+          },
+          paymentMethod: 'cod-test'
+        }, {
+          headers: { Authorization: `Bearer ${tokens?.accessToken}` }
+        });
+
+        if (codOrderResponse.data.success) {
+          setSuccess('COD order placed successfully! You will receive a confirmation shortly.');
+          
+          // Clear cart and localStorage only after successful order
+          clearCart();
+          localStorage.removeItem('cart');
+          localStorage.removeItem('wishlist');
+          
+          // Redirect to order confirmation page with order ID
+          const orderId = codOrderResponse.data.data.order.id;
+          setTimeout(() => {
+            window.location.href = `/order-confirmation/${orderId}`;
+          }, 2000);
+        } else {
+          setError(codOrderResponse.data.error?.message || 'Failed to create COD order');
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Create payment order for Razorpay
       const response = await api.post('/payments/create-order', {
         products: cart.map(item => ({
           product: item.product,
@@ -328,6 +381,44 @@ export default function CheckoutForm() {
               <span className="text-lg font-bold text-gray-900">Total:</span>
               <span className="text-xl font-bold text-blue-600">₹{subtotal.toFixed(2)}</span>
             </div>
+          </div>
+        </div>
+
+        {/* Payment Method Selection */}
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <h3 className="text-lg font-semibold mb-3 text-gray-900">💳 Payment Method</h3>
+          <div className="space-y-3">
+            <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="razorpay"
+                checked={paymentMethod === 'razorpay'}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="text-blue-600 focus:ring-blue-500"
+              />
+              <div className="flex-1">
+                <div className="font-medium text-gray-900">Razorpay (Credit/Debit Card)</div>
+                <div className="text-sm text-gray-500">Secure online payment</div>
+              </div>
+            </label>
+            
+            {process.env.NODE_ENV === 'development' && (
+              <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="cod-test"
+                  checked={paymentMethod === 'cod-test'}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="text-blue-600 focus:ring-blue-500"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900">COD-TEST (Development Only)</div>
+                  <div className="text-sm text-gray-500">Cash on Delivery - Payment collected on delivery</div>
+                </div>
+              </label>
+            )}
           </div>
         </div>
 

@@ -18,9 +18,13 @@ import { validatePaymentResponse } from '../utils/razorpay';
 type TabType = 'login' | 'guest';
 
 interface GuestFormData {
-  name: string;
-  email: string;
-  phone: string;
+  // Sender Information (User placing the order)
+  senderName: string;
+  senderEmail: string;
+  senderPhone: string;
+  // Recipient Information (Person receiving the gift)
+  recipientName: string;
+  recipientPhone: string;
   deliveryAddress: {
     street: string;
     houseNumber: string;
@@ -29,6 +33,7 @@ interface GuestFormData {
     zipCode: string;
     country: string;
   };
+  specialInstructions?: string;
   paymentMethod: string;
 }
 
@@ -38,10 +43,25 @@ interface LoginFormData {
 }
 
 interface RegisterFormData {
-  name: string;
+  // User Account Information
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
+  confirmPassword?: string;
   phone: string;
+  // User's Address (for billing/account purposes)
+  userAddress: {
+    street: string;
+    houseNumber: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+  // Recipient Information (Person receiving the gift)
+  recipientName: string;
+  recipientPhone: string;
   deliveryAddress: {
     street: string;
     houseNumber: string;
@@ -50,6 +70,7 @@ interface RegisterFormData {
     zipCode: string;
     country: string;
   };
+  specialInstructions?: string;
 }
 
 interface RecipientAddress {
@@ -114,7 +135,8 @@ export default function Checkout() {
       });
       
       // Extract unique recipients from previous orders
-      const recipients = res.data
+      const orders = res.data.data || res.data || [];
+      const recipients = orders
         .filter((order: any) => order.shippingDetails)
         .map((order: any) => order.shippingDetails)
         .filter((recipient: OrderRecipient, index: number, self: OrderRecipient[]) => 
@@ -146,9 +168,11 @@ export default function Checkout() {
 
   // Form data
   const [guestData, setGuestData] = useState<GuestFormData>({
-    name: '',
-    email: '',
-    phone: '',
+    senderName: '',
+    senderEmail: '',
+    senderPhone: '',
+    recipientName: '',
+    recipientPhone: '',
     deliveryAddress: {
       street: '',
       houseNumber: '',
@@ -157,6 +181,7 @@ export default function Checkout() {
       zipCode: '',
       country: 'India'
     },
+    specialInstructions: '',
     paymentMethod: 'razorpay'
   });
 
@@ -166,10 +191,21 @@ export default function Checkout() {
   });
 
   const [registerData, setRegisterData] = useState<RegisterFormData>({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     phone: '',
+    userAddress: {
+      street: '',
+      houseNumber: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'India'
+    },
+    recipientName: '',
+    recipientPhone: '',
     deliveryAddress: {
       street: '',
       houseNumber: '',
@@ -177,7 +213,8 @@ export default function Checkout() {
       state: '',
       zipCode: '',
       country: 'India'
-    }
+    },
+    specialInstructions: ''
   });
 
   // Redirect if cart is empty
@@ -265,7 +302,7 @@ export default function Checkout() {
         setSelectedRecipientAddress(null);
         setShowPayment(false);
         setPaymentData(null);
-        setGuestTokens(null); // Clear guest tokens
+        // Don't clear guest tokens immediately - keep them for order confirmation
         
         // Redirect to order confirmation page with order ID
         const orderId = verifyResponse.data.data.orderId;
@@ -344,29 +381,138 @@ export default function Checkout() {
     setLoading(true);
 
     try {
+      // Validate guest form data
+      if (!guestData.senderName.trim()) {
+        setError('Your name is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!guestData.senderEmail.trim()) {
+        setError('Your email is required');
+        setLoading(false);
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(guestData.senderEmail)) {
+        setError('Please enter a valid email address');
+        setLoading(false);
+        return;
+      }
+
+      if (!guestData.senderPhone.trim()) {
+        setError('Your phone number is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!guestData.recipientName.trim()) {
+        setError('Recipient name is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!guestData.recipientPhone.trim()) {
+        setError('Recipient phone number is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!guestData.deliveryAddress.street.trim() || !guestData.deliveryAddress.houseNumber.trim() || 
+          !guestData.deliveryAddress.city.trim() || !guestData.deliveryAddress.state.trim() || 
+          !guestData.deliveryAddress.zipCode.trim()) {
+        setError('Delivery address information is required');
+        setLoading(false);
+        return;
+      }
       // Create guest user - transform data to match backend expectations
       const guestAuthData = {
-        fullName: guestData.name,
-        email: guestData.email,
-        phone: guestData.phone,
+        fullName: guestData.senderName,
+        email: guestData.senderEmail,
+        phone: guestData.senderPhone,
         address: {
-          streetName: guestData.deliveryAddress.street,
+          streetName: guestData.deliveryAddress.street, // This will be updated to user's address later
           houseNumber: guestData.deliveryAddress.houseNumber,
           city: guestData.deliveryAddress.city,
           postalCode: guestData.deliveryAddress.zipCode,
           countryCode: guestData.deliveryAddress.country || 'IN'
-        }
+        },
+        recipientName: guestData.recipientName,
+        recipientPhone: guestData.recipientPhone,
+        deliveryAddress: {
+          street: guestData.deliveryAddress.street,
+          houseNumber: guestData.deliveryAddress.houseNumber,
+          city: guestData.deliveryAddress.city,
+          state: guestData.deliveryAddress.state,
+          zipCode: guestData.deliveryAddress.zipCode,
+          country: guestData.deliveryAddress.country || 'IN'
+        },
+        specialInstructions: guestData.specialInstructions
       };
       
       const guestResponse = await api.post('/auth/guest', guestAuthData);
       const data = guestResponse.data as { data: { tokens: any; user: any } };
       const { tokens: guestTokens, user: guestUser } = data.data;
       
-      // Store guest tokens for payment verification
+      // Store guest tokens in AuthContext for persistence
+      login(guestTokens, guestUser);
       setGuestTokens(guestTokens);
 
       // Merge guest data with existing cart/wishlist
       await mergeGuestData(guestTokens.accessToken);
+
+      // Handle COD payment
+      if (guestData.paymentMethod === 'cod-test' || guestData.paymentMethod === 'cod') {
+
+        // Create COD order directly
+        const codOrderResponse = await api.post('/orders', {
+          products: cart.map(item => ({
+            product: item.product,
+            quantity: item.quantity,
+            // Include combo-specific fields if it's a combo product
+            ...(item.isCombo && {
+              isCombo: item.isCombo,
+              comboBasePrice: item.comboBasePrice,
+              comboItemConfigurations: item.comboItemConfigurations
+            })
+          })),
+          recipientAddress: {
+            name: guestData.recipientName,
+            phone: guestData.recipientPhone,
+            address: {
+              streetName: guestData.deliveryAddress.street,
+              houseNumber: guestData.deliveryAddress.houseNumber,
+              postalCode: guestData.deliveryAddress.zipCode,
+              city: guestData.deliveryAddress.city,
+              countryCode: guestData.deliveryAddress.country || 'IN'
+            },
+            specialInstructions: guestData.specialInstructions
+          },
+          paymentMethod: guestData.paymentMethod
+        }, {
+          headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
+        });
+
+        if (codOrderResponse.data.success) {
+          setSuccess('COD order placed successfully! You will receive a confirmation shortly.');
+          
+          // Clear cart and localStorage only after successful order
+          clearCart();
+          localStorage.removeItem('cart');
+          localStorage.removeItem('wishlist');
+          
+          // Redirect to order confirmation page with order ID
+          const orderId = codOrderResponse.data.data.order.id;
+          setTimeout(() => {
+            router.push(`/order-confirmation/${orderId}`);
+          }, 2000);
+        } else {
+          setError(codOrderResponse.data.error?.message || 'Failed to create COD order');
+        }
+        setLoading(false);
+        return;
+      }
 
       // Create payment order for Razorpay with timeout
       const paymentResponse = await Promise.race([
@@ -382,15 +528,16 @@ export default function Checkout() {
             })
           })),
           recipientAddress: {
-            name: guestData.name,
-            phone: guestData.phone,
+            name: guestData.recipientName,
+            phone: guestData.recipientPhone,
             address: {
               streetName: guestData.deliveryAddress.street,
               houseNumber: guestData.deliveryAddress.houseNumber,
               postalCode: guestData.deliveryAddress.zipCode,
               city: guestData.deliveryAddress.city,
               countryCode: guestData.deliveryAddress.country || 'IN'
-            }
+            },
+            specialInstructions: guestData.specialInstructions
           }
         }, {
           headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
@@ -454,10 +601,7 @@ export default function Checkout() {
       // Refresh cart to ensure it's up to date
       refreshCart();
       
-      // Redirect to order confirmation
-      setTimeout(() => {
-        router.push('/orders');
-      }, 2000);
+      // Stay on checkout page - no redirect needed
     } catch (err: any) {
       setError(err.response?.data?.error?.message || 'Login failed');
     } finally {
@@ -467,12 +611,118 @@ export default function Checkout() {
 
   // Handle register
   const handleRegister = async (e: React.FormEvent) => {
+    console.log('handleRegister called', { e, registerData });
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/register', registerData);
+      // Validate registration data
+      if (!registerData.firstName.trim() || !registerData.lastName.trim()) {
+        setError('First name and last name are required');
+        setLoading(false);
+        return;
+      }
+      
+      if (!registerData.email.trim()) {
+        setError('Email is required');
+        setLoading(false);
+        return;
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(registerData.email)) {
+        setError('Please enter a valid email address');
+        setLoading(false);
+        return;
+      }
+      
+      if (!registerData.phone.trim()) {
+        setError('Phone number is required');
+        setLoading(false);
+        return;
+      }
+      
+      if (!registerData.password) {
+        setError('Password is required');
+        setLoading(false);
+        return;
+      }
+      
+      // Password complexity validation (simplified for testing)
+      if (registerData.password.length < 6) {
+        setError('Password must be at least 6 characters long');
+        setLoading(false);
+        return;
+      }
+
+      // Confirm password validation
+      if (registerData.confirmPassword && registerData.password !== registerData.confirmPassword) {
+        setError('Passwords do not match');
+        setLoading(false);
+        return;
+      }
+
+      // Validate recipient information
+      if (!registerData.recipientName.trim()) {
+        setError('Recipient name is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!registerData.recipientPhone.trim()) {
+        setError('Recipient phone number is required');
+        setLoading(false);
+        return;
+      }
+
+      // Validate user address
+      if (!registerData.userAddress.street.trim() || !registerData.userAddress.houseNumber.trim() || 
+          !registerData.userAddress.city.trim() || !registerData.userAddress.state.trim() || 
+          !registerData.userAddress.zipCode.trim()) {
+        setError('Your address information is required');
+        setLoading(false);
+        return;
+      }
+
+      // Validate delivery address
+      if (!registerData.deliveryAddress.street.trim() || !registerData.deliveryAddress.houseNumber.trim() || 
+          !registerData.deliveryAddress.city.trim() || !registerData.deliveryAddress.state.trim() || 
+          !registerData.deliveryAddress.zipCode.trim()) {
+        setError('Delivery address information is required');
+        setLoading(false);
+        return;
+      }
+      
+      // Send registration data with address information
+      const registrationData = {
+        firstName: registerData.firstName.trim(),
+        lastName: registerData.lastName.trim(),
+        email: registerData.email.trim().toLowerCase(),
+        password: registerData.password,
+        phone: registerData.phone.trim(),
+        userAddress: {
+          street: registerData.userAddress.street,
+          houseNumber: registerData.userAddress.houseNumber,
+          city: registerData.userAddress.city,
+          state: registerData.userAddress.state,
+          zipCode: registerData.userAddress.zipCode,
+          country: registerData.userAddress.country || 'IN'
+        },
+        recipientName: registerData.recipientName,
+        recipientPhone: registerData.recipientPhone,
+        deliveryAddress: {
+          street: registerData.deliveryAddress.street,
+          houseNumber: registerData.deliveryAddress.houseNumber,
+          city: registerData.deliveryAddress.city,
+          state: registerData.deliveryAddress.state,
+          zipCode: registerData.deliveryAddress.zipCode,
+          country: registerData.deliveryAddress.country || 'IN'
+        },
+        specialInstructions: registerData.specialInstructions
+      };
+      
+      const response = await api.post('/auth/register', registrationData);
       const data = response.data as { data: { tokens: any; user: any } };
       const { tokens: registerTokens, user: registerUser } = data.data;
       
@@ -486,10 +736,7 @@ export default function Checkout() {
       // Refresh cart to ensure it's up to date
       refreshCart();
       
-      // Redirect to order confirmation
-      setTimeout(() => {
-        router.push('/orders');
-      }, 2000);
+      // Stay on checkout page - no redirect needed
     } catch (err: any) {
       setError(err.response?.data?.error?.message || 'Registration failed');
     } finally {
@@ -611,7 +858,7 @@ export default function Checkout() {
           <div className="bg-white p-6 rounded-lg shadow-sm border">
             <h2 className="text-xl font-semibold mb-4">Payment & Delivery</h2>
             
-            {isAuthenticated ? (
+            {isAuthenticated && activeTab !== 'guest' ? (
               // Authenticated user - show recipient selection and payment
               <div>
                 {/* Recipient Address Selection */}
@@ -724,6 +971,10 @@ export default function Checkout() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
                       >
                         <option value="razorpay">Razorpay (Credit/Debit Card)</option>
+                        <option value="cod">Cash on Delivery (COD)</option>
+                        {process.env.NODE_ENV === 'development' && (
+                          <option value="cod-test">COD-TEST (Development Only)</option>
+                        )}
                       </select>
                     </div>
                     
@@ -758,6 +1009,232 @@ export default function Checkout() {
                     </div>
                   </div>
                 )}
+                
+                {/* Guest Checkout Option for Authenticated Users */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <p className="text-sm text-gray-600 mb-3">Or continue as guest for this order:</p>
+                  <button
+                    onClick={() => setActiveTab('guest')}
+                    className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Continue as Guest
+                  </button>
+                </div>
+              </div>
+            ) : activeTab === 'guest' ? (
+              // Guest checkout form
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Guest Checkout</h3>
+                <form onSubmit={handleGuestCheckout}>
+                  <div className="space-y-6">
+                    {/* Sender Information Section */}
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="text-md font-semibold mb-3 text-blue-800">Your Information (Sender)</h4>
+                      <p className="text-sm text-blue-600 mb-4">This is your contact information for order updates and billing.</p>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Your Full Name *</label>
+                          <input
+                            type="text"
+                            value={guestData.senderName}
+                            onChange={(e) => setGuestData({...guestData, senderName: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Your Email *</label>
+                          <input
+                            type="email"
+                            value={guestData.senderEmail}
+                            onChange={(e) => setGuestData({...guestData, senderEmail: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Your Phone Number *</label>
+                          <input
+                            type="tel"
+                            value={guestData.senderPhone}
+                            onChange={(e) => setGuestData({...guestData, senderPhone: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Recipient Information Section */}
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h4 className="text-md font-semibold mb-3 text-green-800">Recipient Information</h4>
+                      <p className="text-sm text-green-600 mb-4">Who will receive this gift? This is where we'll deliver the items.</p>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Recipient's Full Name *</label>
+                          <input
+                            type="text"
+                            value={guestData.recipientName}
+                            onChange={(e) => setGuestData({...guestData, recipientName: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Recipient's Phone Number *</label>
+                          <input
+                            type="tel"
+                            value={guestData.recipientPhone}
+                            onChange={(e) => setGuestData({...guestData, recipientPhone: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Delivery Address Section */}
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <h4 className="text-md font-semibold mb-3 text-orange-800">Delivery Address</h4>
+                      <p className="text-sm text-orange-600 mb-4">Where should we deliver the gift?</p>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-1">Street Address *</label>
+                            <input
+                              type="text"
+                              value={guestData.deliveryAddress.street}
+                              onChange={(e) => {
+                                setGuestData({
+                                  ...guestData,
+                                  deliveryAddress: {
+                                    ...guestData.deliveryAddress,
+                                    street: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              placeholder="Street address"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">House/Flat Number *</label>
+                            <input
+                              type="text"
+                              value={guestData.deliveryAddress.houseNumber}
+                              onChange={(e) => {
+                                setGuestData({
+                                  ...guestData,
+                                  deliveryAddress: {
+                                    ...guestData.deliveryAddress,
+                                    houseNumber: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              placeholder="House/Flat number"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-1">City *</label>
+                            <input
+                              type="text"
+                              value={guestData.deliveryAddress.city}
+                              onChange={(e) => {
+                                setGuestData({
+                                  ...guestData,
+                                  deliveryAddress: {
+                                    ...guestData.deliveryAddress,
+                                    city: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              placeholder="City"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">State *</label>
+                            <input
+                              type="text"
+                              value={guestData.deliveryAddress.state}
+                              onChange={(e) => {
+                                setGuestData({
+                                  ...guestData,
+                                  deliveryAddress: {
+                                    ...guestData.deliveryAddress,
+                                    state: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              placeholder="State"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">ZIP Code *</label>
+                            <input
+                              type="text"
+                              value={guestData.deliveryAddress.zipCode}
+                              onChange={(e) => {
+                                setGuestData({
+                                  ...guestData,
+                                  deliveryAddress: {
+                                    ...guestData.deliveryAddress,
+                                    zipCode: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              placeholder="ZIP Code"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Special Instructions (Optional)</label>
+                          <textarea
+                            value={guestData.specialInstructions || ''}
+                            onChange={(e) => setGuestData({...guestData, specialInstructions: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            placeholder="Any special delivery instructions..."
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Payment Method */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Payment Method</label>
+                      <select 
+                        value={guestData.paymentMethod}
+                        onChange={(e) => setGuestData({...guestData, paymentMethod: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="razorpay">Razorpay (Credit/Debit Card)</option>
+                        <option value="cod">Cash on Delivery (COD)</option>
+                        {process.env.NODE_ENV === 'development' && (
+                          <option value="cod-test">COD-TEST (Development Only)</option>
+                        )}
+                      </select>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400"
+                    >
+                      {loading ? 'Processing...' : `Complete Order - ₹${total.toFixed(2)}`}
+                    </button>
+                  </div>
+                </form>
               </div>
             ) : (
               // Non-authenticated user - show authentication options
@@ -781,163 +1258,6 @@ export default function Checkout() {
                     </button>
                   </div>
                 </div>
-
-                {/* Guest Checkout Form */}
-                {activeTab === 'guest' && (
-                  <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold mb-4">Guest Checkout</h3>
-                    <form onSubmit={handleGuestCheckout}>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Full Name *</label>
-                          <input
-                            type="text"
-                            value={guestData.name}
-                            onChange={(e) => setGuestData({...guestData, name: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Email *</label>
-                          <input
-                            type="email"
-                            value={guestData.email}
-                            onChange={(e) => setGuestData({...guestData, email: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Phone Number *</label>
-                          <input
-                            type="tel"
-                            value={guestData.phone}
-                            onChange={(e) => setGuestData({...guestData, phone: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-1">Street Address *</label>
-                            <input
-                              type="text"
-                              value={guestData.deliveryAddress.street}
-                              onChange={(e) => {
-                                setGuestData({
-                                  ...guestData,
-                                  deliveryAddress: {
-                                    ...guestData.deliveryAddress,
-                                    street: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="Street address"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">House/Flat Number *</label>
-                            <input
-                              type="text"
-                              value={guestData.deliveryAddress.houseNumber}
-                              onChange={(e) => {
-                                setGuestData({
-                                  ...guestData,
-                                  deliveryAddress: {
-                                    ...guestData.deliveryAddress,
-                                    houseNumber: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="House/Flat number"
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-1">City *</label>
-                            <input
-                              type="text"
-                              value={guestData.deliveryAddress.city}
-                              onChange={(e) => {
-                                setGuestData({
-                                  ...guestData,
-                                  deliveryAddress: {
-                                    ...guestData.deliveryAddress,
-                                    city: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="City"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">State *</label>
-                            <input
-                              type="text"
-                              value={guestData.deliveryAddress.state}
-                              onChange={(e) => {
-                                setGuestData({
-                                  ...guestData,
-                                  deliveryAddress: {
-                                    ...guestData.deliveryAddress,
-                                    state: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="State"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">ZIP Code *</label>
-                            <input
-                              type="text"
-                              value={guestData.deliveryAddress.zipCode}
-                              onChange={(e) => {
-                                setGuestData({
-                                  ...guestData,
-                                  deliveryAddress: {
-                                    ...guestData.deliveryAddress,
-                                    zipCode: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="ZIP Code"
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Payment Method</label>
-                          <select 
-                            value={guestData.paymentMethod}
-                            onChange={(e) => setGuestData({...guestData, paymentMethod: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value="razorpay">Razorpay (Credit/Debit Card)</option>
-                          </select>
-                        </div>
-                        <button
-                          type="submit"
-                          disabled={loading}
-                          className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400"
-                        >
-                          {loading ? 'Processing...' : `Complete Order - ₹${total.toFixed(2)}`}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -945,8 +1265,8 @@ export default function Checkout() {
 
         {/* Authentication Modal */}
         {showAuthModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Login / Register</h2>
                 <button
@@ -968,7 +1288,17 @@ export default function Checkout() {
 
               {!isRegistering ? (
                 <form onSubmit={handleLogin}>
-                  <div className="space-y-4">
+                  <div className="space-y-4 max-w-md mx-auto">
+                    {error && (
+                      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        {error}
+                      </div>
+                    )}
+                    {success && (
+                      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                        {success}
+                      </div>
+                    )}
                     <div>
                       <label className="block text-sm font-medium mb-1">Email</label>
                       <input
@@ -1000,150 +1330,344 @@ export default function Checkout() {
                 </form>
               ) : (
                 <form onSubmit={handleRegister}>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Name</label>
-                      <input
-                        type="text"
-                        value={registerData.name}
-                        onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Email</label>
-                      <input
-                        type="email"
-                        value={registerData.email}
-                        onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Phone</label>
-                      <input
-                        type="tel"
-                        value={registerData.phone}
-                        onChange={(e) => setRegisterData({...registerData, phone: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Password</label>
-                      <input
-                        type="password"
-                        value={registerData.password}
-                        onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-6">
+                    {error && (
+                      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        {error}
+                      </div>
+                    )}
+                    {success && (
+                      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                        {success}
+                      </div>
+                    )}
+                    {/* Personal Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Personal Information</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1">First Name</label>
+                          <input
+                            type="text"
+                            value={registerData.firstName}
+                            onChange={(e) => setRegisterData({...registerData, firstName: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Last Name</label>
+                          <input
+                            type="text"
+                            value={registerData.lastName}
+                            onChange={(e) => setRegisterData({...registerData, lastName: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+                      </div>
                       <div>
-                        <label className="block text-sm font-medium mb-1">Street Address *</label>
+                        <label className="block text-sm font-medium mb-1">Email</label>
                         <input
-                          type="text"
-                          value={registerData.deliveryAddress.street}
-                          onChange={(e) => {
-                            setRegisterData({
-                              ...registerData,
-                              deliveryAddress: {
-                                ...registerData.deliveryAddress,
-                                street: e.target.value
-                              }
-                            });
-                          }}
+                          type="email"
+                          value={registerData.email}
+                          onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Street address"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-1">House/Flat Number *</label>
+                        <label className="block text-sm font-medium mb-1">Phone</label>
                         <input
-                          type="text"
-                          value={registerData.deliveryAddress.houseNumber}
-                          onChange={(e) => {
-                            setRegisterData({
-                              ...registerData,
-                              deliveryAddress: {
-                                ...registerData.deliveryAddress,
-                                houseNumber: e.target.value
-                              }
-                            });
-                          }}
+                          type="tel"
+                          value={registerData.phone}
+                          onChange={(e) => setRegisterData({...registerData, phone: e.target.value})}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="House/Flat number"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Password</label>
+                        <input
+                          type="password"
+                          value={registerData.password}
+                          onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Confirm Password</label>
+                        <input
+                          type="password"
+                          value={registerData.confirmPassword || ''}
+                          onChange={(e) => setRegisterData({...registerData, confirmPassword: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           required
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">City *</label>
-                        <input
-                          type="text"
-                          value={registerData.deliveryAddress.city}
-                          onChange={(e) => {
-                            setRegisterData({
-                              ...registerData,
-                              deliveryAddress: {
-                                ...registerData.deliveryAddress,
-                                city: e.target.value
-                              }
-                            });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="City"
-                          required
-                        />
+                    
+                    {/* User Address Section */}
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="text-md font-semibold mb-3 text-blue-800">Your Address (for billing/account)</h4>
+                      <p className="text-sm text-blue-600 mb-4">This is your personal address for account purposes.</p>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-1">Street Address *</label>
+                            <input
+                              type="text"
+                              value={registerData.userAddress.street}
+                              onChange={(e) => {
+                                setRegisterData({
+                                  ...registerData,
+                                  userAddress: {
+                                    ...registerData.userAddress,
+                                    street: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Your street address"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">House/Flat Number *</label>
+                            <input
+                              type="text"
+                              value={registerData.userAddress.houseNumber}
+                              onChange={(e) => {
+                                setRegisterData({
+                                  ...registerData,
+                                  userAddress: {
+                                    ...registerData.userAddress,
+                                    houseNumber: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Your house/flat number"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-1">City *</label>
+                            <input
+                              type="text"
+                              value={registerData.userAddress.city}
+                              onChange={(e) => {
+                                setRegisterData({
+                                  ...registerData,
+                                  userAddress: {
+                                    ...registerData.userAddress,
+                                    city: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Your city"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">State *</label>
+                            <input
+                              type="text"
+                              value={registerData.userAddress.state}
+                              onChange={(e) => {
+                                setRegisterData({
+                                  ...registerData,
+                                  userAddress: {
+                                    ...registerData.userAddress,
+                                    state: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Your state"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">ZIP Code *</label>
+                            <input
+                              type="text"
+                              value={registerData.userAddress.zipCode}
+                              onChange={(e) => {
+                                setRegisterData({
+                                  ...registerData,
+                                  userAddress: {
+                                    ...registerData.userAddress,
+                                    zipCode: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Your ZIP code"
+                              required
+                            />
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">State *</label>
-                        <input
-                          type="text"
-                          value={registerData.deliveryAddress.state}
-                          onChange={(e) => {
-                            setRegisterData({
-                              ...registerData,
-                              deliveryAddress: {
-                                ...registerData.deliveryAddress,
-                                state: e.target.value
-                              }
-                            });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="State"
-                          required
-                        />
+                    </div>
+
+                    {/* Recipient Information Section */}
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h4 className="text-md font-semibold mb-3 text-green-800">Recipient Information</h4>
+                      <p className="text-sm text-green-600 mb-4">Who will receive this gift? This is where we'll deliver the items.</p>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Recipient's Full Name *</label>
+                          <input
+                            type="text"
+                            value={registerData.recipientName}
+                            onChange={(e) => setRegisterData({...registerData, recipientName: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Recipient's Phone Number *</label>
+                          <input
+                            type="tel"
+                            value={registerData.recipientPhone}
+                            onChange={(e) => setRegisterData({...registerData, recipientPhone: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            required
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">ZIP Code *</label>
-                        <input
-                          type="text"
-                          value={registerData.deliveryAddress.zipCode}
-                          onChange={(e) => {
-                            setRegisterData({
-                              ...registerData,
-                              deliveryAddress: {
-                                ...registerData.deliveryAddress,
-                                zipCode: e.target.value
-                              }
-                            });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="ZIP Code"
-                          required
-                        />
+                    </div>
+
+                    {/* Delivery Address Section */}
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <h4 className="text-md font-semibold mb-3 text-orange-800">Delivery Address</h4>
+                      <p className="text-sm text-orange-600 mb-4">Where should we deliver the gift?</p>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-1">Street Address *</label>
+                            <input
+                              type="text"
+                              value={registerData.deliveryAddress.street}
+                              onChange={(e) => {
+                                setRegisterData({
+                                  ...registerData,
+                                  deliveryAddress: {
+                                    ...registerData.deliveryAddress,
+                                    street: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              placeholder="Delivery street address"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">House/Flat Number *</label>
+                            <input
+                              type="text"
+                              value={registerData.deliveryAddress.houseNumber}
+                              onChange={(e) => {
+                                setRegisterData({
+                                  ...registerData,
+                                  deliveryAddress: {
+                                    ...registerData.deliveryAddress,
+                                    houseNumber: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              placeholder="Delivery house/flat number"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-1">City *</label>
+                            <input
+                              type="text"
+                              value={registerData.deliveryAddress.city}
+                              onChange={(e) => {
+                                setRegisterData({
+                                  ...registerData,
+                                  deliveryAddress: {
+                                    ...registerData.deliveryAddress,
+                                    city: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              placeholder="Delivery city"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">State *</label>
+                            <input
+                              type="text"
+                              value={registerData.deliveryAddress.state}
+                              onChange={(e) => {
+                                setRegisterData({
+                                  ...registerData,
+                                  deliveryAddress: {
+                                    ...registerData.deliveryAddress,
+                                    state: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              placeholder="Delivery state"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">ZIP Code *</label>
+                            <input
+                              type="text"
+                              value={registerData.deliveryAddress.zipCode}
+                              onChange={(e) => {
+                                setRegisterData({
+                                  ...registerData,
+                                  deliveryAddress: {
+                                    ...registerData.deliveryAddress,
+                                    zipCode: e.target.value
+                                  }
+                                });
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              placeholder="Delivery ZIP code"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Special Instructions (Optional)</label>
+                          <textarea
+                            value={registerData.specialInstructions || ''}
+                            onChange={(e) => setRegisterData({...registerData, specialInstructions: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            placeholder="Any special delivery instructions..."
+                            rows={3}
+                          />
+                        </div>
                       </div>
                     </div>
                     <button
                       type="submit"
                       disabled={loading}
                       className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                      onClick={(e) => {
+                        console.log('Button clicked!', { loading, registerData });
+                        e.preventDefault();
+                        handleRegister(e);
+                      }}
                     >
                       {loading ? 'Creating Account...' : 'Create Account & Continue'}
                     </button>

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import CartItemCard from '../components/CartItemCard';
+import WhatsAppNotification from '../components/WhatsAppNotification';
 import { useCart } from '../context/CartContext';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -8,6 +9,7 @@ import { useRouter } from 'next/router';
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
+  const [showNotification, setShowNotification] = useState(true);
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -30,6 +32,16 @@ export default function Cart() {
               }
             </p>
           </div>
+
+          {/* WhatsApp Support Notification */}
+          {cart.length > 0 && showNotification && (
+            <div className="mb-6">
+              <WhatsAppNotification
+                onDismiss={() => setShowNotification(false)}
+                variant="info"
+              />
+            </div>
+          )}
 
           {cart.length === 0 ? (
             <div className="text-center py-16">

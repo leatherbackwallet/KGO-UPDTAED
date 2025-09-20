@@ -538,8 +538,8 @@ async function handleApiRequest(request) {
     // Network first for API requests
     const networkResponse = await fetch(request);
     
-    if (networkResponse.ok) {
-      // Cache API responses with shorter TTL
+    if (networkResponse.ok && request.method === 'GET') {
+      // Cache only GET API responses with shorter TTL
       const responseToCache = networkResponse.clone();
       await cache.put(request, responseToCache);
       console.log('[SW] Cached API response:', request.url);

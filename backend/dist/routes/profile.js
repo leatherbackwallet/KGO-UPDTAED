@@ -247,6 +247,15 @@ router.get('/addresses', auth_1.auth, async (req, res) => {
                 error: { message: 'User not authenticated', code: 'NOT_AUTHENTICATED' }
             });
         }
+        // Handle guest users - they don't have addresses in the database
+        if (req.user.id.toString().startsWith('guest_')) {
+            return res.json({
+                success: true,
+                data: {
+                    addresses: []
+                }
+            });
+        }
         const user = await index_1.User.findById(req.user.id).select('recipientAddresses');
         if (!user) {
             return res.status(404).json({
@@ -256,7 +265,9 @@ router.get('/addresses', auth_1.auth, async (req, res) => {
         }
         return res.json({
             success: true,
-            data: user.recipientAddresses || []
+            data: {
+                addresses: user.recipientAddresses || []
+            }
         });
     }
     catch (err) {
@@ -274,6 +285,13 @@ router.post('/addresses', auth_1.auth, async (req, res) => {
             return res.status(401).json({
                 success: false,
                 error: { message: 'User not authenticated', code: 'NOT_AUTHENTICATED' }
+            });
+        }
+        // Handle guest users - they can't save addresses to database
+        if (req.user.id.toString().startsWith('guest_')) {
+            return res.status(403).json({
+                success: false,
+                error: { message: 'Guest users cannot save addresses. Please register to save addresses.', code: 'GUEST_NOT_ALLOWED' }
             });
         }
         const { name, phone, streetName, houseNumber, postalCode, city, countryCode = 'DE', additionalInstructions = '', isDefault = false } = req.body;

@@ -299,7 +299,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', auth_1.auth, (0, validation_1.validate)(createContentSchema), async (req, res) => {
     try {
         // Check if user is admin
-        if (req.user.role !== 'admin') {
+        if (req.user.roleName !== 'admin') {
             return res.status(403).json({
                 success: false,
                 error: {
@@ -457,7 +457,7 @@ router.get('/search/:term', async (req, res) => {
 router.get('/analytics', auth_1.auth, async (req, res) => {
     try {
         // Check if user is admin
-        if (req.user.role !== 'admin') {
+        if (req.user.roleName !== 'admin') {
             return res.status(403).json({
                 success: false,
                 error: {

@@ -31,6 +31,15 @@ export interface IRecipientAddress {
   isDefault: boolean;
 }
 
+export interface IUserAddress {
+  streetName: string;
+  houseNumber: string;
+  postalCode: string;
+  city: string;
+  state: string;
+  countryCode: string;
+}
+
 export interface IUser extends Document {
   firstName: string;
   lastName: string;
@@ -41,7 +50,8 @@ export interface IUser extends Document {
   avatar?: string; // Avatar image filename
   location?: IUserLocation;
   schedules?: IUserSchedule[];
-  recipientAddresses?: IRecipientAddress[];
+  userAddress?: IUserAddress; // User's own address for billing/account purposes
+  recipientAddresses?: IRecipientAddress[]; // Addresses for gift delivery
   isActive: boolean;
   isDeleted: boolean;
   createdAt: Date;
@@ -76,6 +86,39 @@ const userScheduleSchema = new Schema<IUserSchedule>({
   isRecurring: {
     type: Boolean,
     default: false
+  }
+});
+
+const userAddressSchema = new Schema<IUserAddress>({
+  streetName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  houseNumber: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  postalCode: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  city: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  state: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  countryCode: {
+    type: String,
+    required: true,
+    default: 'IN'
   }
 });
 
@@ -167,6 +210,7 @@ const userSchema = new Schema<IUser>({
   },
   location: userLocationSchema,
   schedules: [userScheduleSchema],
+  userAddress: userAddressSchema,
   recipientAddresses: [recipientAddressSchema],
   isActive: {
     type: Boolean,

@@ -12,6 +12,7 @@ const analytics_model_1 = require("../models/analytics.model");
 const users_model_1 = require("../models/users.model");
 const products_model_1 = require("../models/products.model");
 const orders_model_1 = require("../models/orders.model");
+const roles_model_1 = require("../models/roles.model");
 const vendors_model_1 = require("../models/vendors.model");
 const supportTickets_model_1 = require("../models/supportTickets.model");
 const mongoose_1 = __importDefault(require("mongoose"));
@@ -53,12 +54,15 @@ class AnalyticsService {
      * Generate customer analytics
      */
     async generateCustomerAnalytics(startDate, endDate) {
+        // Get admin role ID to exclude from customer count
+        const adminRole = await roles_model_1.Role.findOne({ name: 'admin' });
+        const adminRoleId = adminRole?._id;
         const totalCustomers = await users_model_1.User.countDocuments({
-            roleId: { $ne: 'admin' },
+            ...(adminRoleId && { roleId: { $ne: adminRoleId } }),
             createdAt: { $lte: endDate }
         });
         const newCustomers = await users_model_1.User.countDocuments({
-            roleId: { $ne: 'admin' },
+            ...(adminRoleId && { roleId: { $ne: adminRoleId } }),
             createdAt: { $gte: startDate, $lte: endDate }
         });
         const returningCustomers = await this.getReturningCustomers(startDate, endDate);
@@ -236,8 +240,11 @@ class AnalyticsService {
         return returningCustomers;
     }
     async calculateChurnRate(startDate, endDate) {
+        // Get admin role ID to exclude from customer count
+        const adminRole = await roles_model_1.Role.findOne({ name: 'admin' });
+        const adminRoleId = adminRole?._id;
         const totalCustomers = await users_model_1.User.countDocuments({
-            roleId: { $ne: 'admin' },
+            ...(adminRoleId && { roleId: { $ne: adminRoleId } }),
             createdAt: { $lte: startDate }
         });
         const churnedCustomers = await this.getChurnedCustomers(startDate, endDate);

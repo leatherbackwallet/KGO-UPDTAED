@@ -68,6 +68,38 @@ const userScheduleSchema = new mongoose_1.Schema({
         default: false
     }
 });
+const userAddressSchema = new mongoose_1.Schema({
+    streetName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    houseNumber: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    postalCode: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    city: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    state: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    countryCode: {
+        type: String,
+        required: true,
+        default: 'IN'
+    }
+});
 const recipientAddressSchema = new mongoose_1.Schema({
     name: {
         type: String,
@@ -155,6 +187,7 @@ const userSchema = new mongoose_1.Schema({
     },
     location: userLocationSchema,
     schedules: [userScheduleSchema],
+    userAddress: userAddressSchema,
     recipientAddresses: [recipientAddressSchema],
     isActive: {
         type: Boolean,

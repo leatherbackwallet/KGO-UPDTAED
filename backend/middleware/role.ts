@@ -4,14 +4,15 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { User } from '../models/users.model';
-import { Role } from '../models/roles.model';
 
 interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email: string;
-    role: string;
+    roleId: string;
+    roleName: string;
+    firstName: string;
+    lastName: string;
   };
 }
 
@@ -19,19 +20,38 @@ export const requireRole = (requiredRole: string) => {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       if (!req.user?.id) {
-        res.status(403).json({ message: 'Access denied' });
+        res.status(403).json({ 
+          success: false,
+          error: { 
+            message: 'Access denied - No user information', 
+            code: 'NO_USER_INFO' 
+          } 
+        });
         return;
       }
 
-      const user = await User.findById(req.user.id).populate('roleId');
-      if (!user || !user.roleId || (user.roleId as any).name !== requiredRole) {
-        res.status(403).json({ message: 'Access denied' });
+      // Check role from JWT token (no database query needed)
+      if (!req.user.roleName || req.user.roleName !== requiredRole) {
+        res.status(403).json({ 
+          success: false,
+          error: { 
+            message: `Access denied - ${requiredRole} role required`, 
+            code: 'INSUFFICIENT_ROLE' 
+          } 
+        });
         return;
       }
       
       next();
     } catch (error) {
-      res.status(403).json({ message: 'Access denied' });
+      console.error('Role check error:', error);
+      res.status(403).json({ 
+        success: false,
+        error: { 
+          message: 'Access denied - Role verification failed', 
+          code: 'ROLE_VERIFICATION_FAILED' 
+        } 
+      });
     }
   };
 };

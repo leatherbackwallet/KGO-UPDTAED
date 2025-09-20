@@ -17,7 +17,9 @@ const getRateLimitConfig = () => {
         max: isProduction
             ? (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'))
             : (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000')), // Higher limit for development
-        authMax: parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || '5'),
+        authMax: isProduction
+            ? parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || '5')
+            : parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || '50'), // Higher limit for development
         standardHeaders: true,
         legacyHeaders: false,
     };

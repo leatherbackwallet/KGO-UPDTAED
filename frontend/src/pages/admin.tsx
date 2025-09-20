@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
+import { usePermissions } from '../hooks/usePermissions';
 import AdminDashboard from '../components/AdminDashboard';
 import AdminProducts from '../components/AdminProducts';
 import AdminCategories from '../components/AdminCategories';
@@ -13,6 +14,7 @@ import AdminTabs from '../components/AdminTabs';
 
 export default function Admin() {
   const { user } = useAuth();
+  const { canAccessAdmin, canAccessAdminTab } = usePermissions();
   const [tab, setTab] = useState<'dashboard' | 'products' | 'categories' | 'occasions' | 'orders' | 'users' | 'finance' | 'returns'>('products');
 
   const tabs = [
@@ -24,14 +26,14 @@ export default function Admin() {
     { id: 'users', label: 'Users' },
     { id: 'finance', label: 'Finance' },
     { id: 'returns', label: 'Returns' }
-  ];
+  ].filter(tab => canAccessAdminTab(tab.id));
 
-  if (!user || user.roleName !== 'admin') {
+  if (!user || !canAccessAdmin()) {
     return (
       <>
         <Navbar />
         <main className="max-w-4xl mx-auto py-8 px-4">
-          <div className="text-red-600 font-bold">Access denied. Admins only.</div>
+          <div className="text-red-600 font-bold">Access denied. Admin privileges required.</div>
         </main>
       </>
     );

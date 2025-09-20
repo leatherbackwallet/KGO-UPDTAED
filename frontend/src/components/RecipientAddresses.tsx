@@ -57,7 +57,7 @@ export default function RecipientAddresses({
       const response = await api.get('/profile/addresses', {
         headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
-      setAddresses(response.data.data || []);
+      setAddresses(response.data.data?.addresses || []);
     } catch (err: any) {
       setError(err.response?.data?.error?.message || 'Failed to fetch addresses');
     } finally {

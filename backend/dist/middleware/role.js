@@ -5,23 +5,41 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.requireRole = void 0;
-const users_model_1 = require("../models/users.model");
 const requireRole = (requiredRole) => {
     return async (req, res, next) => {
         try {
             if (!req.user?.id) {
-                res.status(403).json({ message: 'Access denied' });
+                res.status(403).json({
+                    success: false,
+                    error: {
+                        message: 'Access denied - No user information',
+                        code: 'NO_USER_INFO'
+                    }
+                });
                 return;
             }
-            const user = await users_model_1.User.findById(req.user.id).populate('roleId');
-            if (!user || !user.roleId || user.roleId.name !== requiredRole) {
-                res.status(403).json({ message: 'Access denied' });
+            // Check role from JWT token (no database query needed)
+            if (!req.user.roleName || req.user.roleName !== requiredRole) {
+                res.status(403).json({
+                    success: false,
+                    error: {
+                        message: `Access denied - ${requiredRole} role required`,
+                        code: 'INSUFFICIENT_ROLE'
+                    }
+                });
                 return;
             }
             next();
         }
         catch (error) {
-            res.status(403).json({ message: 'Access denied' });
+            console.error('Role check error:', error);
+            res.status(403).json({
+                success: false,
+                error: {
+                    message: 'Access denied - Role verification failed',
+                    code: 'ROLE_VERIFICATION_FAILED'
+                }
+            });
         }
     };
 };

@@ -7,6 +7,7 @@ import express from 'express';
 import { Order, Product } from '../models/index';
 import { ensureDatabaseConnection } from '../middleware/database';
 import { auth } from '../middleware/auth';
+import { optionalAuth } from '../middleware/optionalAuth';
 import { requireRole } from '../middleware/role';
 import { calculateComboPrice } from '../utils/comboUtils';
 
@@ -110,7 +111,45 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
       specialInstructions: address.additionalInstructions || address.specialInstructions || ''
     };
     
-    // Create order
+    // Handle COD payment method
+    if (paymentMethod === 'cod-test' || paymentMethod === 'cod') {
+      
+      // Create COD order with specific status and payment details
+      const order = await Order.create({
+        userId: req.user.id,
+        requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        shippingDetails,
+        orderItems,
+        totalPrice,
+        orderStatus: 'payment_done', // COD orders are considered paid
+        paymentStatus: 'captured', // COD is considered captured
+        paymentMethod: paymentMethod === 'cod-test' ? 'cod-test' : 'cod',
+        paymentGateway: 'cod',
+        paymentDate: new Date(),
+        paymentVerifiedAt: new Date(),
+        statusHistory: [{
+          status: 'payment_done',
+          timestamp: new Date(),
+          notes: 'COD order created - payment will be collected on delivery'
+        }]
+      });
+      
+      return res.status(201).json({
+        success: true,
+        data: {
+          message: 'COD order created successfully',
+          order: {
+            id: order._id,
+            orderId: order.orderId,
+            totalPrice: order.totalPrice,
+            orderStatus: order.orderStatus,
+            paymentMethod: 'cod-test'
+          }
+        }
+      });
+    }
+    
+    // Create regular order (Razorpay)
     const order = await Order.create({
       userId: req.user.id,
       requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
@@ -146,8 +185,43 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
   }
 });
 
-// Get order by ID with comprehensive transaction details
-router.get('/:orderId', auth, ensureDatabaseConnection, async (req: any, res) => {
+// Get my orders (customer)
+router.get('/my', auth, async (req: any, res) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json({
+        success: false,
+        error: { message: 'User not authenticated', code: 'NOT_AUTHENTICATED' }
+      });
+    }
+    
+    // Handle guest users - they don't have order history
+    if (req.user.id.toString().startsWith('guest_')) {
+      return res.json({
+        success: true,
+        data: []
+      });
+    }
+
+    const orders = await Order.find({ userId: req.user.id, isDeleted: false })
+      .populate({
+        path: 'orderItems.productId',
+        select: 'name price images description categories',
+        populate: {
+          path: 'categories',
+          select: 'name'
+        }
+      })
+      .sort({ createdAt: -1 });
+    return res.json(orders || []);
+  } catch (err) {
+    console.error('Error fetching orders:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get order by ID with comprehensive transaction details (public endpoint for guest users)
+router.get('/:orderId', optionalAuth, ensureDatabaseConnection, async (req: any, res) => {
   try {
     const { orderId } = req.params;
     
@@ -163,13 +237,24 @@ router.get('/:orderId', auth, ensureDatabaseConnection, async (req: any, res) =>
       });
     }
 
-    // Check if user can access this order (own order or admin)
-    const userId = typeof order.userId === 'string' ? order.userId : order.userId._id.toString();
-    if (userId !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: { message: 'Access denied', code: 'ACCESS_DENIED' }
-      });
+    // Check if user can access this order (own order, admin, or guest with valid token)
+    if (req.user) {
+      const userId = typeof order.userId === 'string' ? order.userId : order.userId._id.toString();
+      if (userId !== req.user.id && req.user.roleName !== 'admin') {
+        return res.status(403).json({
+          success: false,
+          error: { message: 'Access denied', code: 'ACCESS_DENIED' }
+        });
+      }
+    } else {
+      // For guest users, allow access to orders with guest user IDs
+      const userId = typeof order.userId === 'string' ? order.userId : order.userId._id.toString();
+      if (!userId.startsWith('guest_')) {
+        return res.status(403).json({
+          success: false,
+          error: { message: 'Access denied - guest orders only', code: 'ACCESS_DENIED' }
+        });
+      }
     }
 
     // Format order with comprehensive transaction details
@@ -208,8 +293,8 @@ router.get('/:orderId', auth, ensureDatabaseConnection, async (req: any, res) =>
   }
 });
 
-// Generate PDF receipt for order
-router.get('/:orderId/receipt', auth, ensureDatabaseConnection, async (req: any, res) => {
+// Generate PDF receipt for order (public endpoint for guest users)
+router.get('/:orderId/receipt', optionalAuth, ensureDatabaseConnection, async (req: any, res) => {
   try {
     const { orderId } = req.params;
     
@@ -225,13 +310,24 @@ router.get('/:orderId/receipt', auth, ensureDatabaseConnection, async (req: any,
       });
     }
 
-    // Check if user can access this order (own order or admin)
-    const userId = typeof order.userId === 'string' ? order.userId : order.userId._id.toString();
-    if (userId !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: { message: 'Access denied', code: 'ACCESS_DENIED' }
-      });
+    // Check if user can access this order (own order, admin, or guest with valid token)
+    if (req.user) {
+      const userId = typeof order.userId === 'string' ? order.userId : order.userId._id.toString();
+      if (userId !== req.user.id && req.user.roleName !== 'admin') {
+        return res.status(403).json({
+          success: false,
+          error: { message: 'Access denied', code: 'ACCESS_DENIED' }
+        });
+      }
+    } else {
+      // For guest users, allow access to orders with guest user IDs
+      const userId = typeof order.userId === 'string' ? order.userId : order.userId._id.toString();
+      if (!userId.startsWith('guest_')) {
+        return res.status(403).json({
+          success: false,
+          error: { message: 'Access denied - guest orders only', code: 'ACCESS_DENIED' }
+        });
+      }
     }
 
     // Import PDF service dynamically to avoid circular dependencies
@@ -281,26 +377,6 @@ router.get('/', auth, requireRole('admin'), ensureDatabaseConnection, async (req
     return res.json(orders || []);
   } catch (err) {
     console.error('Error fetching orders:', err);
-    return res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Get my orders (customer)
-router.get('/my', auth, ensureDatabaseConnection, async (req: any, res) => {
-  try {
-    const orders = await Order.find({ userId: req.user.id, isDeleted: false })
-      .populate({
-        path: 'orderItems.productId',
-        select: 'name price images description categories',
-        populate: {
-          path: 'categories',
-          select: 'name'
-        }
-      })
-      .sort({ createdAt: -1 });
-    return res.json(orders || []);
-  } catch (err) {
-    console.error('Error fetching user orders:', err);
     return res.status(500).json({ message: 'Server error' });
   }
 });

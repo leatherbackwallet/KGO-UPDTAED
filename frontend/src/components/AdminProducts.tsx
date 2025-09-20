@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import api from '../utils/api';
 import { getMultilingualText } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { usePermissions } from '../hooks/usePermissions';
 import { useRouter } from 'next/router';
 import { Product, ComboItem } from '../types/product';
 import { getProductImage, getOptimizedImagePath, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
@@ -43,6 +44,7 @@ interface Occasion {
 
 const AdminProducts: React.FC = () => {
   const { user, tokens } = useAuth();
+  const { canManageProducts } = usePermissions();
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -138,9 +140,9 @@ const AdminProducts: React.FC = () => {
       return;
     }
     
-    // Check if user has admin role
-    if (user.roleName !== 'admin') {
-      setError('Access denied. Admin privileges required.');
+    // Check if user can manage products
+    if (!canManageProducts()) {
+      setError('Access denied. Product management privileges required.');
       return;
     }
     
@@ -607,7 +609,7 @@ const AdminProducts: React.FC = () => {
     );
   }
 
-  if (user.roleName !== 'admin') {
+  if (!canManageProducts()) {
     return (
       <div className="text-center py-12">
         <div className="text-red-500 mb-4">
@@ -616,7 +618,7 @@ const AdminProducts: React.FC = () => {
           </svg>
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-        <p className="text-gray-600">Admin privileges required to access this page.</p>
+        <p className="text-gray-600">Product management privileges required to access this page.</p>
       </div>
     );
   }
