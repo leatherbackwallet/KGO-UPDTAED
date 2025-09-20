@@ -43,8 +43,11 @@ const validatePaymentVerification = [
 ];
 router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentOrder, async (req, res) => {
     try {
+        console.log('🔍 [Payment Route] Create order request received');
+        console.log('🔍 [Payment Route] Request body:', JSON.stringify(req.body, null, 2));
         const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
+            console.log('❌ [Payment Route] Validation errors:', errors.array());
             res.status(400).json({
                 success: false,
                 error: {
@@ -57,6 +60,8 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
         }
         const { products, recipientAddress, orderNotes } = req.body;
         const userId = req.user.id;
+        console.log('🔍 [Payment Route] User ID:', userId);
+        console.log('🔍 [Payment Route] Products:', products);
         // Calculate total amount
         let totalAmount = 0;
         const orderItems = [];
@@ -152,12 +157,21 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
             totalAmount,
             orderNotes,
             razorpayOrderId: razorpayOrder.id,
-            status: 'pending'
+            status: 'pending',
+            // Add required fields for guest users
+            totalPrice: totalAmount,
+            shippingDetails: {
+                recipientName: recipientAddress.name,
+                recipientPhone: recipientAddress.phone,
+                address: recipientAddress.address
+            },
+            requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
         });
         await order.save();
         res.status(200).json({
             success: true,
             data: {
+                order_id: razorpayOrder.id, // Match Google's naming convention
                 orderId: order._id,
                 razorpayOrderId: razorpayOrder.id,
                 amount: totalAmount,
@@ -313,10 +327,23 @@ async function handlePaymentFailed(payment) {
             status: 'failed',
             paymentStatus: 'failed',
             paymentDate: new Date(),
-            razorpayPaymentDetails: payment
+            razorpayPaymentDetails: payment,
+            // Add failure reason for better tracking
+            failureReason: payment.error_code || payment.error_description || 'Payment failed',
+            // Restore stock if it was decremented
+            stockRestored: false
         }, { new: true });
         if (order) {
-            console.log(`Payment failed for order: ${order._id}`);
+            console.log(`Payment failed for order: ${order._id}, Reason: ${payment.error_code || 'Unknown'}`);
+            // Restore product stock if it was decremented
+            if (!order.stockRestored) {
+                for (const item of order.orderItems) {
+                    await index_1.Product.findByIdAndUpdate(item.productId, { $inc: { stock: item.quantity } });
+                }
+                // Mark stock as restored
+                await index_1.Order.findByIdAndUpdate(order._id, { stockRestored: true });
+                console.log(`Stock restored for failed order: ${order._id}`);
+            }
         }
     }
     catch (error) {
@@ -358,6 +385,45 @@ router.get('/orders', auth_1.auth, database_1.ensureDatabaseConnection, async (r
             error: {
                 message: 'Failed to fetch orders',
                 code: 'ORDERS_FETCH_ERROR'
+            }
+        });
+    }
+});
+// Cleanup endpoint for abandoned orders (orders that were created but never paid)
+router.post('/cleanup-abandoned', database_1.ensureDatabaseConnection, async (req, res) => {
+    try {
+        // Find orders that are older than 30 minutes and still pending
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+        const abandonedOrders = await index_1.Order.find({
+            status: 'pending',
+            createdAt: { $lt: thirtyMinutesAgo }
+        });
+        let cleanedCount = 0;
+        for (const order of abandonedOrders) {
+            // Mark as cancelled
+            await index_1.Order.findByIdAndUpdate(order._id, {
+                status: 'cancelled',
+                paymentStatus: 'failed',
+                failureReason: 'Order abandoned - no payment received within 30 minutes'
+            });
+            cleanedCount++;
+            console.log(`Cleaned up abandoned order: ${order._id}`);
+        }
+        res.status(200).json({
+            success: true,
+            data: {
+                message: `Cleaned up ${cleanedCount} abandoned orders`,
+                cleanedCount
+            }
+        });
+    }
+    catch (error) {
+        console.error('Error cleaning up abandoned orders:', error);
+        res.status(500).json({
+            success: false,
+            error: {
+                message: 'Failed to cleanup abandoned orders',
+                code: 'CLEANUP_ERROR'
             }
         });
     }

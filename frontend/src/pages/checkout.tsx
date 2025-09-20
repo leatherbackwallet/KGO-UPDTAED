@@ -97,6 +97,8 @@ export default function Checkout() {
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPayment, setShowPayment] = useState(false);
   const [guestTokens, setGuestTokens] = useState<any>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [maxRetries] = useState(3);
 
   // Fetch previous order recipients when user is authenticated
   useEffect(() => {
@@ -276,16 +278,59 @@ export default function Checkout() {
   };
 
   const handlePaymentError = (error: any) => {
-    setError(`Payment failed: ${error.description || error.message || 'Unknown error'}`);
+    console.error('Payment error:', error);
+    
+    let errorMessage = 'Payment failed';
+    
+    // Handle different types of payment errors
+    if (error.code) {
+      switch (error.code) {
+        case 'BAD_REQUEST_ERROR':
+          errorMessage = 'Invalid payment details. Please check your card information.';
+          break;
+        case 'GATEWAY_ERROR':
+          errorMessage = 'Payment gateway is temporarily unavailable. Please try again.';
+          break;
+        case 'NETWORK_ERROR':
+          errorMessage = 'Network error occurred. Please check your internet connection.';
+          break;
+        case 'INSUFFICIENT_FUNDS':
+          errorMessage = 'Insufficient funds. Please use a different payment method.';
+          break;
+        case 'CARD_DECLINED':
+          errorMessage = 'Your card was declined. Please contact your bank or use a different card.';
+          break;
+        case 'EXPIRED_CARD':
+          errorMessage = 'Your card has expired. Please use a different payment method.';
+          break;
+        case 'INVALID_CARD':
+          errorMessage = 'Invalid card details. Please check and try again.';
+          break;
+        default:
+          errorMessage = `Payment failed: ${error.description || error.message || 'Unknown error'}`;
+      }
+    } else {
+      errorMessage = `Payment failed: ${error.description || error.message || 'Unknown error'}`;
+    }
+    
+    setError(errorMessage);
     setShowPayment(false);
     setPaymentData(null);
     setGuestTokens(null); // Clear guest tokens on error
+    setLoading(false); // Ensure loading state is cleared
   };
 
   const handlePaymentClose = () => {
+    console.log('Payment modal closed by user');
     setShowPayment(false);
     setPaymentData(null);
     setGuestTokens(null); // Clear guest tokens on close
+    setLoading(false); // Ensure loading state is cleared
+    
+    // Show a friendly message for cancellation
+    if (!error && !success) {
+      setError('Payment was cancelled. You can try again anytime.');
+    }
   };
 
   // Handle guest checkout
@@ -320,32 +365,37 @@ export default function Checkout() {
       // Merge guest data with existing cart/wishlist
       await mergeGuestData(guestTokens.accessToken);
 
-      // Create payment order for Razorpay
-      const paymentResponse = await api.post('/payments/create-order', {
-        products: cart.map(item => ({
-          product: item.product,
-          quantity: item.quantity,
-          // Include combo-specific fields if it's a combo product
-          ...(item.isCombo && {
-            isCombo: item.isCombo,
-            comboBasePrice: item.comboBasePrice,
-            comboItemConfigurations: item.comboItemConfigurations
-          })
-        })),
-        recipientAddress: {
-          name: guestData.name,
-          phone: guestData.phone,
-          address: {
-            streetName: guestData.deliveryAddress.street,
-            houseNumber: guestData.deliveryAddress.houseNumber,
-            postalCode: guestData.deliveryAddress.zipCode,
-            city: guestData.deliveryAddress.city,
-            countryCode: guestData.deliveryAddress.country || 'IN'
+      // Create payment order for Razorpay with timeout
+      const paymentResponse = await Promise.race([
+        api.post('/payments/create-order', {
+          products: cart.map(item => ({
+            product: item.product,
+            quantity: item.quantity,
+            // Include combo-specific fields if it's a combo product
+            ...(item.isCombo && {
+              isCombo: item.isCombo,
+              comboBasePrice: item.comboBasePrice,
+              comboItemConfigurations: item.comboItemConfigurations
+            })
+          })),
+          recipientAddress: {
+            name: guestData.name,
+            phone: guestData.phone,
+            address: {
+              streetName: guestData.deliveryAddress.street,
+              houseNumber: guestData.deliveryAddress.houseNumber,
+              postalCode: guestData.deliveryAddress.zipCode,
+              city: guestData.deliveryAddress.city,
+              countryCode: guestData.deliveryAddress.country || 'IN'
+            }
           }
-        }
-      }, {
-        headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
-      });
+        }, {
+          headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout - please try again')), 30000)
+        )
+      ]) as any;
 
       if (paymentResponse.data.success) {
         setPaymentData(paymentResponse.data.data);
@@ -354,7 +404,27 @@ export default function Checkout() {
         setError(paymentResponse.data.error?.message || 'Failed to create payment order');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Guest checkout failed');
+      console.error('Guest checkout error:', err);
+      
+      let errorMessage = 'Guest checkout failed';
+      
+      if (err.message === 'Request timeout - please try again') {
+        errorMessage = 'Request timed out. Please check your internet connection and try again.';
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Authentication failed. Please refresh the page and try again.';
+      } else if (err.response?.status === 400) {
+        errorMessage = err.response?.data?.error?.message || 'Invalid data provided. Please check your information.';
+      } else if (err.response?.status === 500) {
+        errorMessage = 'Server error occurred. Please try again in a few moments.';
+      } else if (err.code === 'NETWORK_ERROR' || !navigator.onLine) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      } else if (err.response?.data?.error?.message) {
+        errorMessage = err.response.data.error.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -460,7 +530,30 @@ export default function Checkout() {
       <main className="max-w-4xl mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-6">Complete Your Order</h1>
         
-        {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded">{error}</div>}
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded">
+            <div className="flex justify-between items-center">
+              <span>{error}</span>
+              {retryCount < maxRetries && (
+                <button
+                  onClick={() => {
+                    setError('');
+                    setRetryCount(prev => prev + 1);
+                    // Retry the last action based on user type
+                    if (user) {
+                      handleAuthenticatedOrder(new Event('click') as any);
+                    } else {
+                      handleGuestCheckout(new Event('click') as any);
+                    }
+                  }}
+                  className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                >
+                  Retry ({maxRetries - retryCount} left)
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         {success && <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-600 rounded">{success}</div>}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -43,8 +43,12 @@ const validatePaymentVerification = [
 
 router.post('/create-order', auth, ensureDatabaseConnection, validatePaymentOrder, async (req: Request, res: Response): Promise<void> => {
     try {
+        console.log('🔍 [Payment Route] Create order request received');
+        console.log('🔍 [Payment Route] Request body:', JSON.stringify(req.body, null, 2));
+        
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
+            console.log('❌ [Payment Route] Validation errors:', errors.array());
             res.status(400).json({
                 success: false,
                 error: {
@@ -58,6 +62,8 @@ router.post('/create-order', auth, ensureDatabaseConnection, validatePaymentOrde
 
         const { products, recipientAddress, orderNotes } = req.body;
         const userId = (req as any).user.id;
+        console.log('🔍 [Payment Route] User ID:', userId);
+        console.log('🔍 [Payment Route] Products:', products);
 
         // Calculate total amount
         let totalAmount = 0;
@@ -154,7 +160,7 @@ router.post('/create-order', auth, ensureDatabaseConnection, validatePaymentOrde
         // Create Razorpay order
         const razorpayOrder = await paymentService.createOrder(totalAmount, 'INR');
 
-        // Create order in database
+        // Create order in database with PENDING status
         const order = new Order({
             userId,
             orderItems,
@@ -162,7 +168,16 @@ router.post('/create-order', auth, ensureDatabaseConnection, validatePaymentOrde
             totalAmount,
             orderNotes,
             razorpayOrderId: razorpayOrder.id,
-            status: 'pending'
+            orderStatus: 'pending', // Changed from 'payment_done' to 'pending'
+            paymentStatus: 'pending', // Explicitly set payment status
+            // Add required fields for guest users
+            totalPrice: totalAmount,
+            shippingDetails: {
+                recipientName: recipientAddress.name,
+                recipientPhone: recipientAddress.phone,
+                address: recipientAddress.address
+            },
+            requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
         });
 
         await order.save();
@@ -170,6 +185,7 @@ router.post('/create-order', auth, ensureDatabaseConnection, validatePaymentOrde
         res.status(200).json({
             success: true,
             data: {
+                order_id: razorpayOrder.id, // Match Google's naming convention
                 orderId: order._id,
                 razorpayOrderId: razorpayOrder.id,
                 amount: totalAmount,
@@ -224,14 +240,23 @@ router.post('/verify', auth, ensureDatabaseConnection, validatePaymentVerificati
             return;
         }
 
-        // Update order status
+        // Get detailed payment information from Razorpay
+        const paymentDetails = await paymentService.getPaymentDetails(razorpay_payment_id);
+        const orderDetails = await paymentService.getOrderDetails(razorpay_order_id);
+
+        // Update order status with proper payment verification
         const order = await Order.findOneAndUpdate(
             { razorpayOrderId: razorpay_order_id },
             {
-                status: 'confirmed',
+                orderStatus: 'payment_done', // Only set to payment_done after successful verification
+                paymentStatus: 'captured', // Set payment status to captured
                 razorpayPaymentId: razorpay_payment_id,
                 razorpaySignature: razorpay_signature,
-                paymentDate: new Date()
+                paymentDate: new Date(),
+                paymentVerifiedAt: new Date(),
+                // Store detailed Razorpay information
+                razorpayPaymentDetails: paymentDetails,
+                razorpayOrderDetails: orderDetails
             },
             { new: true }
         );
@@ -360,13 +385,31 @@ async function handlePaymentFailed(payment: any) {
                 status: 'failed',
                 paymentStatus: 'failed',
                 paymentDate: new Date(),
-                razorpayPaymentDetails: payment
+                razorpayPaymentDetails: payment,
+                // Add failure reason for better tracking
+                failureReason: payment.error_code || payment.error_description || 'Payment failed',
+                // Restore stock if it was decremented
+                stockRestored: false
             },
             { new: true }
         );
 
         if (order) {
-            console.log(`Payment failed for order: ${order._id}`);
+            console.log(`Payment failed for order: ${order._id}, Reason: ${payment.error_code || 'Unknown'}`);
+            
+            // Restore product stock if it was decremented
+            if (!order.stockRestored) {
+                for (const item of order.orderItems) {
+                    await Product.findByIdAndUpdate(
+                        item.productId,
+                        { $inc: { stock: item.quantity } }
+                    );
+                }
+                
+                // Mark stock as restored
+                await Order.findByIdAndUpdate(order._id, { stockRestored: true });
+                console.log(`Stock restored for failed order: ${order._id}`);
+            }
         }
     } catch (error: any) {
         console.error('Error handling payment failed:', error);
@@ -413,6 +456,50 @@ router.get('/orders', auth, ensureDatabaseConnection, async (req: Request, res: 
             error: {
                 message: 'Failed to fetch orders',
                 code: 'ORDERS_FETCH_ERROR'
+            }
+        });
+    }
+});
+
+// Cleanup endpoint for abandoned orders (orders that were created but never paid)
+router.post('/cleanup-abandoned', ensureDatabaseConnection, async (req: Request, res: Response): Promise<void> => {
+    try {
+        // Find orders that are older than 30 minutes and still pending
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+        
+        const abandonedOrders = await Order.find({
+            status: 'pending',
+            createdAt: { $lt: thirtyMinutesAgo }
+        });
+
+        let cleanedCount = 0;
+        
+        for (const order of abandonedOrders) {
+            // Mark as cancelled
+            await Order.findByIdAndUpdate(order._id, {
+                status: 'cancelled',
+                paymentStatus: 'failed',
+                failureReason: 'Order abandoned - no payment received within 30 minutes'
+            });
+            
+            cleanedCount++;
+            console.log(`Cleaned up abandoned order: ${order._id}`);
+        }
+
+        res.status(200).json({
+            success: true,
+            data: {
+                message: `Cleaned up ${cleanedCount} abandoned orders`,
+                cleanedCount
+            }
+        });
+    } catch (error: any) {
+        console.error('Error cleaning up abandoned orders:', error);
+        res.status(500).json({
+            success: false,
+            error: {
+                message: 'Failed to cleanup abandoned orders',
+                code: 'CLEANUP_ERROR'
             }
         });
     }

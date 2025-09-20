@@ -3,6 +3,7 @@ import { loadScript } from '../utils/razorpay';
 
 interface RazorpayPaymentProps {
   orderData: {
+    order_id?: string; // Google's recommended field name
     orderId: string;
     razorpayOrderId: string;
     amount: number;
@@ -43,7 +44,7 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
           currency: orderData.currency,
           name: 'OnYourBehlf - Kerala Gifts Online',
           description: 'Payment for your Kerala gifts order',
-          order_id: orderData.razorpayOrderId,
+          order_id: orderData.order_id || orderData.razorpayOrderId,
           handler: function (response: any) {
             onSuccess({
               razorpay_payment_id: response.razorpay_payment_id,

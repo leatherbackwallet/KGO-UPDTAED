@@ -45,12 +45,12 @@ export interface IStatusHistory {
 
 export interface IOrder extends Document {
   orderId: string;
-  userId: mongoose.Types.ObjectId;
-  requestedDeliveryDate: Date;
-  shippingDetails: IShippingDetails;
+  userId: mongoose.Types.ObjectId | string; // Allow both ObjectId and string for guest users
+  requestedDeliveryDate?: Date; // Make optional for guest users
+  shippingDetails?: IShippingDetails; // Make optional for guest users
   orderItems: IOrderItem[];
-  totalPrice: number;
-  orderStatus: 'payment_done' | 'order_received' | 'collecting_items' | 'packing' | 'en_route' | 'delivered' | 'cancelled';
+  totalPrice?: number; // Make optional, will be calculated
+  orderStatus: 'pending' | 'payment_done' | 'order_received' | 'collecting_items' | 'packing' | 'en_route' | 'delivered' | 'cancelled';
   statusHistory: IStatusHistory[];
   promotionId?: mongoose.Types.ObjectId;
   discountAmount: number;
@@ -61,8 +61,59 @@ export interface IOrder extends Document {
   razorpaySignature?: string;
   paymentStatus?: 'pending' | 'captured' | 'failed' | 'refunded';
   paymentDate?: Date;
-  razorpayPaymentDetails?: any;
-  razorpayOrderDetails?: any;
+  paymentVerifiedAt?: Date;
+  razorpayPaymentDetails?: {
+    id?: string;
+    amount?: number;
+    currency?: string;
+    status?: string;
+    method?: string;
+    description?: string;
+    bank?: string;
+    wallet?: string;
+    card_id?: string;
+    card?: {
+      id?: string;
+      entity?: string;
+      name?: string;
+      last4?: string;
+      network?: string;
+      type?: string;
+      issuer?: string;
+      international?: boolean;
+      emi?: boolean;
+      sub_type?: string;
+      token_iin?: string;
+    };
+    vpa?: string;
+    email?: string;
+    contact?: string;
+    notes?: any;
+    fee?: number;
+    tax?: number;
+    error_code?: string;
+    error_description?: string;
+    error_source?: string;
+    error_step?: string;
+    error_reason?: string;
+    acquirer_data?: any;
+    created_at?: number;
+  };
+  razorpayOrderDetails?: {
+    id?: string;
+    entity?: string;
+    amount?: number;
+    amount_paid?: number;
+    amount_due?: number;
+    currency?: string;
+    receipt?: string;
+    status?: string;
+    attempts?: number;
+    notes?: any;
+    created_at?: number;
+  };
+  failureReason?: string;
+  stockRestored?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -191,28 +242,27 @@ const orderSchema = new Schema<IOrder>({
     unique: true
   },
   userId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
+    type: Schema.Types.Mixed, // Allow both ObjectId and string for guest users
     required: true
   },
   requestedDeliveryDate: {
     type: Date,
-    required: true
+    required: false // Make optional for guest users
   },
   shippingDetails: {
     type: shippingDetailsSchema,
-    required: true
+    required: false // Make optional for guest users
   },
   orderItems: [orderItemSchema],
   totalPrice: {
     type: Number,
-    required: true,
+    required: false, // Make optional, will be calculated
     min: 0
   },
   orderStatus: {
     type: String,
-    enum: ['payment_done', 'order_received', 'collecting_items', 'packing', 'en_route', 'delivered', 'cancelled'],
-    default: 'payment_done'
+    enum: ['pending', 'payment_done', 'order_received', 'collecting_items', 'packing', 'en_route', 'delivered', 'cancelled'],
+    default: 'pending'
   },
   statusHistory: [statusHistorySchema],
   promotionId: {
@@ -249,11 +299,21 @@ const orderSchema = new Schema<IOrder>({
   paymentDate: {
     type: Date
   },
+  paymentVerifiedAt: {
+    type: Date
+  },
   razorpayPaymentDetails: {
     type: Schema.Types.Mixed
   },
   razorpayOrderDetails: {
     type: Schema.Types.Mixed
+  },
+  failureReason: {
+    type: String
+  },
+  stockRestored: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

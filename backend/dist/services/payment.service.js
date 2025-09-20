@@ -11,16 +11,29 @@ const crypto_1 = __importDefault(require("crypto"));
 const razorpay_1 = __importDefault(require("razorpay"));
 class PaymentService {
     constructor() {
+        console.log('🔍 [Payment Service] Initializing Razorpay...');
+        console.log('🔍 [Payment Service] Key ID:', process.env.RAZORPAY_KEY_ID);
+        console.log('🔍 [Payment Service] Key Secret:', process.env.RAZORPAY_KEY_SECRET ? 'SET' : 'NOT SET');
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+            console.error('❌ [Payment Service] Missing Razorpay credentials');
+            throw new Error('Razorpay credentials not configured');
+        }
         this.razorpay = new razorpay_1.default({
             key_id: process.env.RAZORPAY_KEY_ID,
             key_secret: process.env.RAZORPAY_KEY_SECRET
         });
+        console.log('✅ [Payment Service] Razorpay initialized successfully');
     }
     /**
      * Create a Razorpay order
      */
     async createOrder(amount, currency, receipt) {
         try {
+            console.log('🔍 [Payment Service] Creating Razorpay order...');
+            console.log('🔍 [Payment Service] Amount:', amount);
+            console.log('🔍 [Payment Service] Currency:', currency);
+            console.log('🔍 [Payment Service] Key ID:', process.env.RAZORPAY_KEY_ID);
+            console.log('🔍 [Payment Service] Key Secret:', process.env.RAZORPAY_KEY_SECRET ? 'SET' : 'NOT SET');
             const options = {
                 amount: amount * 100, // Razorpay expects amount in paise
                 currency,
@@ -29,11 +42,15 @@ class PaymentService {
                     source: 'OnYourBehlf - Kerala Gifts Online'
                 }
             };
+            console.log('🔍 [Payment Service] Order options:', options);
             const order = await this.razorpay.orders.create(options);
+            console.log('✅ [Payment Service] Order created successfully:', order.id);
             return order;
         }
         catch (error) {
-            console.error('Error creating Razorpay order:', error);
+            console.error('❌ [Payment Service] Error creating Razorpay order:', error);
+            console.error('❌ [Payment Service] Error details:', error.message);
+            console.error('❌ [Payment Service] Error stack:', error.stack);
             throw new Error(`Failed to create payment order: ${error.message}`);
         }
     }

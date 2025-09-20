@@ -62,6 +62,8 @@ const corsOptions = {
             'https://keralgiftsonline.in',
             'https://keralagiftsonline.in',
             'https://www.keralgiftsonline.in',
+            'https://www.keralagiftsonline.in',
+            'https://keralagiftsonline.in',
             'https://www.keralagiftsonline.in'
         ];
         // Allow requests with no origin (mobile apps, curl, etc.)

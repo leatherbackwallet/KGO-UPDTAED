@@ -159,22 +159,21 @@ const orderSchema = new mongoose_1.Schema({
         unique: true
     },
     userId: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'User',
+        type: mongoose_1.Schema.Types.Mixed, // Allow both ObjectId and string for guest users
         required: true
     },
     requestedDeliveryDate: {
         type: Date,
-        required: true
+        required: false // Make optional for guest users
     },
     shippingDetails: {
         type: shippingDetailsSchema,
-        required: true
+        required: false // Make optional for guest users
     },
     orderItems: [orderItemSchema],
     totalPrice: {
         type: Number,
-        required: true,
+        required: false, // Make optional, will be calculated
         min: 0
     },
     orderStatus: {
@@ -222,6 +221,13 @@ const orderSchema = new mongoose_1.Schema({
     },
     razorpayOrderDetails: {
         type: mongoose_1.Schema.Types.Mixed
+    },
+    failureReason: {
+        type: String
+    },
+    stockRestored: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

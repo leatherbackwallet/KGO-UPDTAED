@@ -24,10 +24,10 @@ env_variables:
   CLOUDINARY_API_SECRET: "fQBjh1m4rF9ztey7u4FANZQUNhQ"
   
   # CORS Configuration - Allow production frontend
-  CORS_ORIGIN: "https://onyourbehlf.uc.r.appspot.com"
+  CORS_ORIGIN: "https://keralagiftsonline.in"
   
   # Frontend URL
-  FRONTEND_URL: "https://onyourbehlf.uc.r.appspot.com"
+  FRONTEND_URL: "https://keralagiftsonline.in"
   
   # API URL
   API_URL: "https://api-dot-onyourbehlf.uc.r.appspot.com"
