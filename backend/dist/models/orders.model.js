@@ -178,8 +178,8 @@ const orderSchema = new mongoose_1.Schema({
     },
     orderStatus: {
         type: String,
-        enum: ['payment_done', 'order_received', 'collecting_items', 'packing', 'en_route', 'delivered', 'cancelled'],
-        default: 'payment_done'
+        enum: ['pending', 'payment_done', 'order_received', 'collecting_items', 'packing', 'en_route', 'delivered', 'cancelled'],
+        default: 'pending'
     },
     statusHistory: [statusHistorySchema],
     promotionId: {
@@ -214,6 +214,9 @@ const orderSchema = new mongoose_1.Schema({
         default: 'pending'
     },
     paymentDate: {
+        type: Date
+    },
+    paymentVerifiedAt: {
         type: Date
     },
     razorpayPaymentDetails: {

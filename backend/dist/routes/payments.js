@@ -149,7 +149,7 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
         }
         // Create Razorpay order
         const razorpayOrder = await payment_service_1.default.createOrder(totalAmount, 'INR');
-        // Create order in database
+        // Create order in database with PENDING status
         const order = new index_1.Order({
             userId,
             orderItems,
@@ -157,7 +157,8 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
             totalAmount,
             orderNotes,
             razorpayOrderId: razorpayOrder.id,
-            status: 'pending',
+            orderStatus: 'pending', // Changed from 'payment_done' to 'pending'
+            paymentStatus: 'pending', // Explicitly set payment status
             // Add required fields for guest users
             totalPrice: totalAmount,
             shippingDetails: {
@@ -218,12 +219,20 @@ router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validat
             });
             return;
         }
-        // Update order status
+        // Get detailed payment information from Razorpay
+        const paymentDetails = await payment_service_1.default.getPaymentDetails(razorpay_payment_id);
+        const orderDetails = await payment_service_1.default.getOrderDetails(razorpay_order_id);
+        // Update order status with proper payment verification
         const order = await index_1.Order.findOneAndUpdate({ razorpayOrderId: razorpay_order_id }, {
-            status: 'confirmed',
+            orderStatus: 'payment_done', // Only set to payment_done after successful verification
+            paymentStatus: 'captured', // Set payment status to captured
             razorpayPaymentId: razorpay_payment_id,
             razorpaySignature: razorpay_signature,
-            paymentDate: new Date()
+            paymentDate: new Date(),
+            paymentVerifiedAt: new Date(),
+            // Store detailed Razorpay information
+            razorpayPaymentDetails: paymentDetails,
+            razorpayOrderDetails: orderDetails
         }, { new: true });
         if (!order) {
             res.status(404).json({
