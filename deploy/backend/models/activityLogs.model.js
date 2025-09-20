@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * ActivityLog Model - Audit trail and system activity tracking
+ * Records user actions, system events, and provides comprehensive audit trail
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,6 +39,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ActivityLog = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// ActivityLog schema definition
 const activityLogSchema = new mongoose_1.Schema({
     actorId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -67,23 +72,30 @@ const activityLogSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 activityLogSchema.index({ actorId: 1, createdAt: -1 });
 activityLogSchema.index({ actionType: 1, createdAt: -1 });
 activityLogSchema.index({ 'target.type': 1, 'target.id': 1 });
 activityLogSchema.index({ createdAt: -1 });
+// Compound index for audit queries
 activityLogSchema.index({ actorId: 1, actionType: 1, createdAt: -1 });
+// Virtual for action summary
 activityLogSchema.virtual('actionSummary').get(function () {
     const actor = this.actorId ? `User ${this.actorId}` : 'System';
     const target = this.target ? `${this.target.type} ${this.target.id}` : 'N/A';
     return `${actor} performed ${this.actionType} on ${target}`;
 });
+// Virtual for is system action
 activityLogSchema.virtual('isSystemAction').get(function () {
     return !this.actorId;
 });
+// Virtual for is user action
 activityLogSchema.virtual('isUserAction').get(function () {
     return !!this.actorId;
 });
+// Ensure virtual fields are serialized
 activityLogSchema.set('toJSON', { virtuals: true });
+// Static method to log user action
 activityLogSchema.statics.logUserAction = function (actorId, actionType, target, details) {
     return this.create({
         actorId,
@@ -92,6 +104,7 @@ activityLogSchema.statics.logUserAction = function (actorId, actionType, target,
         details
     });
 };
+// Static method to log system action
 activityLogSchema.statics.logSystemAction = function (actionType, target, details) {
     return this.create({
         actionType,
@@ -99,16 +112,18 @@ activityLogSchema.statics.logSystemAction = function (actionType, target, detail
         details
     });
 };
+// Pre-save middleware to validate action type
 activityLogSchema.pre('save', function (next) {
+    // Common action types validation
     const commonActions = [
         'create', 'update', 'delete', 'login', 'logout', 'register',
         'order_placed', 'order_cancelled', 'payment_success', 'payment_failed',
         'vendor_approved', 'vendor_rejected', 'product_added', 'product_updated'
     ];
     if (!commonActions.includes(this.actionType.toLowerCase())) {
+        // Allow custom action types but log them
         console.log(`Custom action type logged: ${this.actionType}`);
     }
     next();
 });
 exports.ActivityLog = mongoose_1.default.model('ActivityLog', activityLogSchema);
-//# sourceMappingURL=activityLogs.model.js.map

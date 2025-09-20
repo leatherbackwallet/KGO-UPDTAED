@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Shipments Model - Partial fulfillment and split shipments management
+ * Manages individual shipments that fulfill parts of an order
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -98,6 +102,7 @@ const shipmentSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Generate shipmentId before saving
 shipmentSchema.pre('save', function (next) {
     if (this.isNew && !this.shipmentId) {
         const timestamp = Date.now();
@@ -106,8 +111,8 @@ shipmentSchema.pre('save', function (next) {
     }
     next();
 });
+// Indexes
 shipmentSchema.index({ orderId: 1, status: 1 });
 shipmentSchema.index({ deliveryRunId: 1, status: 1 });
 shipmentSchema.index({ createdAt: -1 });
 exports.Shipment = mongoose_1.default.model('Shipment', shipmentSchema);
-//# sourceMappingURL=shipments.model.js.map

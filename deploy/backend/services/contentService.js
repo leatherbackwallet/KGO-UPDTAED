@@ -1,9 +1,16 @@
 "use strict";
+/**
+ * Content Service - Multi-Language Content Management System
+ * Handles cultural content, recipes, festival guides, and language learning
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContentService = void 0;
 const content_model_1 = require("../models/content.model");
 const userPreferences_model_1 = require("../models/userPreferences.model");
 class ContentService {
+    /**
+     * Create new content
+     */
     static async createContent(contentData) {
         const content = new content_model_1.Content({
             ...contentData,
@@ -20,9 +27,15 @@ class ContentService {
         await content.save();
         return content;
     }
+    /**
+     * Get content by ID
+     */
     static async getContentById(contentId) {
         return await content_model_1.Content.findById(contentId).populate('related.contentIds related.productIds related.categoryIds');
     }
+    /**
+     * Get content with filters
+     */
     static async getContent(filter = {}) {
         const query = { isDeleted: false };
         if (filter.type)
@@ -43,6 +56,9 @@ class ContentService {
             .limit(limit)
             .skip(skip);
     }
+    /**
+     * Get recipes with filters
+     */
     static async getRecipes(filter = {}) {
         const query = {
             type: content_model_1.ContentType.RECIPE,
@@ -61,6 +77,9 @@ class ContentService {
             .populate('related.productIds')
             .sort({ 'recipe.difficulty': 1, createdAt: -1 });
     }
+    /**
+     * Get festival guides
+     */
     static async getFestivalGuides(filter = {}) {
         const query = {
             type: content_model_1.ContentType.FESTIVAL_GUIDE,
@@ -78,6 +97,9 @@ class ContentService {
             .populate('related.productIds')
             .sort({ 'festivalGuide.festivalDate': 1 });
     }
+    /**
+     * Get language learning content
+     */
     static async getLanguageContent(language, difficulty) {
         const query = {
             type: content_model_1.ContentType.LANGUAGE_LESSON,
@@ -90,9 +112,13 @@ class ContentService {
         return await content_model_1.Content.find(query)
             .sort({ 'languageFeatures.difficulty': 1, createdAt: -1 });
     }
+    /**
+     * Get personalized content recommendations
+     */
     static async getPersonalizedContent(userId, limit = 10) {
         const userPrefs = await userPreferences_model_1.UserPreferences.findOne({ userId });
         if (!userPrefs) {
+            // Return popular content if no preferences
             return await content_model_1.Content.find({
                 isPublished: true,
                 isDeleted: false
@@ -105,9 +131,11 @@ class ContentService {
             isDeleted: false,
             language: userPrefs.culturalPreferences.languagePreference,
         };
+        // Add cultural preferences
         if (userPrefs.culturalPreferences.festivalPreferences && userPrefs.culturalPreferences.festivalPreferences.length > 0) {
             query.tags = { $in: userPrefs.culturalPreferences.festivalPreferences };
         }
+        // Add dietary preferences for recipes
         if (userPrefs.culturalPreferences.dietaryRestrictions && userPrefs.culturalPreferences.dietaryRestrictions.length > 0) {
             query['recipe.dietaryTags'] = { $in: userPrefs.culturalPreferences.dietaryRestrictions };
         }
@@ -116,6 +144,9 @@ class ContentService {
             .sort({ 'engagement.views': -1, createdAt: -1 })
             .limit(limit);
     }
+    /**
+     * Get seasonal content
+     */
     static async getSeasonalContent(season, language) {
         const query = {
             isPublished: true,
@@ -127,17 +158,23 @@ class ContentService {
             .populate('related.productIds')
             .sort({ 'engagement.views': -1 });
     }
+    /**
+     * Update content engagement metrics
+     */
     static async updateEngagement(contentId, engagementData) {
         const content = await content_model_1.Content.findById(contentId);
         if (!content)
             return;
+        // Update views
         content.engagement.views += 1;
+        // Update average time on page
         if (engagementData.viewTime) {
             const currentAvg = content.engagement.averageTimeOnPage;
             const totalViews = content.engagement.views;
             content.engagement.averageTimeOnPage =
                 ((currentAvg * (totalViews - 1)) + engagementData.viewTime) / totalViews;
         }
+        // Update other metrics
         if (engagementData.liked)
             content.engagement.likes += 1;
         if (engagementData.shared)
@@ -146,6 +183,9 @@ class ContentService {
             content.engagement.comments += 1;
         await content.save();
     }
+    /**
+     * Get content analytics
+     */
     static async getContentAnalytics() {
         const analytics = await content_model_1.Content.aggregate([
             { $match: { isDeleted: false } },
@@ -182,6 +222,9 @@ class ContentService {
             publishedContent: await content_model_1.Content.countDocuments({ isDeleted: false, isPublished: true }),
         };
     }
+    /**
+     * Search content
+     */
     static async searchContent(searchTerm, language) {
         const query = {
             isDeleted: false,
@@ -202,6 +245,9 @@ class ContentService {
             .populate('related.productIds')
             .sort({ 'engagement.views': -1 });
     }
+    /**
+     * Get related content
+     */
     static async getRelatedContent(contentId, limit = 5) {
         const content = await content_model_1.Content.findById(contentId);
         if (!content)
@@ -222,6 +268,9 @@ class ContentService {
             .sort({ 'engagement.views': -1 })
             .limit(limit);
     }
+    /**
+     * Create sample content for seeding
+     */
     static async createSampleContent() {
         const sampleRecipes = [
             {
@@ -348,4 +397,3 @@ class ContentService {
     }
 }
 exports.ContentService = ContentService;
-//# sourceMappingURL=contentService.js.map

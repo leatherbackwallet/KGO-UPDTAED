@@ -6,13 +6,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.decodeToken = exports.refreshAccessToken = exports.verifyRefreshToken = exports.verifyAccessToken = exports.generateTokenPair = exports.generateSecureToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const crypto_1 = __importDefault(require("crypto"));
+/**
+ * Generate a secure random string for tokens
+ */
 const generateSecureToken = (length = 32) => {
     return crypto_1.default.randomBytes(length).toString('hex');
 };
 exports.generateSecureToken = generateSecureToken;
+/**
+ * Generate access and refresh token pair
+ */
 const generateTokenPair = (payload) => {
-    const accessTokenExpiry = Math.floor(Date.now() / 1000) + (15 * 60);
-    const refreshTokenExpiry = Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60);
+    const accessTokenExpiry = Math.floor(Date.now() / 1000) + (15 * 60); // 15 minutes
+    const refreshTokenExpiry = Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60); // 7 days
     const accessTokenPayload = {
         ...payload,
         type: 'access'
@@ -39,6 +45,9 @@ const generateTokenPair = (payload) => {
     };
 };
 exports.generateTokenPair = generateTokenPair;
+/**
+ * Verify access token
+ */
 const verifyAccessToken = (token) => {
     try {
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET, {
@@ -55,6 +64,9 @@ const verifyAccessToken = (token) => {
     }
 };
 exports.verifyAccessToken = verifyAccessToken;
+/**
+ * Verify refresh token
+ */
 const verifyRefreshToken = (token) => {
     try {
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_REFRESH_SECRET, {
@@ -71,15 +83,22 @@ const verifyRefreshToken = (token) => {
     }
 };
 exports.verifyRefreshToken = verifyRefreshToken;
+/**
+ * Refresh access token using refresh token
+ */
 const refreshAccessToken = (refreshToken) => {
     const decoded = (0, exports.verifyRefreshToken)(refreshToken);
     if (!decoded) {
         return null;
     }
+    // Generate new token pair
     const { type, ...payload } = decoded;
     return (0, exports.generateTokenPair)(payload);
 };
 exports.refreshAccessToken = refreshAccessToken;
+/**
+ * Decode token without verification (for logging purposes only)
+ */
 const decodeToken = (token) => {
     try {
         return jsonwebtoken_1.default.decode(token);
@@ -89,4 +108,3 @@ const decodeToken = (token) => {
     }
 };
 exports.decodeToken = decodeToken;
-//# sourceMappingURL=jwt.js.map

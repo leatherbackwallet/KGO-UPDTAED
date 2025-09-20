@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Transaction Model - Payment gateway transaction tracking
+ * Records payment captures, refunds, and transaction status for financial reconciliation
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,16 +39,19 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Transaction = exports.TransactionStatus = exports.TransactionType = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// Transaction type enum
 var TransactionType;
 (function (TransactionType) {
     TransactionType["CAPTURE"] = "capture";
     TransactionType["REFUND"] = "refund";
 })(TransactionType || (exports.TransactionType = TransactionType = {}));
+// Transaction status enum
 var TransactionStatus;
 (function (TransactionStatus) {
     TransactionStatus["SUCCESS"] = "success";
     TransactionStatus["FAILED"] = "failed";
 })(TransactionStatus || (exports.TransactionStatus = TransactionStatus = {}));
+// Transaction schema definition
 const transactionSchema = new mongoose_1.Schema({
     orderId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -82,29 +89,37 @@ const transactionSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 transactionSchema.index({ orderId: 1, type: 1 });
 transactionSchema.index({ userId: 1, createdAt: -1 });
 transactionSchema.index({ status: 1, type: 1 });
 transactionSchema.index({ gatewayTransactionId: 1 }, { sparse: true });
+// Compound index for financial reporting
 transactionSchema.index({ type: 1, status: 1, createdAt: -1 });
+// Virtual for transaction summary
 transactionSchema.virtual('summary').get(function () {
     return `${this.type.toUpperCase()} - ${this.status.toUpperCase()} - ₹${this.amount}`;
 });
+// Virtual for is refund
 transactionSchema.virtual('isRefund').get(function () {
     return this.type === TransactionType.REFUND;
 });
+// Virtual for is capture
 transactionSchema.virtual('isCapture').get(function () {
     return this.type === TransactionType.CAPTURE;
 });
+// Ensure virtual fields are serialized
 transactionSchema.set('toJSON', { virtuals: true });
+// Pre-save middleware to validate transaction data
 transactionSchema.pre('save', function (next) {
+    // For refunds, orderId should be present
     if (this.type === TransactionType.REFUND && !this.orderId) {
         return next(new Error('Order ID is required for refund transactions'));
     }
+    // For captures, both orderId and userId should be present
     if (this.type === TransactionType.CAPTURE && (!this.orderId || !this.userId)) {
         return next(new Error('Order ID and User ID are required for capture transactions'));
     }
     next();
 });
 exports.Transaction = mongoose_1.default.model('Transaction', transactionSchema);
-//# sourceMappingURL=transactions.model.js.map

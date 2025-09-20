@@ -1,46 +1,67 @@
-const express = require('express');
-const router = express.Router();
-const { User } = require('../models/users.model');
-const { Role } = require('../models/roles.model');
-const auth = require('../middleware/auth');
-const role = require('../middleware/role');
-
+"use strict";
+/**
+ * Users Routes - User management and administration
+ * Handles user operations for admin users
+ */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const users_model_1 = require("../models/users.model");
+const roles_model_1 = require("../models/roles.model");
+const auth_1 = require("../middleware/auth");
+const role_1 = require("../middleware/role");
+const apiSecurity_1 = require("../middleware/apiSecurity");
+const router = express_1.default.Router();
 // Get all users (admin only)
-router.get('/', auth, role('admin'), async (req, res) => {
-  try {
-    const users = await User.find({}, '-password').populate('roleId');
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
+router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), apiSecurity_1.validateAdminSession, apiSecurity_1.adminRateLimit, (0, apiSecurity_1.logSecurityEvent)('USER_LIST_ACCESS'), async (req, res) => {
+    try {
+        const users = await users_model_1.User.find({}, '-password').populate('roleId');
+        res.json(users);
+    }
+    catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
 });
-
 // Grant admin
-router.put('/:id/grant', auth, role('admin'), async (req, res) => {
-  try {
-    const adminRole = await Role.findOne({ name: 'admin' });
-    if (!adminRole) return res.status(500).json({ message: 'Admin role not found' });
-    
-    const user = await User.findByIdAndUpdate(req.params.id, { roleId: adminRole._id }, { new: true }).populate('roleId');
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
+router.put('/:id/grant', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
+    try {
+        // Find the admin role first
+        const adminRole = await roles_model_1.Role.findOne({ name: 'admin' });
+        if (!adminRole) {
+            res.status(500).json({ message: 'Admin role not found' });
+            return;
+        }
+        const user = await users_model_1.User.findByIdAndUpdate(req.params.id, { roleId: adminRole._id }, { new: true });
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+        res.json({ message: 'Admin granted', user });
+    }
+    catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
 });
-
 // Revoke admin
-router.put('/:id/revoke', auth, role('admin'), async (req, res) => {
-  try {
-    const customerRole = await Role.findOne({ name: 'customer' });
-    if (!customerRole) return res.status(500).json({ message: 'Customer role not found' });
-    
-    const user = await User.findByIdAndUpdate(req.params.id, { roleId: customerRole._id }, { new: true }).populate('roleId');
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
+router.put('/:id/revoke', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
+    try {
+        // Find the customer role first
+        const customerRole = await roles_model_1.Role.findOne({ name: 'customer' });
+        if (!customerRole) {
+            res.status(500).json({ message: 'Customer role not found' });
+            return;
+        }
+        const user = await users_model_1.User.findByIdAndUpdate(req.params.id, { roleId: customerRole._id }, { new: true });
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+        res.json({ message: 'Admin revoked', user });
+    }
+    catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
 });
-
-module.exports = router; 
+exports.default = router;

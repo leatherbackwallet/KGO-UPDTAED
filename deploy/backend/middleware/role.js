@@ -1,21 +1,46 @@
-const { User } = require('../models/users.model.js');
-const { Role } = require('../models/roles.model.js');
-
-module.exports = function (requiredRole) {
-  return async (req, res, next) => {
-    try {
-      if (!req.user?.id) {
-        return res.status(403).json({ message: 'Access denied' });
-      }
-
-      const user = await User.findById(req.user.id).populate('roleId');
-      if (!user || !user.roleId || user.roleId.name !== requiredRole) {
-        return res.status(403).json({ message: 'Access denied' });
-      }
-      
-      next();
-    } catch (error) {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-  };
-}; 
+"use strict";
+/**
+ * Role-based Access Control Middleware
+ * Ensures users have the required role to access protected routes
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.requireRole = void 0;
+const requireRole = (requiredRole) => {
+    return async (req, res, next) => {
+        try {
+            if (!req.user?.id) {
+                res.status(403).json({
+                    success: false,
+                    error: {
+                        message: 'Access denied - No user information',
+                        code: 'NO_USER_INFO'
+                    }
+                });
+                return;
+            }
+            // Check role from JWT token (no database query needed)
+            if (!req.user.roleName || req.user.roleName !== requiredRole) {
+                res.status(403).json({
+                    success: false,
+                    error: {
+                        message: `Access denied - ${requiredRole} role required`,
+                        code: 'INSUFFICIENT_ROLE'
+                    }
+                });
+                return;
+            }
+            next();
+        }
+        catch (error) {
+            console.error('Role check error:', error);
+            res.status(403).json({
+                success: false,
+                error: {
+                    message: 'Access denied - Role verification failed',
+                    code: 'ROLE_VERIFICATION_FAILED'
+                }
+            });
+        }
+    };
+};
+exports.requireRole = requireRole;

@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Attributes Model - Extensible product attribute system
+ * Defines custom fields or properties that products can have
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -82,8 +86,8 @@ const attributeSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes
 attributeSchema.index({ 'name.en': 1 });
 attributeSchema.index({ 'name.de': 1 });
 attributeSchema.index({ type: 1, isDeleted: 1 });
 exports.Attribute = mongoose_1.default.model('Attribute', attributeSchema);
-//# sourceMappingURL=attributes.model.js.map

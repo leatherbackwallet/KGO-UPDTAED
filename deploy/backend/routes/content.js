@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Content Routes - Multi-Language Content Management System
+ * Handles cultural content, recipes, festival guides, and language learning
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -6,10 +10,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const content_model_1 = require("../models/content.model");
 const userPreferences_model_1 = require("../models/userPreferences.model");
-const authenticateToken = require('../middleware/auth.js');
-const { validate } = require('../middleware/validation.js');
+const auth_1 = require("../middleware/auth");
+const validation_1 = require("../middleware/validation");
 const zod_1 = require("zod");
 const router = express_1.default.Router();
+// Validation schemas
 const createContentSchema = zod_1.z.object({
     title: zod_1.z.object({
         en: zod_1.z.string().min(1),
@@ -30,6 +35,11 @@ const updateEngagementSchema = zod_1.z.object({
     shared: zod_1.z.boolean().optional(),
     commented: zod_1.z.boolean().optional(),
 });
+/**
+ * @route   GET /api/content
+ * @desc    Get content with filters
+ * @access  Public
+ */
 router.get('/', async (req, res) => {
     try {
         const { type, status = 'published', limit = 20, skip = 0, language, category, tags, } = req.query;
@@ -68,6 +78,11 @@ router.get('/', async (req, res) => {
         });
     }
 });
+/**
+ * @route   GET /api/content/recipes
+ * @desc    Get recipes with filters
+ * @access  Public
+ */
 router.get('/recipes', async (req, res) => {
     try {
         const { difficulty, cookingTime, dietaryTags, language, limit = 20, } = req.query;
@@ -107,6 +122,11 @@ router.get('/recipes', async (req, res) => {
         });
     }
 });
+/**
+ * @route   GET /api/content/festivals
+ * @desc    Get festival guides
+ * @access  Public
+ */
 router.get('/festivals', async (req, res) => {
     try {
         const { upcoming, language, region, limit = 20, } = req.query;
@@ -143,6 +163,11 @@ router.get('/festivals', async (req, res) => {
         });
     }
 });
+/**
+ * @route   GET /api/content/language
+ * @desc    Get language learning content
+ * @access  Public
+ */
 router.get('/language', async (req, res) => {
     try {
         const { language, difficulty, limit = 20, } = req.query;
@@ -175,12 +200,18 @@ router.get('/language', async (req, res) => {
         });
     }
 });
-router.get('/personalized', authenticateToken, async (req, res) => {
+/**
+ * @route   GET /api/content/personalized
+ * @desc    Get personalized content recommendations
+ * @access  Private
+ */
+router.get('/personalized', auth_1.auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const { limit = 10 } = req.query;
         const userPrefs = await userPreferences_model_1.UserPreferences.findOne({ userId });
         if (!userPrefs) {
+            // Return popular content if no preferences
             const popularContent = await content_model_1.Content.find({
                 status: content_model_1.ContentStatus.PUBLISHED,
                 isDeleted: false
@@ -197,9 +228,11 @@ router.get('/personalized', authenticateToken, async (req, res) => {
             status: content_model_1.ContentStatus.PUBLISHED,
             isDeleted: false,
         };
+        // Add cultural preferences
         if (userPrefs.culturalPreferences && userPrefs.culturalPreferences.festivalPreferences && userPrefs.culturalPreferences.festivalPreferences.length > 0) {
             query.tags = { $in: userPrefs.culturalPreferences.festivalPreferences };
         }
+        // Add dietary preferences for recipes
         if (userPrefs.culturalPreferences && userPrefs.culturalPreferences.dietaryRestrictions && userPrefs.culturalPreferences.dietaryRestrictions.length > 0) {
             query['recipe.dietaryTags'] = { $in: userPrefs.culturalPreferences.dietaryRestrictions };
         }
@@ -224,6 +257,11 @@ router.get('/personalized', authenticateToken, async (req, res) => {
         });
     }
 });
+/**
+ * @route   GET /api/content/:id
+ * @desc    Get content by ID
+ * @access  Public
+ */
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -253,9 +291,15 @@ router.get('/:id', async (req, res) => {
         });
     }
 });
-router.post('/', authenticateToken, validate(createContentSchema), async (req, res) => {
+/**
+ * @route   POST /api/content
+ * @desc    Create new content
+ * @access  Private (Admin)
+ */
+router.post('/', auth_1.auth, (0, validation_1.validate)(createContentSchema), async (req, res) => {
     try {
-        if (req.user.role !== 'admin') {
+        // Check if user is admin
+        if (req.user.roleName !== 'admin') {
             return res.status(403).json({
                 success: false,
                 error: {
@@ -307,7 +351,12 @@ router.post('/', authenticateToken, validate(createContentSchema), async (req, r
         });
     }
 });
-router.put('/:id/engagement', validate(updateEngagementSchema), async (req, res) => {
+/**
+ * @route   PUT /api/content/:id/engagement
+ * @desc    Update content engagement metrics
+ * @access  Public
+ */
+router.put('/:id/engagement', (0, validation_1.validate)(updateEngagementSchema), async (req, res) => {
     try {
         const { id } = req.params;
         const engagementData = req.body;
@@ -321,13 +370,16 @@ router.put('/:id/engagement', validate(updateEngagementSchema), async (req, res)
                 },
             });
         }
+        // Update views
         content.engagement.views += 1;
+        // Update average time on page
         if (engagementData.viewTime) {
             const currentAvg = content.engagement.averageTimeOnPage;
             const totalViews = content.engagement.views;
             content.engagement.averageTimeOnPage =
                 ((currentAvg * (totalViews - 1)) + engagementData.viewTime) / totalViews;
         }
+        // Update other metrics
         if (engagementData.liked)
             content.engagement.likes += 1;
         if (engagementData.shared)
@@ -352,6 +404,11 @@ router.put('/:id/engagement', validate(updateEngagementSchema), async (req, res)
         });
     }
 });
+/**
+ * @route   GET /api/content/search/:term
+ * @desc    Search content
+ * @access  Public
+ */
 router.get('/search/:term', async (req, res) => {
     try {
         const { term } = req.params;
@@ -392,9 +449,15 @@ router.get('/search/:term', async (req, res) => {
         });
     }
 });
-router.get('/analytics', authenticateToken, async (req, res) => {
+/**
+ * @route   GET /api/content/analytics
+ * @desc    Get content analytics (Admin only)
+ * @access  Private (Admin)
+ */
+router.get('/analytics', auth_1.auth, async (req, res) => {
     try {
-        if (req.user.role !== 'admin') {
+        // Check if user is admin
+        if (req.user.roleName !== 'admin') {
             return res.status(403).json({
                 success: false,
                 error: {
@@ -447,4 +510,3 @@ router.get('/analytics', authenticateToken, async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=content.js.map

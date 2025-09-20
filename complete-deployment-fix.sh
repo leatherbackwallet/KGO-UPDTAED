@@ -109,6 +109,7 @@ cp -r public deploy/backend/ 2>/dev/null || true
 
 # Install backend dependencies
 cd deploy/backend
+rm -f package-lock.json
 npm install --production
 cd ../..
 
@@ -116,6 +117,58 @@ cd ../..
 print_status "Phase 6: Preparing frontend deployment..."
 cp -r frontend/.next deploy/frontend/
 cp -r frontend/public deploy/frontend/ 2>/dev/null || true
+
+# Ensure correct package.json for backend
+cat > deploy/backend/package.json << 'EOF'
+{
+  "name": "keralagiftsonline-backend-deploy",
+  "version": "3.0.0",
+  "description": "KeralGiftsOnline.com Backend Deployment Package",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.41.3",
+    "compression": "^1.7.4",
+    "connect-mongo": "^5.0.0",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
+    "csv-parser": "^3.0.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-async-handler": "^1.2.0",
+    "express-fileupload": "^1.4.0",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^6.10.0",
+    "express-session": "^1.17.3",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "mongoose": "^7.5.0",
+    "multer": "^1.4.5-lts.1",
+    "multer-storage-cloudinary": "^4.0.0",
+    "node-cache": "^5.1.2",
+    "node-cron": "^3.0.2",
+    "nodemailer": "^6.9.4",
+    "puppeteer": "^24.22.0",
+    "qrcode": "^1.5.3",
+    "razorpay": "^2.9.6",
+    "speakeasy": "^2.0.0",
+    "uuid": "^9.0.0",
+    "winston": "^3.10.0",
+    "zod": "^3.21.4"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
+EOF
 
 # Ensure correct package.json for frontend
 cat > deploy/frontend/package.json << 'EOF'

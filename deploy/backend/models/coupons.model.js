@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Coupon Model - Promotional coupon and discount management
+ * Handles percentage, fixed amount, and free shipping coupons with validation rules
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,12 +39,14 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Coupon = exports.CouponType = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// Coupon type enum
 var CouponType;
 (function (CouponType) {
     CouponType["PERCENTAGE"] = "percentage";
     CouponType["FIXED_AMOUNT"] = "fixed_amount";
     CouponType["FREE_SHIPPING"] = "free_shipping";
 })(CouponType || (exports.CouponType = CouponType = {}));
+// Coupon schema definition
 const couponSchema = new mongoose_1.Schema({
     code: {
         type: String,
@@ -98,9 +104,11 @@ const couponSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 couponSchema.index({ code: 1 });
 couponSchema.index({ isActive: 1, validUntil: 1 });
 couponSchema.index({ type: 1, isActive: 1 });
+// Virtual for discount calculation
 couponSchema.virtual('calculateDiscount').get(function (orderAmount) {
     if (!this.isActive || new Date() > this.validUntil) {
         return 0;
@@ -114,15 +122,18 @@ couponSchema.virtual('calculateDiscount').get(function (orderAmount) {
         case CouponType.FIXED_AMOUNT:
             return Math.min(this.value, orderAmount);
         case CouponType.FREE_SHIPPING:
-            return 0;
+            return 0; // Free shipping logic handled separately
         default:
             return 0;
     }
 });
+// Virtual for coupon status
 couponSchema.virtual('isValid').get(function () {
     return this.isActive && new Date() < this.validUntil;
 });
+// Ensure virtual fields are serialized
 couponSchema.set('toJSON', { virtuals: true });
+// Pre-save middleware to validate coupon code uniqueness
 couponSchema.pre('save', async function (next) {
     if (this.isNew || this.isModified('code')) {
         const existing = await mongoose_1.default.model('Coupon').findOne({
@@ -136,4 +147,3 @@ couponSchema.pre('save', async function (next) {
     next();
 });
 exports.Coupon = mongoose_1.default.model('Coupon', couponSchema);
-//# sourceMappingURL=coupons.model.js.map

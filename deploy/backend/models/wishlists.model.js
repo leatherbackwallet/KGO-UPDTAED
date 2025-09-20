@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Wishlist Model - User product wishlist management
+ * Allows users to save products for future purchase consideration
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,6 +39,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Wishlist = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// Wishlist schema definition
 const wishlistSchema = new mongoose_1.Schema({
     userId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -50,15 +55,20 @@ const wishlistSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 wishlistSchema.index({ userId: 1 });
 wishlistSchema.index({ products: 1 });
+// Virtual for product count
 wishlistSchema.virtual('productCount').get(function () {
     return this.products.length;
 });
+// Virtual for is empty
 wishlistSchema.virtual('isEmpty').get(function () {
     return this.products.length === 0;
 });
+// Ensure virtual fields are serialized
 wishlistSchema.set('toJSON', { virtuals: true });
+// Pre-save middleware to remove duplicate products
 wishlistSchema.pre('save', function (next) {
     if (this.products) {
         this.products = [...new Set(this.products.map(id => id.toString()))].map(id => new mongoose_1.default.Types.ObjectId(id));
@@ -66,4 +76,3 @@ wishlistSchema.pre('save', function (next) {
     next();
 });
 exports.Wishlist = mongoose_1.default.model('Wishlist', wishlistSchema);
-//# sourceMappingURL=wishlists.model.js.map

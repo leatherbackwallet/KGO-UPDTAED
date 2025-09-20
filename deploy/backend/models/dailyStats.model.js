@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * DailyStats Model - Business Intelligence reporting and analytics
+ * Tracks daily metrics, top performers, and provides data for business insights
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,6 +39,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DailyStats = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// DailyStats schema definition
 const dailyStatsSchema = new mongoose_1.Schema({
     date: {
         type: Date,
@@ -79,7 +84,7 @@ const dailyStatsSchema = new mongoose_1.Schema({
         default: [],
         validate: {
             validator: function (products) {
-                return products.length <= 10;
+                return products.length <= 10; // Limit to top 10
             },
             message: 'Cannot have more than 10 top selling products'
         }
@@ -106,7 +111,7 @@ const dailyStatsSchema = new mongoose_1.Schema({
         default: [],
         validate: {
             validator: function (vendors) {
-                return vendors.length <= 10;
+                return vendors.length <= 10; // Limit to top 10
             },
             message: 'Cannot have more than 10 top performing vendors'
         }
@@ -114,23 +119,28 @@ const dailyStatsSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 dailyStatsSchema.index({ date: 1 });
 dailyStatsSchema.index({ totalSales: -1 });
 dailyStatsSchema.index({ totalOrders: -1 });
 dailyStatsSchema.index({ newUsers: -1 });
+// Compound index for date range queries
 dailyStatsSchema.index({ date: 1, totalSales: -1 });
+// Virtual for average order value
 dailyStatsSchema.virtual('averageOrderValue').get(function () {
     if (this.totalOrders > 0) {
         return this.totalSales / this.totalOrders;
     }
     return 0;
 });
+// Virtual for conversion rate (orders per user)
 dailyStatsSchema.virtual('conversionRate').get(function () {
     if (this.newUsers > 0) {
         return (this.totalOrders / this.newUsers) * 100;
     }
     return 0;
 });
+// Virtual for stats summary
 dailyStatsSchema.virtual('summary').get(function () {
     const averageOrderValue = this.totalOrders > 0 ? this.totalSales / this.totalOrders : 0;
     const conversionRate = this.newUsers > 0 ? (this.totalOrders / this.newUsers) * 100 : 0;
@@ -143,22 +153,29 @@ dailyStatsSchema.virtual('summary').get(function () {
         conversionRate
     };
 });
+// Ensure virtual fields are serialized
 dailyStatsSchema.set('toJSON', { virtuals: true });
+// Pre-save middleware to validate date format
 dailyStatsSchema.pre('save', function (next) {
+    // Ensure date is set to start of day
     if (this.date) {
         this.date = new Date(this.date.getFullYear(), this.date.getMonth(), this.date.getDate());
     }
     next();
 });
+// Pre-save middleware to sort top performers
 dailyStatsSchema.pre('save', function (next) {
+    // Sort top selling products by units sold
     if (this.topSellingProducts) {
         this.topSellingProducts.sort((a, b) => b.unitsSold - a.unitsSold);
     }
+    // Sort top performing vendors by revenue
     if (this.topPerformingVendors) {
         this.topPerformingVendors.sort((a, b) => b.totalRevenue - a.totalRevenue);
     }
     next();
 });
+// Static method to get stats for date range
 dailyStatsSchema.statics.getStatsForRange = function (startDate, endDate) {
     return this.find({
         date: {
@@ -167,8 +184,8 @@ dailyStatsSchema.statics.getStatsForRange = function (startDate, endDate) {
         }
     }).sort({ date: 1 });
 };
+// Static method to get latest stats
 dailyStatsSchema.statics.getLatestStats = function () {
     return this.findOne().sort({ date: -1 });
 };
 exports.DailyStats = mongoose_1.default.model('DailyStats', dailyStatsSchema);
-//# sourceMappingURL=dailyStats.model.js.map

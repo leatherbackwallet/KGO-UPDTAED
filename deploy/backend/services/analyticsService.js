@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Analytics Service - Advanced Business Intelligence and Data Analytics
+ * Provides comprehensive insights for data-driven decision making
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -8,18 +12,24 @@ const analytics_model_1 = require("../models/analytics.model");
 const users_model_1 = require("../models/users.model");
 const products_model_1 = require("../models/products.model");
 const orders_model_1 = require("../models/orders.model");
+const roles_model_1 = require("../models/roles.model");
 const vendors_model_1 = require("../models/vendors.model");
 const supportTickets_model_1 = require("../models/supportTickets.model");
 const mongoose_1 = __importDefault(require("mongoose"));
 class AnalyticsService {
+    /**
+     * Generate comprehensive analytics for a given date range
+     */
     async generateAnalytics(startDate, endDate) {
         try {
+            // Check if analytics already exist for this date
             const existingAnalytics = await analytics_model_1.Analytics.findOne({
                 date: { $gte: startDate, $lte: endDate }
             });
             if (existingAnalytics) {
                 return existingAnalytics;
             }
+            // Generate new analytics
             const analytics = new analytics_model_1.Analytics({
                 date: new Date(),
                 customerAnalytics: await this.generateCustomerAnalytics(startDate, endDate),
@@ -40,18 +50,25 @@ class AnalyticsService {
             throw error;
         }
     }
+    /**
+     * Generate customer analytics
+     */
     async generateCustomerAnalytics(startDate, endDate) {
+        // Get admin role ID to exclude from customer count
+        const adminRole = await roles_model_1.Role.findOne({ name: 'admin' });
+        const adminRoleId = adminRole?._id;
         const totalCustomers = await users_model_1.User.countDocuments({
-            roleId: { $ne: 'admin' },
+            ...(adminRoleId && { roleId: { $ne: adminRoleId } }),
             createdAt: { $lte: endDate }
         });
         const newCustomers = await users_model_1.User.countDocuments({
-            roleId: { $ne: 'admin' },
+            ...(adminRoleId && { roleId: { $ne: adminRoleId } }),
             createdAt: { $gte: startDate, $lte: endDate }
         });
         const returningCustomers = await this.getReturningCustomers(startDate, endDate);
         const churnRate = await this.calculateChurnRate(startDate, endDate);
         const customerLifetimeValue = await this.calculateCustomerLifetimeValue();
+        // Customer segmentation
         const customerSegments = await this.generateCustomerSegments();
         return {
             totalCustomers,
@@ -63,6 +80,9 @@ class AnalyticsService {
             customerSegments
         };
     }
+    /**
+     * Generate product analytics
+     */
     async generateProductAnalytics(startDate, endDate) {
         const totalProducts = await products_model_1.Product.countDocuments({ isDeleted: false });
         const topSellingProducts = await this.getTopSellingProducts(startDate, endDate);
@@ -75,6 +95,9 @@ class AnalyticsService {
             inventoryAnalytics
         };
     }
+    /**
+     * Generate sales analytics
+     */
     async generateSalesAnalytics(startDate, endDate) {
         const orders = await orders_model_1.Order.find({
             createdAt: { $gte: startDate, $lte: endDate }
@@ -96,6 +119,9 @@ class AnalyticsService {
             seasonalTrends
         };
     }
+    /**
+     * Generate marketing analytics
+     */
     async generateMarketingAnalytics(startDate, endDate) {
         const campaignPerformance = await this.getCampaignPerformance(startDate, endDate);
         const promotionEffectiveness = await this.getPromotionEffectiveness(startDate, endDate);
@@ -108,6 +134,9 @@ class AnalyticsService {
             customerRetentionCost
         };
     }
+    /**
+     * Generate operational analytics
+     */
     async generateOperationalAnalytics(startDate, endDate) {
         const deliveryPerformance = await this.getDeliveryPerformance(startDate, endDate);
         const vendorPerformance = await this.getVendorPerformance(startDate, endDate);
@@ -118,6 +147,9 @@ class AnalyticsService {
             supportAnalytics
         };
     }
+    /**
+     * Generate financial analytics
+     */
     async generateFinancialAnalytics(startDate, endDate) {
         const orders = await orders_model_1.Order.find({
             createdAt: { $gte: startDate, $lte: endDate }
@@ -134,9 +166,9 @@ class AnalyticsService {
         const revenueBySource = await this.getRevenueBySource(startDate, endDate);
         return {
             grossProfit,
-            netProfit: grossProfit,
+            netProfit: grossProfit, // Simplified for now
             profitMargin,
-            operatingExpenses: totalCost * 0.3,
+            operatingExpenses: totalCost * 0.3, // Estimate
             cashFlow: {
                 inflow: totalRevenue,
                 outflow: totalCost,
@@ -145,6 +177,9 @@ class AnalyticsService {
             revenueBySource
         };
     }
+    /**
+     * Generate cultural analytics
+     */
     async generateCulturalAnalytics(startDate, endDate) {
         const festivalPerformance = await this.getFestivalPerformance(startDate, endDate);
         const languagePreferences = await this.getLanguagePreferences();
@@ -155,6 +190,9 @@ class AnalyticsService {
             traditionalVsModern
         };
     }
+    /**
+     * Generate predictive analytics
+     */
     async generatePredictiveAnalytics(startDate, endDate) {
         const demandForecast = await this.generateDemandForecast();
         const churnPrediction = await this.generateChurnPrediction();
@@ -165,6 +203,9 @@ class AnalyticsService {
             revenueForecast
         };
     }
+    /**
+     * Generate real-time metrics
+     */
     async generateRealTimeMetrics() {
         const activeUsers = await this.getActiveUsers();
         const currentOrders = await this.getCurrentOrders();
@@ -180,6 +221,7 @@ class AnalyticsService {
             }
         };
     }
+    // Helper methods for specific analytics calculations
     async getReturningCustomers(startDate, endDate) {
         const orders = await orders_model_1.Order.find({
             createdAt: { $gte: startDate, $lte: endDate }
@@ -198,15 +240,18 @@ class AnalyticsService {
         return returningCustomers;
     }
     async calculateChurnRate(startDate, endDate) {
+        // Get admin role ID to exclude from customer count
+        const adminRole = await roles_model_1.Role.findOne({ name: 'admin' });
+        const adminRoleId = adminRole?._id;
         const totalCustomers = await users_model_1.User.countDocuments({
-            roleId: { $ne: 'admin' },
+            ...(adminRoleId && { roleId: { $ne: adminRoleId } }),
             createdAt: { $lte: startDate }
         });
         const churnedCustomers = await this.getChurnedCustomers(startDate, endDate);
         return totalCustomers > 0 ? (churnedCustomers / totalCustomers) * 100 : 0;
     }
     async getChurnedCustomers(startDate, endDate) {
-        const cutoffDate = new Date(startDate.getTime() - (90 * 24 * 60 * 60 * 1000));
+        const cutoffDate = new Date(startDate.getTime() - (90 * 24 * 60 * 60 * 1000)); // 90 days ago
         const activeCustomers = await orders_model_1.Order.distinct('userId', {
             createdAt: { $gte: cutoffDate, $lt: startDate }
         });
@@ -234,6 +279,7 @@ class AnalyticsService {
             { segment: 'Medium Value', count: 0, averageOrderValue: 0, retentionRate: 0 },
             { segment: 'Low Value', count: 0, averageOrderValue: 0, retentionRate: 0 }
         ];
+        // This would be implemented with actual customer data analysis
         return segments;
     }
     async getTopSellingProducts(startDate, endDate) {
@@ -266,12 +312,13 @@ class AnalyticsService {
             name: data.name,
             unitsSold: data.units,
             revenue: data.revenue,
-            profitMargin: 0.25
+            profitMargin: 0.25 // Estimate
         }))
             .sort((a, b) => b.unitsSold - a.unitsSold)
             .slice(0, 10);
     }
     async getCategoryPerformance(startDate, endDate) {
+        // Implementation for category performance analysis
         return [];
     }
     async getInventoryAnalytics() {
@@ -281,15 +328,17 @@ class AnalyticsService {
         return {
             lowStockItems,
             outOfStockItems,
-            overstockedItems: 0,
-            inventoryTurnover: 4.5
+            overstockedItems: 0, // Would need business logic to define
+            inventoryTurnover: 4.5 // Estimate
         };
     }
     async calculateConversionRate(startDate, endDate) {
-        return 15.5;
+        // This would require tracking page views and purchases
+        return 15.5; // Estimate
     }
     async calculateCartAbandonmentRate(startDate, endDate) {
-        return 68.5;
+        // This would require tracking cart additions and purchases
+        return 68.5; // Estimate
     }
     async getSalesByChannel(startDate, endDate) {
         return [
@@ -334,9 +383,11 @@ class AnalyticsService {
         ];
     }
     async calculateCustomerAcquisitionCost(startDate, endDate) {
+        // This would require marketing spend data
         return 45;
     }
     async calculateCustomerRetentionCost(startDate, endDate) {
+        // This would require retention campaign spend data
         return 25;
     }
     async getDeliveryPerformance(startDate, endDate) {
@@ -462,9 +513,12 @@ class AnalyticsService {
         const uniqueCustomers = customerOrderCounts.size;
         return uniqueCustomers > 0 ? totalOrders / uniqueCustomers : 0;
     }
+    /**
+     * Get analytics summary for dashboard
+     */
     async getAnalyticsSummary() {
         const endDate = new Date();
-        const startDate = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const startDate = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000); // Last 30 days
         const analytics = await this.generateAnalytics(startDate, endDate);
         return {
             customerMetrics: {
@@ -500,4 +554,3 @@ class AnalyticsService {
     }
 }
 exports.analyticsService = new AnalyticsService();
-//# sourceMappingURL=analyticsService.js.map

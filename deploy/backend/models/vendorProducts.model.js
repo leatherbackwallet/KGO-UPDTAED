@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * VendorProduct Model - Vendor-specific product pricing and tax information
+ * Links vendors to products with custom pricing, HSN codes, and tax rates
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,6 +39,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VendorProduct = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// VendorProduct schema definition
 const vendorProductSchema = new mongoose_1.Schema({
     vendorId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -64,7 +69,7 @@ const vendorProductSchema = new mongoose_1.Schema({
         required: [true, 'Tax rate is required'],
         min: [0, 'Tax rate cannot be negative'],
         max: [100, 'Tax rate cannot exceed 100%'],
-        enum: [0, 5, 12, 18, 28]
+        enum: [0, 5, 12, 18, 28] // Common GST rates in India
     },
     stockType: {
         type: String,
@@ -83,17 +88,23 @@ const vendorProductSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Compound index for vendor-product uniqueness and performance
 vendorProductSchema.index({ vendorId: 1, productId: 1 }, { unique: true });
+// Indexes for performance
 vendorProductSchema.index({ productId: 1, isActive: 1 });
 vendorProductSchema.index({ vendorId: 1, isActive: 1 });
 vendorProductSchema.index({ price: 1 });
+// Virtual for tax amount
 vendorProductSchema.virtual('taxAmount').get(function () {
     return (this.price * this.taxRate) / 100;
 });
+// Virtual for total price with tax
 vendorProductSchema.virtual('totalPrice').get(function () {
     return this.price + ((this.price * this.taxRate) / 100);
 });
+// Ensure virtual fields are serialized
 vendorProductSchema.set('toJSON', { virtuals: true });
+// Pre-save middleware to validate unique vendor-product combination
 vendorProductSchema.pre('save', async function (next) {
     if (this.isNew || this.isModified('vendorId') || this.isModified('productId')) {
         const existing = await mongoose_1.default.model('VendorProduct').findOne({
@@ -108,4 +119,3 @@ vendorProductSchema.pre('save', async function (next) {
     next();
 });
 exports.VendorProduct = mongoose_1.default.model('VendorProduct', vendorProductSchema);
-//# sourceMappingURL=vendorProducts.model.js.map

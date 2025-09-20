@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Subscriptions Model - Premium membership and loyalty program
+ * Provides recurring revenue through subscription tiers and loyalty rewards
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -216,6 +220,7 @@ const subscriptionSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Generate referral code before saving
 subscriptionSchema.pre('save', function (next) {
     if (this.isNew && !this.referrals.referralCode) {
         const timestamp = Date.now().toString(36);
@@ -224,9 +229,9 @@ subscriptionSchema.pre('save', function (next) {
     }
     next();
 });
+// Indexes for performance
 subscriptionSchema.index({ userId: 1 });
 subscriptionSchema.index({ tier: 1, status: 1 });
 subscriptionSchema.index({ 'referrals.referralCode': 1 });
 subscriptionSchema.index({ 'billing.nextBillingDate': 1 });
 exports.Subscription = mongoose_1.default.model('Subscription', subscriptionSchema);
-//# sourceMappingURL=subscriptions.model.js.map

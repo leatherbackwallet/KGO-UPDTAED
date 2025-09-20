@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Categories Model - Product categorization with internationalized content
+ * Supports hierarchical categories and multilingual content
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -71,6 +75,7 @@ const categorySchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Generate slug from name before saving
 categorySchema.pre('save', function (next) {
     if (this.isModified('name') && !this.slug) {
         this.slug = this.name
@@ -80,9 +85,9 @@ categorySchema.pre('save', function (next) {
     }
     next();
 });
+// Indexes
 categorySchema.index({ parentCategory: 1 });
 categorySchema.index({ sortOrder: 1 });
 categorySchema.index({ isActive: 1, isDeleted: 1 });
 categorySchema.index({ 'name': 'text' });
 exports.Category = mongoose_1.default.model('Category', categorySchema);
-//# sourceMappingURL=categories.model.js.map

@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Returns Model - Return Merchandise Authorization (RMA) workflows
+ * Manages the complete return process from request to resolution
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -88,14 +92,15 @@ const returnSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Generate returnId before saving
 returnSchema.pre('save', function (next) {
     if (this.isNew && !this.returnId) {
         this.returnId = `RMA-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     }
     next();
 });
+// Indexes
 returnSchema.index({ orderId: 1, status: 1 });
 returnSchema.index({ userId: 1, status: 1 });
 returnSchema.index({ createdAt: -1 });
 exports.Return = mongoose_1.default.model('Return', returnSchema);
-//# sourceMappingURL=returns.model.js.map

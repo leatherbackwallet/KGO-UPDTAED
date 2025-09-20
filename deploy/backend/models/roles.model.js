@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Roles Model - Role-Based Access Control (RBAC) definitions
+ * Defines user roles and their associated permissions
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -62,7 +66,7 @@ const roleSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes
 roleSchema.index({ name: 1 });
 roleSchema.index({ isActive: 1, isDeleted: 1 });
 exports.Role = mongoose_1.default.model('Role', roleSchema);
-//# sourceMappingURL=roles.model.js.map

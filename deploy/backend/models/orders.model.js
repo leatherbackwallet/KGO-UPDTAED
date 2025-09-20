@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Orders Model - Parent order management with shipment and promotion support
+ * Orders can be fulfilled by one or more shipments
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,6 +39,28 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Order = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+const comboItemConfigurationSchema = new mongoose_1.Schema({
+    name: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    unitPrice: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    quantity: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    unit: {
+        type: String,
+        required: true,
+        trim: true
+    }
+});
 const orderItemSchema = new mongoose_1.Schema({
     productId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -53,7 +79,18 @@ const orderItemSchema = new mongoose_1.Schema({
     },
     personalizationOptions: {
         type: mongoose_1.Schema.Types.Mixed
-    }
+    },
+    // Combo-specific fields
+    isCombo: {
+        type: Boolean,
+        default: false
+    },
+    comboBasePrice: {
+        type: Number,
+        min: 0,
+        default: 0
+    },
+    comboItemConfigurations: [comboItemConfigurationSchema]
 });
 const shippingDetailsSchema = new mongoose_1.Schema({
     recipientName: {
@@ -122,28 +159,27 @@ const orderSchema = new mongoose_1.Schema({
         unique: true
     },
     userId: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'User',
+        type: mongoose_1.Schema.Types.Mixed, // Allow both ObjectId and string for guest users
         required: true
     },
     requestedDeliveryDate: {
         type: Date,
-        required: true
+        required: false // Make optional for guest users
     },
     shippingDetails: {
         type: shippingDetailsSchema,
-        required: true
+        required: false // Make optional for guest users
     },
     orderItems: [orderItemSchema],
     totalPrice: {
         type: Number,
-        required: true,
+        required: false, // Make optional, will be calculated
         min: 0
     },
     orderStatus: {
         type: String,
-        enum: ['payment_done', 'order_received', 'collecting_items', 'packing', 'en_route', 'delivered', 'cancelled'],
-        default: 'payment_done'
+        enum: ['pending', 'payment_done', 'order_received', 'collecting_items', 'packing', 'en_route', 'delivered', 'cancelled'],
+        default: 'pending'
     },
     statusHistory: [statusHistorySchema],
     promotionId: {
@@ -158,10 +194,93 @@ const orderSchema = new mongoose_1.Schema({
     isDeleted: {
         type: Boolean,
         default: false
-    }
+    },
+    // Razorpay payment fields
+    razorpayOrderId: {
+        type: String,
+        trim: true
+    },
+    razorpayPaymentId: {
+        type: String,
+        trim: true
+    },
+    razorpaySignature: {
+        type: String,
+        trim: true
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'captured', 'failed', 'refunded'],
+        default: 'pending'
+    },
+    paymentDate: {
+        type: Date
+    },
+    paymentVerifiedAt: {
+        type: Date
+    },
+    // Comprehensive Razorpay transaction tracking
+    razorpayPaymentDetails: {
+        type: mongoose_1.Schema.Types.Mixed
+    },
+    razorpayOrderDetails: {
+        type: mongoose_1.Schema.Types.Mixed
+    },
+    // Additional tracking fields for better transaction monitoring
+    transactionId: {
+        type: String,
+        trim: true
+    },
+    paymentMethod: {
+        type: String,
+        trim: true
+    },
+    paymentGateway: {
+        type: String,
+        default: 'razorpay'
+    },
+    currency: {
+        type: String,
+        default: 'INR'
+    },
+    amountPaid: {
+        type: Number,
+        min: 0
+    },
+    amountRefunded: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
+    refundStatus: {
+        type: String,
+        enum: ['none', 'partial', 'full'],
+        default: 'none'
+    },
+    refundDetails: {
+        type: mongoose_1.Schema.Types.Mixed
+    },
+    failureReason: {
+        type: String
+    },
+    stockRestored: {
+        type: Boolean,
+        default: false
+    },
+    // Webhook tracking
+    webhookReceived: {
+        type: Boolean,
+        default: false
+    },
+    webhookEvents: [{
+            event: String,
+            timestamp: Date,
+            data: mongoose_1.Schema.Types.Mixed
+        }]
 }, {
     timestamps: true
 });
+// Generate orderId before saving
 orderSchema.pre('save', function (next) {
     if (this.isNew && !this.orderId) {
         const timestamp = Date.now();
@@ -170,6 +289,7 @@ orderSchema.pre('save', function (next) {
     }
     next();
 });
+// Add status to history when status changes
 orderSchema.pre('save', function (next) {
     if (this.isModified('orderStatus')) {
         this.statusHistory.push({
@@ -179,10 +299,10 @@ orderSchema.pre('save', function (next) {
     }
     next();
 });
+// Indexes
 orderSchema.index({ userId: 1 });
 orderSchema.index({ orderStatus: 1, isDeleted: 1 });
 orderSchema.index({ requestedDeliveryDate: 1 });
 orderSchema.index({ promotionId: 1 });
 orderSchema.index({ createdAt: -1 });
 exports.Order = mongoose_1.default.model('Order', orderSchema);
-//# sourceMappingURL=orders.model.js.map

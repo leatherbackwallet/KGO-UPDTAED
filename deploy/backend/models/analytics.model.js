@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Analytics Model - Advanced Business Intelligence and Data Analytics
+ * Provides comprehensive insights for data-driven decision making
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -209,8 +213,8 @@ const analyticsSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 analyticsSchema.index({ date: 1 });
 analyticsSchema.index({ 'customerAnalytics.totalCustomers': 1 });
 analyticsSchema.index({ 'salesAnalytics.totalRevenue': 1 });
 exports.Analytics = mongoose_1.default.model('Analytics', analyticsSchema);
-//# sourceMappingURL=analytics.model.js.map

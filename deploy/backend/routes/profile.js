@@ -1,4 +1,7 @@
 "use strict";
+/**
+ * Profile Routes - User profile management including avatar, password reset, and address management
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -10,11 +13,13 @@ const hash_1 = require("../utils/hash");
 const fileUpload_1 = require("../utils/fileUpload");
 const database_1 = require("../middleware/database");
 const router = express_1.default.Router();
-const auth = require('../middleware/auth.js');
+// Import auth middleware with proper typing
+const auth_1 = require("../middleware/auth");
+// Configure multer for file uploads
 const upload = (0, multer_1.default)({
     storage: multer_1.default.memoryStorage(),
     limits: {
-        fileSize: 5 * 1024 * 1024,
+        fileSize: 5 * 1024 * 1024, // 5MB limit
     },
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('image/')) {
@@ -25,7 +30,8 @@ const upload = (0, multer_1.default)({
         }
     },
 });
-router.get('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
+// Get user profile
+router.get('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -55,7 +61,8 @@ router.get('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
         });
     }
 });
-router.put('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
+// Update user profile
+router.put('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -90,7 +97,8 @@ router.put('/', auth, database_1.ensureDatabaseConnection, async (req, res) => {
         });
     }
 });
-router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
+// Upload avatar
+router.post('/avatar', auth_1.auth, upload.single('avatar'), async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -111,6 +119,7 @@ router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
                 error: { message: 'User not found', code: 'USER_NOT_FOUND' }
             });
         }
+        // Delete old avatar if exists
         if (user.avatar) {
             try {
                 await (0, fileUpload_1.deleteImage)(user.avatar);
@@ -119,6 +128,7 @@ router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
                 console.warn('Failed to delete old avatar:', deleteErr);
             }
         }
+        // Upload new avatar
         const uploadResult = await (0, fileUpload_1.uploadImage)(req.file);
         user.avatar = uploadResult.filename;
         await user.save();
@@ -135,7 +145,8 @@ router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
         });
     }
 });
-router.delete('/avatar', auth, async (req, res) => {
+// Delete avatar
+router.delete('/avatar', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -173,7 +184,8 @@ router.delete('/avatar', auth, async (req, res) => {
         });
     }
 });
-router.put('/password', auth, async (req, res) => {
+// Change password
+router.put('/password', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -201,6 +213,7 @@ router.put('/password', auth, async (req, res) => {
                 error: { message: 'User not found', code: 'USER_NOT_FOUND' }
             });
         }
+        // Verify current password
         const isMatch = await (0, hash_1.comparePassword)(currentPassword, user.password);
         if (!isMatch) {
             return res.status(400).json({
@@ -208,6 +221,7 @@ router.put('/password', auth, async (req, res) => {
                 error: { message: 'Current password is incorrect', code: 'INVALID_PASSWORD' }
             });
         }
+        // Hash new password
         const hashedPassword = await (0, hash_1.hashPassword)(newPassword);
         user.password = hashedPassword;
         await user.save();
@@ -224,12 +238,22 @@ router.put('/password', auth, async (req, res) => {
         });
     }
 });
-router.get('/addresses', auth, async (req, res) => {
+// Get user addresses
+router.get('/addresses', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
                 success: false,
                 error: { message: 'User not authenticated', code: 'NOT_AUTHENTICATED' }
+            });
+        }
+        // Handle guest users - they don't have addresses in the database
+        if (req.user.id.toString().startsWith('guest_')) {
+            return res.json({
+                success: true,
+                data: {
+                    addresses: []
+                }
             });
         }
         const user = await index_1.User.findById(req.user.id).select('recipientAddresses');
@@ -241,7 +265,9 @@ router.get('/addresses', auth, async (req, res) => {
         }
         return res.json({
             success: true,
-            data: user.recipientAddresses || []
+            data: {
+                addresses: user.recipientAddresses || []
+            }
         });
     }
     catch (err) {
@@ -252,12 +278,20 @@ router.get('/addresses', auth, async (req, res) => {
         });
     }
 });
-router.post('/addresses', auth, async (req, res) => {
+// Add new address
+router.post('/addresses', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
                 success: false,
                 error: { message: 'User not authenticated', code: 'NOT_AUTHENTICATED' }
+            });
+        }
+        // Handle guest users - they can't save addresses to database
+        if (req.user.id.toString().startsWith('guest_')) {
+            return res.status(403).json({
+                success: false,
+                error: { message: 'Guest users cannot save addresses. Please register to save addresses.', code: 'GUEST_NOT_ALLOWED' }
             });
         }
         const { name, phone, streetName, houseNumber, postalCode, city, countryCode = 'DE', additionalInstructions = '', isDefault = false } = req.body;
@@ -267,6 +301,7 @@ router.post('/addresses', auth, async (req, res) => {
                 error: { message: 'All address fields are required', code: 'MISSING_FIELDS' }
             });
         }
+        // Validate postal code format (basic validation for international addresses)
         if (postalCode && !/^[A-Z0-9\s-]{3,10}$/i.test(postalCode)) {
             return res.status(400).json({
                 success: false,
@@ -280,14 +315,17 @@ router.post('/addresses', auth, async (req, res) => {
                 error: { message: 'User not found', code: 'USER_NOT_FOUND' }
             });
         }
+        // Initialize recipientAddresses array if it doesn't exist
         if (!user.recipientAddresses) {
             user.recipientAddresses = [];
         }
+        // If this is the first address or isDefault is true, unset all other defaults
         if (isDefault || user.recipientAddresses.length === 0) {
             user.recipientAddresses.forEach(addr => {
                 addr.isDefault = false;
             });
         }
+        // Add new address
         user.recipientAddresses.push({
             name,
             phone,
@@ -318,7 +356,8 @@ router.post('/addresses', auth, async (req, res) => {
         });
     }
 });
-router.put('/addresses/:index', auth, async (req, res) => {
+// Update address
+router.put('/addresses/:index', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -340,6 +379,7 @@ router.put('/addresses/:index', auth, async (req, res) => {
                 error: { message: 'All address fields are required', code: 'MISSING_FIELDS' }
             });
         }
+        // Validate postal code format (basic validation for international addresses)
         if (postalCode && !/^[A-Z0-9\s-]{3,10}$/i.test(postalCode)) {
             return res.status(400).json({
                 success: false,
@@ -360,11 +400,13 @@ router.put('/addresses/:index', auth, async (req, res) => {
                 error: { message: 'Address not found', code: 'ADDRESS_NOT_FOUND' }
             });
         }
+        // If setting as default, unset all other defaults
         if (isDefault) {
             user.recipientAddresses.forEach(addr => {
                 addr.isDefault = false;
             });
         }
+        // Update the address
         user.recipientAddresses[addressIndex] = {
             name,
             phone,
@@ -392,7 +434,8 @@ router.put('/addresses/:index', auth, async (req, res) => {
         });
     }
 });
-router.delete('/addresses/:index', auth, async (req, res) => {
+// Delete address
+router.delete('/addresses/:index', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -421,7 +464,9 @@ router.delete('/addresses/:index', auth, async (req, res) => {
                 error: { message: 'Address not found', code: 'ADDRESS_NOT_FOUND' }
             });
         }
+        // Remove the address
         user.recipientAddresses.splice(addressIndex, 1);
+        // If we deleted the default address and there are other addresses, set the first one as default
         if (user.recipientAddresses && user.recipientAddresses.length > 0 && !user.recipientAddresses.some(addr => addr.isDefault)) {
             if (user.recipientAddresses[0]) {
                 user.recipientAddresses[0].isDefault = true;
@@ -441,7 +486,8 @@ router.delete('/addresses/:index', auth, async (req, res) => {
         });
     }
 });
-router.put('/addresses/:index/default', auth, async (req, res) => {
+// Set default address
+router.put('/addresses/:index/default', auth_1.auth, async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({
@@ -470,9 +516,11 @@ router.put('/addresses/:index/default', auth, async (req, res) => {
                 error: { message: 'Address not found', code: 'ADDRESS_NOT_FOUND' }
             });
         }
+        // Unset all defaults
         user.recipientAddresses.forEach(addr => {
             addr.isDefault = false;
         });
+        // Set the specified address as default
         if (user.recipientAddresses && user.recipientAddresses[addressIndex]) {
             user.recipientAddresses[addressIndex].isDefault = true;
         }
@@ -491,4 +539,3 @@ router.put('/addresses/:index/default', auth, async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=profile.js.map

@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Ledger Model - Financial core for income and expense tracking
+ * Comprehensive financial record keeping with categorization and audit trail
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,11 +39,13 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Ledger = exports.LedgerCategory = exports.LedgerType = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// Ledger type enum
 var LedgerType;
 (function (LedgerType) {
     LedgerType["INCOME"] = "income";
     LedgerType["EXPENSE"] = "expense";
 })(LedgerType || (exports.LedgerType = LedgerType = {}));
+// Ledger category enum
 var LedgerCategory;
 (function (LedgerCategory) {
     LedgerCategory["SALES_REVENUE"] = "sales_revenue";
@@ -51,6 +57,7 @@ var LedgerCategory;
     LedgerCategory["SALARIES"] = "salaries";
     LedgerCategory["OTHER"] = "other";
 })(LedgerCategory || (exports.LedgerCategory = LedgerCategory = {}));
+// Ledger schema definition
 const ledgerSchema = new mongoose_1.Schema({
     date: {
         type: Date,
@@ -99,27 +106,36 @@ const ledgerSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 ledgerSchema.index({ date: 1, type: 1 });
 ledgerSchema.index({ category: 1, date: -1 });
 ledgerSchema.index({ type: 1, category: 1, date: -1 });
+// Compound index for financial reporting
 ledgerSchema.index({ date: 1, type: 1, category: 1 });
+// Virtual for formatted amount
 ledgerSchema.virtual('formattedAmount').get(function () {
     const prefix = this.type === LedgerType.INCOME ? '+' : '-';
     return `${prefix}₹${this.amount.toFixed(2)}`;
 });
+// Virtual for entry summary
 ledgerSchema.virtual('summary').get(function () {
     const prefix = this.type === LedgerType.INCOME ? '+' : '-';
     const formattedAmount = `${prefix}₹${this.amount.toFixed(2)}`;
     return `${this.type.toUpperCase()} - ${this.category.replace('_', ' ').toUpperCase()} - ${formattedAmount}`;
 });
+// Virtual for is income
 ledgerSchema.virtual('isIncome').get(function () {
     return this.type === LedgerType.INCOME;
 });
+// Virtual for is expense
 ledgerSchema.virtual('isExpense').get(function () {
     return this.type === LedgerType.EXPENSE;
 });
+// Ensure virtual fields are serialized
 ledgerSchema.set('toJSON', { virtuals: true });
+// Pre-save middleware to validate ledger data
 ledgerSchema.pre('save', function (next) {
+    // Validate category matches type
     const incomeCategories = [
         LedgerCategory.SALES_REVENUE,
         LedgerCategory.DELIVERY_FEE
@@ -141,4 +157,3 @@ ledgerSchema.pre('save', function (next) {
     next();
 });
 exports.Ledger = mongoose_1.default.model('Ledger', ledgerSchema);
-//# sourceMappingURL=ledger.model.js.map

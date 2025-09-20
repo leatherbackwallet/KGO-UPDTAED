@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * User Preferences Model - AI-powered personalization and recommendation system
+ * Tracks user behavior, preferences, and enables personalized experiences
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -194,9 +198,9 @@ const userPreferencesSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 userPreferencesSchema.index({ userId: 1 });
 userPreferencesSchema.index({ 'aiPreferences.preferredCategories.category': 1 });
 userPreferencesSchema.index({ 'aiPreferences.preferredOccasions.occasion': 1 });
 userPreferencesSchema.index({ 'culturalPreferences.languagePreference': 1 });
 exports.UserPreferences = mongoose_1.default.model('UserPreferences', userPreferencesSchema);
-//# sourceMappingURL=userPreferences.model.js.map

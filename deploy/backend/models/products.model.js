@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Products Model - Product templates with internationalized content
+ * Specific characteristics are managed via the attributes system
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -48,7 +52,7 @@ const productSchema = new mongoose_1.Schema({
     },
     slug: {
         type: String,
-        required: false,
+        required: false, // Will be generated automatically
         unique: true,
         trim: true,
         lowercase: true
@@ -61,7 +65,13 @@ const productSchema = new mongoose_1.Schema({
     price: {
         type: Number,
         required: true,
-        min: [0, 'Price cannot be negative']
+        min: [0, 'Price cannot be negative'],
+        validate: {
+            validator: function (v) {
+                return Number.isInteger(v);
+            },
+            message: 'Price must be a whole number'
+        }
     },
     costPrice: {
         type: Number,
@@ -80,9 +90,11 @@ const productSchema = new mongoose_1.Schema({
             trim: true,
             validate: {
                 validator: function (v) {
+                    // Allow Cloudinary public IDs (e.g., "keralagiftsonline/products/product-123")
                     if (v && v.startsWith('keralagiftsonline/products/')) {
                         return true;
                     }
+                    // Also allow local filenames (alphanumeric, hyphens, underscores, dots)
                     return /^[a-zA-Z0-9._-]+$/.test(v);
                 },
                 message: 'Invalid image path format. Must be a Cloudinary public ID or valid filename.'
@@ -94,24 +106,20 @@ const productSchema = new mongoose_1.Schema({
         validate: {
             validator: function (v) {
                 if (!v)
-                    return true;
+                    return true; // Allow empty/null
+                // Allow Cloudinary public IDs (e.g., "keralagiftsonline/products/product-123")
                 if (v && v.startsWith('keralagiftsonline/products/')) {
                     return true;
                 }
+                // Also allow local filenames (alphanumeric, hyphens, underscores, dots)
                 return /^[a-zA-Z0-9._-]+$/.test(v);
             },
             message: 'Invalid image path format. Must be a Cloudinary public ID or valid filename.'
         }
     },
     occasions: [{
-            type: String,
-            trim: true,
-            enum: [
-                'DIWALI', 'ANNIVERSARY', 'BIRTHDAY', 'CONDOLENCES', 'CONGRATULATION',
-                'FATHERS DAY', 'GET WELL SOON', 'HOUSE WARMING', 'JUST BECAUSE',
-                'MISS YOU', 'NEW BORN', 'ONAM', 'SYMPATHY', 'THANK YOU',
-                'TRADITIONAL', 'WEDDING'
-            ]
+            type: mongoose_1.Schema.Types.ObjectId,
+            ref: 'Occasion'
         }],
     vendors: [{
             type: mongoose_1.Schema.Types.ObjectId,
@@ -124,16 +132,64 @@ const productSchema = new mongoose_1.Schema({
     isDeleted: {
         type: Boolean,
         default: false
-    }
+    },
+    // Combo product fields
+    isCombo: {
+        type: Boolean,
+        default: false
+    },
+    comboBasePrice: {
+        type: Number,
+        min: [0, 'Combo base price cannot be negative'],
+        default: 0,
+        validate: {
+            validator: function (v) {
+                return Number.isInteger(v);
+            },
+            message: 'Combo base price must be a whole number'
+        }
+    },
+    comboItems: [{
+            name: {
+                type: String,
+                required: true,
+                trim: true
+            },
+            unitPrice: {
+                type: Number,
+                required: true,
+                min: [0, 'Unit price cannot be negative'],
+                validate: {
+                    validator: function (v) {
+                        return Number.isInteger(v);
+                    },
+                    message: 'Unit price must be a whole number'
+                }
+            },
+            defaultQuantity: {
+                type: Number,
+                required: true,
+                min: [0, 'Default quantity cannot be negative'],
+                default: 1
+            },
+            unit: {
+                type: String,
+                required: true,
+                trim: true,
+                enum: ['kg', 'set', 'piece', 'dozen', 'gram', 'liter', 'box', 'pack']
+            }
+        }]
 }, {
     timestamps: true
 });
+// Generate slug from name before saving
 productSchema.pre('save', async function (next) {
     if (!this.slug && this.name) {
         let baseSlug = this.name
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
+        // Check if slug already exists and add suffix if needed
         let slug = baseSlug;
         let counter = 1;
         while (await mongoose_1.default.model('Product').findOne({ slug, _id: { $ne: this._id } })) {
@@ -144,16 +200,16 @@ productSchema.pre('save', async function (next) {
     }
     next();
 });
+// Indexes
 productSchema.index({ categories: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ stock: 1 });
 productSchema.index({ isFeatured: 1, createdAt: -1 });
 productSchema.index({ isDeleted: 1 });
 productSchema.index({ slug: 1 }, { unique: true });
-productSchema.index({ name: 'text', description: 'text' });
+productSchema.index({ name: 'text', description: 'text' }); // Text search index
 productSchema.index({ occasions: 1 });
 productSchema.index({ vendors: 1 });
 productSchema.index({ createdAt: -1 });
 productSchema.index({ updatedAt: -1 });
 exports.Product = mongoose_1.default.model('Product', productSchema);
-//# sourceMappingURL=products.model.js.map

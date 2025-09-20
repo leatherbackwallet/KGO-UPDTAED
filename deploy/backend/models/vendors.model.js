@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Vendor Model - Marketplace vendor management with store information
+ * Handles vendor profiles, addresses, service areas, and approval status
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,6 +39,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Vendor = exports.VendorStatus = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// Vendor status enum
 var VendorStatus;
 (function (VendorStatus) {
     VendorStatus["ACTIVE"] = "active";
@@ -42,6 +47,7 @@ var VendorStatus;
     VendorStatus["PENDING_APPROVAL"] = "pending_approval";
     VendorStatus["REJECTED"] = "rejected";
 })(VendorStatus || (exports.VendorStatus = VendorStatus = {}));
+// Vendor schema definition
 const vendorSchema = new mongoose_1.Schema({
     ownerId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -106,13 +112,15 @@ const vendorSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 vendorSchema.index({ storeName: 1 });
 vendorSchema.index({ status: 1, averageRating: -1 });
 vendorSchema.index({ 'address.city': 1, 'address.state': 1 });
+// Virtual for full address
 vendorSchema.virtual('fullAddress').get(function () {
     const addr = this.address;
     return `${addr.street}, ${addr.city}, ${addr.state} - ${addr.postalCode}`;
 });
+// Ensure virtual fields are serialized
 vendorSchema.set('toJSON', { virtuals: true });
 exports.Vendor = mongoose_1.default.model('Vendor', vendorSchema);
-//# sourceMappingURL=vendors.model.js.map

@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Notification Model - User notification management
+ * Handles system notifications, alerts, and user communication
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,6 +39,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Notification = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// Notification schema definition
 const notificationSchema = new mongoose_1.Schema({
     recipientId: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -66,27 +71,33 @@ const notificationSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes for performance
 notificationSchema.index({ recipientId: 1, isRead: 1 });
 notificationSchema.index({ recipientId: 1, createdAt: -1 });
 notificationSchema.index({ isRead: 1, createdAt: -1 });
+// Compound index for user notification queries
 notificationSchema.index({ recipientId: 1, isRead: 1, createdAt: -1 });
+// Virtual for notification summary
 notificationSchema.virtual('summary').get(function () {
     if (this.message && this.message.length > 100) {
         return this.message.substring(0, 100) + '...';
     }
     return this.message;
 });
+// Virtual for is unread
 notificationSchema.virtual('isUnread').get(function () {
     return !this.isRead;
 });
+// Ensure virtual fields are serialized
 notificationSchema.set('toJSON', { virtuals: true });
+// Instance method to mark as read
 notificationSchema.methods.markAsRead = function () {
     this.isRead = true;
     return this.save();
 };
+// Instance method to mark as unread
 notificationSchema.methods.markAsUnread = function () {
     this.isRead = false;
     return this.save();
 };
 exports.Notification = mongoose_1.default.model('Notification', notificationSchema);
-//# sourceMappingURL=notifications.model.js.map

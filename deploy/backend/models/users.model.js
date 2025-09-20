@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Users Model - Core user management with roles, schedules, and recipient address book
+ * Supports RBAC, delivery agent locations, and customer address management
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -62,6 +66,38 @@ const userScheduleSchema = new mongoose_1.Schema({
     isRecurring: {
         type: Boolean,
         default: false
+    }
+});
+const userAddressSchema = new mongoose_1.Schema({
+    streetName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    houseNumber: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    postalCode: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    city: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    state: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    countryCode: {
+        type: String,
+        required: true,
+        default: 'IN'
     }
 });
 const recipientAddressSchema = new mongoose_1.Schema({
@@ -151,6 +187,7 @@ const userSchema = new mongoose_1.Schema({
     },
     location: userLocationSchema,
     schedules: [userScheduleSchema],
+    userAddress: userAddressSchema,
     recipientAddresses: [recipientAddressSchema],
     isActive: {
         type: Boolean,
@@ -163,12 +200,14 @@ const userSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes
 userSchema.index({ location: '2dsphere' });
 userSchema.index({ roleId: 1 });
 userSchema.index({ isActive: 1, isDeleted: 1 });
+// Virtual for full name
 userSchema.virtual('fullName').get(function () {
     return `${this.firstName} ${this.lastName}`;
 });
+// Ensure virtuals are serialized
 userSchema.set('toJSON', { virtuals: true });
 exports.User = mongoose_1.default.model('User', userSchema);
-//# sourceMappingURL=users.model.js.map

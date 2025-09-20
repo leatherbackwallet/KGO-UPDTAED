@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Analytics Routes - Advanced Business Intelligence and Data Analytics
+ * Provides comprehensive insights for data-driven decision making
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -6,10 +10,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const analyticsService_1 = require("../services/analyticsService");
 const analytics_model_1 = require("../models/analytics.model");
-const auth = require('../middleware/auth.js');
-const role = require('../middleware/role.js');
+const auth_1 = require("../middleware/auth");
+const role_1 = require("../middleware/role");
 const router = express_1.default.Router();
-router.get('/summary', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/summary
+ * Get analytics summary for dashboard
+ */
+router.get('/summary', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const summary = await analyticsService_1.analyticsService.getAnalyticsSummary();
         return res.status(200).json({
@@ -25,7 +33,11 @@ router.get('/summary', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.get('/generate', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/generate
+ * Generate comprehensive analytics for a date range
+ */
+router.get('/generate', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         if (!startDate || !endDate) {
@@ -50,7 +62,11 @@ router.get('/generate', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.get('/customer', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/customer
+ * Get customer analytics
+ */
+router.get('/customer', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -72,7 +88,11 @@ router.get('/customer', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.get('/sales', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/sales
+ * Get sales analytics
+ */
+router.get('/sales', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -94,7 +114,11 @@ router.get('/sales', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.get('/products', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/products
+ * Get product analytics
+ */
+router.get('/products', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -116,7 +140,11 @@ router.get('/products', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.get('/financial', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/financial
+ * Get financial analytics
+ */
+router.get('/financial', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -138,7 +166,11 @@ router.get('/financial', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.get('/cultural', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/cultural
+ * Get cultural analytics
+ */
+router.get('/cultural', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -160,7 +192,11 @@ router.get('/cultural', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.get('/operational', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/operational
+ * Get operational analytics
+ */
+router.get('/operational', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -182,7 +218,11 @@ router.get('/operational', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.get('/predictive', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/predictive
+ * Get predictive analytics
+ */
+router.get('/predictive', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -204,7 +244,11 @@ router.get('/predictive', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.get('/real-time', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/real-time
+ * Get real-time metrics
+ */
+router.get('/real-time', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const analytics = await analytics_model_1.Analytics.findOne().sort({ createdAt: -1 });
         if (!analytics) {
@@ -226,7 +270,11 @@ router.get('/real-time', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.get('/history', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/history
+ * Get analytics history
+ */
+router.get('/history', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { limit = 30, startDate, endDate } = req.query;
         let query = {};
@@ -256,7 +304,11 @@ router.get('/history', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.post('/export', auth, role(['admin']), async (req, res) => {
+/**
+ * POST /api/analytics/export
+ * Export analytics data
+ */
+router.post('/export', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const { startDate, endDate, format = 'json' } = req.body;
         if (!startDate || !endDate) {
@@ -268,6 +320,7 @@ router.post('/export', auth, role(['admin']), async (req, res) => {
         const start = new Date(startDate);
         const end = new Date(endDate);
         const analytics = await analyticsService_1.analyticsService.generateAnalytics(start, end);
+        // For now, return JSON. In a real implementation, you'd generate CSV/Excel files
         return res.status(200).json({
             success: true,
             data: {
@@ -285,9 +338,14 @@ router.post('/export', auth, role(['admin']), async (req, res) => {
         });
     }
 });
-router.get('/dashboard', auth, role(['admin']), async (req, res) => {
+/**
+ * GET /api/analytics/dashboard
+ * Get dashboard metrics
+ */
+router.get('/dashboard', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
         const summary = await analyticsService_1.analyticsService.getAnalyticsSummary();
+        // Get recent trends
         const recentAnalytics = await analytics_model_1.Analytics.find()
             .sort({ date: -1 })
             .limit(7)
@@ -320,4 +378,3 @@ router.get('/dashboard', auth, role(['admin']), async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=analytics.js.map

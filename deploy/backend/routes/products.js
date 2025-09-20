@@ -1,454 +1,322 @@
-const express = require('express');
-const router = express.Router();
-const { Product } = require('../models/products.model');
-const { Category } = require('../models/categories.model');
-const { ActivityLog } = require('../models/activityLogs.model');
-const { ProductAttribute } = require('../models/productAttributes.model');
-const { VendorProduct } = require('../models/vendorProducts.model');
-const { Review } = require('../models/reviews.model');
-const { Wishlist } = require('../models/wishlists.model');
-const { Notification } = require('../models/notifications.model');
-const auth = require('../middleware/auth');
-const role = require('../middleware/role');
-const { validate } = require('../middleware/validation');
-const mongoose = require('mongoose');
-const { cacheConfigs, invalidateProductCache } = require('../middleware/cache');
-
-// Get all products with SMART caching and pagination
-router.get('/', cacheConfigs.products, async (req, res) => {
-  try {
-    console.log('🔍 [Products API] Fetching products with smart caching...');
-    console.log('🔍 [Products API] Database name:', mongoose.connection.db?.databaseName);
-    console.log('🔍 [Products API] Connection state:', mongoose.connection.readyState);
-    
-    const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false, admin = false } = req.query;
-    
-    let filter = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
-    
-    // Apply filters
-    if (category) {
-      if (mongoose.Types.ObjectId.isValid(category)) {
-        filter.categories = category;
-      } else {
-        const categoryDoc = await Category.findOne({ slug: category });
-        if (categoryDoc) {
-          filter.categories = categoryDoc._id;
-        } else {
-          res.json({ success: true, data: [], count: 0 });
-          return;
-        }
-      }
+"use strict";
+/**
+ * Products Routes - Product management and catalog operations
+ * Handles product CRUD, search, filtering, and inventory management
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
     }
-    
-    if (featured === 'true') filter.isFeatured = true;
-    
-    if (min || max) filter.price = {};
-    if (min) filter.price.$gte = Number(min);
-    if (max) filter.price.$lte = Number(max);
-    
-    if (occasions) {
-      // Handle both ObjectId and name-based filtering
-      const occasionArray = occasions.split(',').map(o => o.trim());
-      filter.occasions = { $in: occasionArray };
-    }
-    
-    if (search) {
-      const searchRegex = new RegExp(search, 'i');
-      filter.$or = [
-        { 'name': searchRegex },
-        { 'description': searchRegex }
-      ];
-    }
-    
-    console.log('🔍 [Products API] Filter being applied:', JSON.stringify(filter, null, 2));
-    
-    const skip = (Number(page) - 1) * Number(limit);
-    
-    let query = Product.find(filter)
-      .populate('categories', 'name slug')
-      .populate('vendors', 'storeName')
-      .populate('occasions', 'name slug dateRange priority seasonalFlags')
-      .sort({ isFeatured: -1, createdAt: -1 });
-    
-    // For admin requests or when limit is high (>=100), don't apply pagination limits
-    // This ensures all products are returned when requested
-    if (admin !== 'true' && Number(limit) < 100) {
-      query = query.skip(skip).limit(Number(limit));
-    }
-    
-    const products = await query;
-    const total = await Product.countDocuments(filter);
-    
-    console.log('📦 [Products API] Found products:', products.length, 'Total:', total);
-    
-    // Set cache headers for product responses
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    res.setHeader('ETag', `"products-${products.length}-${Date.now()}"`);
-    
-    res.json({
-      success: true,
-      data: products,
-      count: products.length,
-      total,
-      page: Number(page),
-      pages: Number(limit) >= 100 ? 1 : Math.ceil(total / Number(limit)),
-      allProductsLoaded: Number(limit) >= 100 || admin === 'true' || products.length === total
-    });
-  } catch (err) {
-    console.error('Products fetch error:', err);
-    res.status(500).json({ 
-      success: false,
-      error: { message: 'Failed to fetch products', code: 'FETCH_ERROR' } 
-    });
-  }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
 });
-
-// Get single product
-router.get('/:id', async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id).populate('categories', 'name slug').populate('vendors', 'storeName');
-    if (!product) return res.status(404).json({ message: 'Product not found' });
-    res.json(product);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Create product (admin only)
-router.post('/', auth, role('admin'), async (req, res) => {
-  try {
-    const { name, description, price, categories, stock, images, occasions, vendors, isFeatured, slug, defaultImage, isCombo, comboBasePrice, comboItems } = req.body;
-    
-    // Handle categories - could be array of ObjectIds or slugs
-    let categoryIds = categories;
-    if (categories && Array.isArray(categories)) {
-      categoryIds = await Promise.all(categories.map(async (category) => {
-        if (mongoose.Types.ObjectId.isValid(category)) {
-          return category;
-        } else {
-          const categoryDoc = await Category.findOne({ slug: category });
-          if (!categoryDoc) {
-            throw new Error(`Category not found: ${category}`);
-          }
-          return categoryDoc._id;
-        }
-      }));
-    } else if (categories && !Array.isArray(categories)) {
-      // Handle single category for backward compatibility
-      if (mongoose.Types.ObjectId.isValid(categories)) {
-        categoryIds = [categories];
-      } else {
-        const categoryDoc = await Category.findOne({ slug: categories });
-        if (!categoryDoc) {
-          return res.status(400).json({ message: 'Category not found' });
-        }
-        categoryIds = [categoryDoc._id];
-      }
-    }
-    
-    const product = await Product.create({ 
-      name, 
-      description, 
-      price, 
-      categories: categoryIds, 
-      stock: stock || 200, // Set default stock to 200 if not provided
-      images, 
-      occasions, 
-      vendors,
-      isFeatured,
-      slug,
-      defaultImage,
-      isCombo: isCombo || false,
-      comboBasePrice: comboBasePrice || 0,
-      comboItems: comboItems || []
-    });
-    
-    // Log the product creation activity
-    await ActivityLog.logUserAction(
-      req.user.id,
-      'product_created',
-      { type: 'Product', id: product._id },
-      { 
-        productName: product.name,
-        productId: product._id,
-        categories: categoryIds,
-        price: product.price,
-        stock: product.stock
-      }
-    );
-    
-    // Create notification for product creation
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const products_model_1 = require("../models/products.model");
+const categories_model_1 = require("../models/categories.model");
+const activityLogs_model_1 = require("../models/activityLogs.model");
+const auth_1 = require("../middleware/auth");
+const role_1 = require("../middleware/role");
+const cache_1 = require("../middleware/cache");
+const database_1 = require("../middleware/database");
+const router = express_1.default.Router();
+// Get all products with SMART caching (re-enabled with proper invalidation)
+router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
-      await Notification.create({
-        userId: req.user.id,
-        title: 'Product Created Successfully',
-        message: `Product "${product.name}" has been created successfully`,
-        type: 'success',
-        relatedEntity: { type: 'Product', id: product._id }
-      });
-    } catch (notificationError) {
-      console.error('Error creating notification:', notificationError);
-      // Don't fail the operation if notification fails
+        console.log('🔍 [Products API] Fetching products with smart caching...');
+        console.log('🔍 [Products API] Database name:', mongoose_1.default.connection.db?.databaseName);
+        console.log('🔍 [Products API] Connection state:', mongoose_1.default.connection.readyState);
+        console.log('🔍 [Products API] Connection URI:', mongoose_1.default.connection.host, mongoose_1.default.connection.port);
+        console.log('🔍 [Products API] Collections:', await mongoose_1.default.connection.db?.listCollections().toArray());
+        const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false, admin = false } = req.query;
+        let filter = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
+        // Apply filters
+        if (category) {
+            if (mongoose_1.default.Types.ObjectId.isValid(category)) {
+                filter.categories = category;
+            }
+            else {
+                const categoryDoc = await categories_model_1.Category.findOne({ slug: category });
+                if (categoryDoc) {
+                    filter.categories = categoryDoc._id;
+                }
+                else {
+                    res.json({ success: true, data: [], count: 0 });
+                    return;
+                }
+            }
+        }
+        if (featured === 'true')
+            filter.isFeatured = true;
+        if (min || max)
+            filter.price = {};
+        if (min)
+            filter.price.$gte = Number(min);
+        if (max)
+            filter.price.$lte = Number(max);
+        if (occasions) {
+            // Handle both ObjectId and name-based filtering
+            const occasionArray = occasions.split(',').map(o => o.trim());
+            const occasionIds = [];
+            const occasionNames = [];
+            for (const occasion of occasionArray) {
+                if (mongoose_1.default.Types.ObjectId.isValid(occasion)) {
+                    occasionIds.push(occasion);
+                }
+                else {
+                    occasionNames.push(occasion);
+                }
+            }
+            if (occasionIds.length > 0 && occasionNames.length > 0) {
+                // Mixed filtering - need to find occasion IDs by name first
+                const { Occasion } = await Promise.resolve().then(() => __importStar(require('../models/occasions.model')));
+                const occasionsByName = await Occasion.find({
+                    name: { $in: occasionNames },
+                    isActive: true,
+                    isDeleted: false
+                }).select('_id');
+                const allOccasionIds = [...occasionIds, ...occasionsByName.map(o => o._id)];
+                filter.occasions = { $in: allOccasionIds };
+            }
+            else if (occasionIds.length > 0) {
+                filter.occasions = { $in: occasionIds };
+            }
+            else if (occasionNames.length > 0) {
+                const { Occasion } = await Promise.resolve().then(() => __importStar(require('../models/occasions.model')));
+                const occasionsByName = await Occasion.find({
+                    name: { $in: occasionNames },
+                    isActive: true,
+                    isDeleted: false
+                }).select('_id');
+                filter.occasions = { $in: occasionsByName.map(o => o._id) };
+            }
+        }
+        if (search) {
+            const searchRegex = new RegExp(search, 'i');
+            filter.$or = [
+                { 'name': searchRegex },
+                { 'description': searchRegex }
+            ];
+        }
+        const skip = (Number(page) - 1) * Number(limit);
+        let query = products_model_1.Product.find(filter)
+            .populate('categories', 'name slug')
+            .populate('vendors', 'storeName')
+            .populate('occasions', 'name slug dateRange priority seasonalFlags')
+            .sort({ isFeatured: -1, createdAt: -1 });
+        // For admin requests or when limit is high (>=100), don't apply pagination limits
+        // This ensures all products are returned when requested
+        if (admin !== 'true' && Number(limit) < 100) {
+            query = query.skip(skip).limit(Number(limit));
+        }
+        const products = await query;
+        const total = await products_model_1.Product.countDocuments(filter);
+        res.json({
+            success: true,
+            data: products,
+            count: products.length,
+            total,
+            page: Number(page),
+            pages: Number(limit) >= 100 ? 1 : Math.ceil(total / Number(limit)),
+            allProductsLoaded: Number(limit) >= 100 || admin === 'true' || products.length === total
+        });
     }
-    
-    res.status(201).json(product);
-  } catch (err) {
-    console.error('Product creation error:', err);
-    
-    // Log the error for debugging
-    await ActivityLog.logSystemAction(
-      'product_creation_failed',
-      { type: 'Product', id: 'unknown' },
-      { 
-        error: err.message,
-        stack: err.stack,
-        requestData: req.body,
-        userId: req.user.id
-      }
-    );
-    
-    // Return appropriate error response
-    if (err.name === 'ValidationError') {
-      return res.status(400).json({ 
-        success: false,
-        error: { 
-          message: 'Validation failed', 
-          code: 'VALIDATION_ERROR',
-          details: Object.values(err.errors).map(e => e.message)
-        } 
-      });
+    catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch products' });
     }
-    
-    if (err.code === 11000) {
-      return res.status(400).json({ 
-        success: false,
-        error: { 
-          message: 'Product with this name or slug already exists', 
-          code: 'DUPLICATE_ERROR' 
-        } 
-      });
-    }
-    
-    res.status(500).json({ 
-      success: false,
-      error: { 
-        message: 'Failed to create product', 
-        code: 'SERVER_ERROR' 
-      } 
-    });
-  }
 });
-
+// Get single product by ID
+router.get('/:id', database_1.ensureDatabaseConnection, async (req, res) => {
+    try {
+        const product = await products_model_1.Product.findById(req.params.id)
+            .populate('categories', 'name slug')
+            .populate('vendors', 'storeName')
+            .populate('attributes')
+            .populate({
+            path: 'reviews',
+            populate: {
+                path: 'userId',
+                select: 'firstName lastName'
+            }
+        });
+        if (!product) {
+            res.status(404).json({ success: false, error: 'Product not found' });
+            return;
+        }
+        res.json({ success: true, data: product });
+    }
+    catch (error) {
+        console.error('Error fetching product:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch product' });
+    }
+});
+// Create new product (admin only)
+router.post('/', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
+    try {
+        const productData = req.body;
+        // Validate required fields
+        if (!productData.name || !productData.price || !productData.categories) {
+            res.status(400).json({
+                success: false,
+                error: 'Name, price, and categories are required'
+            });
+            return;
+        }
+        const product = new products_model_1.Product(productData);
+        await product.save();
+        // Invalidate cache
+        await (0, cache_1.invalidateProductCache)();
+        // Log activity
+        await activityLogs_model_1.ActivityLog.create({
+            userId: req.user?.id,
+            action: 'CREATE_PRODUCT',
+            details: { productId: product._id, productName: product.name }
+        });
+        res.status(201).json({ success: true, data: product });
+    }
+    catch (error) {
+        console.error('Error creating product:', error);
+        res.status(500).json({ success: false, error: 'Failed to create product' });
+    }
+});
 // Update product (admin only)
-router.put('/:id', auth, role('admin'), async (req, res) => {
-  try {
-    const { name, description, price, category, categories, stock, occasions, isFeatured, images, defaultImage, isCombo, comboBasePrice, comboItems } = req.body;
-    
-    // Prepare update data
-    const updateData = {};
-    
-    // Handle name
-    if (name) {
-      updateData.name = name;
-    }
-    
-    // Handle description
-    if (description) {
-      updateData.description = description;
-    }
-    
-    // Handle other fields
-    if (price !== undefined) updateData.price = price;
-    if (stock !== undefined) updateData.stock = stock;
-    if (occasions !== undefined) updateData.occasions = occasions;
-    if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
-    if (isCombo !== undefined) updateData.isCombo = isCombo;
-    if (comboBasePrice !== undefined) updateData.comboBasePrice = comboBasePrice;
-    if (comboItems !== undefined) updateData.comboItems = comboItems;
-    
-    // Handle category update - support both 'category' and 'categories'
-    const categoryData = categories || category;
-    if (categoryData) {
-      if (typeof categoryData === 'string') {
-        // If category is a string (ObjectId), convert to array
-        updateData.categories = [categoryData];
-      } else if (categoryData._id) {
-        // If category is an object with _id, extract the _id
-        updateData.categories = [categoryData._id];
-      } else if (Array.isArray(categoryData)) {
-        // If category is already an array
-        updateData.categories = categoryData;
-      }
-    }
-    
-    console.log('Updating product with data:', updateData);
-    
-    const product = await Product.findByIdAndUpdate(
-      req.params.id, 
-      updateData, 
-      { new: true, runValidators: true }
-    ).populate('categories', 'name slug');
-    
-    if (!product) {
-      return res.status(404).json({ 
-        success: false,
-        error: { message: 'Product not found', code: 'PRODUCT_NOT_FOUND' } 
-      });
-    }
-    
-    // Invalidate cache
-    invalidateProductCache();
-    
-    // Log the product update activity
-    await ActivityLog.logUserAction(
-      req.user.id,
-      'product_updated',
-      { type: 'Product', id: product._id },
-      { 
-        productName: product.name,
-        productId: product._id,
-        changes: updateData,
-        previousData: {
-          name: product?.name,
-          price: product?.price,
-          stock: product?.stock
-        }
-      }
-    );
-    
-    res.json({
-      success: true,
-      data: product,
-      message: 'Product updated successfully'
-    });
-  } catch (err) {
-    console.error('Product update error:', err);
-    res.status(500).json({ 
-      success: false,
-      error: { message: err.message || 'Server error', code: 'UPDATE_ERROR' } 
-    });
-  }
-});
-
-// Delete product (admin only)
-router.delete('/:id', auth, role('admin'), async (req, res) => {
-  try {
-    console.log(`[DELETE] Attempting to delete product with ID: ${req.params.id}`);
-    
-    // Validate ObjectId format
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      console.log(`[DELETE] Invalid ObjectId format: ${req.params.id}`);
-      return res.status(400).json({ 
-        success: false,
-        error: { message: 'Invalid product ID format', code: 'INVALID_ID' } 
-      });
-    }
-    
-    // First check if product exists
-    const existingProduct = await Product.findById(req.params.id);
-    if (!existingProduct) {
-      console.log(`[DELETE] Product not found with ID: ${req.params.id}`);
-      return res.status(404).json({ 
-        success: false,
-        error: { message: 'Product not found', code: 'PRODUCT_NOT_FOUND' } 
-      });
-    }
-    
-    console.log(`[DELETE] Found product: ${existingProduct.name} (ID: ${existingProduct._id})`);
-    
-    // Delete the product
-    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
-    
-    if (!deletedProduct) {
-      console.log(`[DELETE] Failed to delete product with ID: ${req.params.id}`);
-      return res.status(500).json({ 
-        success: false,
-        error: { message: 'Failed to delete product', code: 'DELETE_ERROR' } 
-      });
-    }
-    
-    console.log(`Successfully deleted product: ${deletedProduct.name} (ID: ${deletedProduct._id})`);
-    
-    // Cascade cleanup - remove related records
+router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {
-      console.log(`[DELETE] Starting cascade cleanup for product: ${deletedProduct._id}`);
-      
-      // Cleanup product attributes
-      const deletedAttributes = await ProductAttribute.deleteMany({ productId: req.params.id });
-      console.log(`[DELETE] Deleted ${deletedAttributes.deletedCount} product attributes`);
-      
-      // Cleanup vendor products
-      const deletedVendorProducts = await VendorProduct.deleteMany({ productId: req.params.id });
-      console.log(`[DELETE] Deleted ${deletedVendorProducts.deletedCount} vendor products`);
-      
-      // Cleanup reviews
-      const deletedReviews = await Review.deleteMany({ productId: req.params.id });
-      console.log(`[DELETE] Deleted ${deletedReviews.deletedCount} reviews`);
-      
-      // Remove from wishlists
-      const updatedWishlists = await Wishlist.updateMany(
-        { products: req.params.id },
-        { $pull: { products: req.params.id } }
-      );
-      console.log(`[DELETE] Updated ${updatedWishlists.modifiedCount} wishlists`);
-      
-      console.log(`[DELETE] Cascade cleanup completed successfully`);
-    } catch (cleanupError) {
-      console.error('[DELETE] Error during cascade cleanup:', cleanupError);
-      // Don't fail the delete operation if cleanup fails
-    }
-    
-    // Log the product deletion activity
-    await ActivityLog.logUserAction(
-      req.user.id,
-      'product_deleted',
-      { type: 'Product', id: req.params.id },
-      { 
-        productName: deletedProduct.name,
-        productId: deletedProduct._id,
-        deletedAt: new Date()
-      }
-    );
-    
-    // Invalidate cache
-    invalidateProductCache();
-    
-    res.json({ 
-      success: true,
-      data: { 
-        message: 'Product deleted successfully',
-        deletedProduct: {
-          id: deletedProduct._id,
-          name: deletedProduct.name
+        const product = await products_model_1.Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true }).populate('categories', 'name slug');
+        if (!product) {
+            res.status(404).json({ success: false, error: 'Product not found' });
+            return;
         }
-      }
-    });
-  } catch (err) {
-    console.error('[DELETE] Error deleting product:', err);
-    res.status(500).json({ 
-      success: false,
-      error: { message: 'Server error', code: 'SERVER_ERROR' } 
-    });
-  }
+        // Invalidate cache
+        await (0, cache_1.invalidateProductCache)();
+        // Log activity
+        await activityLogs_model_1.ActivityLog.create({
+            userId: req.user?.id,
+            action: 'UPDATE_PRODUCT',
+            details: { productId: product._id, productName: product.name }
+        });
+        res.json({ success: true, data: product });
+    }
+    catch (error) {
+        console.error('Error updating product:', error);
+        res.status(500).json({ success: false, error: 'Failed to update product' });
+    }
 });
-
-// Clear product cache (admin only)
-router.post('/clear-cache', auth, role('admin'), async (req, res) => {
-  try {
-    invalidateProductCache();
-    res.json({
-      success: true,
-      message: 'Product cache cleared successfully'
-    });
-  } catch (err) {
-    console.error('Cache clear error:', err);
-    res.status(500).json({ 
-      success: false,
-      error: { message: 'Failed to clear cache', code: 'CACHE_CLEAR_ERROR' } 
-    });
-  }
+// Delete product (admin only)
+router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
+    try {
+        const product = await products_model_1.Product.findByIdAndDelete(req.params.id);
+        if (!product) {
+            res.status(404).json({ success: false, error: 'Product not found' });
+            return;
+        }
+        // Invalidate cache
+        await (0, cache_1.invalidateProductCache)();
+        // Log activity
+        await activityLogs_model_1.ActivityLog.create({
+            userId: req.user?.id,
+            action: 'DELETE_PRODUCT',
+            details: { productId: product._id, productName: product.name }
+        });
+        res.json({ success: true, message: 'Product deleted successfully' });
+    }
+    catch (error) {
+        console.error('Error deleting product:', error);
+        res.status(500).json({ success: false, error: 'Failed to delete product' });
+    }
 });
-
-module.exports = router; 
+// Get featured products
+router.get('/featured/list', database_1.ensureDatabaseConnection, async (req, res) => {
+    try {
+        const products = await products_model_1.Product.find({ isFeatured: true, isActive: true, isDeleted: false })
+            .populate('categories', 'name slug')
+            .populate('vendors', 'storeName')
+            .sort({ createdAt: -1 })
+            .limit(10);
+        res.json({ success: true, data: products });
+    }
+    catch (error) {
+        console.error('Error fetching featured products:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch featured products' });
+    }
+});
+// Search products
+router.get('/search/query', database_1.ensureDatabaseConnection, async (req, res) => {
+    try {
+        const { q, category, min, max, page = 1, limit = 20 } = req.query;
+        if (!q) {
+            res.status(400).json({ success: false, error: 'Search query is required' });
+            return;
+        }
+        let filter = {
+            isDeleted: false,
+            $or: [
+                { name: new RegExp(q, 'i') },
+                { description: new RegExp(q, 'i') }
+            ]
+        };
+        if (category) {
+            filter.categories = category;
+        }
+        if (min || max) {
+            filter.price = {};
+            if (min)
+                filter.price.$gte = Number(min);
+            if (max)
+                filter.price.$lte = Number(max);
+        }
+        const skip = (Number(page) - 1) * Number(limit);
+        const products = await products_model_1.Product.find(filter)
+            .populate('categories', 'name slug')
+            .populate('vendors', 'storeName')
+            .populate('occasions', 'name slug dateRange priority seasonalFlags')
+            .sort({ isFeatured: -1, createdAt: -1 })
+            .skip(skip)
+            .limit(Number(limit));
+        const total = await products_model_1.Product.countDocuments(filter);
+        res.json({
+            success: true,
+            data: products,
+            count: products.length,
+            total,
+            page: Number(page),
+            pages: Math.ceil(total / Number(limit))
+        });
+    }
+    catch (error) {
+        console.error('Error searching products:', error);
+        res.status(500).json({ success: false, error: 'Failed to search products' });
+    }
+});
+exports.default = router;

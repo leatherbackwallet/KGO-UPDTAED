@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Promotions Model - Advanced promotions engine with complex rules and actions
+ * Manages promotional campaigns with flexible rule-based logic
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -91,10 +95,12 @@ const promotionSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+// Indexes
 promotionSchema.index({ code: 1 });
 promotionSchema.index({ isActive: 1, isDeleted: 1 });
 promotionSchema.index({ startDate: 1, endDate: 1 });
 promotionSchema.index({ createdAt: -1 });
+// Validation: Ensure at least one condition and action
 promotionSchema.pre('save', function (next) {
     if (this.conditions.length === 0) {
         return next(new Error('Promotion must have at least one condition'));
@@ -105,4 +111,3 @@ promotionSchema.pre('save', function (next) {
     next();
 });
 exports.Promotion = mongoose_1.default.model('Promotion', promotionSchema);
-//# sourceMappingURL=promotions.model.js.map
