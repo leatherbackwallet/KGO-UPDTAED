@@ -111,7 +111,7 @@ const shippingDetailsSchema = new mongoose_1.Schema({
         },
         houseNumber: {
             type: String,
-            required: true,
+            required: false,
             trim: true
         },
         postalCode: {

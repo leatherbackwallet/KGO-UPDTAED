@@ -19,7 +19,7 @@ interface RecipientAddress {
   phone: string;
   address: {
     streetName: string;
-    houseNumber: string;
+    houseNumber?: string;
     postalCode: string;
     city: string;
     countryCode: string;

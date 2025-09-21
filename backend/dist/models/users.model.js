@@ -76,7 +76,7 @@ const userAddressSchema = new mongoose_1.Schema({
     },
     houseNumber: {
         type: String,
-        required: true,
+        required: false,
         trim: true
     },
     postalCode: {
@@ -119,7 +119,7 @@ const recipientAddressSchema = new mongoose_1.Schema({
         },
         houseNumber: {
             type: String,
-            required: true,
+            required: false,
             trim: true
         },
         postalCode: {

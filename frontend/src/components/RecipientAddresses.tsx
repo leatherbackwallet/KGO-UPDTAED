@@ -7,7 +7,7 @@ interface RecipientAddress {
   phone: string;
   address: {
     streetName: string;
-    houseNumber: string;
+    houseNumber?: string;
     postalCode: string;
     city: string;
     countryCode: string;
@@ -108,7 +108,7 @@ export default function RecipientAddresses({
       name: address.name,
       phone: address.phone,
       streetName: address.address.streetName,
-      houseNumber: address.address.houseNumber,
+      houseNumber: address.address.houseNumber || '',
       postalCode: address.address.postalCode,
       city: address.address.city,
       countryCode: address.address.countryCode,
