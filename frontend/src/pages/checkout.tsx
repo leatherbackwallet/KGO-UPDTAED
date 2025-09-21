@@ -277,14 +277,24 @@ export default function Checkout() {
   const handlePaymentSuccess = async (paymentResponse: any) => {
     try {
       setLoading(true);
+      console.log('Payment success received:', paymentResponse);
       
       // Use guest tokens if available, otherwise use authenticated user tokens
       const authToken = guestTokens?.accessToken || tokens?.accessToken;
+      
+      if (!authToken) {
+        setError('Authentication token not found. Please try again.');
+        return;
+      }
+      
+      console.log('Verifying payment with token:', authToken ? 'Present' : 'Missing');
       
       // Verify payment
       const verifyResponse = await api.post('/payments/verify', paymentResponse, {
         headers: { Authorization: `Bearer ${authToken}` }
       });
+
+      console.log('Payment verification response:', verifyResponse.data);
 
       if (verifyResponse.data.success) {
         const successMessage = guestTokens 
@@ -302,11 +312,15 @@ export default function Checkout() {
         
         // Redirect to order confirmation page with order ID
         const orderId = verifyResponse.data.data.orderId;
-        router.push(`/order-confirmation/${orderId}`);
+        console.log('Redirecting to order confirmation:', orderId);
+        
+        // Use window.location.href for more reliable navigation
+        window.location.href = `/order-confirmation/${orderId}`;
       } else {
         setError(verifyResponse.data.error?.message || 'Payment verification failed');
       }
     } catch (err: any) {
+      console.error('Payment verification error:', err);
       setError(err.response?.data?.error?.message || 'Payment verification failed');
     } finally {
       setLoading(false);
@@ -500,6 +514,10 @@ export default function Checkout() {
       }
 
       // Create payment order for Razorpay with timeout
+      console.log('Creating payment order for guest user...');
+      console.log('Guest tokens:', guestTokens ? 'Present' : 'Missing');
+      console.log('Cart items:', cart);
+      
       const paymentResponse = await Promise.race([
         api.post('/payments/create-order', {
           products: cart.map(item => ({
@@ -520,6 +538,8 @@ export default function Checkout() {
           setTimeout(() => reject(new Error('Request timeout - please try again')), 30000)
         )
       ]) as any;
+      
+      console.log('Payment order response:', paymentResponse.data);
 
       if (paymentResponse.data.success) {
         setPaymentData(paymentResponse.data.data);

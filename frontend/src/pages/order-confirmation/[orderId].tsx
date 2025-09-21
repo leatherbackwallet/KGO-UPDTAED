@@ -87,7 +87,7 @@ const OrderConfirmationPage: React.FC = () => {
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    if (orderId) {
+    if (orderId && typeof orderId === 'string') {
       fetchOrderDetails();
     }
   }, [orderId]);
@@ -100,12 +100,30 @@ const OrderConfirmationPage: React.FC = () => {
       // Add authorization header if user is authenticated
       if (tokens?.accessToken) {
         headers.Authorization = `Bearer ${tokens.accessToken}`;
+      } else {
+        // For guest users, try to get guest tokens from localStorage
+        const guestTokens = localStorage.getItem('guestTokens');
+        if (guestTokens) {
+          try {
+            const parsedTokens = JSON.parse(guestTokens);
+            if (parsedTokens.accessToken) {
+              headers.Authorization = `Bearer ${parsedTokens.accessToken}`;
+            }
+          } catch (e) {
+            console.warn('Failed to parse guest tokens:', e);
+          }
+        }
       }
       
+      console.log('Fetching order details for orderId:', orderId);
+      console.log('Using headers:', headers);
+      
       const response = await api.get(`/orders/${orderId}`, { headers });
+      console.log('Order details response:', response.data);
       setOrder(response.data.data.order);
     } catch (err: any) {
       console.error('Error fetching order details:', err);
+      console.error('Error response:', err.response?.data);
       setError(err.response?.data?.error?.message || 'Failed to fetch order details');
     } finally {
       setLoading(false);
