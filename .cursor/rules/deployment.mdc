@@ -1,0 +1,5 @@
+---
+description: Never automatically deploy without explicit command from user 
+globs: Never automatically deploy without explicit command from user 
+alwaysApply: true
+---

@@ -68,7 +68,7 @@ const OrdersPage: React.FC = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/orders');
+      const response = await api.get('/orders/my');
       setOrders(response.data.data || []);
     } catch (err: any) {
       console.error('Error fetching orders:', err);
