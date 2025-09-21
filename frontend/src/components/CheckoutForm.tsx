@@ -5,13 +5,14 @@ import RecipientAddresses from './RecipientAddresses';
 import RazorpayPayment from './RazorpayPayment';
 import api from '../utils/api';
 import { validatePaymentResponse } from '../utils/razorpay';
+import { createStandardRecipientAddress } from '../utils/addressMapping';
 
 interface RecipientAddress {
   name: string;
   phone: string;
   address: {
     streetName: string;
-    houseNumber: string;
+    houseNumber?: string;
     postalCode: string;
     city: string;
     countryCode: string;
@@ -25,7 +26,7 @@ interface OrderRecipient {
   recipientPhone: string;
   address: {
     streetName: string;
-    houseNumber: string;
+    houseNumber?: string;
     postalCode: string;
     city: string;
     countryCode: string;
@@ -33,7 +34,30 @@ interface OrderRecipient {
   specialInstructions?: string;
 }
 
-export default function CheckoutForm() {
+interface GuestFormData {
+  senderName: string;
+  senderEmail: string;
+  senderPhone: string;
+  recipientName: string;
+  recipientPhone: string;
+  deliveryAddress: {
+    street: string;
+    houseNumber?: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+  specialInstructions?: string;
+  paymentMethod: string;
+}
+
+interface CheckoutFormProps {
+  guestData?: GuestFormData;
+  isGuest?: boolean;
+}
+
+export default function CheckoutForm({ guestData, isGuest = false }: CheckoutFormProps) {
   const { cart, clearCart } = useCart();
   const { user, tokens } = useAuth();
   const [selectedRecipientAddress, setSelectedRecipientAddress] = useState<RecipientAddress | null>(null);
@@ -169,12 +193,7 @@ export default function CheckoutForm() {
             comboItemConfigurations: item.comboItemConfigurations
           })
         })),
-        recipientAddress: {
-          name: selectedRecipientAddress.name,
-          phone: selectedRecipientAddress.phone,
-          address: selectedRecipientAddress.address,
-          additionalInstructions: selectedRecipientAddress.additionalInstructions
-        }
+        recipientAddress: createStandardRecipientAddress(selectedRecipientAddress, false)
       }, {
         headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
@@ -465,6 +484,11 @@ export default function CheckoutForm() {
       {showPayment && paymentData && (
         <RazorpayPayment
           orderData={paymentData}
+          customerData={{
+            name: user ? `${user.firstName} ${user.lastName}` : (guestData?.senderName || 'Customer'),
+            email: user ? user.email : (guestData?.senderEmail || ''),
+            contact: user ? user.phone : (guestData?.senderPhone || '')
+          }}
           onSuccess={handlePaymentSuccess}
           onError={handlePaymentError}
           onClose={handlePaymentClose}

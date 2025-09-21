@@ -14,6 +14,7 @@ import RecipientAddresses from '../components/RecipientAddresses';
 import RazorpayPayment from '../components/RazorpayPayment';
 import api from '../utils/api';
 import { validatePaymentResponse } from '../utils/razorpay';
+import { createStandardRecipientAddress } from '../utils/addressMapping';
 
 type TabType = 'login' | 'guest';
 
@@ -53,7 +54,7 @@ interface RegisterFormData {
   // User's Address (for billing/account purposes)
   userAddress: {
     street: string;
-    houseNumber: string;
+    houseNumber?: string;
     city: string;
     state: string;
     zipCode: string;
@@ -64,7 +65,7 @@ interface RegisterFormData {
   recipientPhone: string;
   deliveryAddress: {
     street: string;
-    houseNumber: string;
+    houseNumber?: string;
     city: string;
     state: string;
     zipCode: string;
@@ -78,7 +79,7 @@ interface RecipientAddress {
   phone: string;
   address: {
     streetName: string;
-    houseNumber: string;
+    houseNumber?: string;
     postalCode: string;
     city: string;
     countryCode: string;
@@ -92,7 +93,7 @@ interface OrderRecipient {
   recipientPhone: string;
   address: {
     streetName: string;
-    houseNumber: string;
+    houseNumber?: string;
     postalCode: string;
     city: string;
     countryCode: string;
@@ -255,12 +256,7 @@ export default function Checkout() {
             comboItemConfigurations: item.comboItemConfigurations
           })
         })),
-        recipientAddress: {
-          name: selectedRecipientAddress.name,
-          phone: selectedRecipientAddress.phone,
-          address: selectedRecipientAddress.address,
-          additionalInstructions: selectedRecipientAddress.additionalInstructions
-        }
+        recipientAddress: createStandardRecipientAddress(selectedRecipientAddress, false)
       }, {
         headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
@@ -419,7 +415,7 @@ export default function Checkout() {
         return;
       }
 
-      if (!guestData.deliveryAddress.street.trim() || !guestData.deliveryAddress.houseNumber.trim() || 
+      if (!guestData.deliveryAddress.street.trim() || 
           !guestData.deliveryAddress.city.trim() || !guestData.deliveryAddress.state.trim() || 
           !guestData.deliveryAddress.zipCode.trim()) {
         setError('Delivery address information is required');
@@ -477,18 +473,7 @@ export default function Checkout() {
               comboItemConfigurations: item.comboItemConfigurations
             })
           })),
-          recipientAddress: {
-            name: guestData.recipientName,
-            phone: guestData.recipientPhone,
-            address: {
-              streetName: guestData.deliveryAddress.street,
-              houseNumber: guestData.deliveryAddress.houseNumber,
-              postalCode: guestData.deliveryAddress.zipCode,
-              city: guestData.deliveryAddress.city,
-              countryCode: guestData.deliveryAddress.country || 'IN'
-            },
-            specialInstructions: guestData.specialInstructions
-          },
+          recipientAddress: createStandardRecipientAddress(guestData, true),
           paymentMethod: guestData.paymentMethod
         }, {
           headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
@@ -527,18 +512,7 @@ export default function Checkout() {
               comboItemConfigurations: item.comboItemConfigurations
             })
           })),
-          recipientAddress: {
-            name: guestData.recipientName,
-            phone: guestData.recipientPhone,
-            address: {
-              streetName: guestData.deliveryAddress.street,
-              houseNumber: guestData.deliveryAddress.houseNumber,
-              postalCode: guestData.deliveryAddress.zipCode,
-              city: guestData.deliveryAddress.city,
-              countryCode: guestData.deliveryAddress.country || 'IN'
-            },
-            specialInstructions: guestData.specialInstructions
-          }
+          recipientAddress: createStandardRecipientAddress(guestData, true)
         }, {
           headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
         }),
@@ -677,7 +651,7 @@ export default function Checkout() {
       }
 
       // Validate user address
-      if (!registerData.userAddress.street.trim() || !registerData.userAddress.houseNumber.trim() || 
+      if (!registerData.userAddress.street.trim() || 
           !registerData.userAddress.city.trim() || !registerData.userAddress.state.trim() || 
           !registerData.userAddress.zipCode.trim()) {
         setError('Your address information is required');
@@ -686,7 +660,7 @@ export default function Checkout() {
       }
 
       // Validate delivery address
-      if (!registerData.deliveryAddress.street.trim() || !registerData.deliveryAddress.houseNumber.trim() || 
+      if (!registerData.deliveryAddress.street.trim() || 
           !registerData.deliveryAddress.city.trim() || !registerData.deliveryAddress.state.trim() || 
           !registerData.deliveryAddress.zipCode.trim()) {
         setError('Delivery address information is required');
@@ -1009,17 +983,6 @@ export default function Checkout() {
                     </div>
                   </div>
                 )}
-                
-                {/* Guest Checkout Option for Authenticated Users */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <p className="text-sm text-gray-600 mb-3">Or continue as guest for this order:</p>
-                  <button
-                    onClick={() => setActiveTab('guest')}
-                    className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    Continue as Guest
-                  </button>
-                </div>
               </div>
             ) : activeTab === 'guest' ? (
               // Guest checkout form
@@ -1119,7 +1082,7 @@ export default function Checkout() {
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium mb-1">House/Flat Number *</label>
+                            <label className="block text-sm font-medium mb-1">House/Flat Number</label>
                             <input
                               type="text"
                               value={guestData.deliveryAddress.houseNumber}
@@ -1133,8 +1096,7 @@ export default function Checkout() {
                                 });
                               }}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="House/Flat number"
-                              required
+                              placeholder="House/Flat number (optional)"
                             />
                           </div>
                         </div>
@@ -1434,7 +1396,7 @@ export default function Checkout() {
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium mb-1">House/Flat Number *</label>
+                            <label className="block text-sm font-medium mb-1">House/Flat Number</label>
                             <input
                               type="text"
                               value={registerData.userAddress.houseNumber}
@@ -1448,8 +1410,7 @@ export default function Checkout() {
                                 });
                               }}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="Your house/flat number"
-                              required
+                              placeholder="Your house/flat number (optional)"
                             />
                           </div>
                         </div>
@@ -1569,7 +1530,7 @@ export default function Checkout() {
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium mb-1">House/Flat Number *</label>
+                            <label className="block text-sm font-medium mb-1">House/Flat Number</label>
                             <input
                               type="text"
                               value={registerData.deliveryAddress.houseNumber}
@@ -1583,8 +1544,7 @@ export default function Checkout() {
                                 });
                               }}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="Delivery house/flat number"
-                              required
+                              placeholder="Delivery house/flat number (optional)"
                             />
                           </div>
                         </div>
@@ -1682,6 +1642,11 @@ export default function Checkout() {
         {showPayment && paymentData && (
           <RazorpayPayment
             orderData={paymentData}
+            customerData={{
+              name: user ? `${user.firstName} ${user.lastName}` : guestData.senderName,
+              email: user ? user.email : guestData.senderEmail,
+              contact: user ? user.phone : guestData.senderPhone
+            }}
             onSuccess={handlePaymentSuccess}
             onError={handlePaymentError}
             onClose={handlePaymentClose}

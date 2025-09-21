@@ -53,10 +53,11 @@ interface Order {
 }
 
 const OrdersPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, tokens } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [downloading, setDownloading] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -74,6 +75,38 @@ const OrdersPage: React.FC = () => {
       setError(err.response?.data?.error?.message || 'Failed to fetch orders');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownloadReceipt = async (orderId: string) => {
+    try {
+      setDownloading(orderId);
+      const config: any = { 
+        responseType: 'blob',
+        headers: {}
+      };
+      
+      // Add authorization header if user is authenticated
+      if (tokens?.accessToken) {
+        config.headers.Authorization = `Bearer ${tokens.accessToken}`;
+      }
+      
+      const response = await api.get(`/orders/${orderId}/receipt`, config);
+
+      // Create blob link to download file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `receipt-${orderId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error('Error downloading receipt:', err);
+      setError('Failed to download receipt');
+    } finally {
+      setDownloading(null);
     }
   };
 
@@ -236,6 +269,30 @@ const OrdersPage: React.FC = () => {
                             Payment: {order.paymentMethod === 'cod-test' ? 'COD (Cash on Delivery)' : 'Online Payment'}
                           </p>
                         )}
+                        <div className="mt-3">
+                          <button
+                            onClick={() => handleDownloadReceipt(order._id)}
+                            disabled={downloading === order._id}
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                          >
+                            {downloading === order._id ? (
+                              <>
+                                <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Download Receipt
+                              </>
+                            )}
+                          </button>
+                        </div>
                         <OrderStatusTimeline currentStatus={order.status} statusHistory={order.statusHistory || []} />
                       </div>
                     </div>

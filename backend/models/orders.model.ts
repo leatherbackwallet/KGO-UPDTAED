@@ -28,7 +28,7 @@ export interface IShippingDetails {
   recipientPhone: string;
   address: {
     streetName: string;
-    houseNumber: string;
+    houseNumber?: string;
     postalCode: string;
     city: string;
     countryCode: string;
@@ -208,7 +208,7 @@ const shippingDetailsSchema = new Schema<IShippingDetails>({
     },
     houseNumber: {
       type: String,
-      required: true,
+      required: false,
       trim: true
     },
     postalCode: {

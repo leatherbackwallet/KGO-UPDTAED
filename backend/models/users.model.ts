@@ -22,7 +22,7 @@ export interface IRecipientAddress {
   phone: string;
   address: {
     streetName: string;
-    houseNumber: string;
+    houseNumber?: string;
     postalCode: string;
     city: string;
     countryCode: string;
@@ -33,7 +33,7 @@ export interface IRecipientAddress {
 
 export interface IUserAddress {
   streetName: string;
-  houseNumber: string;
+  houseNumber?: string;
   postalCode: string;
   city: string;
   state: string;
@@ -97,7 +97,7 @@ const userAddressSchema = new Schema<IUserAddress>({
   },
   houseNumber: {
     type: String,
-    required: true,
+    required: false,
     trim: true
   },
   postalCode: {
@@ -141,7 +141,7 @@ const recipientAddressSchema = new Schema<IRecipientAddress>({
     },
     houseNumber: {
       type: String,
-      required: true,
+      required: false,
       trim: true
     },
     postalCode: {

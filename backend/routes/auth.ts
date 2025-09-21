@@ -81,7 +81,7 @@ router.post('/register', sanitizeInput, validate(schemas.register), ensureDataba
 
     // Validate user address if provided
     if (userAddress) {
-      if (!userAddress.street || !userAddress.houseNumber || !userAddress.city || !userAddress.state || !userAddress.zipCode) {
+      if (!userAddress.street || !userAddress.city || !userAddress.state || !userAddress.zipCode) {
         return res.status(400).json({
           success: false,
           error: { message: 'User address information is incomplete', code: 'INCOMPLETE_USER_ADDRESS' }
@@ -106,7 +106,7 @@ router.post('/register', sanitizeInput, validate(schemas.register), ensureDataba
 
     // Validate delivery address if provided
     if (deliveryAddress) {
-      if (!deliveryAddress.street || !deliveryAddress.houseNumber || !deliveryAddress.city || !deliveryAddress.state || !deliveryAddress.zipCode) {
+      if (!deliveryAddress.street || !deliveryAddress.city || !deliveryAddress.state || !deliveryAddress.zipCode) {
         return res.status(400).json({
           success: false,
           error: { message: 'Delivery address information is incomplete', code: 'INCOMPLETE_DELIVERY_ADDRESS' }
@@ -401,7 +401,7 @@ router.post('/guest', sanitizeInput, ensureDatabaseConnection, async (req, res) 
     }
 
     // Validate delivery address
-    if (!deliveryAddress || !deliveryAddress.street || !deliveryAddress.houseNumber || !deliveryAddress.city || !deliveryAddress.state || !deliveryAddress.zipCode) {
+    if (!deliveryAddress || !deliveryAddress.street || !deliveryAddress.city || !deliveryAddress.state || !deliveryAddress.zipCode) {
       return res.status(400).json({
         success: false,
         error: { message: 'Complete delivery address is required', code: 'MISSING_DELIVERY_ADDRESS' }

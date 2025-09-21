@@ -115,7 +115,7 @@ interface Order {
 }
 
 const AdminOrders: React.FC = () => {
-  const { user } = useAuth();
+  const { user, tokens } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,6 +127,7 @@ const AdminOrders: React.FC = () => {
   const [paymentMethodFilter, setPaymentMethodFilter] = useState('all');
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [downloading, setDownloading] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -216,6 +217,38 @@ const AdminOrders: React.FC = () => {
     } catch (err: any) {
       console.error('Error updating order status:', err);
       setError(err.response?.data?.error?.message || 'Failed to update order status');
+    }
+  };
+
+  const handleDownloadReceipt = async (orderId: string) => {
+    try {
+      setDownloading(orderId);
+      const config: any = { 
+        responseType: 'blob',
+        headers: {}
+      };
+      
+      // Add authorization header if user is authenticated
+      if (tokens?.accessToken) {
+        config.headers.Authorization = `Bearer ${tokens.accessToken}`;
+      }
+      
+      const response = await api.get(`/orders/${orderId}/receipt`, config);
+
+      // Create blob link to download file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `receipt-${orderId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error('Error downloading receipt:', err);
+      setError('Failed to download receipt');
+    } finally {
+      setDownloading(null);
     }
   };
 
@@ -524,6 +557,13 @@ const AdminOrders: React.FC = () => {
                         className="text-blue-600 hover:text-blue-900 font-medium"
                       >
                         View Details
+                      </button>
+                      <button
+                        onClick={() => handleDownloadReceipt(order._id)}
+                        disabled={downloading === order._id}
+                        className="text-green-600 hover:text-green-900 font-medium disabled:opacity-50"
+                      >
+                        {downloading === order._id ? 'Generating...' : 'Download Receipt'}
                       </button>
                     </div>
                   </td>

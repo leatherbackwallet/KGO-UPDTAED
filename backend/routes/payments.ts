@@ -166,12 +166,12 @@ router.post('/create-order', auth, ensureDatabaseConnection, validatePaymentOrde
             orderItems,
             recipientAddress,
             totalAmount,
+            totalPrice: totalAmount, // ✅ Ensure totalPrice is set for all users
             orderNotes,
             razorpayOrderId: razorpayOrder.id,
             orderStatus: 'pending', // Changed from 'payment_done' to 'pending'
             paymentStatus: 'pending', // Explicitly set payment status
-            // Add required fields for guest users
-            totalPrice: totalAmount,
+            // Add required fields for all users
             shippingDetails: {
                 recipientName: recipientAddress.name,
                 recipientPhone: recipientAddress.phone,

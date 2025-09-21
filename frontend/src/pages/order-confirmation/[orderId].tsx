@@ -25,7 +25,7 @@ interface ShippingDetails {
   recipientPhone: string;
   address: {
     streetName: string;
-    houseNumber: string;
+    houseNumber?: string;
     postalCode: string;
     city: string;
     countryCode: string;
@@ -115,14 +115,17 @@ const OrderConfirmationPage: React.FC = () => {
   const handleDownloadReceipt = async () => {
     try {
       setDownloading(true);
-      const headers: any = { responseType: 'blob' };
+      const config: any = { 
+        responseType: 'blob',
+        headers: {}
+      };
       
       // Add authorization header if user is authenticated
       if (tokens?.accessToken) {
-        headers.Authorization = `Bearer ${tokens.accessToken}`;
+        config.headers.Authorization = `Bearer ${tokens.accessToken}`;
       }
       
-      const response = await api.get(`/orders/${orderId}/receipt`, headers);
+      const response = await api.get(`/orders/${orderId}/receipt`, config);
 
       // Create blob link to download file
       const url = window.URL.createObjectURL(new Blob([response.data]));

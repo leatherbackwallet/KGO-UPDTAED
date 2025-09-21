@@ -50,7 +50,7 @@
               "required": true,
               "structure": {
                 "streetName": { "type": "String", "required": true },
-                "houseNumber": { "type": "String", "required": true },
+                "houseNumber": { "type": "String", "required": false },
                 "postalCode": { "type": "String", "required": true },
                 "city": { "type": "String", "required": true },
                 "countryCode": { "type": "String", "required": true, "default": "DE" }

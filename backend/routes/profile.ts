@@ -344,7 +344,7 @@ router.post('/addresses', auth, async (req: AuthenticatedRequest, res) => {
       isDefault = false 
     } = req.body;
     
-    if (!name || !phone || !streetName || !houseNumber || !postalCode || !city) {
+    if (!name || !phone || !streetName || !postalCode || !city) {
       return res.status(400).json({
         success: false,
         error: { message: 'All address fields are required', code: 'MISSING_FIELDS' }

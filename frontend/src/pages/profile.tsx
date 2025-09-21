@@ -511,7 +511,7 @@ export default function Profile() {
                     />
                   </div>
                   <div>
-                    <label className="form-label">House Number</label>
+                    <label className="form-label">House Number (Optional)</label>
                     <input
                       type="text"
                       value={addressForm.address.houseNumber}
@@ -520,7 +520,7 @@ export default function Profile() {
                         address: { ...addressForm.address, houseNumber: e.target.value }
                       })}
                       className="form-input"
-                      required
+                      placeholder="House number (optional)"
                     />
                   </div>
                   <div>

@@ -10,6 +10,11 @@ interface RazorpayPaymentProps {
     currency: string;
     key: string;
   };
+  customerData: {
+    name: string;
+    email: string;
+    contact: string;
+  };
   onSuccess: (paymentData: any) => void;
   onError: (error: any) => void;
   onClose: () => void;
@@ -23,6 +28,7 @@ declare global {
 
 const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
   orderData,
+  customerData,
   onSuccess,
   onError,
   onClose
@@ -53,9 +59,9 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
             });
           },
           prefill: {
-            name: 'Customer',
-            email: 'customer@example.com',
-            contact: '+919876543210'
+            name: customerData.name,
+            email: customerData.email,
+            contact: customerData.contact
           },
           notes: {
             order_id: orderData.orderId,
@@ -83,7 +89,7 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
     };
 
     initializeRazorpay();
-  }, [orderData, onSuccess, onError, onClose]);
+  }, [orderData, customerData, onSuccess, onError, onClose]);
 
   return null; // This component doesn't render anything
 };
