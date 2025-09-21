@@ -165,7 +165,8 @@ const OrderConfirmationPage: React.FC = () => {
     }
   };
 
-  if (!user) {
+  // Allow both authenticated users and guest users with valid tokens
+  if (!user && !tokens) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

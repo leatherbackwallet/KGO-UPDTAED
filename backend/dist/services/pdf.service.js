@@ -22,30 +22,47 @@ class PDFService {
      * Generate order receipt as PDF
      */
     async generateOrderReceipt(orderData) {
-        const browser = await puppeteer_1.default.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
         try {
-            const page = await browser.newPage();
-            // Generate HTML content for the receipt
-            const htmlContent = this.generateReceiptHTML(orderData);
-            await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-            // Generate PDF
-            const pdfBuffer = await page.pdf({
-                format: 'A4',
-                printBackground: true,
-                margin: {
-                    top: '20mm',
-                    right: '20mm',
-                    bottom: '20mm',
-                    left: '20mm'
-                }
+            const browser = await puppeteer_1.default.launch({
+                headless: true,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--single-process',
+                    '--disable-gpu'
+                ],
+                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
             });
-            return Buffer.from(pdfBuffer);
+            try {
+                const page = await browser.newPage();
+                // Generate HTML content for the receipt
+                const htmlContent = this.generateReceiptHTML(orderData);
+                await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+                // Generate PDF
+                const pdfBuffer = await page.pdf({
+                    format: 'A4',
+                    printBackground: true,
+                    margin: {
+                        top: '20mm',
+                        right: '20mm',
+                        bottom: '20mm',
+                        left: '20mm'
+                    }
+                });
+                return Buffer.from(pdfBuffer);
+            }
+            finally {
+                await browser.close();
+            }
         }
-        finally {
-            await browser.close();
+        catch (error) {
+            console.error('Puppeteer PDF generation failed, falling back to HTML receipt:', error);
+            // Fallback: return HTML content as a simple text-based receipt
+            return this.generateFallbackReceipt(orderData);
         }
     }
     /**
@@ -426,6 +443,67 @@ class PDFService {
       </body>
       </html>
     `;
+    }
+    /**
+     * Generate a simple text-based receipt as fallback when PDF generation fails
+     */
+    generateFallbackReceipt(data) {
+        const { order, companyInfo } = data;
+        const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        const totalAmount = order.totalPrice || 0;
+        const taxRate = 0.18; // 18% GST
+        const taxAmount = totalAmount * taxRate;
+        const subtotal = totalAmount - taxAmount;
+        const receiptText = `
+${companyInfo.name}
+${companyInfo.address}
+Phone: ${companyInfo.phone}
+Email: ${companyInfo.email}
+Website: ${companyInfo.website}
+
+========================================
+ORDER RECEIPT
+========================================
+
+Order ID: ${order.orderId}
+Date: ${orderDate}
+Status: ${order.status || 'N/A'}
+
+Customer Details:
+${order.shippingDetails?.recipientName || 'N/A'}
+${order.shippingDetails?.recipientPhone || 'N/A'}
+${order.shippingDetails?.address?.streetName || 'N/A'}
+${order.shippingDetails?.address?.city || 'N/A'}, ${order.shippingDetails?.address?.state || 'N/A'} ${order.shippingDetails?.address?.postalCode || 'N/A'}
+
+Order Items:
+${order.orderItems?.map((item) => `${item.productId?.name || 'Product'} x ${item.quantity} = ₹${(item.price * item.quantity).toFixed(2)}`).join('\n') || 'No items'}
+
+========================================
+PRICING BREAKDOWN
+========================================
+
+Subtotal: ₹${subtotal.toFixed(2)}
+GST (18%): ₹${taxAmount.toFixed(2)}
+Total: ₹${totalAmount.toFixed(2)}
+
+Payment Method: ${order.paymentMethod || 'N/A'}
+Payment Status: ${order.paymentStatus || 'N/A'}
+
+========================================
+Thank you for your order!
+
+For any queries or support, please contact us at:
+${companyInfo.email} or ${companyInfo.phone}
+
+Visit us at ${companyInfo.website} for more authentic Kerala gifts
+
+This is a computer-generated receipt. No signature required.
+    `.trim();
+        return Buffer.from(receiptText, 'utf-8');
     }
 }
 exports.default = new PDFService();

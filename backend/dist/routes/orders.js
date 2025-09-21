@@ -355,10 +355,20 @@ router.get('/:orderId/receipt', optionalAuth_1.optionalAuth, database_1.ensureDa
                 website: 'https://keralgiftsonline.in'
             }
         });
-        // Set response headers for PDF download
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="receipt-${order.orderId}.pdf"`);
-        res.setHeader('Content-Length', pdfBuffer.length);
+        // Check if this is a fallback text receipt or actual PDF
+        const isTextReceipt = pdfBuffer.toString('utf-8', 0, 100).includes('ORDER RECEIPT');
+        if (isTextReceipt) {
+            // Set response headers for text file download
+            res.setHeader('Content-Type', 'text/plain');
+            res.setHeader('Content-Disposition', `attachment; filename="receipt-${order.orderId}.txt"`);
+            res.setHeader('Content-Length', pdfBuffer.length);
+        }
+        else {
+            // Set response headers for PDF download
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="receipt-${order.orderId}.pdf"`);
+            res.setHeader('Content-Length', pdfBuffer.length);
+        }
         res.send(pdfBuffer);
     }
     catch (err) {
