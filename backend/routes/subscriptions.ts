@@ -311,7 +311,7 @@ router.post('/process-referral', authenticateToken, validate(referralSchema), as
 router.get('/analytics', authenticateToken, async (req: Request, res: Response) => {
   try {
     // Check if user is admin
-    if ((req as any).user.role !== 'admin') {
+    if ((req as any).user.roleName !== 'admin') {
       return res.status(403).json({
         success: false,
         error: {

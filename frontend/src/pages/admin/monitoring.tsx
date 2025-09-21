@@ -23,7 +23,7 @@ const AdminMonitoringPage: React.FC = () => {
         }
 
         const userData = JSON.parse(user);
-        if (userData.role !== 'admin') {
+        if (userData.roleName !== 'admin') {
           router.push('/');
           return;
         }

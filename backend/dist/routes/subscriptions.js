@@ -306,7 +306,7 @@ router.post('/process-referral', auth_1.auth, (0, validation_1.validate)(referra
 router.get('/analytics', auth_1.auth, async (req, res) => {
     try {
         // Check if user is admin
-        if (req.user.role !== 'admin') {
+        if (req.user.roleName !== 'admin') {
             return res.status(403).json({
                 success: false,
                 error: {
