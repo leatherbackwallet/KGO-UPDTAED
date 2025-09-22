@@ -54,12 +54,12 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <img 
-              src="/images/logo.svg" 
+              src="/images/logo.png" 
               alt="KeralaGiftsOnline Logo" 
               className="h-10 w-auto hidden md:block"
             />
             <img 
-              src="/images/logo-mobile.svg" 
+              src="/images/logo-mobile.png" 
               alt="KeralaGiftsOnline Logo" 
               className="h-8 w-auto md:hidden"
             />
