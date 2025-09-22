@@ -37,6 +37,10 @@ env_variables:
   RAZORPAY_KEY_SECRET: "kgZuBvXrRs1JEbEiQdzG7MeN"
   RAZORPAY_WEBHOOK_SECRET: "esmeR2lda"
   PAYMENT_CURRENCY: "INR"
+  
+  # Puppeteer Configuration for PDF Generation
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
+  PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium-browser"
 
 # Add health check configuration
 readiness_check:

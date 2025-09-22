@@ -24,6 +24,8 @@ class PDFService {
     async generateOrderReceipt(orderData) {
         try {
             console.log('Starting PDF generation for order:', orderData.order.orderId);
+            console.log('Environment:', process.env.NODE_ENV);
+            console.log('Puppeteer executable path:', process.env.PUPPETEER_EXECUTABLE_PATH);
             const browser = await puppeteer_1.default.launch({
                 headless: true,
                 args: [
@@ -36,19 +38,56 @@ class PDFService {
                     '--single-process',
                     '--disable-gpu',
                     '--disable-web-security',
-                    '--disable-features=VizDisplayCompositor'
+                    '--disable-features=VizDisplayCompositor',
+                    '--disable-background-timer-throttling',
+                    '--disable-backgrounding-occluded-windows',
+                    '--disable-renderer-backgrounding',
+                    '--disable-extensions',
+                    '--disable-plugins',
+                    '--disable-default-apps',
+                    '--disable-sync',
+                    '--disable-translate',
+                    '--hide-scrollbars',
+                    '--mute-audio',
+                    '--no-default-browser-check',
+                    '--no-pings',
+                    '--disable-logging',
+                    '--disable-permissions-api',
+                    '--disable-presentation-api',
+                    '--disable-print-preview',
+                    '--disable-speech-api',
+                    '--disable-file-system',
+                    '--disable-notifications',
+                    '--disable-device-discovery-notifications',
+                    '--disable-client-side-phishing-detection',
+                    '--disable-component-extensions-with-background-pages',
+                    '--disable-ipc-flooding-protection',
+                    '--disable-hang-monitor',
+                    '--disable-prompt-on-repost',
+                    '--disable-domain-reliability',
+                    '--disable-features=TranslateUI,BlinkGenPropertyTrees',
+                    '--force-color-profile=srgb',
+                    '--memory-pressure-off',
+                    '--max_old_space_size=4096'
                 ],
                 executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-                timeout: 30000 // 30 second timeout
+                timeout: 60000 // 60 second timeout for production
             });
             try {
                 const page = await browser.newPage();
-                page.setDefaultTimeout(30000); // 30 second timeout for page operations
+                page.setDefaultTimeout(60000); // 60 second timeout for page operations
+                // Set viewport for consistent rendering
+                await page.setViewport({ width: 1200, height: 800, deviceScaleFactor: 1 });
                 // Generate HTML content for the receipt
                 const htmlContent = this.generateReceiptHTML(orderData);
                 console.log('Generated HTML content length:', htmlContent.length);
-                await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
+                await page.setContent(htmlContent, {
+                    waitUntil: 'networkidle0',
+                    timeout: 60000
+                });
                 console.log('Page content loaded successfully');
+                // Wait a bit for any dynamic content to render
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 // Generate PDF
                 const pdfBuffer = await page.pdf({
                     format: 'A4',
@@ -59,7 +98,8 @@ class PDFService {
                         bottom: '20mm',
                         left: '20mm'
                     },
-                    timeout: 30000
+                    timeout: 60000,
+                    preferCSSPageSize: true
                 });
                 console.log('PDF generated successfully, size:', pdfBuffer.length, 'bytes');
                 console.log('PDF buffer first 10 bytes:', Array.from(pdfBuffer.slice(0, 10)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '));
@@ -71,6 +111,14 @@ class PDFService {
         }
         catch (error) {
             console.error('Puppeteer PDF generation failed, falling back to HTML receipt:', error);
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name,
+                orderId: orderData.order.orderId,
+                environment: process.env.NODE_ENV,
+                puppeteerPath: process.env.PUPPETEER_EXECUTABLE_PATH
+            });
             // Fallback: return HTML content as a simple text-based receipt
             return this.generateFallbackReceipt(orderData);
         }
