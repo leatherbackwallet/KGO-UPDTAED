@@ -104,9 +104,21 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
     const skip = (Number(page) - 1) * Number(limit);
     
     let query = Product.find(filter)
-      .populate('categories', 'name slug')
-      .populate('vendors', 'storeName')
-      .populate('occasions', 'name slug dateRange priority seasonalFlags')
+      .populate({
+        path: 'categories',
+        select: 'name slug',
+        options: { strictPopulate: false }
+      })
+      .populate({
+        path: 'vendors',
+        select: 'storeName',
+        options: { strictPopulate: false }
+      })
+      .populate({
+        path: 'occasions',
+        select: 'name slug dateRange priority seasonalFlags',
+        options: { strictPopulate: false }
+      })
       .sort({ isFeatured: -1, createdAt: -1 });
     
     // For admin requests or when limit is high (>=100), don't apply pagination limits
@@ -138,11 +150,23 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
 router.get('/:id', ensureDatabaseConnection, async (req: Request, res: Response): Promise<void> => {
   try {
     const product = await Product.findById(req.params.id)
-      .populate('categories', 'name slug')
-      .populate('vendors', 'storeName')
-      .populate('attributes')
+      .populate({
+        path: 'categories',
+        select: 'name slug',
+        options: { strictPopulate: false }
+      })
+      .populate({
+        path: 'vendors',
+        select: 'storeName',
+        options: { strictPopulate: false }
+      })
+      .populate({
+        path: 'attributes',
+        options: { strictPopulate: false }
+      })
       .populate({
         path: 'reviews',
+        options: { strictPopulate: false },
         populate: {
           path: 'userId',
           select: 'firstName lastName'
@@ -257,8 +281,16 @@ router.delete('/:id', auth, requireRole('admin'), ensureDatabaseConnection, asyn
 router.get('/featured/list', ensureDatabaseConnection, async (req: Request, res: Response): Promise<void> => {
   try {
     const products = await Product.find({ isFeatured: true, isActive: true, isDeleted: false })
-      .populate('categories', 'name slug')
-      .populate('vendors', 'storeName')
+      .populate({
+        path: 'categories',
+        select: 'name slug',
+        options: { strictPopulate: false }
+      })
+      .populate({
+        path: 'vendors',
+        select: 'storeName',
+        options: { strictPopulate: false }
+      })
       .sort({ createdAt: -1 })
       .limit(10);
 
@@ -300,9 +332,21 @@ router.get('/search/query', ensureDatabaseConnection, async (req: Request, res: 
     const skip = (Number(page) - 1) * Number(limit);
     
     const products = await Product.find(filter)
-      .populate('categories', 'name slug')
-      .populate('vendors', 'storeName')
-      .populate('occasions', 'name slug dateRange priority seasonalFlags')
+      .populate({
+        path: 'categories',
+        select: 'name slug',
+        options: { strictPopulate: false }
+      })
+      .populate({
+        path: 'vendors',
+        select: 'storeName',
+        options: { strictPopulate: false }
+      })
+      .populate({
+        path: 'occasions',
+        select: 'name slug dateRange priority seasonalFlags',
+        options: { strictPopulate: false }
+      })
       .sort({ isFeatured: -1, createdAt: -1 })
       .skip(skip)
       .limit(Number(limit));

@@ -130,9 +130,21 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
         }
         const skip = (Number(page) - 1) * Number(limit);
         let query = products_model_1.Product.find(filter)
-            .populate('categories', 'name slug')
-            .populate('vendors', 'storeName')
-            .populate('occasions', 'name slug dateRange priority seasonalFlags')
+            .populate({
+            path: 'categories',
+            select: 'name slug',
+            options: { strictPopulate: false }
+        })
+            .populate({
+            path: 'vendors',
+            select: 'storeName',
+            options: { strictPopulate: false }
+        })
+            .populate({
+            path: 'occasions',
+            select: 'name slug dateRange priority seasonalFlags',
+            options: { strictPopulate: false }
+        })
             .sort({ isFeatured: -1, createdAt: -1 });
         // For admin requests or when limit is high (>=100), don't apply pagination limits
         // This ensures all products are returned when requested
@@ -160,11 +172,23 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
 router.get('/:id', database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const product = await products_model_1.Product.findById(req.params.id)
-            .populate('categories', 'name slug')
-            .populate('vendors', 'storeName')
-            .populate('attributes')
+            .populate({
+            path: 'categories',
+            select: 'name slug',
+            options: { strictPopulate: false }
+        })
+            .populate({
+            path: 'vendors',
+            select: 'storeName',
+            options: { strictPopulate: false }
+        })
+            .populate({
+            path: 'attributes',
+            options: { strictPopulate: false }
+        })
             .populate({
             path: 'reviews',
+            options: { strictPopulate: false },
             populate: {
                 path: 'userId',
                 select: 'firstName lastName'
@@ -260,8 +284,16 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.
 router.get('/featured/list', database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const products = await products_model_1.Product.find({ isFeatured: true, isActive: true, isDeleted: false })
-            .populate('categories', 'name slug')
-            .populate('vendors', 'storeName')
+            .populate({
+            path: 'categories',
+            select: 'name slug',
+            options: { strictPopulate: false }
+        })
+            .populate({
+            path: 'vendors',
+            select: 'storeName',
+            options: { strictPopulate: false }
+        })
             .sort({ createdAt: -1 })
             .limit(10);
         res.json({ success: true, data: products });
@@ -298,9 +330,21 @@ router.get('/search/query', database_1.ensureDatabaseConnection, async (req, res
         }
         const skip = (Number(page) - 1) * Number(limit);
         const products = await products_model_1.Product.find(filter)
-            .populate('categories', 'name slug')
-            .populate('vendors', 'storeName')
-            .populate('occasions', 'name slug dateRange priority seasonalFlags')
+            .populate({
+            path: 'categories',
+            select: 'name slug',
+            options: { strictPopulate: false }
+        })
+            .populate({
+            path: 'vendors',
+            select: 'storeName',
+            options: { strictPopulate: false }
+        })
+            .populate({
+            path: 'occasions',
+            select: 'name slug dateRange priority seasonalFlags',
+            options: { strictPopulate: false }
+        })
             .sort({ isFeatured: -1, createdAt: -1 })
             .skip(skip)
             .limit(Number(limit));
