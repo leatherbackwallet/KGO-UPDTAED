@@ -423,10 +423,10 @@ export default function Checkout() {
       // Import the payment status utility
       const { checkPaymentStatusWithFallback } = await import('../utils/paymentStatus');
       
-      // Get the current payment data from state or create from order data
+      // Get the current payment data from state
       const currentPaymentData = paymentData || {
-        razorpay_order_id: currentOrder?.razorpayOrderId,
-        razorpay_payment_id: currentOrder?.razorpayPaymentId
+        razorpay_order_id: paymentData?.razorpay_order_id,
+        razorpay_payment_id: paymentData?.razorpay_payment_id
       };
       
       if (!currentPaymentData.razorpay_order_id && !currentPaymentData.razorpay_payment_id) {
