@@ -31,6 +31,8 @@ class PDFService {
    */
   async generateOrderReceipt(orderData: OrderReceiptData): Promise<Buffer> {
     try {
+      console.log('Starting PDF generation for order:', orderData.order.orderId);
+      
       const browser = await puppeteer.launch({
         headless: true,
         args: [
@@ -41,18 +43,24 @@ class PDFService {
           '--no-first-run',
           '--no-zygote',
           '--single-process',
-          '--disable-gpu'
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor'
         ],
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+        timeout: 30000 // 30 second timeout
       });
 
       try {
         const page = await browser.newPage();
+        page.setDefaultTimeout(30000); // 30 second timeout for page operations
         
         // Generate HTML content for the receipt
         const htmlContent = this.generateReceiptHTML(orderData);
+        console.log('Generated HTML content length:', htmlContent.length);
         
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
+        console.log('Page content loaded successfully');
         
         // Generate PDF
         const pdfBuffer = await page.pdf({
@@ -63,9 +71,12 @@ class PDFService {
             right: '20mm',
             bottom: '20mm',
             left: '20mm'
-          }
+          },
+          timeout: 30000
         });
 
+        console.log('PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+        console.log('PDF buffer first 10 bytes:', Array.from(pdfBuffer.slice(0, 10)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '));
         return Buffer.from(pdfBuffer);
       } finally {
         await browser.close();
@@ -82,13 +93,23 @@ class PDFService {
    */
   private generateReceiptHTML(data: OrderReceiptData): string {
     const { order, companyInfo } = data;
-    const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN', {
+    
+    // Validate order data
+    if (!order) {
+      throw new Error('Order data is required');
+    }
+    
+    if (!order.orderId) {
+      throw new Error('Order ID is required');
+    }
+    
+    const orderDate = new Date(order.createdAt || new Date()).toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
 
-    const totalAmount = order.totalPrice || 0;
+    const totalAmount = order.totalPrice || order.amountPaid || 0;
     const taxRate = 0.18; // 18% GST
     const taxAmount = totalAmount * taxRate;
     const subtotal = totalAmount - taxAmount;
@@ -384,20 +405,27 @@ class PDFService {
               </tr>
             </thead>
             <tbody>
-              ${order.orderItems?.map(item => `
+              ${order.orderItems?.map(item => {
+                const product = item.productId as any;
+                const productName = product?.name?.en || product?.name || 'Product';
+                const productDescription = product?.description?.en || product?.description || '';
+                const categoryName = product?.categories?.[0]?.name?.en || product?.categories?.[0]?.name || 'General';
+                
+                return `
                 <tr>
                   <td>
-                    <div class="product-name">${(item.productId as any)?.name?.en || 'Product'}</div>
-                    ${(item.productId as any)?.description?.en ? `<div class="product-category">${(item.productId as any).description.en}</div>` : ''}
+                    <div class="product-name">${productName}</div>
+                    ${productDescription ? `<div class="product-category">${productDescription}</div>` : ''}
                   </td>
                   <td>
-                    ${(item.productId as any)?.categories?.[0]?.name?.en || 'General'}
+                    ${categoryName}
                   </td>
                   <td class="text-center">${item.quantity}</td>
                   <td class="text-right">₹${item.price?.toFixed(2) || '0.00'}</td>
                   <td class="text-right">₹${((item.price || 0) * item.quantity).toFixed(2)}</td>
                 </tr>
-              `).join('') || '<tr><td colspan="5" class="text-center">No items found</td></tr>'}
+              `;
+              }).join('') || '<tr><td colspan="5" class="text-center">No items found</td></tr>'}
             </tbody>
           </table>
 
@@ -464,13 +492,23 @@ class PDFService {
    */
   private generateFallbackReceipt(data: OrderReceiptData): Buffer {
     const { order, companyInfo } = data;
-    const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN', {
+    
+    // Validate order data
+    if (!order) {
+      throw new Error('Order data is required for fallback receipt');
+    }
+    
+    if (!order.orderId) {
+      throw new Error('Order ID is required for fallback receipt');
+    }
+    
+    const orderDate = new Date(order.createdAt || new Date()).toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
 
-    const totalAmount = order.totalPrice || 0;
+    const totalAmount = order.totalPrice || order.amountPaid || 0;
     const taxRate = 0.18; // 18% GST
     const taxAmount = totalAmount * taxRate;
     const subtotal = totalAmount - taxAmount;
@@ -488,7 +526,7 @@ ORDER RECEIPT
 
 Order ID: ${order.orderId}
 Date: ${orderDate}
-Status: ${(order as any).status || 'N/A'}
+Status: ${order.orderStatus || 'N/A'}
 
 Customer Details:
 ${order.shippingDetails?.recipientName || 'N/A'}
@@ -497,9 +535,11 @@ ${order.shippingDetails?.address?.streetName || 'N/A'}
 ${order.shippingDetails?.address?.city || 'N/A'}, ${(order.shippingDetails?.address as any)?.state || 'N/A'} ${order.shippingDetails?.address?.postalCode || 'N/A'}
 
 Order Items:
-${order.orderItems?.map((item: any) => 
-  `${item.productId?.name || 'Product'} x ${item.quantity} = ₹${(item.price * item.quantity).toFixed(2)}`
-).join('\n') || 'No items'}
+${order.orderItems?.map((item: any) => {
+  const product = item.productId;
+  const productName = product?.name?.en || product?.name || 'Product';
+  return `${productName} x ${item.quantity} = ₹${(item.price * item.quantity).toFixed(2)}`;
+}).join('\n') || 'No items'}
 
 ========================================
 PRICING BREAKDOWN
@@ -523,7 +563,10 @@ Visit us at ${companyInfo.website} for more authentic Kerala gifts
 This is a computer-generated receipt. No signature required.
     `.trim();
 
-    return Buffer.from(receiptText, 'utf-8');
+    const buffer = Buffer.from(receiptText, 'utf-8');
+    console.log('Fallback receipt generated, size:', buffer.length, 'bytes');
+    console.log('Fallback buffer first 10 bytes:', Array.from(buffer.slice(0, 10)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '));
+    return buffer;
   }
 }
 

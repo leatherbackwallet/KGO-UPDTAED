@@ -12,6 +12,7 @@ import { useWishlist } from '../context/WishlistContext';
 import AdminTabs from '../components/AdminTabs';
 import RecipientAddresses from '../components/RecipientAddresses';
 import RazorpayPayment from '../components/RazorpayPayment';
+import PasswordRequirements from '../components/PasswordRequirements';
 import api from '../utils/api';
 import { validatePaymentResponse } from '../utils/razorpay';
 import { createStandardRecipientAddress } from '../utils/addressMapping';
@@ -1408,6 +1409,7 @@ export default function Checkout() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
+                      <PasswordRequirements password={loginData.password} />
                     </div>
                     <button
                       type="submit"
@@ -1485,6 +1487,7 @@ export default function Checkout() {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           required
                         />
+                        <PasswordRequirements password={registerData.password} />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-1">Confirm Password</label>

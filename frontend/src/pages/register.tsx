@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
+import PasswordRequirements from '../components/PasswordRequirements';
 import api from '../utils/api';
 
 interface AuthResponse {
@@ -263,15 +264,15 @@ export default function Register() {
             <input
               id="password"
               type="password"
-              placeholder="Enter your password (min 6 characters)"
+              placeholder="Enter your password"
               value={password}
               onChange={e => handleInputChange('password', e.target.value)}
               className="form-input w-full"
               required
               disabled={loading}
               autoComplete="new-password"
-              minLength={6}
             />
+            <PasswordRequirements password={password} />
           </div>
           
           <div className="mb-6">

@@ -333,6 +333,9 @@ router.get('/:orderId/receipt', optionalAuth, ensureDatabaseConnection, async (r
     // Import PDF service dynamically to avoid circular dependencies
     const PDFService = (await import('../services/pdf.service')).default;
     
+    console.log('Generating PDF for order:', order.orderId);
+    console.log('Order data:', JSON.stringify(order, null, 2));
+    
     // Generate PDF
     const pdfBuffer = await PDFService.generateOrderReceipt({
       order: order as any,
@@ -346,11 +349,15 @@ router.get('/:orderId/receipt', optionalAuth, ensureDatabaseConnection, async (r
     });
 
     // Check if this is a fallback text receipt or actual PDF
-    const isTextReceipt = pdfBuffer.toString('utf-8', 0, 100).includes('ORDER RECEIPT');
+    // Check the first few bytes to determine if it's a PDF (PDF files start with %PDF)
+    console.log('PDF buffer received, size:', pdfBuffer.length, 'bytes');
+    console.log('PDF buffer first 10 bytes:', Array.from(pdfBuffer.slice(0, 10)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '));
+    const isPDF = pdfBuffer.length > 4 && pdfBuffer[0] === 0x25 && pdfBuffer[1] === 0x50 && pdfBuffer[2] === 0x44 && pdfBuffer[3] === 0x46;
+    console.log('Is PDF:', isPDF);
     
-    if (isTextReceipt) {
+    if (!isPDF) {
       // Set response headers for text file download
-      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
       res.setHeader('Content-Disposition', `attachment; filename="receipt-${order.orderId}.txt"`);
       res.setHeader('Content-Length', pdfBuffer.length);
     } else {
@@ -363,9 +370,18 @@ router.get('/:orderId/receipt', optionalAuth, ensureDatabaseConnection, async (r
     res.send(pdfBuffer);
   } catch (err: any) {
     console.error('Error generating PDF receipt:', err);
+    console.error('Error details:', {
+      message: err.message,
+      stack: err.stack,
+      orderId: req.params.orderId
+    });
     res.status(500).json({
       success: false,
-      error: { message: 'Failed to generate PDF receipt', code: 'PDF_GENERATION_ERROR' }
+      error: { 
+        message: 'Failed to generate PDF receipt', 
+        code: 'PDF_GENERATION_ERROR',
+        details: process.env.NODE_ENV === 'development' ? err.message : undefined
+      }
     });
   }
 });

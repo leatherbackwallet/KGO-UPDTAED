@@ -93,11 +93,27 @@ const OrdersPage: React.FC = () => {
       
       const response = await api.get(`/orders/${orderId}/receipt`, config);
 
+      console.log('Download response:', {
+        status: response.status,
+        headers: response.headers,
+        dataType: typeof response.data,
+        dataSize: response.data?.size || response.data?.length || 'unknown'
+      });
+
       // Create blob link to download file
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = new Blob([response.data], { 
+        type: response.headers['content-type'] || 'application/pdf' 
+      });
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `receipt-${orderId}.pdf`);
+      
+      // Determine file extension based on content type
+      const contentType = response.headers['content-type'] || '';
+      const isPDF = contentType.includes('application/pdf');
+      const fileExtension = isPDF ? 'pdf' : 'txt';
+      
+      link.setAttribute('download', `receipt-${orderId}.${fileExtension}`);
       document.body.appendChild(link);
       link.click();
       link.remove();
