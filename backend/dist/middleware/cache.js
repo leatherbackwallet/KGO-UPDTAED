@@ -188,8 +188,9 @@ const warmCache = async (warmingConfig) => {
         console.log('Starting cache warming...');
         // Warm frequently accessed product data
         if (warmingConfig.products) {
-            // Cache featured products
+            // Cache featured products with optimized query
             const featuredProducts = await products_model_1.Product.find({ isFeatured: true })
+                .select('name description price images isFeatured categories vendors')
                 .populate('categories', 'name slug')
                 .populate('vendors', 'storeName')
                 .limit(20);
@@ -200,10 +201,11 @@ const warmCache = async (warmingConfig) => {
                 etag,
                 timestamp: Date.now()
             }, 300);
-            // Cache products by popular categories
+            // Cache products by popular categories with optimized queries
             const popularCategories = await categories_model_1.Category.find({ isPopular: true }).limit(5);
             for (const category of popularCategories) {
                 const categoryProducts = await products_model_1.Product.find({ categories: category._id })
+                    .select('name description price images isFeatured categories vendors')
                     .populate('categories', 'name slug')
                     .populate('vendors', 'storeName')
                     .limit(20);
@@ -238,13 +240,13 @@ const warmCache = async (warmingConfig) => {
 exports.warmCache = warmCache;
 // Schedule cache warming for frequently accessed data
 const scheduleWarmCache = () => {
-    // Warm cache every 10 minutes
+    // Warm cache every 30 minutes (reduced frequency to reduce database load)
     setInterval(() => {
         (0, exports.warmCache)({ products: true, categories: true });
-    }, 600000); // 10 minutes
-    // Initial warming
+    }, 1800000); // 30 minutes
+    // Initial warming with delay to avoid startup conflicts
     setTimeout(() => {
         (0, exports.warmCache)({ products: true, categories: true });
-    }, 5000); // 5 seconds after startup
+    }, 30000); // 30 seconds after startup
 };
 exports.scheduleWarmCache = scheduleWarmCache;

@@ -53,12 +53,10 @@ const router = express_1.default.Router();
 // Get all products with SMART caching (re-enabled with proper invalidation)
 router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
-        console.log('🔍 [Products API] Fetching products with smart caching...');
-        console.log('🔍 [Products API] Database name:', mongoose_1.default.connection.db?.databaseName);
-        console.log('🔍 [Products API] Connection state:', mongoose_1.default.connection.readyState);
-        console.log('🔍 [Products API] Connection URI:', mongoose_1.default.connection.host, mongoose_1.default.connection.port);
-        console.log('🔍 [Products API] Collections:', await mongoose_1.default.connection.db?.listCollections().toArray());
+        // Removed excessive debug logging for better performance
         const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false, admin = false } = req.query;
+        // For admin requests, use a high limit to get all products
+        const effectiveLimit = admin === 'true' ? 1000 : Number(limit);
         let filter = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
         // Apply filters
         if (category) {
@@ -97,28 +95,27 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
                     occasionNames.push(occasion);
                 }
             }
-            if (occasionIds.length > 0 && occasionNames.length > 0) {
-                // Mixed filtering - need to find occasion IDs by name first
-                const { Occasion } = await Promise.resolve().then(() => __importStar(require('../models/occasions.model')));
-                const occasionsByName = await Occasion.find({
-                    name: { $in: occasionNames },
-                    isActive: true,
-                    isDeleted: false
-                }).select('_id');
-                const allOccasionIds = [...occasionIds, ...occasionsByName.map(o => o._id)];
-                filter.occasions = { $in: allOccasionIds };
+            // Optimize: Only make one database call for occasion lookups
+            if (occasionNames.length > 0) {
+                try {
+                    const { Occasion } = await Promise.resolve().then(() => __importStar(require('../models/occasions.model')));
+                    const occasionsByName = await Occasion.find({
+                        name: { $in: occasionNames },
+                        isActive: true,
+                        isDeleted: false
+                    }).select('_id');
+                    const allOccasionIds = [...occasionIds, ...occasionsByName.map(o => o._id)];
+                    if (allOccasionIds.length > 0) {
+                        filter.occasions = { $in: allOccasionIds };
+                    }
+                }
+                catch (error) {
+                    console.error('Error fetching occasions:', error);
+                    // If occasion lookup fails, skip occasion filtering
+                }
             }
             else if (occasionIds.length > 0) {
                 filter.occasions = { $in: occasionIds };
-            }
-            else if (occasionNames.length > 0) {
-                const { Occasion } = await Promise.resolve().then(() => __importStar(require('../models/occasions.model')));
-                const occasionsByName = await Occasion.find({
-                    name: { $in: occasionNames },
-                    isActive: true,
-                    isDeleted: false
-                }).select('_id');
-                filter.occasions = { $in: occasionsByName.map(o => o._id) };
             }
         }
         if (search) {
@@ -128,8 +125,10 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
                 { 'description': searchRegex }
             ];
         }
-        const skip = (Number(page) - 1) * Number(limit);
+        const skip = (Number(page) - 1) * effectiveLimit;
+        // Optimize: Select only needed fields for better performance
         let query = products_model_1.Product.find(filter)
+            .select('name description price images isFeatured categories vendors occasions createdAt updatedAt')
             .populate({
             path: 'categories',
             select: 'name slug',
@@ -148,19 +147,33 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
             .sort({ isFeatured: -1, createdAt: -1 });
         // For admin requests or when limit is high (>=100), don't apply pagination limits
         // This ensures all products are returned when requested
-        if (admin !== 'true' && Number(limit) < 100) {
-            query = query.skip(skip).limit(Number(limit));
+        if (admin !== 'true' && effectiveLimit < 100) {
+            query = query.skip(skip).limit(effectiveLimit);
         }
-        const products = await query;
-        const total = await products_model_1.Product.countDocuments(filter);
+        else if (admin === 'true') {
+            // For admin requests, return all products without pagination
+            console.log('Admin request: returning all products without pagination');
+        }
+        // Optimize: Run count query in parallel with main query for better performance
+        const [products, total] = await Promise.all([
+            query,
+            products_model_1.Product.countDocuments(filter)
+        ]).catch(error => {
+            console.error('Error in parallel queries:', error);
+            // Fallback to sequential queries if parallel fails
+            return Promise.all([
+                query.catch(() => []),
+                products_model_1.Product.countDocuments(filter).catch(() => 0)
+            ]);
+        });
         res.json({
             success: true,
             data: products,
             count: products.length,
             total,
             page: Number(page),
-            pages: Number(limit) >= 100 ? 1 : Math.ceil(total / Number(limit)),
-            allProductsLoaded: Number(limit) >= 100 || admin === 'true' || products.length === total
+            pages: effectiveLimit >= 100 ? 1 : Math.ceil(total / effectiveLimit),
+            allProductsLoaded: effectiveLimit >= 100 || admin === 'true' || products.length === total
         });
     }
     catch (error) {

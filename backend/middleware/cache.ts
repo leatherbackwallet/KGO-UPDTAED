@@ -203,8 +203,9 @@ export const warmCache = async (warmingConfig: WarmingConfig): Promise<void> => 
     
     // Warm frequently accessed product data
     if (warmingConfig.products) {
-      // Cache featured products
+      // Cache featured products with optimized query
       const featuredProducts = await Product.find({ isFeatured: true })
+        .select('name description price images isFeatured categories vendors')
         .populate('categories', 'name slug')
         .populate('vendors', 'storeName')
         .limit(20);
@@ -217,10 +218,11 @@ export const warmCache = async (warmingConfig: WarmingConfig): Promise<void> => 
         timestamp: Date.now() 
       }, 300);
       
-      // Cache products by popular categories
+      // Cache products by popular categories with optimized queries
       const popularCategories = await Category.find({ isPopular: true }).limit(5);
       for (const category of popularCategories) {
         const categoryProducts = await Product.find({ categories: category._id })
+          .select('name description price images isFeatured categories vendors')
           .populate('categories', 'name slug')
           .populate('vendors', 'storeName')
           .limit(20);
@@ -259,15 +261,15 @@ export const warmCache = async (warmingConfig: WarmingConfig): Promise<void> => 
 
 // Schedule cache warming for frequently accessed data
 export const scheduleWarmCache = (): void => {
-  // Warm cache every 10 minutes
+  // Warm cache every 30 minutes (reduced frequency to reduce database load)
   setInterval(() => {
     warmCache({ products: true, categories: true });
-  }, 600000); // 10 minutes
+  }, 1800000); // 30 minutes
   
-  // Initial warming
+  // Initial warming with delay to avoid startup conflicts
   setTimeout(() => {
     warmCache({ products: true, categories: true });
-  }, 5000); // 5 seconds after startup
+  }, 30000); // 30 seconds after startup
 };
 
 export { cache, generateETag };

@@ -30,10 +30,14 @@ export async function connectToDatabase(): Promise<void> {
     }
 
     await mongoose.connect(process.env.MONGODB_URI, {
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
+      maxPoolSize: 50, // Increased from 10 to 50 for better concurrency
+      minPoolSize: 5, // Maintain minimum connections
+      maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
+      serverSelectionTimeoutMS: 10000, // Increased timeout for better reliability
       socketTimeoutMS: 45000,
       bufferCommands: false,
+      retryWrites: true,
+      w: 'majority', // Write concern for better reliability
     });
 
     isConnected = true;
@@ -75,21 +79,36 @@ export async function disconnectFromDatabase(): Promise<void> {
   }
 }
 
-// Handle connection events
+// Handle connection events with better monitoring
 mongoose.connection.on('connected', () => {
-  console.log('Mongoose connected to MongoDB');
+  console.log('✅ Mongoose connected to MongoDB');
+  console.log(`📊 Connection state: ${mongoose.connection.readyState}`);
   isConnected = true;
 });
 
 mongoose.connection.on('error', (err) => {
-  console.error('Mongoose connection error:', err);
+  console.error('❌ Mongoose connection error:', err);
   isConnected = false;
 });
 
 mongoose.connection.on('disconnected', () => {
-  console.log('Mongoose disconnected from MongoDB');
+  console.log('⚠️ Mongoose disconnected from MongoDB');
   isConnected = false;
 });
+
+mongoose.connection.on('reconnected', () => {
+  console.log('🔄 Mongoose reconnected to MongoDB');
+  isConnected = true;
+});
+
+// Monitor connection status
+setInterval(() => {
+  if (mongoose.connection.readyState === 1) {
+    console.log(`📊 DB Status: Connected (${mongoose.connection.readyState})`);
+  } else {
+    console.log(`⚠️ DB Status: Disconnected (${mongoose.connection.readyState})`);
+  }
+}, 60000); // Check every minute
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
