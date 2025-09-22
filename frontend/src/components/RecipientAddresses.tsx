@@ -139,7 +139,7 @@ export default function RecipientAddresses({
   };
 
   // Helper function to compare addresses
-  const isAddressEqual = (addr1: RecipientAddress | null, addr2: RecipientAddress) => {
+  const isAddressEqual = (addr1: RecipientAddress | null | undefined, addr2: RecipientAddress) => {
     if (!addr1) return false;
     return (
       addr1.name === addr2.name &&
