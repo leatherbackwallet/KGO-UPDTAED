@@ -13,9 +13,10 @@ interface AdminTabsProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   className?: string;
+  notificationBadges?: { [key: string]: number };
 }
 
-const AdminTabs: React.FC<AdminTabsProps> = ({ tabs, activeTab, onTabChange, className }) => (
+const AdminTabs: React.FC<AdminTabsProps> = ({ tabs, activeTab, onTabChange, className, notificationBadges = {} }) => (
           <div
           className={`inline-flex bg-gray-50 rounded-full p-1 transition-colors ${className || ''}`}
           role="tablist"
@@ -35,7 +36,14 @@ const AdminTabs: React.FC<AdminTabsProps> = ({ tabs, activeTab, onTabChange, cla
               onClick={() => onTabChange(tab)}
               role="tab"
             >
-        {tab}
+        <span className="flex items-center">
+          {tab}
+          {notificationBadges[tab] && notificationBadges[tab] > 0 && (
+            <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+              {notificationBadges[tab] > 99 ? '99+' : notificationBadges[tab]}
+            </span>
+          )}
+        </span>
       </button>
     ))}
   </div>

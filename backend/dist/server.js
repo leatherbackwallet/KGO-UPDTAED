@@ -233,6 +233,7 @@ const monitoring_1 = __importDefault(require("./routes/monitoring"));
 const occasions_1 = __importDefault(require("./routes/occasions"));
 const occasions_seed_1 = __importDefault(require("./routes/occasions-seed"));
 const payments_1 = __importDefault(require("./routes/payments"));
+const notifications_1 = __importDefault(require("./routes/notifications"));
 // Apply health routes first
 app.use('/api/health', rateLimit_1.apiLimiter, health_1.default);
 // Enhanced health check with database status (backup endpoint)
@@ -282,6 +283,7 @@ app.use('/api/feature-flags', rateLimit_1.apiLimiter, featureFlags_1.default);
 app.use('/api/monitoring', rateLimit_1.apiLimiter, monitoring_1.default);
 app.use('/api/occasions', rateLimit_1.apiLimiter, occasions_1.default);
 app.use('/api/occasions', rateLimit_1.apiLimiter, occasions_seed_1.default);
+app.use('/api/notifications', rateLimit_1.apiLimiter, notifications_1.default);
 // Error logging middleware
 app.use(logger_1.errorLogger);
 // Start server

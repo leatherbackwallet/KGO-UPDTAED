@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
+import { useNotifications } from '../hooks/useNotifications';
 import AdminDashboard from '../components/AdminDashboard';
 import AdminProducts from '../components/AdminProducts';
 import AdminCategories from '../components/AdminCategories';
@@ -15,6 +16,7 @@ import AdminTabs from '../components/AdminTabs';
 export default function Admin() {
   const { user } = useAuth();
   const { canAccessAdmin, canAccessAdminTab } = usePermissions();
+  const { unreadCount } = useNotifications();
   const [tab, setTab] = useState<'dashboard' | 'products' | 'categories' | 'occasions' | 'orders' | 'users' | 'finance' | 'returns'>('products');
 
   const tabs = [
@@ -27,6 +29,12 @@ export default function Admin() {
     { id: 'finance', label: 'Finance' },
     { id: 'returns', label: 'Returns' }
   ].filter(tab => canAccessAdminTab(tab.id));
+
+  // Create notification badges object
+  const notificationBadges: { [key: string]: number } = {};
+  if (unreadCount > 0) {
+    notificationBadges['Orders'] = unreadCount;
+  }
 
   if (!user || !canAccessAdmin()) {
     return (
@@ -54,6 +62,7 @@ export default function Admin() {
               setTab(tabId);
             }}
             className="mb-6"
+            notificationBadges={notificationBadges}
           />
         </div>
 

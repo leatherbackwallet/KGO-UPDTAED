@@ -122,6 +122,7 @@ export default function Checkout() {
   const [guestTokens, setGuestTokens] = useState<any>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [maxRetries] = useState(3);
+  const [authenticatedPaymentMethod, setAuthenticatedPaymentMethod] = useState('razorpay');
 
   // Fetch previous order recipients when user is authenticated
   useEffect(() => {
@@ -245,7 +246,48 @@ export default function Checkout() {
     }
 
     try {
-      // Create payment order
+      // Handle COD payment for authenticated users
+      if (authenticatedPaymentMethod === 'cod-test' || authenticatedPaymentMethod === 'cod') {
+        // Create COD order directly
+        const codOrderResponse = await api.post('/orders', {
+          products: cart.map(item => ({
+            product: item.product,
+            quantity: item.quantity,
+            // Include combo-specific fields if it's a combo product
+            ...(item.isCombo && {
+              isCombo: item.isCombo,
+              comboBasePrice: item.comboBasePrice,
+              comboItemConfigurations: item.comboItemConfigurations
+            })
+          })),
+          recipientAddress: createStandardRecipientAddress(selectedRecipientAddress, false),
+          paymentMethod: authenticatedPaymentMethod
+        }, {
+          headers: { Authorization: `Bearer ${tokens?.accessToken}` }
+        });
+
+        if (codOrderResponse.data.success) {
+          setSuccess('COD order placed successfully! You will receive a confirmation shortly.');
+          
+          // Clear cart and localStorage only after successful order
+          clearCart();
+          localStorage.removeItem('cart');
+          localStorage.removeItem('wishlist');
+          setSelectedRecipientAddress(null);
+          
+          // Redirect to order confirmation page with order ID
+          const orderId = codOrderResponse.data.data.order.id;
+          setTimeout(() => {
+            router.push(`/order-confirmation/${orderId}`);
+          }, 2000);
+        } else {
+          setError(codOrderResponse.data.error?.message || 'Failed to create COD order');
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Create payment order for Razorpay
       const response = await api.post('/payments/create-order', {
         products: cart.map(item => ({
           product: item.product,
@@ -898,7 +940,32 @@ export default function Checkout() {
     <>
       <Navbar />
       <main className="max-w-4xl mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold mb-6">Complete Your Order</h1>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-4">Complete Your Order</h1>
+          <div className="flex items-center justify-center space-x-4 text-gray-600">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">Choose Recipient</span>
+            </div>
+            <div className="w-8 h-0.5 bg-gray-300"></div>
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">Complete Payment</span>
+            </div>
+          </div>
+          <p className="text-gray-500 text-sm mt-3">
+            Follow these simple steps to send your Kerala gifts to your loved ones
+          </p>
+        </div>
         
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded">
@@ -925,6 +992,60 @@ export default function Checkout() {
           </div>
         )}
         {success && <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-600 rounded">{success}</div>}
+
+        {/* Checkout Progress Indicator */}
+        <div className="mb-8">
+          <div className="flex items-center justify-center space-x-8">
+            {/* Step 1: Address Selection */}
+            <div className="flex items-center space-x-3">
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                selectedRecipientAddress 
+                  ? 'bg-green-500 border-green-500 text-white' 
+                  : 'bg-red-500 border-red-500 text-white'
+              }`}>
+                {selectedRecipientAddress ? (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <span className="text-sm font-semibold">1</span>
+                )}
+              </div>
+              <div>
+                <p className={`text-sm font-medium ${
+                  selectedRecipientAddress ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  Select Address
+                </p>
+                <p className="text-xs text-gray-500">Choose recipient</p>
+              </div>
+            </div>
+
+            {/* Connector Line */}
+            <div className={`flex-1 h-0.5 ${
+              selectedRecipientAddress ? 'bg-green-500' : 'bg-gray-300'
+            }`}></div>
+
+            {/* Step 2: Payment */}
+            <div className="flex items-center space-x-3">
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                selectedRecipientAddress 
+                  ? 'bg-blue-500 border-blue-500 text-white' 
+                  : 'bg-gray-300 border-gray-300 text-gray-500'
+              }`}>
+                <span className="text-sm font-semibold">2</span>
+              </div>
+              <div>
+                <p className={`text-sm font-medium ${
+                  selectedRecipientAddress ? 'text-blue-600' : 'text-gray-400'
+                }`}>
+                  Payment
+                </p>
+                <p className="text-xs text-gray-500">Complete order</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}
@@ -965,10 +1086,36 @@ export default function Checkout() {
               // Authenticated user - show recipient selection and payment
               <div>
                 {/* Recipient Address Selection */}
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-4 text-gray-900">🎁 Gift Recipient</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Select who will receive this gift, or add a new recipient address.
+                <div className={`mb-6 p-6 rounded-xl border-2 transition-all duration-300 ${
+                  !selectedRecipientAddress 
+                    ? 'bg-gradient-to-r from-red-50 to-pink-50 border-red-200 shadow-md' 
+                    : 'bg-green-50 border-green-200'
+                }`}>
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                      selectedRecipientAddress ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                    }`}>
+                      {selectedRecipientAddress ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <span className="text-sm font-semibold">1</span>
+                      )}
+                    </div>
+                    <h3 className={`text-lg font-semibold ${
+                      selectedRecipientAddress ? 'text-green-800' : 'text-red-800'
+                    }`}>
+                      🎁 Gift Recipient
+                    </h3>
+                  </div>
+                  <p className={`text-sm mb-4 ${
+                    selectedRecipientAddress ? 'text-green-700' : 'text-red-700'
+                  }`}>
+                    {selectedRecipientAddress 
+                      ? 'Great! You\'ve selected a recipient. You can now proceed to payment.'
+                      : 'Select who will receive this gift, or add a new recipient address to continue.'
+                    }
                   </p>
                   
                   {/* Previous Order Recipients */}
@@ -1031,10 +1178,33 @@ export default function Checkout() {
                   )}
                   
                   {/* Recipient Address Selection */}
-                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 className="font-medium text-blue-900 mb-3">📍 Select Recipient Address</h4>
-                    <p className="text-sm text-blue-800 mb-4">
-                      Choose where you want to send your Kerala gifts. You can select from previous addresses or add a new one.
+                  <div className={`mb-6 p-5 rounded-lg border-2 transition-all duration-300 ${
+                    !selectedRecipientAddress 
+                      ? 'bg-red-50 border-red-200 shadow-sm' 
+                      : 'bg-green-50 border-green-200'
+                  }`}>
+                    <div className="flex items-center space-x-2 mb-3">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                        selectedRecipientAddress ? 'bg-green-500' : 'bg-red-500'
+                      }`}>
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+                      <h4 className={`font-semibold ${
+                        selectedRecipientAddress ? 'text-green-900' : 'text-red-900'
+                      }`}>
+                        📍 Select Recipient Address
+                      </h4>
+                    </div>
+                    <p className={`text-sm mb-4 ${
+                      selectedRecipientAddress ? 'text-green-800' : 'text-red-800'
+                    }`}>
+                      {selectedRecipientAddress 
+                        ? 'Address selected! You can change it below if needed.'
+                        : 'Choose where you want to send your Kerala gifts. You can select from previous addresses or add a new one.'
+                      }
                     </p>
                     
                     <RecipientAddresses
@@ -1044,6 +1214,7 @@ export default function Checkout() {
                       className=""
                     />
                   </div>
+
 
                   {selectedRecipientAddress && (
                     <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -1069,9 +1240,9 @@ export default function Checkout() {
                     <div>
                       <label className="block text-sm font-medium mb-1">Payment Method</label>
                       <select 
-                        value="razorpay"
-                        disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
+                        value={authenticatedPaymentMethod}
+                        onChange={(e) => setAuthenticatedPaymentMethod(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="razorpay">Razorpay (Credit/Debit Card)</option>
                         <option value="cod">Cash on Delivery (COD)</option>
@@ -1088,27 +1259,47 @@ export default function Checkout() {
                         e.preventDefault();
                         handleAuthenticatedOrder(e);
                       }}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                      className={`w-full py-3 rounded-lg transition-colors ${
+                        !selectedRecipientAddress 
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
                     >
-                      {loading ? 'Processing...' : `Pay ₹${total.toFixed(2)}`}
+                      {loading ? 'Processing...' : 
+                        !selectedRecipientAddress 
+                          ? '📍 Select Address First' 
+                          : authenticatedPaymentMethod === 'cod' || authenticatedPaymentMethod === 'cod-test' 
+                            ? `Place COD Order - ₹${total.toFixed(2)}` 
+                            : `Pay ₹${total.toFixed(2)}`
+                      }
                     </button>
                   </div>
                 </form>
 
                 {!selectedRecipientAddress && (
-                  <div className="mt-4 text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="text-yellow-800 mb-3">
-                      <p className="font-medium">⚠️ Address Required</p>
-                      <p className="text-sm">Please select a recipient address to continue with your order.</p>
-                    </div>
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => setShowPreviousRecipients(true)}
-                        className="block w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                      >
-                        📋 Select from Previous Addresses
-                      </button>
-                      <p className="text-xs text-yellow-700">Or scroll up to add a new address</p>
+                  <div className="mt-6 p-6 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl shadow-sm">
+                    <div className="text-center">
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-4">
+                        <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-orange-800 mb-2">Address Selection Required</h3>
+                      <p className="text-orange-700 mb-4">
+                        You must select a recipient address before proceeding to payment. 
+                        Choose where you want to send your Kerala gifts.
+                      </p>
+                      <div className="space-y-3">
+                        <button
+                          onClick={() => setShowPreviousRecipients(true)}
+                          className="block w-full px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"
+                        >
+                          📋 Choose from Previous Addresses
+                        </button>
+                        <p className="text-sm text-orange-600">
+                          Or scroll up to add a new recipient address
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}

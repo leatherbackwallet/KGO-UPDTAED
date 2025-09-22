@@ -42,7 +42,7 @@ export default function RecipientAddresses({
     houseNumber: '',
     postalCode: '',
     city: '',
-    countryCode: 'DE',
+    countryCode: 'IN',
     additionalInstructions: '',
     isDefault: false
   });
@@ -91,7 +91,7 @@ export default function RecipientAddresses({
         houseNumber: '',
         postalCode: '',
         city: '',
-        countryCode: 'DE',
+        countryCode: 'IN',
         additionalInstructions: '',
         isDefault: false
       });
@@ -138,6 +138,20 @@ export default function RecipientAddresses({
     }
   };
 
+  // Helper function to compare addresses
+  const isAddressEqual = (addr1: RecipientAddress | null, addr2: RecipientAddress) => {
+    if (!addr1) return false;
+    return (
+      addr1.name === addr2.name &&
+      addr1.phone === addr2.phone &&
+      addr1.address.streetName === addr2.address.streetName &&
+      addr1.address.houseNumber === addr2.address.houseNumber &&
+      addr1.address.postalCode === addr2.address.postalCode &&
+      addr1.address.city === addr2.address.city &&
+      addr1.address.countryCode === addr2.address.countryCode
+    );
+  };
+
   const cancelForm = () => {
     setShowAddForm(false);
     setEditingIndex(null);
@@ -148,7 +162,7 @@ export default function RecipientAddresses({
       houseNumber: '',
       postalCode: '',
       city: '',
-      countryCode: 'DE',
+      countryCode: 'IN',
       additionalInstructions: '',
       isDefault: false
     });
@@ -362,10 +376,10 @@ export default function RecipientAddresses({
           {addresses.map((address, index) => (
             <div
               key={index}
-              className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                selectedAddress === address
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                isAddressEqual(selectedAddress, address)
+                  ? 'border-green-500 bg-green-50 shadow-md transform scale-[1.02]'
+                  : 'border-gray-200 hover:border-red-300 hover:bg-red-50 hover:shadow-sm'
               }`}
               onClick={() => handleAddressSelect(address)}
             >
@@ -373,8 +387,13 @@ export default function RecipientAddresses({
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <h4 className="font-medium text-gray-900">{address.name}</h4>
-                    {address.isDefault && (
+                    {isAddressEqual(selectedAddress, address) && (
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                        ✓ Selected
+                      </span>
+                    )}
+                    {address.isDefault && !isAddressEqual(selectedAddress, address) && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                         Default
                       </span>
                     )}

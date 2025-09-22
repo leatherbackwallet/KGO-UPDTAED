@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../hooks/useNotifications';
 import AdminOrderStatusManager from './AdminOrderStatusManager';
 import { getMultilingualText } from '../utils/api';
 import { ProductImage } from './ProgressiveImage';
@@ -114,8 +115,54 @@ interface Order {
   updatedAt: string;
 }
 
+// Utility functions for CSV export
+const generateOrdersCSV = (orders: Order[]): string => {
+  const headers = [
+    'Order ID',
+    'Customer Name',
+    'Customer Email',
+    'Customer Phone',
+    'Total Price',
+    'Order Status',
+    'Payment Status',
+    'Payment Method',
+    'Created Date',
+    'Items Count'
+  ];
+
+  const rows = orders.map(order => [
+    order.orderId || 'N/A',
+    order.shippingDetails?.recipientName || 'N/A',
+    order.userId?.email || 'N/A',
+    order.shippingDetails?.recipientPhone || 'N/A',
+    (order.totalPrice || 0).toFixed(2),
+    order.orderStatus || 'N/A',
+    order.paymentStatus || 'N/A',
+    order.razorpayPaymentDetails?.method || 'N/A',
+    order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A',
+    order.orderItems?.length || 0
+  ]);
+
+  return [headers, ...rows].map(row => 
+    row.map(field => `"${field}"`).join(',')
+  ).join('\n');
+};
+
+const downloadCSV = (csvContent: string, filename: string): void => {
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 const AdminOrders: React.FC = () => {
   const { user, tokens } = useAuth();
+  const { markAllAsRead } = useNotifications();
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,7 +178,9 @@ const AdminOrders: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+    // Mark all notifications as read when admin visits orders tab
+    markAllAsRead();
+  }, [markAllAsRead]);
 
   // Filter and sort orders
   useEffect(() => {
@@ -300,21 +349,211 @@ const AdminOrders: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Orders Management</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Manage and track all customer orders
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-gray-600">
-            Showing {filteredOrders.length} of {orders.length} orders
+    <div className="flex gap-6">
+      {/* Left Sidebar - CRUD Operations */}
+      <div className="w-80 flex-shrink-0">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Management</h3>
+          
+          <div className="space-y-3">
+            <button
+              onClick={fetchOrders}
+              disabled={loading}
+              className="w-full bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Refreshing...
+                </div>
+              ) : (
+                '🔄 Refresh Orders'
+              )}
+            </button>
+            
+            <button
+              onClick={() => {
+                // Export orders functionality
+                const csvContent = generateOrdersCSV(filteredOrders);
+                downloadCSV(csvContent, 'orders-export.csv');
+              }}
+              className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+              📊 Export Orders
+            </button>
+            
+            <button
+              onClick={() => {
+                // Bulk actions functionality
+                alert('Bulk actions feature coming soon!');
+              }}
+              className="w-full bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+            >
+              ⚡ Bulk Actions
+            </button>
+          </div>
+          
+          {/* Order Statistics */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Order Statistics</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total Orders:</span>
+                <span className="font-medium text-gray-900">{orders.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Pending:</span>
+                <span className="font-medium text-yellow-600">
+                  {orders.filter(o => o.orderStatus === 'pending').length}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Delivered:</span>
+                <span className="font-medium text-green-600">
+                  {orders.filter(o => o.orderStatus === 'delivered').length}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Cancelled:</span>
+                <span className="font-medium text-red-600">
+                  {orders.filter(o => o.orderStatus === 'cancelled').length}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total Revenue:</span>
+                <span className="font-medium text-green-600">
+                  ₹{orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Selected Order Actions */}
+          {selectedOrder && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">Selected Order Actions</h4>
+              <div className="space-y-2">
+                <div className="bg-blue-50 p-3 rounded-lg mb-3">
+                  <div className="text-sm font-medium text-blue-900">
+                    Order #{selectedOrder.orderId || 'N/A'}
+                  </div>
+                  <div className="text-xs text-blue-700 mt-1">
+                    {selectedOrder.shippingDetails?.recipientName || 'N/A'} • ₹{(selectedOrder.totalPrice || 0).toFixed(2)}
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    // View Details action - already handled by selectedOrder state
+                  }}
+                  className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  👁️ View Details
+                </button>
+                
+                <button
+                  onClick={() => handleDownloadReceipt(selectedOrder._id)}
+                  disabled={downloading === selectedOrder._id}
+                  className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                >
+                  {downloading === selectedOrder._id ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                      Generating...
+                    </div>
+                  ) : (
+                    '📄 Download Receipt'
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="w-full bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium"
+                >
+                  ✕ Clear Selection
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Filters */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Filters</h4>
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  setStatusFilter('pending');
+                  setPaymentFilter('all');
+                  setPaymentMethodFilter('all');
+                }}
+                className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                  statusFilter === 'pending' 
+                    ? 'bg-yellow-100 text-yellow-800' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                🟡 Pending Orders
+              </button>
+              <button
+                onClick={() => {
+                  setStatusFilter('delivered');
+                  setPaymentFilter('all');
+                  setPaymentMethodFilter('all');
+                }}
+                className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                  statusFilter === 'delivered' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                ✅ Delivered Orders
+              </button>
+              <button
+                onClick={() => {
+                  setStatusFilter('all');
+                  setPaymentFilter('captured');
+                  setPaymentMethodFilter('all');
+                }}
+                className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                  paymentFilter === 'captured' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                💳 Paid Orders
+              </button>
+              <button
+                onClick={() => {
+                  setStatusFilter('all');
+                  setPaymentFilter('all');
+                  setPaymentMethodFilter('all');
+                  setSearchTerm('');
+                }}
+                className="w-full text-left px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                🔄 Clear All Filters
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Orders Management</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Manage and track all customer orders
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-600">
+              Showing {filteredOrders.length} of {orders.length} orders
+            </div>
+          </div>
+        </div>
 
       {/* Filters and Search */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -431,6 +670,9 @@ const AdminOrders: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Order
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -450,9 +692,6 @@ const AdminOrders: React.FC = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
                 </th>
               </tr>
             </thead>
@@ -475,7 +714,39 @@ const AdminOrders: React.FC = () => {
                 </tr>
               ) : (
                 filteredOrders?.map((order) => (
-                <tr key={order._id} className="hover:bg-gray-50">
+                <tr key={order._id} className={`hover:bg-gray-50 ${selectedOrder?._id === order._id ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`}>
+                  {/* Actions Column - First Column */}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex flex-col space-y-2">
+                      <button
+                        onClick={() => {
+                          setSelectedOrder(order);
+                        }}
+                        className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                          selectedOrder?._id === order._id
+                            ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                      >
+                        {selectedOrder?._id === order._id ? '✓ Selected' : 'Select'}
+                      </button>
+                      <button
+                        onClick={() => handleDownloadReceipt(order._id)}
+                        disabled={downloading === order._id}
+                        className="px-3 py-1 rounded-md text-xs font-medium transition-colors bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {downloading === order._id ? (
+                          <div className="flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                            <span className="text-xs">...</span>
+                          </div>
+                        ) : (
+                          '📄 Receipt'
+                        )}
+                      </button>
+                    </div>
+                  </td>
+                  {/* Order Column */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
                       #{order.orderId || 'N/A'}
@@ -484,6 +755,7 @@ const AdminOrders: React.FC = () => {
                       {order.razorpayOrderId ? `RZP: ${order.razorpayOrderId.slice(-8)}` : 'No Payment ID'}
                     </div>
                   </td>
+                  {/* Customer Column */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
                       {order.shippingDetails?.recipientName || 'N/A'}
@@ -495,6 +767,7 @@ const AdminOrders: React.FC = () => {
                       {order.userId?.email || 'N/A'}
                     </div>
                   </td>
+                  {/* Items Column */}
                   <td className="px-6 py-4">
                     <div className="space-y-2">
                       {order.orderItems?.slice(0, 2).map((item) => (
@@ -525,9 +798,11 @@ const AdminOrders: React.FC = () => {
                       )}
                     </div>
                   </td>
+                  {/* Total Column */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     ₹{(order.totalPrice || 0).toFixed(2)}
                   </td>
+                  {/* Payment Column */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="space-y-1">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(order.paymentStatus || 'unknown')}`}>
@@ -540,32 +815,15 @@ const AdminOrders: React.FC = () => {
                       )}
                     </div>
                   </td>
+                  {/* Status Column */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus || 'unknown')}`}>
                       {(order.orderStatus || 'unknown').replace('_', ' ')}
                     </span>
                   </td>
+                  {/* Date Column */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => {
-                          setSelectedOrder(order);
-                        }}
-                        className="text-blue-600 hover:text-blue-900 font-medium"
-                      >
-                        View Details
-                      </button>
-                      <button
-                        onClick={() => handleDownloadReceipt(order._id)}
-                        disabled={downloading === order._id}
-                        className="text-green-600 hover:text-green-900 font-medium disabled:opacity-50"
-                      >
-                        {downloading === order._id ? 'Generating...' : 'Download Receipt'}
-                      </button>
-                    </div>
                   </td>
                 </tr>
                 ))
@@ -881,6 +1139,7 @@ const AdminOrders: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

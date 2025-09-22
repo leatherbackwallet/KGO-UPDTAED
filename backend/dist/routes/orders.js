@@ -47,6 +47,7 @@ const auth_1 = require("../middleware/auth");
 const optionalAuth_1 = require("../middleware/optionalAuth");
 const role_1 = require("../middleware/role");
 const comboUtils_1 = require("../utils/comboUtils");
+const notificationService_1 = require("../services/notificationService");
 const router = express_1.default.Router();
 // Create order (customer)
 router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
@@ -157,6 +158,19 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                         notes: 'COD order created - payment will be collected on delivery'
                     }]
             });
+            // Create notification for admin users about new order
+            try {
+                await notificationService_1.NotificationService.createNewOrderNotification({
+                    orderId: order.orderId,
+                    customerName: shippingDetails.recipientName,
+                    totalPrice: order.totalPrice,
+                    orderStatus: order.orderStatus
+                });
+            }
+            catch (notificationError) {
+                console.error('Error creating notification for new order:', notificationError);
+                // Don't fail the order creation if notification fails
+            }
             return res.status(201).json({
                 success: true,
                 data: {
@@ -185,6 +199,19 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                     notes: 'Order created and payment received'
                 }]
         });
+        // Create notification for admin users about new order
+        try {
+            await notificationService_1.NotificationService.createNewOrderNotification({
+                orderId: order.orderId,
+                customerName: shippingDetails.recipientName,
+                totalPrice: order.totalPrice,
+                orderStatus: order.orderStatus
+            });
+        }
+        catch (notificationError) {
+            console.error('Error creating notification for new order:', notificationError);
+            // Don't fail the order creation if notification fails
+        }
         return res.status(201).json({
             success: true,
             data: {

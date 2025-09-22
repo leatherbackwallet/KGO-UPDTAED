@@ -214,6 +214,7 @@ import monitoringRoutes from './routes/monitoring';
 import occasionsRoutes from './routes/occasions';
 import occasionsSeedRoutes from './routes/occasions-seed';
 import paymentRoutes from './routes/payments';
+import notificationRoutes from './routes/notifications';
 
 // Apply health routes first
 app.use('/api/health', apiLimiter as any, healthRoutes);
@@ -266,6 +267,7 @@ app.use('/api/feature-flags', apiLimiter as any, featureFlagsRoutes);
 app.use('/api/monitoring', apiLimiter as any, monitoringRoutes);
 app.use('/api/occasions', apiLimiter as any, occasionsRoutes);
 app.use('/api/occasions', apiLimiter as any, occasionsSeedRoutes);
+app.use('/api/notifications', apiLimiter as any, notificationRoutes);
 
 // Error logging middleware
 app.use(errorLogger);

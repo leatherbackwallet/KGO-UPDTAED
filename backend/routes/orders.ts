@@ -10,6 +10,7 @@ import { auth } from '../middleware/auth';
 import { optionalAuth } from '../middleware/optionalAuth';
 import { requireRole } from '../middleware/role';
 import { calculateComboPrice } from '../utils/comboUtils';
+import { NotificationService } from '../services/notificationService';
 
 const router = express.Router();
 
@@ -134,6 +135,19 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
         }]
       });
       
+      // Create notification for admin users about new order
+      try {
+        await NotificationService.createNewOrderNotification({
+          orderId: order.orderId,
+          customerName: shippingDetails.recipientName,
+          totalPrice: order.totalPrice,
+          orderStatus: order.orderStatus
+        });
+      } catch (notificationError) {
+        console.error('Error creating notification for new order:', notificationError);
+        // Don't fail the order creation if notification fails
+      }
+      
       return res.status(201).json({
         success: true,
         data: {
@@ -163,6 +177,19 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
         notes: 'Order created and payment received'
       }]
     });
+    
+    // Create notification for admin users about new order
+    try {
+      await NotificationService.createNewOrderNotification({
+        orderId: order.orderId,
+        customerName: shippingDetails.recipientName,
+        totalPrice: order.totalPrice,
+        orderStatus: order.orderStatus
+      });
+    } catch (notificationError) {
+      console.error('Error creating notification for new order:', notificationError);
+      // Don't fail the order creation if notification fails
+    }
     
     return res.status(201).json({
       success: true,

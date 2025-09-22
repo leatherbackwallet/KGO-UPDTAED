@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { usePermissions } from '../hooks/usePermissions';
 import api from '../utils/api';
 
 interface Category {
@@ -21,6 +22,7 @@ interface Category {
 export default function Navbar() {
   const { user, logout, isLoading } = useAuth();
   const { cart } = useCart();
+  const { isAdmin } = usePermissions();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -77,6 +79,11 @@ export default function Navbar() {
             <Link href="/about" className="nav-link">
               About
             </Link>
+            {isAdmin() && (
+              <Link href="/admin" className="nav-link bg-kgo-red text-white px-3 py-1 rounded-md hover:bg-red-700 transition-colors">
+                Admin Dashboard
+              </Link>
+            )}
           </div>
 
           {/* Right side - Cart, User */}
@@ -135,7 +142,7 @@ export default function Navbar() {
                       <Link href="/wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         Wishlist
                       </Link>
-                      {user.roleName === 'admin' && (
+                      {isAdmin() && (
                         <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           Admin Dashboard
                         </Link>
@@ -189,6 +196,11 @@ export default function Navbar() {
                 <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">
                   About
                 </Link>
+                {isAdmin() && (
+                  <Link href="/admin" className="text-white bg-kgo-red px-3 py-2 rounded-md hover:bg-red-700 transition-colors font-medium">
+                    Admin Dashboard
+                  </Link>
+                )}
                 
                 {/* Categories Section */}
                 <div className="border-t border-gray-200 pt-4 mt-4">
