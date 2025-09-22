@@ -383,6 +383,114 @@ export default function Checkout() {
     }
   };
 
+  const handlePaymentStatusCheck = async (status: 'checking' | 'success' | 'failed' | 'unknown') => {
+    console.log('Payment status check triggered:', status);
+    
+    if (status === 'checking') {
+      setLoading(true);
+      setError('');
+      setSuccess('Checking payment status...');
+      return;
+    }
+    
+    if (status === 'success') {
+      // Payment was successful, proceed with verification
+      if (paymentData) {
+        await handlePaymentSuccess(paymentData);
+      }
+      return;
+    }
+    
+    if (status === 'failed') {
+      setError('Payment failed. Please try again.');
+      setLoading(false);
+      return;
+    }
+    
+    if (status === 'unknown') {
+      // Payment status is unclear, we need to check with backend
+      console.log('Payment status unknown, checking with backend...');
+      await checkPaymentStatusWithBackend();
+    }
+  };
+
+  const checkPaymentStatusWithBackend = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('Checking payment status...');
+      
+      // Import the payment status utility
+      const { checkPaymentStatusWithFallback } = await import('../utils/paymentStatus');
+      
+      // Get the current payment data from state or create from order data
+      const currentPaymentData = paymentData || {
+        razorpay_order_id: currentOrder?.razorpayOrderId,
+        razorpay_payment_id: currentOrder?.razorpayPaymentId
+      };
+      
+      if (!currentPaymentData.razorpay_order_id && !currentPaymentData.razorpay_payment_id) {
+        console.error('No payment data available for status check');
+        setError('Unable to check payment status. Please contact support if payment was deducted.');
+        setLoading(false);
+        return;
+      }
+      
+      // Use guest tokens if available, otherwise use authenticated user tokens
+      const authToken = guestTokens?.accessToken || tokens?.accessToken;
+      
+      console.log('Checking payment status with data:', currentPaymentData);
+      
+      const result = await checkPaymentStatusWithFallback(
+        currentPaymentData,
+        authToken,
+        {
+          maxRetries: 3,
+          retryDelay: 1000,
+          enablePolling: true
+        }
+      );
+      
+      console.log('Payment status check result:', result);
+      
+      if (result.success) {
+        if (result.status === 'verified') {
+          // Payment is already verified, redirect to order confirmation
+          setSuccess('Payment verified! Your order has been confirmed.');
+          clearCart();
+          localStorage.removeItem('cart');
+          localStorage.removeItem('wishlist');
+          setSelectedRecipientAddress(null);
+          setShowPayment(false);
+          setPaymentData(null);
+          
+          if (result.orderId) {
+            window.location.href = `/order-confirmation/${result.orderId}`;
+          }
+        } else if (result.status === 'payment_success' && result.needsVerification) {
+          // Payment succeeded but needs verification, try to verify
+          if (currentPaymentData.razorpay_payment_id && currentPaymentData.razorpay_order_id) {
+            setSuccess('Payment successful! Verifying payment...');
+            await handlePaymentSuccess(currentPaymentData);
+          } else {
+            setError('Payment successful but verification data is missing. Please contact support.');
+          }
+        } else if (result.status === 'payment_failed') {
+          setError('Payment failed. Please try again.');
+        } else {
+          setError('Payment status is unclear. Please contact support if payment was deducted.');
+        }
+      } else {
+        setError(result.message || 'Unable to verify payment status. Please contact support if payment was deducted.');
+      }
+    } catch (error: any) {
+      console.error('Error checking payment status:', error);
+      setError('Error checking payment status. Please contact support if payment was deducted.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Handle guest checkout
   const handleGuestCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1670,6 +1778,7 @@ export default function Checkout() {
             onSuccess={handlePaymentSuccess}
             onError={handlePaymentError}
             onClose={handlePaymentClose}
+            onStatusCheck={handlePaymentStatusCheck}
           />
         )}
       </main>

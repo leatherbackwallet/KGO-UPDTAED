@@ -251,6 +251,104 @@ export default function CheckoutForm({ guestData, isGuest = false }: CheckoutFor
     setPaymentData(null);
   };
 
+  const handlePaymentStatusCheck = async (status: 'checking' | 'success' | 'failed' | 'unknown') => {
+    console.log('Payment status check triggered in CheckoutForm:', status);
+    
+    if (status === 'checking') {
+      setLoading(true);
+      setError('');
+      setSuccess('Checking payment status...');
+      return;
+    }
+    
+    if (status === 'success') {
+      // Payment was successful, proceed with verification
+      if (paymentData) {
+        await handlePaymentSuccess(paymentData);
+      }
+      return;
+    }
+    
+    if (status === 'failed') {
+      setError('Payment failed. Please try again.');
+      setLoading(false);
+      return;
+    }
+    
+    if (status === 'unknown') {
+      // Payment status is unclear, we need to check with backend
+      console.log('Payment status unknown, checking with backend...');
+      await checkPaymentStatusWithBackend();
+    }
+  };
+
+  const checkPaymentStatusWithBackend = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('Checking payment status...');
+      
+      // Import the payment status utility
+      const { checkPaymentStatusWithFallback } = await import('../utils/paymentStatus');
+      
+      // Get the current payment data from state
+      if (!paymentData) {
+        console.error('No payment data available for status check');
+        setError('Unable to check payment status. Please contact support if payment was deducted.');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Checking payment status with data:', paymentData);
+      
+      const result = await checkPaymentStatusWithFallback(
+        paymentData,
+        tokens?.accessToken,
+        {
+          maxRetries: 3,
+          retryDelay: 1000,
+          enablePolling: true
+        }
+      );
+      
+      console.log('Payment status check result:', result);
+      
+      if (result.success) {
+        if (result.status === 'verified') {
+          // Payment is already verified, redirect to order confirmation
+          setSuccess('Payment verified! Your order has been confirmed.');
+          clearCart();
+          setSelectedRecipientAddress(null);
+          setShowPayment(false);
+          setPaymentData(null);
+          
+          if (result.orderId) {
+            window.location.href = `/order-confirmation/${result.orderId}`;
+          }
+        } else if (result.status === 'payment_success' && result.needsVerification) {
+          // Payment succeeded but needs verification, try to verify
+          if (paymentData.razorpay_payment_id && paymentData.razorpay_order_id) {
+            setSuccess('Payment successful! Verifying payment...');
+            await handlePaymentSuccess(paymentData);
+          } else {
+            setError('Payment successful but verification data is missing. Please contact support.');
+          }
+        } else if (result.status === 'payment_failed') {
+          setError('Payment failed. Please try again.');
+        } else {
+          setError('Payment status is unclear. Please contact support if payment was deducted.');
+        }
+      } else {
+        setError(result.message || 'Unable to verify payment status. Please contact support if payment was deducted.');
+      }
+    } catch (error: any) {
+      console.error('Error checking payment status:', error);
+      setError('Error checking payment status. Please contact support if payment was deducted.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="text-center py-8">
@@ -492,6 +590,7 @@ export default function CheckoutForm({ guestData, isGuest = false }: CheckoutFor
           onSuccess={handlePaymentSuccess}
           onError={handlePaymentError}
           onClose={handlePaymentClose}
+          onStatusCheck={handlePaymentStatusCheck}
         />
       )}
     </div>

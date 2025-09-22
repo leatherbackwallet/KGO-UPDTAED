@@ -280,6 +280,237 @@ router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validat
         });
     }
 });
+// New endpoint to check payment status without full verification
+router.post('/check-status', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id } = req.body;
+        if (!razorpay_order_id && !razorpay_payment_id) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    message: 'Either razorpay_order_id or razorpay_payment_id is required',
+                    code: 'MISSING_PAYMENT_ID'
+                }
+            });
+            return;
+        }
+        // Try to find order by razorpay order ID or payment ID
+        const order = await index_1.Order.findOne({
+            $or: [
+                { razorpayOrderId: razorpay_order_id },
+                { razorpayPaymentId: razorpay_payment_id }
+            ]
+        });
+        if (!order) {
+            res.status(404).json({
+                success: false,
+                error: {
+                    message: 'Order not found',
+                    code: 'ORDER_NOT_FOUND'
+                }
+            });
+            return;
+        }
+        // Check if payment is already verified
+        if (order.paymentStatus === 'captured' && order.orderStatus === 'payment_done') {
+            res.status(200).json({
+                success: true,
+                data: {
+                    orderId: order._id,
+                    status: 'verified',
+                    paymentStatus: order.paymentStatus,
+                    orderStatus: order.orderStatus,
+                    message: 'Payment already verified'
+                }
+            });
+            return;
+        }
+        // If we have payment ID, try to get payment details from Razorpay
+        if (razorpay_payment_id) {
+            try {
+                const paymentDetails = await payment_service_1.default.getPaymentDetails(razorpay_payment_id);
+                // Check if payment was successful
+                if (paymentDetails.status === 'captured') {
+                    res.status(200).json({
+                        success: true,
+                        data: {
+                            orderId: order._id,
+                            status: 'payment_success',
+                            paymentStatus: 'captured',
+                            orderStatus: order.orderStatus,
+                            message: 'Payment successful but not yet verified',
+                            needsVerification: true
+                        }
+                    });
+                    return;
+                }
+                else if (paymentDetails.status === 'failed') {
+                    res.status(200).json({
+                        success: true,
+                        data: {
+                            orderId: order._id,
+                            status: 'payment_failed',
+                            paymentStatus: 'failed',
+                            orderStatus: order.orderStatus,
+                            message: 'Payment failed'
+                        }
+                    });
+                    return;
+                }
+            }
+            catch (error) {
+                console.error('Error fetching payment details:', error);
+                // Continue to return current order status
+            }
+        }
+        // Return current order status
+        res.status(200).json({
+            success: true,
+            data: {
+                orderId: order._id,
+                status: 'pending',
+                paymentStatus: order.paymentStatus || 'pending',
+                orderStatus: order.orderStatus || 'pending',
+                message: 'Payment status pending'
+            }
+        });
+    }
+    catch (error) {
+        console.error('Error checking payment status:', error);
+        res.status(500).json({
+            success: false,
+            error: {
+                message: 'Failed to check payment status',
+                code: 'STATUS_CHECK_ERROR'
+            }
+        });
+    }
+});
+// New endpoint for payment status polling
+router.post('/poll-status', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, maxAttempts = 10, intervalMs = 2000 } = req.body;
+        if (!razorpay_order_id && !razorpay_payment_id) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    message: 'Either razorpay_order_id or razorpay_payment_id is required',
+                    code: 'MISSING_PAYMENT_ID'
+                }
+            });
+            return;
+        }
+        let attempts = 0;
+        let order = null;
+        while (attempts < maxAttempts) {
+            try {
+                // Find order
+                order = await index_1.Order.findOne({
+                    $or: [
+                        { razorpayOrderId: razorpay_order_id },
+                        { razorpayPaymentId: razorpay_payment_id }
+                    ]
+                });
+                if (!order) {
+                    res.status(404).json({
+                        success: false,
+                        error: {
+                            message: 'Order not found',
+                            code: 'ORDER_NOT_FOUND'
+                        }
+                    });
+                    return;
+                }
+                // Check if payment is already verified
+                if (order.paymentStatus === 'captured' && order.orderStatus === 'payment_done') {
+                    res.status(200).json({
+                        success: true,
+                        data: {
+                            orderId: order._id,
+                            status: 'verified',
+                            paymentStatus: order.paymentStatus,
+                            orderStatus: order.orderStatus,
+                            message: 'Payment verified',
+                            attempts: attempts + 1
+                        }
+                    });
+                    return;
+                }
+                // If we have payment ID, check Razorpay status
+                if (razorpay_payment_id) {
+                    try {
+                        const paymentDetails = await payment_service_1.default.getPaymentDetails(razorpay_payment_id);
+                        if (paymentDetails.status === 'captured') {
+                            res.status(200).json({
+                                success: true,
+                                data: {
+                                    orderId: order._id,
+                                    status: 'payment_success',
+                                    paymentStatus: 'captured',
+                                    orderStatus: order.orderStatus,
+                                    message: 'Payment successful but not yet verified',
+                                    needsVerification: true,
+                                    attempts: attempts + 1
+                                }
+                            });
+                            return;
+                        }
+                        else if (paymentDetails.status === 'failed') {
+                            res.status(200).json({
+                                success: true,
+                                data: {
+                                    orderId: order._id,
+                                    status: 'payment_failed',
+                                    paymentStatus: 'failed',
+                                    orderStatus: order.orderStatus,
+                                    message: 'Payment failed',
+                                    attempts: attempts + 1
+                                }
+                            });
+                            return;
+                        }
+                    }
+                    catch (error) {
+                        console.error('Error fetching payment details in poll:', error);
+                    }
+                }
+                attempts++;
+                if (attempts < maxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, intervalMs));
+                }
+            }
+            catch (error) {
+                console.error('Error in polling attempt:', error);
+                attempts++;
+                if (attempts < maxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, intervalMs));
+                }
+            }
+        }
+        // Return final status after max attempts
+        res.status(200).json({
+            success: true,
+            data: {
+                orderId: order?._id,
+                status: 'timeout',
+                paymentStatus: order?.paymentStatus || 'unknown',
+                orderStatus: order?.orderStatus || 'unknown',
+                message: 'Payment status check timed out',
+                attempts: attempts
+            }
+        });
+    }
+    catch (error) {
+        console.error('Error polling payment status:', error);
+        res.status(500).json({
+            success: false,
+            error: {
+                message: 'Failed to poll payment status',
+                code: 'POLL_ERROR'
+            }
+        });
+    }
+});
 // Webhook endpoint for Razorpay payment status updates
 router.post('/webhook', express_1.default.raw({ type: 'application/json' }), async (req, res) => {
     try {

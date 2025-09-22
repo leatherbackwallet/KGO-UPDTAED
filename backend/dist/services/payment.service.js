@@ -34,22 +34,28 @@ class PaymentService {
             console.log('🔍 [Payment Service] Currency:', currency);
             console.log('🔍 [Payment Service] Key ID:', process.env.RAZORPAY_KEY_ID);
             console.log('🔍 [Payment Service] Key Secret:', process.env.RAZORPAY_KEY_SECRET ? 'SET' : 'NOT SET');
+            // Ensure amount is a valid number and convert to paise
+            const amountInPaise = Math.round(amount * 100);
+            console.log('🔍 [Payment Service] Amount in paise:', amountInPaise);
             const options = {
-                amount: amount * 100, // Razorpay expects amount in paise
-                currency,
+                amount: amountInPaise, // Razorpay expects amount in paise
+                currency: currency || 'INR',
                 receipt: receipt || `receipt_${Date.now()}`,
                 notes: {
-                    source: 'OnYourBehlf - Kerala Gifts Online'
+                    source: 'OnYourBehlf - Kerala Gifts Online',
+                    timestamp: new Date().toISOString()
                 }
             };
             console.log('🔍 [Payment Service] Order options:', options);
             const order = await this.razorpay.orders.create(options);
             console.log('✅ [Payment Service] Order created successfully:', order.id);
+            console.log('✅ [Payment Service] Order details:', JSON.stringify(order, null, 2));
             return order;
         }
         catch (error) {
             console.error('❌ [Payment Service] Error creating Razorpay order:', error);
             console.error('❌ [Payment Service] Error details:', error.message);
+            console.error('❌ [Payment Service] Error response:', error.response?.data);
             console.error('❌ [Payment Service] Error stack:', error.stack);
             throw new Error(`Failed to create payment order: ${error.message}`);
         }
