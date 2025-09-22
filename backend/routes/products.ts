@@ -104,7 +104,7 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
     
     // Optimize: Select only needed fields for better performance
     let query = Product.find(filter)
-      .select('name description price images isFeatured categories vendors occasions createdAt updatedAt')
+      .select('name description price stock images isFeatured categories vendors occasions createdAt updatedAt')
       .populate({
         path: 'categories',
         select: 'name slug',
@@ -293,7 +293,7 @@ router.delete('/:id', auth, requireRole('admin'), ensureDatabaseConnection, asyn
 // Get featured products
 router.get('/featured/list', ensureDatabaseConnection, async (req: Request, res: Response): Promise<void> => {
   try {
-    const products = await Product.find({ isFeatured: true, isActive: true, isDeleted: false })
+    const products = await Product.find({ isFeatured: true, isDeleted: false })
       .populate({
         path: 'categories',
         select: 'name slug',

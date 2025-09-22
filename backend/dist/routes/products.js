@@ -128,7 +128,7 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
         const skip = (Number(page) - 1) * effectiveLimit;
         // Optimize: Select only needed fields for better performance
         let query = products_model_1.Product.find(filter)
-            .select('name description price images isFeatured categories vendors occasions createdAt updatedAt')
+            .select('name description price stock images isFeatured categories vendors occasions createdAt updatedAt')
             .populate({
             path: 'categories',
             select: 'name slug',
@@ -296,7 +296,7 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.
 // Get featured products
 router.get('/featured/list', database_1.ensureDatabaseConnection, async (req, res) => {
     try {
-        const products = await products_model_1.Product.find({ isFeatured: true, isActive: true, isDeleted: false })
+        const products = await products_model_1.Product.find({ isFeatured: true, isDeleted: false })
             .populate({
             path: 'categories',
             select: 'name slug',

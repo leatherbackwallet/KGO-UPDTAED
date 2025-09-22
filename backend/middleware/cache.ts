@@ -205,7 +205,7 @@ export const warmCache = async (warmingConfig: WarmingConfig): Promise<void> => 
     if (warmingConfig.products) {
       // Cache featured products with optimized query
       const featuredProducts = await Product.find({ isFeatured: true })
-        .select('name description price images isFeatured categories vendors')
+        .select('name description price stock images isFeatured categories vendors')
         .populate('categories', 'name slug')
         .populate('vendors', 'storeName')
         .limit(20);
@@ -222,7 +222,7 @@ export const warmCache = async (warmingConfig: WarmingConfig): Promise<void> => 
       const popularCategories = await Category.find({ isPopular: true }).limit(5);
       for (const category of popularCategories) {
         const categoryProducts = await Product.find({ categories: category._id })
-          .select('name description price images isFeatured categories vendors')
+          .select('name description price stock images isFeatured categories vendors')
           .populate('categories', 'name slug')
           .populate('vendors', 'storeName')
           .limit(20);
