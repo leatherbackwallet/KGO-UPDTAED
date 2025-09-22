@@ -134,9 +134,6 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                     <span className="text-3xl font-bold text-gray-900">
                       ₹{product.price?.toFixed(2) || '0.00'}
                     </span>
-                    <span className="text-sm text-gray-500">
-                      {product.stock !== undefined ? `${product.stock} in stock` : 'Stock not available'}
-                    </span>
                   </div>
                 </div>
 
