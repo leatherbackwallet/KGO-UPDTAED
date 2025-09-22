@@ -3,7 +3,7 @@
  * Handles payment status checking and verification with fallback mechanisms
  */
 
-import { api } from './api';
+import api from './api';
 
 export interface PaymentStatusResponse {
   success: boolean;
@@ -150,10 +150,14 @@ export const checkPaymentStatusWithFallback = async (
 }> => {
   const { maxRetries = 3, retryDelay = 1000, enablePolling = true } = options;
 
-  // First, try to verify payment if we have signature
-  if (paymentData.razorpay_signature) {
+  // First, try to verify payment if we have all required data
+  if (paymentData.razorpay_signature && paymentData.razorpay_payment_id && paymentData.razorpay_order_id) {
     console.log('🔍 Attempting payment verification with signature...');
-    const verifyResult = await verifyPayment(paymentData, authToken);
+    const verifyResult = await verifyPayment({
+      razorpay_payment_id: paymentData.razorpay_payment_id,
+      razorpay_order_id: paymentData.razorpay_order_id,
+      razorpay_signature: paymentData.razorpay_signature
+    }, authToken);
     
     if (verifyResult.success) {
       return {
