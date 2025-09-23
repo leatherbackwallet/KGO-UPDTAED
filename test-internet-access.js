@@ -11,7 +11,7 @@ const http = require('http');
 // Test URLs
 const TEST_URLS = {
   frontend: 'https://onyourbehlf.uc.r.appspot.com',
-  api: 'https://api-dot-onyourbehlf.uc.r.appspot.com/api/health',
+  api: 'https://api-dot-onyourbehlf.uc.r.appspot.com/api/health-status',
   products: 'https://api-dot-onyourbehlf.uc.r.appspot.com/api/products',
   cloudinary: 'https://res.cloudinary.com/deojqbepy/image/upload/w_400,h_auto,q_auto,f_auto/keralagiftsonline/products/sample.jpg'
 };

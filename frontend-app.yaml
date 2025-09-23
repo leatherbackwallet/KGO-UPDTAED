@@ -18,18 +18,16 @@ env_variables:
   API_URL: "https://api-dot-onyourbehlf.uc.r.appspot.com"
   FRONTEND_URL: "https://onyourbehlf.uc.r.appspot.com"
 
-# App Engine Standard scaling configuration
 automatic_scaling:
-  min_instances: 2
-  max_instances: 20
-  target_cpu_utilization: 0.6
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
   target_throughput_utilization: 0.6
 
-# App Engine Standard resources
 resources:
-  cpu: 2
-  memory_gb: 4
-  disk_size_gb: 20
+  cpu: 1
+  memory_gb: 2
+  disk_size_gb: 10
 
 entrypoint: bash -lc 'cd frontend && node server.js'
 

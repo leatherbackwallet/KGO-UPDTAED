@@ -59,8 +59,9 @@ const corsOptions = {
             'http://localhost:3001',
             'http://localhost:3002',
             'http://localhost:3003',
-            'https://onyourbehlf.uc.r.appspot.com'
-            // Removed incorrect keralagiftsonline.in domains that were blocking internet users
+            'https://onyourbehlf.uc.r.appspot.com',
+            'https://keralagiftsonline.in',
+            'https://www.keralagiftsonline.in'
         ];
         // Allow requests with no origin (mobile apps, curl, etc.)
         if (!origin)

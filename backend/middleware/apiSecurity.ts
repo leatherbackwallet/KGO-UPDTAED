@@ -194,8 +194,9 @@ function isValidOrigin(origin: string): boolean {
     'http://localhost:3000',
     'http://localhost:3001',
     'https://onyourbehlf.uc.r.appspot.com',
-    'https://www.onyourbehlf.uc.r.appspot.com'
-    // Fixed: Removed incorrect keralagiftsonline domains
+    'https://www.onyourbehlf.uc.r.appspot.com',
+    'https://keralagiftsonline.in',
+    'https://www.keralagiftsonline.in'
   ];
   
   return allowedOrigins.includes(origin);
