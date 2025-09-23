@@ -102,26 +102,23 @@ export default function Home() {
 
     // Add product information if available
     if (products.length > 0) {
-      baseStructuredData.mainEntity = {
-        ...baseStructuredData.mainEntity,
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "Premium Kerala Gifts Collection",
-          "itemListElement": products.slice(0, 10).map((product, index) => ({
-            "@type": "Offer",
-            "position": index + 1,
-            "itemOffered": {
-              "@type": "Product",
-              "name": product.name,
-              "description": product.description,
-              "image": product.images?.[0] ? `https://keralgiftsonline.in/images/${product.images[0]}` : undefined,
-              "url": `https://keralgiftsonline.in/product/${product._id}`
-            },
-            "price": product.price,
-            "priceCurrency": "INR",
-            "availability": "https://schema.org/InStock"
-          }))
-        }
+      (baseStructuredData.mainEntity as any).hasOfferCatalog = {
+        "@type": "OfferCatalog",
+        "name": "Premium Kerala Gifts Collection",
+        "itemListElement": products.slice(0, 10).map((product, index) => ({
+          "@type": "Offer",
+          "position": index + 1,
+          "itemOffered": {
+            "@type": "Product",
+            "name": product.name,
+            "description": product.description,
+            "image": product.images?.[0] ? `https://keralgiftsonline.in/images/${product.images[0]}` : undefined,
+            "url": `https://keralgiftsonline.in/product/${product._id}`
+          },
+          "price": product.price,
+          "priceCurrency": "INR",
+          "availability": "https://schema.org/InStock"
+        }))
       };
     }
 
@@ -144,155 +141,109 @@ export default function Home() {
       <main className="min-h-screen">
         <Navbar />
         
-        {/* Modern Hero Section */}
-        <section className="relative bg-gradient-to-br from-kgo-green to-emerald-800 text-white py-20 lg:py-32 overflow-hidden" role="banner">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10" aria-hidden="true">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            }} />
+        {/* Hero Section with Onam Background */}
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          {/* Background Image with Overlay */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: `url('/images/onam-background.svg')`
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-green-900/40 via-green-800/60 to-green-900/80"></div>
           </div>
-          
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              {/* Hero Content */}
-              <header className="text-center lg:text-left">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-                  <span className="block">Premium Gifts &</span>
-                  <span className="block text-yellow-400">Traditional Products</span>
-                  <span className="block">Kerala's Best Store</span>
-                </h1>
-                <p className="text-xl lg:text-2xl mb-8 text-green-100 leading-relaxed">
-                  Kerala's premier online gift store offering authentic traditional products, 
-                  premium gifts, and cultural treasures with fast delivery across Kerala.
-                </p>
-                
-                {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
-                  <Link 
-                    href="/products"
-                    className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-green-900 bg-yellow-400 rounded-full hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                  >
-                    Shop Now
-                    <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </Link>
-                  <Link 
-                    href="/categories"
-                    className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white border-2 border-white rounded-full hover:bg-white hover:text-green-900 transition-all duration-300"
-                  >
-                    Browse Categories
-                  </Link>
-                </div>
 
-                {/* Trust Indicators */}
-                <div className="grid grid-cols-3 gap-8 text-center lg:text-left">
-                  <div>
-                    <div className="text-2xl font-bold text-yellow-400">10K+</div>
-                    <div className="text-green-100 text-sm">Happy Customers</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-yellow-400">50+</div>
-                    <div className="text-green-100 text-sm">Countries Served</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-yellow-400">24/7</div>
-                    <div className="text-green-100 text-sm">Support</div>
-                  </div>
-                </div>
-              </header>
+          {/* Floating Elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-20 left-10 w-20 h-20 bg-yellow-400/20 rounded-full float-animation"></div>
+            <div className="absolute top-40 right-20 w-16 h-16 bg-yellow-300/15 rounded-full float-animation-delay-1"></div>
+            <div className="absolute bottom-40 left-20 w-24 h-24 bg-yellow-500/25 rounded-full float-animation-delay-2"></div>
+            <div className="absolute bottom-20 right-10 w-12 h-12 bg-yellow-400/20 rounded-full float-animation-delay-3"></div>
+            <div className="absolute top-60 left-1/4 w-8 h-8 bg-white/30 rounded-full float-animation"></div>
+            <div className="absolute top-80 right-1/3 w-10 h-10 bg-white/25 rounded-full float-animation-delay-1"></div>
+            <div className="absolute bottom-60 left-1/3 w-6 h-6 bg-white/35 rounded-full float-animation-delay-2"></div>
+            <div className="absolute bottom-80 right-1/4 w-14 h-14 bg-white/20 rounded-full float-animation-delay-3"></div>
+          </div>
 
-              {/* Hero Image/Products Showcase */}
-              <div className="relative">
-                {loading ? (
-                  <div className="grid grid-cols-2 gap-4">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="bg-white/10 rounded-2xl p-6 animate-pulse">
-                        <div className="bg-white/20 h-32 rounded-xl mb-4"></div>
-                        <div className="bg-white/20 h-4 rounded mb-2"></div>
-                        <div className="bg-white/20 h-4 rounded w-2/3"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4">
-                    {products.slice(0, 4).map((product, index) => (
-                      <div key={product._id} className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300 cursor-pointer group"
-                           onClick={() => handleQuickView(product)}>
-                        <div className="bg-white rounded-xl p-3 mb-3 group-hover:scale-105 transition-transform duration-300">
-                          <img 
-                            src={product.defaultImage ? `/images/products/${product.defaultImage}` : '/images/placeholder-product.png'}
-                            alt={product.name}
-                            className="w-full h-24 object-cover rounded-lg"
-                            onError={(e) => {
-                              e.currentTarget.src = '/images/placeholder-product.png';
-                            }}
-                          />
-                        </div>
-                        <h3 className="font-semibold text-white text-sm mb-1 line-clamp-2">{product.name}</h3>
-                        <p className="text-yellow-400 font-bold">₹{product.price}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+          {/* Content */}
+          <div className="relative z-10 text-center text-white px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
+                <span className="block text-yellow-300 onam-text-glow">Happy Onam</span>
+                <span className="block text-3xl md:text-5xl mt-4">Celebrate Every Moment</span>
+              </h1>
+              <p className="text-xl md:text-2xl mb-8 text-green-100 leading-relaxed">
+                Premium quality gifts with fast delivery across Kerala.<br />
+                <span className="text-yellow-200 font-medium">Traditional products made special</span>
+              </p>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link 
+                href="/products"
+                className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-green-900 bg-yellow-400 rounded-full hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                <span className="relative z-10">Shop Now</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </Link>
+              <Link 
+                href="/about"
+                className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white border-2 border-white rounded-full hover:bg-white hover:text-green-900 transition-all duration-300 transform hover:scale-105"
+              >
+                Learn More
+              </Link>
+            </div>
+
+            {/* Scroll Indicator */}
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+              <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
+                <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
               </div>
             </div>
           </div>
         </section>
-        
-        {/* Key Features Section */}
-        <section className="py-20 bg-white" aria-labelledby="features-heading">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Features Section */}
+        <section className="py-20 bg-gradient-to-b from-green-50 to-white relative">
+          <div className="absolute inset-0 bg-pattern opacity-5"></div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-                <h2 id="features-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                  Why Choose KeralGiftsOnline?
-                </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                We bridge the distance between you and the authentic flavors of Kerala, 
-                delivering quality products with care and cultural connection.
+              <h2 className="text-4xl font-bold text-green-900 mb-4">Why Choose KeralGiftsOnline?</h2>
+              <p className="text-xl text-green-700 max-w-3xl mx-auto">
+                We bring the spirit of Kerala's culture to your doorstep with premium quality and exceptional service
               </p>
             </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div className="text-center group">
-                <div className="w-16 h-16 bg-kgo-green rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="group text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Global Delivery</h3>
-                <p className="text-gray-600">Fast, reliable shipping to over 50 countries worldwide</p>
+                <h3 className="text-2xl font-bold text-green-900 mb-4">Lightning Fast Delivery</h3>
+                <p className="text-green-700 leading-relaxed">Express delivery across Kerala with real-time tracking and guaranteed on-time delivery</p>
               </div>
-
-              <div className="text-center group">
-                <div className="w-16 h-16 bg-kgo-red rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              
+              <div className="group text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">100% Authentic</h3>
-                <p className="text-gray-600">Sourced directly from trusted vendors in Kerala</p>
+                <h3 className="text-2xl font-bold text-green-900 mb-4">Premium Quality</h3>
+                <p className="text-green-700 leading-relaxed">Handpicked selection of the finest gifts and traditional products</p>
               </div>
-
-              <div className="text-center group">
-                <div className="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Best Prices</h3>
-                <p className="text-gray-600">Competitive pricing with subscription benefits</p>
-              </div>
-
-              <div className="text-center group">
-                <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              
+              <div className="group text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Cultural Connection</h3>
-                <p className="text-gray-600">Recipes, stories, and cultural content included</p>
+                <h3 className="text-2xl font-bold text-green-900 mb-4">Personal Touch</h3>
+                <p className="text-green-700 leading-relaxed">Personalized service and custom gift arrangements for every occasion</p>
               </div>
             </div>
           </div>
@@ -414,186 +365,63 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <section className="py-20 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                What Our Customers Say
+        {/* Celebration Banner */}
+        <section className="py-20 bg-gradient-to-r from-green-600 via-green-700 to-green-800 relative overflow-hidden">
+          <div className="absolute inset-0 bg-pattern opacity-10"></div>
+          <div className="absolute inset-0 festive-pattern opacity-5"></div>
+          
+          {/* Decorative Elements */}
+          <div className="absolute top-10 left-10 w-16 h-16 bg-yellow-400/20 rounded-full float-animation"></div>
+          <div className="absolute top-20 right-20 w-12 h-12 bg-yellow-300/15 rounded-full float-animation-delay-1"></div>
+          <div className="absolute bottom-20 left-20 w-20 h-20 bg-yellow-500/25 rounded-full float-animation-delay-2"></div>
+          <div className="absolute bottom-10 right-10 w-14 h-14 bg-yellow-400/20 rounded-full float-animation-delay-3"></div>
+          
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="mb-8">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 onam-text-glow">
+                Celebrate Onam with Us
               </h2>
-              <p className="text-xl text-gray-600">
-                Stories from our global community
+              <p className="text-xl text-green-100 mb-8 max-w-3xl mx-auto leading-relaxed">
+                Join thousands of happy customers who trust us for their gift needs. 
+                From traditional to modern, we have everything you need to make your Onam special.
               </p>
             </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-2xl p-8 shadow-lg">
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-6">
-                  "Finally found authentic Kerala snacks in Canada! The taste reminds me of home. 
-                  Fast delivery and excellent packaging. Highly recommended!"
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-kgo-green rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                    P
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-900">Priya Nair</div>
-                    <div className="text-sm text-gray-600">Toronto, Canada</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl p-8 shadow-lg">
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-6">
-                  "The spice quality is exceptional! As a chef, I can tell the difference. 
-                  KeralGiftsOnline has become my go-to source for authentic Kerala ingredients."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-kgo-red rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                    R
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-900">Rajesh Kumar</div>
-                    <div className="text-sm text-gray-600">Dubai, UAE</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl p-8 shadow-lg">
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-6">
-                  "Love the cultural content and recipes that come with the products! 
-                  It's not just shopping, it's staying connected to our roots."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                    S
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-900">Sita Menon</div>
-                    <div className="text-sm text-gray-600">London, UK</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Newsletter Section */}
-        <section className="py-20 bg-kgo-green text-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Stay Connected with Kerala
-            </h2>
-            <p className="text-xl text-green-100 mb-8">
-              Get the latest products, recipes, and cultural content delivered to your inbox
-            </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-6 py-4 rounded-full text-gray-900 focus:outline-none focus:ring-4 focus:ring-yellow-400"
-              />
-              <button className="px-8 py-4 bg-yellow-400 text-green-900 font-semibold rounded-full hover:bg-yellow-300 transition-colors duration-300">
-                Subscribe
-              </button>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              <Link
+                href="/register"
+                className="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 rounded-full font-semibold hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                <span className="relative z-10">Join Now</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </Link>
+              <Link
+                href="/contact"
+                className="group inline-flex items-center px-8 py-4 border-2 border-white text-white rounded-full font-semibold hover:bg-white hover:text-green-900 transition-all duration-300 transform hover:scale-105"
+              >
+                Contact Us
+              </Link>
             </div>
             
-            <p className="text-sm text-green-200 mt-4">
-              Join 10,000+ subscribers. No spam, unsubscribe anytime.
-            </p>
+            {/* Festive Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-yellow-400 mb-2">10K+</div>
+                <div className="text-green-100">Happy Customers</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-yellow-400 mb-2">500+</div>
+                <div className="text-green-100">Cities Served</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-yellow-400 mb-2">24/7</div>
+                <div className="text-green-100">Customer Support</div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid md:grid-cols-4 gap-8">
-            {/* Brand */}
-            <div className="md:col-span-1">
-              <h3 className="text-2xl font-bold mb-4">KeralGiftsOnline</h3>
-              <p className="text-gray-400 mb-4">
-                Connecting the global Malayalam diaspora with authentic Kerala products and cultural treasures.
-              </p>
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.097.118.112.222.083.343-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.746-1.378l-.747 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.624 0 11.99-5.367 11.99-11.986C24.007 5.367 18.641.001 12.017.001z"/>
-                  </svg>
-                </a>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><Link href="/products" className="text-gray-400 hover:text-white transition-colors">Products</Link></li>
-                <li><Link href="/categories" className="text-gray-400 hover:text-white transition-colors">Categories</Link></li>
-                <li><Link href="/content" className="text-gray-400 hover:text-white transition-colors">Cultural Content</Link></li>
-                <li><Link href="/about" className="text-gray-400 hover:text-white transition-colors">About Us</Link></li>
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Support</h4>
-              <ul className="space-y-2">
-                <li><Link href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact Us</Link></li>
-                <li><Link href="/shipping" className="text-gray-400 hover:text-white transition-colors">Shipping Info</Link></li>
-                <li><Link href="/returns" className="text-gray-400 hover:text-white transition-colors">Returns</Link></li>
-                <li><Link href="/faq" className="text-gray-400 hover:text-white transition-colors">FAQ</Link></li>
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Contact</h4>
-              <div className="space-y-2 text-gray-400">
-                <p>Email: hello@onyourbehlf.com</p>
-                <p>Phone: +91 123 456 7890</p>
-                <p>Address: Kerala, India</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 KeralGiftsOnline. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
 
       {/* Quick View Modal */}
       {selectedProduct && (
