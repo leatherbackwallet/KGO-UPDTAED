@@ -1,14 +1,16 @@
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import SEOHead from '../components/SEOHead';
 
 export default function Custom404() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Head>
-        <title>404 - Page Not Found | OnYourBehlf</title>
-        <meta name="description" content="The page you're looking for doesn't exist." />
-      </Head>
+      <SEOHead
+        title="404 - Page Not Found | KeralGiftsOnline"
+        description="The page you're looking for doesn't exist. Browse our collection of premium gifts and traditional Kerala products instead."
+        noindex={true}
+      />
       
       <div className="max-w-md w-full text-center">
         <div className="mb-8">

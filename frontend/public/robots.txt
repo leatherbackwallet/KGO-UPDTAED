@@ -10,15 +10,52 @@ Disallow: /api/
 Disallow: /_next/
 Disallow: /test-api
 Disallow: /debug
+Disallow: /checkout/
+Disallow: /profile/
+Disallow: /orders/
+Disallow: /*?*utm_*
+Disallow: /*?*fbclid=*
+Disallow: /*?*gclid=*
 
-# Allow important pages
+# Allow important pages for SEO
 Allow: /products
+Allow: /product/
 Allow: /about
+Allow: /contact
 Allow: /content
 Allow: /login
 Allow: /register
+Allow: /cart
+Allow: /wishlist
+Allow: /privacy
+Allow: /terms
 
-# Crawl delay (optional)
+# Specific rules for different crawlers
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# General crawl delay
 Crawl-delay: 1
 
 # Host directive

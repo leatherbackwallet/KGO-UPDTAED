@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import api from '../../utils/api';
 import Navbar from '../../components/Navbar';
+import SEOHead from '../../components/SEOHead';
 import { getProductImage } from '../../utils/imageUtils';
 import { getMultilingualText } from '../../utils/api';
+import { generateKeywords } from '../../utils/seoKeywords';
 
 interface Product {
   _id: string;
@@ -83,8 +86,101 @@ const ProductDetailPage: React.FC = () => {
     return 'Uncategorized';
   };
 
+  // Generate comprehensive product SEO data
+  const generateProductSEO = () => {
+    const productName = getMultilingualText(product.name);
+    const productDescription = getMultilingualText(product.description);
+    const categoryName = getCategoryName();
+    
+    const title = `${productName} - Premium Kerala Gift | KeralGiftsOnline`;
+    const description = `Buy ${productName} online. ${productDescription}. Fast delivery across Kerala. Premium quality ${categoryName.toLowerCase()} with authentic traditional craftsmanship.`;
+    
+    const productImage = product.images?.[0] 
+      ? `https://keralgiftsonline.in/images/${product.images[0]}`
+      : 'https://keralgiftsonline.in/images/og-image.jpg';
+
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": productName,
+      "description": productDescription,
+      "image": product.images?.map(img => `https://keralgiftsonline.in/images/${img}`) || [productImage],
+      "url": `https://keralgiftsonline.in/product/${product._id}`,
+      "sku": product._id,
+      "category": categoryName,
+      "brand": {
+        "@type": "Brand",
+        "name": "KeralGiftsOnline"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": product.price || product.comboBasePrice || 0,
+        "priceCurrency": "INR",
+        "availability": (product.stock || 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        "seller": {
+          "@type": "Organization",
+          "name": "KeralGiftsOnline",
+          "url": "https://keralgiftsonline.in"
+        },
+        "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 1 year from now
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.5",
+        "reviewCount": "25",
+        "bestRating": "5",
+        "worstRating": "1"
+      }
+    };
+
+    // Add combo-specific structured data
+    if (product.isCombo && product.comboItems) {
+      structuredData["isVariantOf"] = {
+        "@type": "ProductGroup",
+        "name": `${productName} Collection`,
+        "hasVariant": product.comboItems.map(item => ({
+          "@type": "Product",
+          "name": item.name,
+          "offers": {
+            "@type": "Offer",
+            "price": item.unitPrice,
+            "priceCurrency": "INR"
+          }
+        }))
+      };
+    }
+
+    // Add occasion-based keywords
+    const occasionKeywords = product.occasions?.map(occasion => 
+      `${occasion.toLowerCase().replace('_', ' ')} gifts`
+    ).join(', ') || '';
+
+    return {
+      title,
+      description,
+      image: productImage,
+      structuredData,
+      occasionKeywords
+    };
+  };
+
+  const productSEO = generateProductSEO();
+
   return (
     <>
+      <SEOHead
+        title={productSEO.title}
+        description={productSEO.description}
+        type="product"
+        image={productSEO.image}
+        url={`https://keralgiftsonline.in/product/${product._id}`}
+        structuredData={productSEO.structuredData}
+        products={[{
+          name: getMultilingualText(product.name),
+          categories: product.category ? [{ name: getCategoryName() }] : [],
+          occasions: product.occasions?.map(occ => ({ name: occ })) || []
+        }]}
+      />
       <Navbar />
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

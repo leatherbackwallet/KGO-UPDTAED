@@ -5,6 +5,7 @@ import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
 import ProductSkeleton, { ProductSkeletonGrid } from '../components/ProductSkeleton';
 import ProductFilters from '../components/ProductFilters';
+import SEOHead from '../components/SEOHead';
 import api from '../utils/api';
 import { getMultilingualText } from '../utils/api';
 import { preloadProductImages } from '../utils/imageUtils';
@@ -290,14 +291,97 @@ const ProductsPage: React.FC = () => {
     console.log('Is client:', isClient);
   };
 
+  // Generate dynamic SEO data based on filters
+  const generateSEOData = () => {
+    let title = 'Premium Gifts & Traditional Products | KeralGiftsOnline';
+    let description = 'Discover our complete collection of premium gifts, traditional Kerala products & authentic items. Fast delivery across Kerala with advanced logistics.';
+    let keywords = 'kerala gifts, traditional products, online gift delivery kerala, premium gifts, festival gifts, authentic kerala items';
+
+    if (search) {
+      title = `${search} - Search Results | KeralGiftsOnline`;
+      description = `Find ${search} and related premium gifts, traditional products. Fast delivery across Kerala.`;
+      keywords += `, ${search}`;
+    }
+
+    if (category) {
+      const categoryName = categories.find(cat => cat._id === category || cat.slug === category);
+      if (categoryName) {
+        const name = typeof categoryName.name === 'string' ? categoryName.name : categoryName.name.en;
+        title = `${name} - Premium ${name} Gifts | KeralGiftsOnline`;
+        description = `Shop premium ${name} gifts and traditional products. Fast delivery across Kerala with authentic quality guaranteed.`;
+        keywords += `, ${name}, ${name} gifts`;
+      }
+    }
+
+    if (selectedOccasions.length > 0) {
+      const occasion = selectedOccasions[0].toLowerCase().replace('_', ' ');
+      title = `${occasion} Gifts - Premium Collection | KeralGiftsOnline`;
+      description = `Perfect ${occasion} gifts and traditional products for your special moments. Premium quality with fast delivery across Kerala.`;
+      keywords += `, ${occasion} gifts`;
+    }
+
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": title,
+      "description": description,
+      "url": "https://keralgiftsonline.in/products",
+      "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": totalProducts,
+        "itemListElement": products.slice(0, 10).map((product, index) => ({
+          "@type": "Product",
+          "position": index + 1,
+          "name": product.name,
+          "description": product.description,
+          "image": product.images?.[0] || '',
+          "url": `https://keralgiftsonline.in/product/${product._id}`,
+          "offers": {
+            "@type": "Offer",
+            "price": product.price,
+            "priceCurrency": "INR",
+            "availability": (product.stock && product.stock > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+          }
+        }))
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://keralgiftsonline.in/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Products",
+            "item": "https://keralgiftsonline.in/products"
+          }
+        ]
+      }
+    };
+
+    return { title, description, keywords, structuredData };
+  };
+
+  const seoData = generateSEOData();
+
   return (
     <>
-      <Head>
-        <title>Products - KeralGiftsOnline</title>
-        <meta name="description" content="Discover our collection of gifts, traditional products, and authentic Kerala items" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-      </Head>
+      <SEOHead
+        title={seoData.title}
+        description={seoData.description}
+        url="https://keralgiftsonline.in/products"
+        structuredData={seoData.structuredData}
+        products={products}
+        categories={categories.map(cat => ({
+          name: typeof cat.name === 'string' ? cat.name : cat.name.en
+        }))}
+        searchTerm={search}
+        location={category ? undefined : 'Kerala'}
+      />
 
       <Navbar />
       <main className="min-h-screen bg-gray-50">

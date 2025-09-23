@@ -1,16 +1,15 @@
 {
-  "name": "KeralGiftsOnline - Premium Gifts & Celebrations",
+  "name": "KeralGiftsOnline - Premium Gifts & Traditional Products",
   "short_name": "KeralGiftsOnline",
-  "description": "Premium quality gifts, cakes, flowers, and celebration items with fast delivery across Kerala",
+  "description": "Kerala's premier online gift store offering traditional products and premium gifts with fast delivery",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#dc2626",
+  "theme_color": "#059669",
   "orientation": "portrait-primary",
+  "categories": ["shopping", "lifestyle", "business"],
+  "lang": "en-US",
   "scope": "/",
-  "lang": "en",
-  "dir": "ltr",
-  "categories": ["shopping", "lifestyle", "food"],
   "icons": [
     {
       "src": "/favicon.svg",
@@ -19,56 +18,80 @@
       "purpose": "any maskable"
     },
     {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32",
+      "type": "image/x-icon"
+    },
+    {
       "src": "/images/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "/images/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/images/screenshot-mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/images/screenshot-desktop.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Shop Products",
-      "short_name": "Shop",
-      "description": "Browse our product catalog",
+      "name": "Browse Products",
+      "short_name": "Products",
+      "description": "Browse our collection of premium gifts",
       "url": "/products",
       "icons": [
         {
           "src": "/favicon.svg",
-          "sizes": "96x96"
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
     },
     {
-      "name": "My Orders",
-      "short_name": "Orders",
-      "description": "View your order history",
-      "url": "/orders",
+      "name": "Shopping Cart",
+      "short_name": "Cart",
+      "description": "View your shopping cart",
+      "url": "/cart",
       "icons": [
         {
           "src": "/favicon.svg",
-          "sizes": "96x96"
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
+    },
+    {
+      "name": "Wishlist",
+      "short_name": "Wishlist",
+      "description": "View your wishlist items",
+      "url": "/wishlist",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "/images/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "OnYourBehlf homepage on desktop"
+    },
+    {
+      "src": "/images/screenshot-narrow.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "OnYourBehlf homepage on mobile"
     }
   ]
 }

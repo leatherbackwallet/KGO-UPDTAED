@@ -79,13 +79,13 @@ class PDFService {
           '--memory-pressure-off',
           '--max_old_space_size=4096'
         ],
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-        timeout: 60000 // 60 second timeout for production
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
+        timeout: 120000 // 120 second timeout for production
       });
 
       try {
         const page = await browser.newPage();
-        page.setDefaultTimeout(60000); // 60 second timeout for page operations
+        page.setDefaultTimeout(120000); // 120 second timeout for page operations
         
         // Set viewport for consistent rendering
         await page.setViewport({ width: 1200, height: 800, deviceScaleFactor: 1 });
@@ -95,13 +95,13 @@ class PDFService {
         console.log('Generated HTML content length:', htmlContent.length);
         
         await page.setContent(htmlContent, { 
-          waitUntil: 'networkidle0', 
-          timeout: 60000 
+          waitUntil: 'domcontentloaded', 
+          timeout: 120000 
         });
         console.log('Page content loaded successfully');
         
         // Wait a bit for any dynamic content to render
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Generate PDF
         const pdfBuffer = await page.pdf({
@@ -113,7 +113,7 @@ class PDFService {
             bottom: '20mm',
             left: '20mm'
           },
-          timeout: 60000,
+          timeout: 120000,
           preferCSSPageSize: true
         });
 
