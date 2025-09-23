@@ -5,7 +5,6 @@ entrypoint: bash -lc 'cd backend && node dist/server.js'
 
 env_variables:
   NODE_ENV: production
-  PORT: 8080
   # Database Configuration - Using consistent MongoDB Atlas URI
   MONGODB_URI: "mongodb+srv://castlebek:uJrTGo7E47HiEYpf@keralagiftsonline.7oukp55.mongodb.net/keralagiftsonline?retryWrites=true&w=majority&appName=KeralaGiftsOnline"
   
@@ -24,10 +23,10 @@ env_variables:
   CLOUDINARY_API_KEY: "476938714454695"
   CLOUDINARY_API_SECRET: "fQBjh1m4rF9ztey7u4FANZQUNhQ"
   
-  # CORS Configuration - Allow production frontend
+  # CORS Configuration - Fixed for internet access
   CORS_ORIGIN: "https://onyourbehlf.uc.r.appspot.com"
   
-  # Frontend URL
+  # Frontend URL - Fixed for internet access
   FRONTEND_URL: "https://onyourbehlf.uc.r.appspot.com"
   
   # API URL
@@ -43,7 +42,21 @@ env_variables:
   PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
   PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium-browser"
 
-# Add health check configuration
+# App Engine Flex scaling configuration
+automatic_scaling:
+  min_num_instances: 2
+  max_num_instances: 20
+  cool_down_period_sec: 120
+  cpu_utilization:
+    target_utilization: 0.6
+
+# App Engine Flex resources
+resources:
+  cpu: 2
+  memory_gb: 4
+  disk_size_gb: 20
+
+# Health checks for App Engine Flex
 readiness_check:
   path: "/api/health"
   check_interval_sec: 10
@@ -58,20 +71,3 @@ liveness_check:
   timeout_sec: 10
   failure_threshold: 3
   success_threshold: 2
-
-automatic_scaling:
-  min_num_instances: 2
-  max_num_instances: 20
-  cool_down_period_sec: 120
-  cpu_utilization:
-    target_utilization: 0.5
-
-resources:
-  cpu: 2
-  memory_gb: 4
-  disk_size_gb: 20
-
-handlers:
-  - url: /.*
-    script: auto
-    secure: always

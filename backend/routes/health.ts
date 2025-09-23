@@ -1,92 +1,78 @@
-/**
- * Health Check Routes
- * Provides system health monitoring and status endpoints
- */
-
-import express, { Request, Response } from 'express';
+import express from 'express';
 import mongoose from 'mongoose';
-import { Product } from '../models/products.model';
-import { ProductAttribute } from '../models/productAttributes.model';
-import { VendorProduct } from '../models/vendorProducts.model';
-import { Review } from '../models/reviews.model';
-import { Wishlist } from '../models/wishlists.model';
 
 const router = express.Router();
 
-// Enhanced health check with database integrity
-router.get('/', async (req: Request, res: Response): Promise<void> => {
+/**
+ * Health check endpoint for App Engine
+ * Returns 200 if service is healthy, 503 if not
+ */
+router.get('/health', (req, res) => {
   try {
-    const health: any = {
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      database: {
-        status: 'connected',
-        collections: {}
-      },
-      integrity: {
-        orphanedRecords: {},
-        totalIssues: 0
-      }
-    };
-
     // Check database connection
-    if (mongoose.connection.readyState !== 1) {
-      health.status = 'unhealthy';
-      health.database.status = 'disconnected';
-      res.status(503).json(health);
-      return;
+    const dbStatus = mongoose.connection.readyState;
+    const dbStatusText = {
+      0: 'disconnected',
+      1: 'connected', 
+      2: 'connecting',
+      3: 'disconnecting'
+    }[dbStatus] || 'unknown';
+
+    // Service is healthy if database is connected
+    if (dbStatus === 1) {
+      return res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        database: dbStatusText,
+        memory: process.memoryUsage(),
+        version: process.env.npm_package_version || '3.0.0'
+      });
+    } else {
+      return res.status(503).json({
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        database: dbStatusText,
+        reason: 'Database not connected'
+      });
     }
-
-    // Check for orphaned records
-    const existingProductIds = await Product.find({}, '_id');
-    const productIdSet = new Set(existingProductIds.map(p => p._id.toString()));
-
-    // Check orphaned product attributes
-    const orphanedAttributes = await ProductAttribute.countDocuments({
-      productId: { $nin: existingProductIds.map(p => p._id) }
-    });
-
-    // Check orphaned vendor products
-    const orphanedVendorProducts = await VendorProduct.countDocuments({
-      productId: { $nin: existingProductIds.map(p => p._id) }
-    });
-
-    // Check orphaned reviews
-    const orphanedReviews = await Review.countDocuments({
-      productId: { $nin: existingProductIds.map(p => p._id) }
-    });
-
-    // Check collection counts
-    health.database.collections = {
-      products: await Product.countDocuments(),
-      productAttributes: await ProductAttribute.countDocuments(),
-      vendorProducts: await VendorProduct.countDocuments(),
-      reviews: await Review.countDocuments(),
-      wishlists: await Wishlist.countDocuments()
-    };
-
-    // Integrity check results
-    health.integrity.orphanedRecords = {
-      productAttributes: orphanedAttributes,
-      vendorProducts: orphanedVendorProducts,
-      reviews: orphanedReviews
-    };
-
-    health.integrity.totalIssues = orphanedAttributes + orphanedVendorProducts + orphanedReviews;
-
-    // Mark as unhealthy if there are integrity issues
-    if (health.integrity.totalIssues > 0) {
-      health.status = 'degraded';
-      health.message = `Found ${health.integrity.totalIssues} orphaned records`;
-    }
-
-    res.json(health);
-  } catch (error: any) {
-    res.status(503).json({
+  } catch (error) {
+    console.error('Health check error:', error);
+    return res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      error: error.message
+      error: 'Health check failed'
+    });
+  }
+});
+
+/**
+ * Readiness check endpoint
+ * More strict than health - checks if service is ready to handle requests
+ */
+router.get('/ready', (req, res) => {
+  try {
+    const dbStatus = mongoose.connection.readyState;
+    
+    // Service is ready only if database is connected and stable
+    if (dbStatus === 1) {
+      return res.status(200).json({
+        status: 'ready',
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      return res.status(503).json({
+        status: 'not ready',
+        timestamp: new Date().toISOString(),
+        reason: 'Database not ready'
+      });
+    }
+  } catch (error) {
+    console.error('Readiness check error:', error);
+    return res.status(503).json({
+      status: 'not ready',
+      timestamp: new Date().toISOString(),
+      error: 'Readiness check failed'
     });
   }
 });
