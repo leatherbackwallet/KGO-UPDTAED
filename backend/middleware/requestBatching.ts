@@ -23,7 +23,7 @@ const generateRequestSignature = (req: Request): string => {
   return signature;
 };
 
-// Request deduplication middleware
+// User-aware request deduplication middleware
 export const deduplicateRequests = () => {
   return (req: Request, res: Response, next: NextFunction): void => {
     // Only deduplicate GET requests
@@ -31,9 +31,13 @@ export const deduplicateRequests = () => {
       return next();
     }
 
-    const signature = generateRequestSignature(req);
+    // Generate user-aware signature
+    const userId = (req as any).user?.id || 'anonymous';
+    const userRole = (req as any).user?.roleName || 'guest';
+    const baseSignature = generateRequestSignature(req);
+    const signature = `${baseSignature}:user:${userId}:role:${userRole}`;
     
-    // Check if identical request is already pending
+    // Check if identical request is already pending for this user
     if (pendingRequests.has(signature)) {
       const pendingRequest = pendingRequests.get(signature);
       

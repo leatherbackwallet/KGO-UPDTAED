@@ -10,11 +10,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
+const mongoose_1 = __importDefault(require("mongoose"));
 const payment_service_1 = __importDefault(require("../services/payment.service"));
 const index_1 = require("../models/index");
 const database_1 = require("../middleware/database");
 const auth_1 = require("../middleware/auth");
 const comboUtils_1 = require("../utils/comboUtils");
+const stockService_1 = __importDefault(require("../services/stockService"));
 const router = express_1.default.Router();
 const validatePaymentOrder = [
     (0, express_validator_1.body)('products').isArray().withMessage('Products must be an array'),
@@ -42,12 +44,144 @@ const validatePaymentVerification = [
     (0, express_validator_1.body)('razorpay_signature').notEmpty().withMessage('Razorpay signature is required')
 ];
 router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentOrder, async (req, res) => {
+    const session = await mongoose_1.default.startSession();
     try {
-        console.log('🔍 [Payment Route] Create order request received');
-        console.log('🔍 [Payment Route] Request body:', JSON.stringify(req.body, null, 2));
-        const errors = (0, express_validator_1.validationResult)(req);
-        if (!errors.isEmpty()) {
-            console.log('❌ [Payment Route] Validation errors:', errors.array());
+        await session.withTransaction(async () => {
+            console.log('🔍 [Payment Route] Create order request received');
+            console.log('🔍 [Payment Route] Request body:', JSON.stringify(req.body, null, 2));
+            const errors = (0, express_validator_1.validationResult)(req);
+            if (!errors.isEmpty()) {
+                console.log('❌ [Payment Route] Validation errors:', errors.array());
+                throw new Error('VALIDATION_ERROR');
+            }
+            const { products, recipientAddress, orderNotes } = req.body;
+            const userId = req.user.id;
+            console.log('🔍 [Payment Route] User ID:', userId);
+            console.log('🔍 [Payment Route] Products:', products);
+            // Check stock availability using stock service
+            const stockCheck = await stockService_1.default.checkStockAvailability(products, session);
+            if (!stockCheck.available) {
+                const errorMessage = stockCheck.results
+                    .filter(r => !r.available)
+                    .map(r => `${r.productName}: ${r.currentStock} available, ${r.requestedQuantity} requested`)
+                    .join('; ');
+                throw new Error(`INSUFFICIENT_STOCK:${errorMessage}`);
+            }
+            // Reserve stock for this order
+            const sessionId = `payment_${Date.now()}_${userId}`;
+            const reservationResult = await stockService_1.default.reserveStock(products, userId, sessionId, session);
+            if (!reservationResult.success) {
+                throw new Error(`STOCK_RESERVATION_FAILED:${reservationResult.errors.join('; ')}`);
+            }
+            // Calculate total amount
+            let totalAmount = 0;
+            const orderItems = [];
+            for (const item of products) {
+                const product = await index_1.Product.findById(item.product).session(session);
+                if (!product) {
+                    throw new Error(`PRODUCT_NOT_FOUND:${item.product}`);
+                }
+                let itemTotal;
+                let itemPrice;
+                let orderItemData = {
+                    productId: product._id,
+                    quantity: item.quantity,
+                    isCombo: false,
+                    comboBasePrice: 0,
+                    comboItemConfigurations: []
+                };
+                // Handle combo products
+                if (product.isCombo && item.isCombo) {
+                    // Validate combo configuration
+                    if (!item.comboItemConfigurations || !Array.isArray(item.comboItemConfigurations)) {
+                        res.status(400).json({
+                            success: false,
+                            error: {
+                                message: `Combo product ${product.name} requires comboItemConfigurations`,
+                                code: 'MISSING_COMBO_CONFIG'
+                            }
+                        });
+                        return;
+                    }
+                    // Validate combo base price matches
+                    if (item.comboBasePrice !== product.comboBasePrice) {
+                        res.status(400).json({
+                            success: false,
+                            error: {
+                                message: `Combo base price mismatch for product ${product.name}`,
+                                code: 'COMBO_PRICE_MISMATCH'
+                            }
+                        });
+                        return;
+                    }
+                    // Recalculate combo price server-side
+                    itemPrice = (0, comboUtils_1.calculateComboPrice)(product.comboBasePrice || 0, item.comboItemConfigurations);
+                    itemTotal = itemPrice * item.quantity;
+                    // Store combo configuration
+                    orderItemData.isCombo = true;
+                    orderItemData.comboBasePrice = product.comboBasePrice || 0;
+                    orderItemData.comboItemConfigurations = item.comboItemConfigurations;
+                    orderItemData.price = itemPrice;
+                    orderItemData.total = itemTotal;
+                }
+                else if (product.isCombo && !item.isCombo) {
+                    // Combo product but not sent as combo - use base price
+                    itemPrice = product.comboBasePrice || 0;
+                    itemTotal = itemPrice * item.quantity;
+                    orderItemData.price = itemPrice;
+                    orderItemData.total = itemTotal;
+                }
+                else {
+                    // Regular product
+                    itemPrice = product.price;
+                    itemTotal = itemPrice * item.quantity;
+                    orderItemData.price = itemPrice;
+                    orderItemData.total = itemTotal;
+                }
+                totalAmount += itemTotal;
+                orderItems.push(orderItemData);
+            }
+            // Create Razorpay order
+            const razorpayOrder = await payment_service_1.default.createOrder(totalAmount, 'INR');
+            // Create order in database with PENDING status
+            const order = new index_1.Order({
+                userId,
+                orderItems,
+                recipientAddress,
+                totalAmount,
+                totalPrice: totalAmount, // ✅ Ensure totalPrice is set for all users
+                orderNotes,
+                razorpayOrderId: razorpayOrder.id,
+                orderStatus: 'pending', // Changed from 'payment_done' to 'pending'
+                paymentStatus: 'pending', // Explicitly set payment status
+                // Add required fields for all users
+                shippingDetails: {
+                    recipientName: recipientAddress.name,
+                    recipientPhone: recipientAddress.phone,
+                    address: recipientAddress.address
+                },
+                requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+            });
+            await order.save();
+            res.status(200).json({
+                success: true,
+                data: {
+                    order_id: razorpayOrder.id, // Match Google's naming convention
+                    orderId: order._id,
+                    razorpayOrderId: razorpayOrder.id,
+                    amount: totalAmount,
+                    currency: 'INR',
+                    key: process.env.RAZORPAY_KEY_ID,
+                    stockReservations: reservationResult.reservations // Include reservation info
+                }
+            });
+        });
+    }
+    catch (error) {
+        console.error('Error creating payment order:', error);
+        // Handle specific error types
+        if (error.message === 'VALIDATION_ERROR') {
+            const errors = (0, express_validator_1.validationResult)(req);
             res.status(400).json({
                 success: false,
                 error: {
@@ -58,131 +192,39 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
             });
             return;
         }
-        const { products, recipientAddress, orderNotes } = req.body;
-        const userId = req.user.id;
-        console.log('🔍 [Payment Route] User ID:', userId);
-        console.log('🔍 [Payment Route] Products:', products);
-        // Calculate total amount
-        let totalAmount = 0;
-        const orderItems = [];
-        for (const item of products) {
-            const product = await index_1.Product.findById(item.product);
-            if (!product) {
-                res.status(400).json({
-                    success: false,
-                    error: {
-                        message: `Product with ID ${item.product} not found`,
-                        code: 'PRODUCT_NOT_FOUND'
-                    }
-                });
-                return;
-            }
-            if (product.stock < item.quantity) {
-                res.status(400).json({
-                    success: false,
-                    error: {
-                        message: `Insufficient stock for product ${product.name}`,
-                        code: 'INSUFFICIENT_STOCK'
-                    }
-                });
-                return;
-            }
-            let itemTotal;
-            let itemPrice;
-            let orderItemData = {
-                productId: product._id,
-                quantity: item.quantity,
-                isCombo: false,
-                comboBasePrice: 0,
-                comboItemConfigurations: []
-            };
-            // Handle combo products
-            if (product.isCombo && item.isCombo) {
-                // Validate combo configuration
-                if (!item.comboItemConfigurations || !Array.isArray(item.comboItemConfigurations)) {
-                    res.status(400).json({
-                        success: false,
-                        error: {
-                            message: `Combo product ${product.name} requires comboItemConfigurations`,
-                            code: 'MISSING_COMBO_CONFIG'
-                        }
-                    });
-                    return;
+        if (error.message.startsWith('INSUFFICIENT_STOCK:')) {
+            const stockMessage = error.message.split(':')[1];
+            res.status(400).json({
+                success: false,
+                error: {
+                    message: `Insufficient stock: ${stockMessage}`,
+                    code: 'INSUFFICIENT_STOCK'
                 }
-                // Validate combo base price matches
-                if (item.comboBasePrice !== product.comboBasePrice) {
-                    res.status(400).json({
-                        success: false,
-                        error: {
-                            message: `Combo base price mismatch for product ${product.name}`,
-                            code: 'COMBO_PRICE_MISMATCH'
-                        }
-                    });
-                    return;
-                }
-                // Recalculate combo price server-side
-                itemPrice = (0, comboUtils_1.calculateComboPrice)(product.comboBasePrice || 0, item.comboItemConfigurations);
-                itemTotal = itemPrice * item.quantity;
-                // Store combo configuration
-                orderItemData.isCombo = true;
-                orderItemData.comboBasePrice = product.comboBasePrice || 0;
-                orderItemData.comboItemConfigurations = item.comboItemConfigurations;
-                orderItemData.price = itemPrice;
-                orderItemData.total = itemTotal;
-            }
-            else if (product.isCombo && !item.isCombo) {
-                // Combo product but not sent as combo - use base price
-                itemPrice = product.comboBasePrice || 0;
-                itemTotal = itemPrice * item.quantity;
-                orderItemData.price = itemPrice;
-                orderItemData.total = itemTotal;
-            }
-            else {
-                // Regular product
-                itemPrice = product.price;
-                itemTotal = itemPrice * item.quantity;
-                orderItemData.price = itemPrice;
-                orderItemData.total = itemTotal;
-            }
-            totalAmount += itemTotal;
-            orderItems.push(orderItemData);
+            });
+            return;
         }
-        // Create Razorpay order
-        const razorpayOrder = await payment_service_1.default.createOrder(totalAmount, 'INR');
-        // Create order in database with PENDING status
-        const order = new index_1.Order({
-            userId,
-            orderItems,
-            recipientAddress,
-            totalAmount,
-            totalPrice: totalAmount, // ✅ Ensure totalPrice is set for all users
-            orderNotes,
-            razorpayOrderId: razorpayOrder.id,
-            orderStatus: 'pending', // Changed from 'payment_done' to 'pending'
-            paymentStatus: 'pending', // Explicitly set payment status
-            // Add required fields for all users
-            shippingDetails: {
-                recipientName: recipientAddress.name,
-                recipientPhone: recipientAddress.phone,
-                address: recipientAddress.address
-            },
-            requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
-        });
-        await order.save();
-        res.status(200).json({
-            success: true,
-            data: {
-                order_id: razorpayOrder.id, // Match Google's naming convention
-                orderId: order._id,
-                razorpayOrderId: razorpayOrder.id,
-                amount: totalAmount,
-                currency: 'INR',
-                key: process.env.RAZORPAY_KEY_ID
-            }
-        });
-    }
-    catch (error) {
-        console.error('Error creating payment order:', error);
+        if (error.message.startsWith('STOCK_RESERVATION_FAILED:')) {
+            const reservationMessage = error.message.split(':')[1];
+            res.status(400).json({
+                success: false,
+                error: {
+                    message: `Stock reservation failed: ${reservationMessage}`,
+                    code: 'STOCK_RESERVATION_FAILED'
+                }
+            });
+            return;
+        }
+        if (error.message.startsWith('PRODUCT_NOT_FOUND:')) {
+            const productId = error.message.split(':')[1];
+            res.status(400).json({
+                success: false,
+                error: {
+                    message: `Product with ID ${productId} not found`,
+                    code: 'PRODUCT_NOT_FOUND'
+                }
+            });
+            return;
+        }
         res.status(500).json({
             success: false,
             error: {
@@ -190,6 +232,9 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
                 code: 'PAYMENT_ORDER_ERROR'
             }
         });
+    }
+    finally {
+        await session.endSession();
     }
 });
 router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentVerification, async (req, res) => {

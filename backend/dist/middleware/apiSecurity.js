@@ -166,14 +166,15 @@ const validateRequestOrigin = (req, res, next) => {
 exports.validateRequestOrigin = validateRequestOrigin;
 /**
  * Check if origin is valid
- * In production, this should check against your allowed domains
+ * Updated with correct production domains for internet access
  */
 function isValidOrigin(origin) {
     const allowedOrigins = [
         'http://localhost:3000',
         'http://localhost:3001',
-        'https://keralagiftsonline.com',
-        'https://www.keralagiftsonline.com'
+        'https://onyourbehlf.uc.r.appspot.com',
+        'https://www.onyourbehlf.uc.r.appspot.com'
+        // Fixed: Removed incorrect keralagiftsonline domains
     ];
     return allowedOrigins.includes(origin);
 }

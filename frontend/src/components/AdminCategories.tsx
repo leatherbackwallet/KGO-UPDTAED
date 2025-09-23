@@ -7,6 +7,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import AdminLayout from './AdminLayout';
 
 interface Category {
   _id: string;
@@ -260,7 +261,7 @@ export default function AdminCategories() {
   return (
     <div className="flex gap-6">
       {/* Left Sidebar - CRUD Operations */}
-      <div className="w-80 flex-shrink-0">
+      <div className="w-72 flex-shrink-0">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Category Management</h3>
           
@@ -601,19 +602,19 @@ export default function AdminCategories() {
         {/* Categories List */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">
                     Category
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-96">
                     Description
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                     Sort Order
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                     Status
                   </th>
                 </tr>
@@ -637,25 +638,25 @@ export default function AdminCategories() {
                       }}
                       title={isSelected ? 'Click to deselect' : 'Click to select this category'}
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <div className="flex items-start">
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-gray-900 truncate">
                               {getCategoryPath(category)}
                             </div>
-                            <div className="text-sm text-gray-500 mt-1">{category.slug}</div>
+                            <div className="text-xs text-gray-500 mt-1 truncate">{category.slug}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <div className="text-sm text-gray-900 max-w-xs truncate">
                           {category.description || 'No description'}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-4 py-4 text-sm text-gray-900">
                         {category.sortOrder}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           category.isActive 
                             ? 'bg-green-100 text-green-800' 

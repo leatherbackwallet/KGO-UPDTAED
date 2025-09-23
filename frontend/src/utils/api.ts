@@ -43,7 +43,7 @@ const safeSetTokens = (tokens: any): boolean => {
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
-  timeout: 10000, // 10 second timeout
+  timeout: 30000, // 30 second timeout - standardized across all services
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',

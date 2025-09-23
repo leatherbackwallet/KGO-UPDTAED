@@ -7,6 +7,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import AdminLayout from './AdminLayout';
 
 interface Occasion {
   _id: string;
@@ -353,7 +354,7 @@ export default function AdminOccasions() {
   return (
     <div className="flex gap-6">
       {/* Left Sidebar - CRUD Operations */}
-      <div className="w-80 flex-shrink-0">
+      <div className="w-72 flex-shrink-0">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Occasion Management</h3>
           
@@ -783,25 +784,25 @@ export default function AdminOccasions() {
         {/* Occasions List */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">
                     Occasion
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                     Date Range
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                     Priority
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
                     Type
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                     Actions
                   </th>
                 </tr>
@@ -809,35 +810,35 @@ export default function AdminOccasions() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredOccasions.map((occasion) => (
                   <tr key={occasion._id} className={!occasion.isActive ? 'opacity-60' : ''}>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4">
                       <div className="flex items-center">
                         {occasion.icon && (
-                          <span className="text-2xl mr-3">{occasion.icon}</span>
+                          <span className="text-xl mr-2">{occasion.icon}</span>
                         )}
                         <div>
                           <div className="text-sm font-medium text-gray-900 flex items-center">
                             {occasion.name}
                             {isCurrentlyActive(occasion) && (
-                              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Active Now
+                              <span className="ml-2 inline-flex items-center px-1 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Active
                               </span>
                             )}
                           </div>
-                          <div className="text-sm text-gray-500">{occasion.slug}</div>
+                          <div className="text-xs text-gray-500 truncate">{occasion.slug}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-4 py-4 text-sm text-gray-900">
                       {formatDateRange(occasion)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         PRIORITY_LEVELS.find(p => p.value === occasion.priority.level)?.color || 'bg-gray-100 text-gray-800'
                       }`}>
                         {occasion.priority.level} ({occasion.priority.boostMultiplier}x)
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4">
                       <div className="flex flex-wrap gap-1">
                         {occasion.seasonalFlags.isFestival && (
                           <span className="inline-flex px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
@@ -861,7 +862,7 @@ export default function AdminOccasions() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         occasion.isActive 
                           ? 'bg-green-100 text-green-800' 
@@ -870,22 +871,22 @@ export default function AdminOccasions() {
                         {occasion.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                    <td className="px-4 py-4 text-sm font-medium space-x-1">
                       <button
                         onClick={() => handleEdit(occasion)}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className="text-indigo-600 hover:text-indigo-900 text-xs"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleToggleActive(occasion)}
-                        className={occasion.isActive ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'}
+                        className={occasion.isActive ? 'text-yellow-600 hover:text-yellow-900 text-xs' : 'text-green-600 hover:text-green-900 text-xs'}
                       >
                         {occasion.isActive ? 'Deactivate' : 'Activate'}
                       </button>
                       <button
                         onClick={() => handleDelete(occasion)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-red-600 hover:text-red-900 text-xs"
                       >
                         Delete
                       </button>

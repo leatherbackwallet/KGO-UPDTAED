@@ -32,7 +32,13 @@ export function getProductImage(imagePath?: string, slug?: string): string {
   
   // If we have a Cloudinary public_id (starts with keralagiftsonline/products/)
   if (imagePath && imagePath.startsWith('keralagiftsonline/products/')) {
-    return `https://res.cloudinary.com/deojqbepy/image/upload/${imagePath}`;
+    // Validate the public_id format before creating URL
+    if (imagePath.length > 30 && !imagePath.includes('..')) {
+      return `https://res.cloudinary.com/deojqbepy/image/upload/w_400,h_auto,q_auto,f_auto/${imagePath}`;
+    } else {
+      // Invalid public_id, return default
+      return DEFAULT_PRODUCT_IMAGE;
+    }
   }
   
   // If we have a relative path starting with /images/products/ (from database)
@@ -144,15 +150,21 @@ export async function imageExists(imagePath: string): Promise<boolean> {
  * @returns Optimized Cloudinary URL
  */
 export function getOptimizedImagePath(publicId: string, size: 'thumb' | 'small' | 'medium' | 'large' = 'medium'): string {
-  // If it's not a Cloudinary public ID, return as is
+  // If it's not a Cloudinary public ID, use the main image function
   if (!publicId.startsWith('keralagiftsonline/products/')) {
-    return publicId;
+    return getProductImage(publicId);
   }
   
-  const sizeConfig = PRODUCT_IMAGE_SIZES[size];
-  const transformations = `w_${sizeConfig.width},h_${sizeConfig.height},c_fill,q_auto`;
+  // Validate the public_id format before creating URL
+  if (publicId.length > 30 && !publicId.includes('..')) {
+    const sizeConfig = PRODUCT_IMAGE_SIZES[size];
+    const transformations = `w_${sizeConfig.width},h_${sizeConfig.height},c_fill,q_auto,f_auto`;
+    
+    return `https://res.cloudinary.com/deojqbepy/image/upload/${transformations}/${publicId}`;
+  }
   
-  return `https://res.cloudinary.com/deojqbepy/image/upload/${transformations}/${publicId}`;
+  // Invalid public_id, return default
+  return DEFAULT_PRODUCT_IMAGE;
 }
 
 /**
@@ -212,13 +224,13 @@ export function preloadImages(imagePaths: string[], priority: 'high' | 'low' = '
       }
       
       img.onload = () => {
-        console.log(`✅ Preloaded image: ${imagePath}`);
+        // Silently resolve successful loads
         resolve();
       };
       
-      img.onerror = (error) => {
-        console.warn(`⚠️ Failed to preload image: ${imagePath}`, error);
-        resolve(); // Don't reject, just log and continue
+      img.onerror = () => {
+        // Silently handle errors without console spam
+        resolve(); // Don't reject, just continue
       };
       
       img.src = imagePath;

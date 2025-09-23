@@ -20,7 +20,7 @@ export class ReliableApiService {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   private cacheStats: CacheStats = { hits: 0, misses: 0, size: 0, hitRate: 0 };
 
-  constructor(baseURL?: string, timeout: number = 10000) {
+  constructor(baseURL?: string, timeout: number = 30000) {
     this.axiosInstance = axios.create({
       baseURL: baseURL || process.env.NEXT_PUBLIC_API_URL,
       timeout,
@@ -128,7 +128,7 @@ export class ReliableApiService {
   ): Promise<ApiResponse<T>> {
     const startTime = performance.now();
     const {
-      timeout = 10000,
+      timeout = 30000,
       retries = 3,
       cacheStrategy = 'network-first',
       cacheTTL = 300000, // 5 minutes default

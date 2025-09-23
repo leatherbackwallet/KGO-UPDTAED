@@ -40,7 +40,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateETag = exports.cache = exports.scheduleWarmCache = exports.warmCache = exports.clearCache = exports.getCacheStats = exports.invalidateUserCache = exports.invalidateCategoryCache = exports.invalidateProductCache = exports.invalidateCache = exports.cacheConfigs = exports.createCacheMiddleware = void 0;
+exports.generateETag = exports.cache = exports.scheduleWarmCache = exports.warmCache = exports.clearCache = exports.getCacheStats = exports.invalidateGlobalCache = exports.invalidateUserCache = exports.invalidateCategoryCache = exports.invalidateProductCache = exports.invalidateCache = exports.cacheConfigs = exports.createCacheMiddleware = void 0;
 const node_cache_1 = __importDefault(require("node-cache"));
 const crypto = __importStar(require("crypto"));
 const products_model_1 = require("../models/products.model");
@@ -59,7 +59,7 @@ const generateETag = (data) => {
     return `"${hash.digest('hex')}"`;
 };
 exports.generateETag = generateETag;
-// Enhanced cache middleware factory with ETag support
+// Enhanced cache middleware factory with ETag support and user awareness
 const createCacheMiddleware = (ttl = 300, keyGenerator = null, options = {}) => {
     const { enableETag = true, cacheControl = 'public, max-age=300', staleWhileRevalidate = false } = options;
     return (req, res, next) => {
@@ -67,8 +67,12 @@ const createCacheMiddleware = (ttl = 300, keyGenerator = null, options = {}) => 
         if (req.method !== 'GET') {
             return next();
         }
-        // Generate cache key
-        const cacheKey = keyGenerator ? keyGenerator(req) : `${req.originalUrl || req.url}`;
+        // Generate user-aware cache key
+        const baseKey = keyGenerator ? keyGenerator(req) : `${req.originalUrl || req.url}`;
+        const userId = req.user?.id || 'anonymous';
+        const userRole = req.user?.roleName || 'guest';
+        // Create user-specific cache key for user-sensitive data
+        const cacheKey = `${baseKey}:user:${userId}:role:${userRole}`;
         // Check if response is cached
         const cachedEntry = cache.get(cacheKey);
         if (cachedEntry) {
@@ -152,20 +156,36 @@ exports.cacheConfigs = {
         cacheControl: 'public, max-age=3600, stale-while-revalidate=1800'
     })
 };
-// Cache invalidation utilities
-const invalidateCache = (pattern) => {
+// Cache invalidation utilities with user awareness
+const invalidateCache = (pattern, userId) => {
+    const keys = cache.keys();
+    let matchingKeys;
+    if (userId) {
+        // Invalidate cache for specific user
+        matchingKeys = keys.filter(key => key.includes(pattern) && key.includes(`user:${userId}`));
+    }
+    else {
+        // Invalidate cache for all users
+        matchingKeys = keys.filter(key => key.includes(pattern));
+    }
+    cache.del(matchingKeys);
+    console.log(`Invalidated ${matchingKeys.length} cache entries for pattern: ${pattern}${userId ? ` (user: ${userId})` : ' (all users)'}`);
+};
+exports.invalidateCache = invalidateCache;
+const invalidateProductCache = (userId) => (0, exports.invalidateCache)('products:', userId);
+exports.invalidateProductCache = invalidateProductCache;
+const invalidateCategoryCache = (userId) => (0, exports.invalidateCache)('categories', userId);
+exports.invalidateCategoryCache = invalidateCategoryCache;
+const invalidateUserCache = (userId) => (0, exports.invalidateCache)(`profile:`, userId);
+exports.invalidateUserCache = invalidateUserCache;
+// Invalidate cache for all users when global data changes
+const invalidateGlobalCache = (pattern) => {
     const keys = cache.keys();
     const matchingKeys = keys.filter(key => key.includes(pattern));
     cache.del(matchingKeys);
-    console.log(`Invalidated ${matchingKeys.length} cache entries for pattern: ${pattern}`);
+    console.log(`Invalidated ${matchingKeys.length} global cache entries for pattern: ${pattern}`);
 };
-exports.invalidateCache = invalidateCache;
-const invalidateProductCache = () => (0, exports.invalidateCache)('products:');
-exports.invalidateProductCache = invalidateProductCache;
-const invalidateCategoryCache = () => (0, exports.invalidateCache)('categories');
-exports.invalidateCategoryCache = invalidateCategoryCache;
-const invalidateUserCache = (userId) => (0, exports.invalidateCache)(`profile:${userId}`);
-exports.invalidateUserCache = invalidateUserCache;
+exports.invalidateGlobalCache = invalidateGlobalCache;
 // Cache statistics
 const getCacheStats = () => {
     return {

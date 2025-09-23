@@ -47,7 +47,7 @@ const generateETag = (data: any): string => {
   return `"${hash.digest('hex')}"`;
 };
 
-// Enhanced cache middleware factory with ETag support
+// Enhanced cache middleware factory with ETag support and user awareness
 export const createCacheMiddleware = (
   ttl: number = 300, 
   keyGenerator: ((req: Request) => string) | null = null, 
@@ -65,8 +65,13 @@ export const createCacheMiddleware = (
       return next();
     }
 
-    // Generate cache key
-    const cacheKey = keyGenerator ? keyGenerator(req) : `${req.originalUrl || req.url}`;
+    // Generate user-aware cache key
+    const baseKey = keyGenerator ? keyGenerator(req) : `${req.originalUrl || req.url}`;
+    const userId = (req as any).user?.id || 'anonymous';
+    const userRole = (req as any).user?.roleName || 'guest';
+    
+    // Create user-specific cache key for user-sensitive data
+    const cacheKey = `${baseKey}:user:${userId}:role:${userRole}`;
     
     // Check if response is cached
     const cachedEntry = cache.get<CacheEntry>(cacheKey);
@@ -168,17 +173,36 @@ export const cacheConfigs = {
   })
 };
 
-// Cache invalidation utilities
-export const invalidateCache = (pattern: string): void => {
+// Cache invalidation utilities with user awareness
+export const invalidateCache = (pattern: string, userId?: string): void => {
+  const keys = cache.keys();
+  let matchingKeys: string[];
+  
+  if (userId) {
+    // Invalidate cache for specific user
+    matchingKeys = keys.filter(key => 
+      key.includes(pattern) && key.includes(`user:${userId}`)
+    );
+  } else {
+    // Invalidate cache for all users
+    matchingKeys = keys.filter(key => key.includes(pattern));
+  }
+  
+  cache.del(matchingKeys);
+  console.log(`Invalidated ${matchingKeys.length} cache entries for pattern: ${pattern}${userId ? ` (user: ${userId})` : ' (all users)'}`);
+};
+
+export const invalidateProductCache = (userId?: string): void => invalidateCache('products:', userId);
+export const invalidateCategoryCache = (userId?: string): void => invalidateCache('categories', userId);
+export const invalidateUserCache = (userId: string): void => invalidateCache(`profile:`, userId);
+
+// Invalidate cache for all users when global data changes
+export const invalidateGlobalCache = (pattern: string): void => {
   const keys = cache.keys();
   const matchingKeys = keys.filter(key => key.includes(pattern));
   cache.del(matchingKeys);
-  console.log(`Invalidated ${matchingKeys.length} cache entries for pattern: ${pattern}`);
+  console.log(`Invalidated ${matchingKeys.length} global cache entries for pattern: ${pattern}`);
 };
-
-export const invalidateProductCache = (): void => invalidateCache('products:');
-export const invalidateCategoryCache = (): void => invalidateCache('categories');
-export const invalidateUserCache = (userId: string): void => invalidateCache(`profile:${userId}`);
 
 // Cache statistics
 export const getCacheStats = (): CacheStats => {

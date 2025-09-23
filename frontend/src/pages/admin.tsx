@@ -50,7 +50,7 @@ export default function Admin() {
   return (
     <>
       <Navbar />
-      <main className="max-w-6xl mx-auto py-8 px-4">
+      <main className="w-full max-w-none mx-auto py-8 px-6">
         <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
         
         <div className="mb-8">

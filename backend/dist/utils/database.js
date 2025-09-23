@@ -33,14 +33,16 @@ async function connectToDatabase() {
             throw new Error('MongoDB Atlas must be used. Local MongoDB is not allowed.');
         }
         await mongoose_1.default.connect(process.env.MONGODB_URI, {
-            maxPoolSize: 50, // Increased from 10 to 50 for better concurrency
-            minPoolSize: 5, // Maintain minimum connections
-            maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
-            serverSelectionTimeoutMS: 10000, // Increased timeout for better reliability
-            socketTimeoutMS: 45000,
+            maxPoolSize: 100, // Increased for better concurrency
+            minPoolSize: 10, // Higher minimum for production
+            maxIdleTimeMS: 60000, // Longer idle time to reduce reconnection overhead
+            serverSelectionTimeoutMS: 30000, // Longer timeout for better reliability
+            socketTimeoutMS: 60000, // Longer socket timeout
             bufferCommands: false,
             retryWrites: true,
             w: 'majority', // Write concern for better reliability
+            maxConnecting: 10, // Limit concurrent connection attempts
+            heartbeatFrequencyMS: 10000, // More frequent heartbeats
         });
         isConnected = true;
         console.log('✅ MongoDB connected successfully');
@@ -96,15 +98,69 @@ mongoose_1.default.connection.on('reconnected', () => {
     console.log('🔄 Mongoose reconnected to MongoDB');
     isConnected = true;
 });
-// Monitor connection status
+// Enhanced connection monitoring with detailed metrics
 setInterval(() => {
-    if (mongoose_1.default.connection.readyState === 1) {
-        console.log(`📊 DB Status: Connected (${mongoose_1.default.connection.readyState})`);
+    const connectionState = mongoose_1.default.connection.readyState;
+    const states = {
+        0: 'disconnected',
+        1: 'connected',
+        2: 'connecting',
+        3: 'disconnecting'
+    };
+    if (connectionState === 1) {
+        const stats = {
+            readyState: states[connectionState],
+            host: mongoose_1.default.connection.host,
+            port: mongoose_1.default.connection.port,
+            name: mongoose_1.default.connection.name,
+            collections: Object.keys(mongoose_1.default.connection.collections).length,
+            models: Object.keys(mongoose_1.default.connection.models).length
+        };
+        console.log(`📊 DB Status: Connected - ${JSON.stringify(stats)}`);
     }
     else {
-        console.log(`⚠️ DB Status: Disconnected (${mongoose_1.default.connection.readyState})`);
+        console.log(`⚠️ DB Status: ${states[connectionState]} (${connectionState})`);
     }
 }, 60000); // Check every minute
+// Enhanced connection pool monitoring with detailed metrics
+setInterval(() => {
+    if (mongoose_1.default.connection.readyState === 1) {
+        const poolStats = {
+            totalConnections: mongoose_1.default.connection.db?.serverConfig?.pool?.totalConnectionCount || 0,
+            availableConnections: mongoose_1.default.connection.db?.serverConfig?.pool?.availableConnectionCount || 0,
+            checkedOutConnections: mongoose_1.default.connection.db?.serverConfig?.pool?.checkedOutConnectionCount || 0,
+            waitQueueSize: mongoose_1.default.connection.db?.serverConfig?.pool?.waitQueueSize || 0,
+            maxPoolSize: 100,
+            minPoolSize: 10,
+            utilization: 0
+        };
+        // Calculate pool utilization percentage
+        if (poolStats.totalConnections > 0) {
+            poolStats.utilization = Math.round((poolStats.checkedOutConnections / poolStats.totalConnections) * 100);
+        }
+        console.log(`🔗 MongoDB Pool Stats: ${JSON.stringify(poolStats)}`);
+        // Enhanced alerting with different severity levels
+        if (poolStats.waitQueueSize > 20) {
+            console.error(`🚨 CRITICAL: Very high wait queue size: ${poolStats.waitQueueSize} connections waiting`);
+        }
+        else if (poolStats.waitQueueSize > 10) {
+            console.warn(`⚠️ WARNING: High wait queue size: ${poolStats.waitQueueSize} connections waiting`);
+        }
+        if (poolStats.utilization > 90) {
+            console.error(`🚨 CRITICAL: Very high connection usage: ${poolStats.utilization}% (${poolStats.checkedOutConnections}/${poolStats.totalConnections})`);
+        }
+        else if (poolStats.utilization > 75) {
+            console.warn(`⚠️ WARNING: High connection usage: ${poolStats.utilization}% (${poolStats.checkedOutConnections}/${poolStats.totalConnections})`);
+        }
+        else if (poolStats.utilization > 0) {
+            console.log(`📊 INFO: Connection usage: ${poolStats.utilization}% (${poolStats.checkedOutConnections}/${poolStats.totalConnections})`);
+        }
+        // Log connection efficiency metrics
+        if (poolStats.availableConnections === 0 && poolStats.waitQueueSize > 0) {
+            console.warn(`⚠️ PERFORMANCE: No available connections, ${poolStats.waitQueueSize} requests queued`);
+        }
+    }
+}, 30000); // Check every 30 seconds
 // Graceful shutdown
 process.on('SIGINT', async () => {
     await disconnectFromDatabase();

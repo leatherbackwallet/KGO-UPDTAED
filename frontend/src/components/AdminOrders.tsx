@@ -351,7 +351,7 @@ const AdminOrders: React.FC = () => {
   return (
     <div className="flex gap-6">
       {/* Left Sidebar - CRUD Operations */}
-      <div className="w-80 flex-shrink-0">
+      <div className="w-72 flex-shrink-0">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Management</h3>
           
@@ -666,31 +666,31 @@ const AdminOrders: React.FC = () => {
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                   Actions
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                   Order
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
                   Customer
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">
                   Items
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                   Total
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                   Payment
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                   Date
                 </th>
               </tr>
@@ -698,7 +698,7 @@ const AdminOrders: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredOrders?.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center">
+                  <td colSpan={8} className="px-4 py-12 text-center">
                     <div className="text-gray-500">
                       <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -716,96 +716,95 @@ const AdminOrders: React.FC = () => {
                 filteredOrders?.map((order) => (
                 <tr key={order._id} className={`hover:bg-gray-50 ${selectedOrder?._id === order._id ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`}>
                   {/* Actions Column - First Column */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex flex-col space-y-2">
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="flex flex-col space-y-1">
                       <button
                         onClick={() => {
                           setSelectedOrder(order);
                         }}
-                        className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                        className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
                           selectedOrder?._id === order._id
                             ? 'bg-blue-100 text-blue-800 border border-blue-200'
                             : 'bg-blue-600 text-white hover:bg-blue-700'
                         }`}
                       >
-                        {selectedOrder?._id === order._id ? '✓ Selected' : 'Select'}
+                        {selectedOrder?._id === order._id ? '✓' : 'Select'}
                       </button>
                       <button
                         onClick={() => handleDownloadReceipt(order._id)}
                         disabled={downloading === order._id}
-                        className="px-3 py-1 rounded-md text-xs font-medium transition-colors bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-2 py-1 rounded text-xs font-medium transition-colors bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {downloading === order._id ? (
                           <div className="flex items-center justify-center">
-                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                            <span className="text-xs">...</span>
+                            <div className="animate-spin rounded-full h-2 w-2 border-b-2 border-white"></div>
                           </div>
                         ) : (
-                          '📄 Receipt'
+                          '📄'
                         )}
                       </button>
                     </div>
                   </td>
                   {/* Order Column */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
+                  <td className="px-4 py-4">
+                    <div className="text-sm font-medium text-gray-900 truncate">
                       #{order.orderId || 'N/A'}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 truncate">
                       {order.razorpayOrderId ? `RZP: ${order.razorpayOrderId.slice(-8)}` : 'No Payment ID'}
                     </div>
                   </td>
                   {/* Customer Column */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
+                  <td className="px-4 py-4">
+                    <div className="text-sm text-gray-900 truncate">
                       {order.shippingDetails?.recipientName || 'N/A'}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-xs text-gray-500 truncate">
                       {order.shippingDetails?.recipientPhone || 'N/A'}
                     </div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-gray-400 truncate">
                       {order.userId?.email || 'N/A'}
                     </div>
                   </td>
                   {/* Items Column */}
-                  <td className="px-6 py-4">
-                    <div className="space-y-2">
+                  <td className="px-4 py-4">
+                    <div className="space-y-1">
                       {order.orderItems?.slice(0, 2).map((item) => (
-                        <div key={item._id} className="flex items-center space-x-3">
-                          <div className="flex-shrink-0 h-8 w-8">
+                        <div key={item._id} className="flex items-center space-x-2">
+                          <div className="flex-shrink-0 h-6 w-6">
                             <ProductImage
                               src={item.productId?.images?.[0]}
                               alt={getMultilingualText(item.productId?.name) || 'Product'}
                               productSlug={item.productId?.slug}
                               size="thumb"
-                              className="h-8 w-8 rounded object-cover"
+                              className="h-6 w-6 rounded object-cover"
                             />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-gray-900 truncate">
+                            <div className="text-xs font-medium text-gray-900 truncate">
                               {getMultilingualText(item.productId?.name) || 'Unknown Product'}
                             </div>
-                            <div className="text-sm text-gray-500">
-                              Qty: {item.quantity || 0} × ₹{(item.price || 0).toFixed(2)}
+                            <div className="text-xs text-gray-500">
+                              {item.quantity || 0} × ₹{(item.price || 0).toFixed(2)}
                             </div>
                           </div>
                         </div>
                       ))}
                       {order.orderItems?.length > 2 && (
                         <div className="text-xs text-gray-500">
-                          +{order.orderItems.length - 2} more items
+                          +{order.orderItems.length - 2} more
                         </div>
                       )}
                     </div>
                   </td>
                   {/* Total Column */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-4 py-4 text-sm font-medium text-gray-900">
                     ₹{(order.totalPrice || 0).toFixed(2)}
                   </td>
                   {/* Payment Column */}
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 py-4">
                     <div className="space-y-1">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(order.paymentStatus || 'unknown')}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(order.paymentStatus || 'unknown')}`}>
                         {order.paymentStatus || 'Unknown'}
                       </span>
                       {order.paymentDate && (
@@ -816,13 +815,13 @@ const AdminOrders: React.FC = () => {
                     </div>
                   </td>
                   {/* Status Column */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus || 'unknown')}`}>
+                  <td className="px-4 py-4">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus || 'unknown')}`}>
                       {(order.orderStatus || 'unknown').replace('_', ' ')}
                     </span>
                   </td>
                   {/* Date Column */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-4 py-4 text-sm text-gray-500">
                     {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
                   </td>
                 </tr>

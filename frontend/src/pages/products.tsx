@@ -126,9 +126,9 @@ const ProductsPage: React.FC = () => {
       const apiUrl = `/products?${params.toString()}`;
       console.log('🔗 Full API URL:', `${api.defaults.baseURL}${apiUrl}`);
       
-      // Add a timeout promise with longer timeout for stability
+      // Add a timeout promise with standardized timeout for stability
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout after 20 seconds')), 20000);
+        setTimeout(() => reject(new Error('Request timeout after 30 seconds')), 30000);
       });
       
       const apiPromise = api.get(apiUrl);

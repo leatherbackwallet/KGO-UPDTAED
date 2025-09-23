@@ -60,7 +60,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden backdrop-blur-sm">
-      {/* Main Search Bar */}
+      {/* Main Search Bar with Integrated Filters */}
       <div className="p-6 border-b border-gray-50">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -69,46 +69,50 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             placeholder="Search for gifts, cakes, flowers..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder-gray-500"
+            className="w-full pl-12 pr-32 py-4 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder-gray-500"
           />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Filter Toggle */}
-      <div className="px-6 py-4 border-b border-gray-50">
-        <div className="flex items-center justify-between">
-                      <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors hover:bg-gray-50 px-3 py-2 rounded-lg"
-            >
-            <Filter className="h-5 w-5" />
-            <span className="font-medium">Filters</span>
-            {activeFilterCount > 0 && (
-              <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                {activeFilterCount}
-              </span>
-            )}
-            <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-          </button>
           
-          {activeFilterCount > 0 && (
+          {/* Right side buttons container */}
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+            {/* Clear search button */}
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+            
+            {/* Filters button */}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 transition-colors hover:bg-gray-100 px-3 py-2 rounded-lg"
+            >
+              <Filter className="h-4 w-4" />
+              <span className="text-sm font-medium">Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+              <ChevronDown className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+        </div>
+        
+        {/* Clear all filters button - positioned below search when filters are active */}
+        {activeFilterCount > 0 && (
+          <div className="mt-3 flex justify-end">
             <button
               onClick={onClearFilters}
               className="text-sm text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1 hover:bg-gray-50 px-3 py-2 rounded-lg"
             >
               <X className="h-4 w-4" />
-              Clear all
+              Clear all filters
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Expanded Filters */}

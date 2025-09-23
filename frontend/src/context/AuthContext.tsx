@@ -131,13 +131,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // Listen for storage changes from other tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'tokens' || e.key === 'user') {
+        if (e.newValue === null) {
+          // Auth data was cleared in another tab
+          setTokens(null);
+          setUser(null);
+        } else {
+          // Auth data was updated in another tab
+          initializeAuth();
+        }
+      }
+    };
+
+    // Listen for custom auth events from other tabs
+    const handleAuthEvent = (e: CustomEvent) => {
+      if (e.detail.type === 'auth_update') {
+        initializeAuth();
+      } else if (e.detail.type === 'auth_clear') {
+        setTokens(null);
+        setUser(null);
+      }
+    };
+
     // Only initialize on client side
     if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleStorageChange);
+      window.addEventListener('authEvent', handleAuthEvent as EventListener);
       initializeAuth();
     } else {
       setIsLoading(false);
       setIsHydrated(true);
     }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('authEvent', handleAuthEvent as EventListener);
+      }
+    };
   }, []);
 
   const login = (tokenPair: TokenPair, userData: User) => {
@@ -151,6 +184,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       setTokens(tokenPair);
       setUser(userData);
+      
+      // Notify other tabs about auth update
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('authEvent', {
+          detail: { type: 'auth_update' }
+        }));
+      }
     } catch (error) {
       console.error('Error during login:', error);
     }
@@ -162,6 +202,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       safeLocalStorage.removeItem('user');
       setTokens(null);
       setUser(null);
+      
+      // Notify other tabs about auth clear
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('authEvent', {
+          detail: { type: 'auth_clear' }
+        }));
+      }
     } catch (error) {
       console.error('Error during logout:', error);
     }
@@ -186,6 +233,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         
         setTokens(newTokens);
+        
+        // Notify other tabs about token refresh
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('authEvent', {
+            detail: { type: 'auth_update' }
+          }));
+        }
+        
         return true;
       }
       

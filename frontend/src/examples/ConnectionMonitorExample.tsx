@@ -36,7 +36,7 @@ export const ConnectionMonitorExample: React.FC = () => {
       console.log(`Estimated load time: ${estimatedTime}ms`);
 
       // Simulate API call with adaptive timeout based on connection
-      const timeout = connectionQuality === 'poor' ? 10000 : 5000;
+      const timeout = connectionQuality === 'poor' ? 30000 : 15000;
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);

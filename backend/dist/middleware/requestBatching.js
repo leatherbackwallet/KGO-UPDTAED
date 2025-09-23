@@ -50,15 +50,19 @@ const generateRequestSignature = (req) => {
         .digest('hex');
     return signature;
 };
-// Request deduplication middleware
+// User-aware request deduplication middleware
 const deduplicateRequests = () => {
     return (req, res, next) => {
         // Only deduplicate GET requests
         if (req.method !== 'GET') {
             return next();
         }
-        const signature = generateRequestSignature(req);
-        // Check if identical request is already pending
+        // Generate user-aware signature
+        const userId = req.user?.id || 'anonymous';
+        const userRole = req.user?.roleName || 'guest';
+        const baseSignature = generateRequestSignature(req);
+        const signature = `${baseSignature}:user:${userId}:role:${userRole}`;
+        // Check if identical request is already pending for this user
         if (pendingRequests.has(signature)) {
             const pendingRequest = pendingRequests.get(signature);
             if (pendingRequest) {

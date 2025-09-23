@@ -15,7 +15,7 @@ dotenv.config();
 
 const app = express();
 
-// CORS Configuration
+// CORS Configuration - Fixed for internet access
 const corsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     const allowedOrigins = [
@@ -24,13 +24,8 @@ const corsOptions = {
       'http://localhost:3001',
       'http://localhost:3002',
       'http://localhost:3003',
-      'https://onyourbehlf.uc.r.appspot.com',
-      'https://keralgiftsonline.in',
-      'https://keralagiftsonline.in',
-      'https://www.keralgiftsonline.in',
-      'https://www.keralagiftsonline.in',
-      'https://keralagiftsonline.in',
-      'https://www.keralagiftsonline.in'
+      'https://onyourbehlf.uc.r.appspot.com'
+      // Removed incorrect keralagiftsonline.in domains that were blocking internet users
     ];
     
     // Allow requests with no origin (mobile apps, curl, etc.)

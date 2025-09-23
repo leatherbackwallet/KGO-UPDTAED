@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const index_1 = require("../models/index");
 const database_1 = require("../middleware/database");
 const auth_1 = require("../middleware/auth");
@@ -49,188 +50,236 @@ const role_1 = require("../middleware/role");
 const comboUtils_1 = require("../utils/comboUtils");
 const notificationService_1 = require("../services/notificationService");
 const router = express_1.default.Router();
-// Create order (customer)
+// Create order (customer) - WITH TRANSACTION SUPPORT
 router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
+    const session = await mongoose_1.default.startSession();
     try {
-        const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod } = req.body;
-        // Use recipientAddress if provided, otherwise fall back to other address formats
-        const address = recipientAddress || deliveryAddress || shippingAddress;
-        if (!address) {
+        await session.withTransaction(async () => {
+            const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod } = req.body;
+            // Use recipientAddress if provided, otherwise fall back to other address formats
+            const address = recipientAddress || deliveryAddress || shippingAddress;
+            if (!address) {
+                throw new Error('MISSING_ADDRESS');
+            }
+            // Calculate total and prepare order items with stock validation
+            let totalPrice = 0;
+            const orderItems = [];
+            const productUpdates = [];
+            for (const item of products) {
+                // Use findById with session for transaction consistency
+                const product = await index_1.Product.findById(item.product).session(session);
+                if (!product) {
+                    throw new Error('PRODUCT_NOT_FOUND');
+                }
+                // Check stock availability with atomic operation
+                if (product.stock < item.quantity) {
+                    throw new Error(`INSUFFICIENT_STOCK:${product.name}`);
+                }
+                let itemPrice;
+                let orderItemData = {
+                    productId: item.product,
+                    quantity: item.quantity,
+                    isCombo: false,
+                    comboBasePrice: 0,
+                    comboItemConfigurations: []
+                };
+                // Handle combo products
+                if (product.isCombo && item.isCombo) {
+                    // Validate combo configuration
+                    if (!item.comboItemConfigurations || !Array.isArray(item.comboItemConfigurations)) {
+                        throw new Error(`MISSING_COMBO_CONFIG:${product.name}`);
+                    }
+                    // Validate combo base price matches
+                    if (item.comboBasePrice !== product.comboBasePrice) {
+                        throw new Error(`COMBO_PRICE_MISMATCH:${product.name}`);
+                    }
+                    // Recalculate combo price server-side
+                    itemPrice = (0, comboUtils_1.calculateComboPrice)(product.comboBasePrice || 0, item.comboItemConfigurations);
+                    // Store combo configuration
+                    orderItemData.isCombo = true;
+                    orderItemData.comboBasePrice = product.comboBasePrice || 0;
+                    orderItemData.comboItemConfigurations = item.comboItemConfigurations;
+                    orderItemData.price = itemPrice;
+                }
+                else if (product.isCombo && !item.isCombo) {
+                    // Combo product but not sent as combo - use base price
+                    itemPrice = product.comboBasePrice || 0;
+                    orderItemData.price = itemPrice;
+                }
+                else {
+                    // Regular product
+                    itemPrice = product.price;
+                    orderItemData.price = itemPrice;
+                }
+                const itemTotal = itemPrice * item.quantity;
+                totalPrice += itemTotal;
+                orderItems.push(orderItemData);
+                // Prepare stock update for transaction
+                productUpdates.push({
+                    productId: product._id,
+                    quantity: item.quantity,
+                    currentStock: product.stock
+                });
+            }
+            // Prepare shipping details - handle both new recipientAddress format and legacy formats
+            const shippingDetails = {
+                recipientName: address.name || `${req.user.firstName} ${req.user.lastName}`,
+                recipientPhone: address.phone || req.user.phone,
+                address: {
+                    streetName: address.address?.streetName || address.street || address.streetName,
+                    houseNumber: address.address?.houseNumber || address.houseNumber || '',
+                    postalCode: address.address?.postalCode || address.postalCode || address.zipCode,
+                    city: address.address?.city || address.city,
+                    countryCode: address.address?.countryCode || address.countryCode || address.country || 'DE'
+                },
+                specialInstructions: address.additionalInstructions || address.specialInstructions || ''
+            };
+            // Update product stock atomically within transaction
+            for (const update of productUpdates) {
+                await index_1.Product.findByIdAndUpdate(update.productId, { $inc: { stock: -update.quantity } }, { session });
+            }
+            // Handle COD payment method
+            if (paymentMethod === 'cod-test' || paymentMethod === 'cod') {
+                // Create COD order with specific status and payment details
+                const order = await index_1.Order.create([{
+                        userId: req.user.id,
+                        requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+                        shippingDetails,
+                        orderItems,
+                        totalPrice,
+                        orderStatus: 'payment_done', // COD orders are considered paid
+                        paymentStatus: 'captured', // COD is considered captured
+                        paymentMethod: paymentMethod === 'cod-test' ? 'cod-test' : 'cod',
+                        paymentGateway: 'cod',
+                        paymentDate: new Date(),
+                        paymentVerifiedAt: new Date(),
+                        statusHistory: [{
+                                status: 'payment_done',
+                                timestamp: new Date(),
+                                notes: 'COD order created - payment will be collected on delivery'
+                            }]
+                    }], { session });
+                const createdOrder = order[0];
+                // Create notification for admin users about new order (outside transaction)
+                setImmediate(async () => {
+                    try {
+                        await notificationService_1.NotificationService.createNewOrderNotification({
+                            orderId: createdOrder.orderId,
+                            customerName: shippingDetails.recipientName,
+                            totalPrice: createdOrder.totalPrice,
+                            orderStatus: createdOrder.orderStatus
+                        });
+                    }
+                    catch (notificationError) {
+                        console.error('Error creating notification for new order:', notificationError);
+                    }
+                });
+                return res.status(201).json({
+                    success: true,
+                    data: {
+                        message: 'COD order created successfully',
+                        order: {
+                            id: createdOrder._id,
+                            orderId: createdOrder.orderId,
+                            totalPrice: createdOrder.totalPrice,
+                            orderStatus: createdOrder.orderStatus,
+                            paymentMethod: 'cod-test'
+                        }
+                    }
+                });
+            }
+            // Create regular order (Razorpay)
+            const order = await index_1.Order.create([{
+                    userId: req.user.id,
+                    requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+                    shippingDetails,
+                    orderItems,
+                    totalPrice,
+                    orderStatus: 'payment_done',
+                    statusHistory: [{
+                            status: 'payment_done',
+                            timestamp: new Date(),
+                            notes: 'Order created and payment received'
+                        }]
+                }], { session });
+            const createdOrder = order[0];
+            // Create notification for admin users about new order (outside transaction)
+            setImmediate(async () => {
+                try {
+                    await notificationService_1.NotificationService.createNewOrderNotification({
+                        orderId: createdOrder.orderId,
+                        customerName: shippingDetails.recipientName,
+                        totalPrice: createdOrder.totalPrice,
+                        orderStatus: createdOrder.orderStatus
+                    });
+                }
+                catch (notificationError) {
+                    console.error('Error creating notification for new order:', notificationError);
+                }
+            });
+            return res.status(201).json({
+                success: true,
+                data: {
+                    message: 'Order created successfully',
+                    order: {
+                        id: createdOrder._id,
+                        orderId: createdOrder.orderId,
+                        totalPrice: createdOrder.totalPrice,
+                        orderStatus: createdOrder.orderStatus
+                    }
+                }
+            });
+        });
+    }
+    catch (err) {
+        console.error('Order creation error:', err);
+        // Handle specific error types
+        if (err.message === 'MISSING_ADDRESS') {
             return res.status(400).json({
                 success: false,
                 error: { message: 'Recipient address is required', code: 'MISSING_ADDRESS' }
             });
         }
-        // Calculate total and prepare order items
-        let totalPrice = 0;
-        const orderItems = [];
-        for (const item of products) {
-            const product = await index_1.Product.findById(item.product);
-            if (!product) {
-                return res.status(400).json({
-                    success: false,
-                    error: { message: 'Product not found', code: 'PRODUCT_NOT_FOUND' }
-                });
-            }
-            let itemPrice;
-            let orderItemData = {
-                productId: item.product,
-                quantity: item.quantity,
-                isCombo: false,
-                comboBasePrice: 0,
-                comboItemConfigurations: []
-            };
-            // Handle combo products
-            if (product.isCombo && item.isCombo) {
-                // Validate combo configuration
-                if (!item.comboItemConfigurations || !Array.isArray(item.comboItemConfigurations)) {
-                    return res.status(400).json({
-                        success: false,
-                        error: {
-                            message: `Combo product ${product.name} requires comboItemConfigurations`,
-                            code: 'MISSING_COMBO_CONFIG'
-                        }
-                    });
-                }
-                // Validate combo base price matches
-                if (item.comboBasePrice !== product.comboBasePrice) {
-                    return res.status(400).json({
-                        success: false,
-                        error: {
-                            message: `Combo base price mismatch for product ${product.name}`,
-                            code: 'COMBO_PRICE_MISMATCH'
-                        }
-                    });
-                }
-                // Recalculate combo price server-side
-                itemPrice = (0, comboUtils_1.calculateComboPrice)(product.comboBasePrice || 0, item.comboItemConfigurations);
-                // Store combo configuration
-                orderItemData.isCombo = true;
-                orderItemData.comboBasePrice = product.comboBasePrice || 0;
-                orderItemData.comboItemConfigurations = item.comboItemConfigurations;
-                orderItemData.price = itemPrice;
-            }
-            else if (product.isCombo && !item.isCombo) {
-                // Combo product but not sent as combo - use base price
-                itemPrice = product.comboBasePrice || 0;
-                orderItemData.price = itemPrice;
-            }
-            else {
-                // Regular product
-                itemPrice = product.price;
-                orderItemData.price = itemPrice;
-            }
-            const itemTotal = itemPrice * item.quantity;
-            totalPrice += itemTotal;
-            orderItems.push(orderItemData);
-        }
-        // Prepare shipping details - handle both new recipientAddress format and legacy formats
-        const shippingDetails = {
-            recipientName: address.name || `${req.user.firstName} ${req.user.lastName}`,
-            recipientPhone: address.phone || req.user.phone,
-            address: {
-                streetName: address.address?.streetName || address.street || address.streetName,
-                houseNumber: address.address?.houseNumber || address.houseNumber || '',
-                postalCode: address.address?.postalCode || address.postalCode || address.zipCode,
-                city: address.address?.city || address.city,
-                countryCode: address.address?.countryCode || address.countryCode || address.country || 'DE'
-            },
-            specialInstructions: address.additionalInstructions || address.specialInstructions || ''
-        };
-        // Handle COD payment method
-        if (paymentMethod === 'cod-test' || paymentMethod === 'cod') {
-            // Create COD order with specific status and payment details
-            const order = await index_1.Order.create({
-                userId: req.user.id,
-                requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-                shippingDetails,
-                orderItems,
-                totalPrice,
-                orderStatus: 'payment_done', // COD orders are considered paid
-                paymentStatus: 'captured', // COD is considered captured
-                paymentMethod: paymentMethod === 'cod-test' ? 'cod-test' : 'cod',
-                paymentGateway: 'cod',
-                paymentDate: new Date(),
-                paymentVerifiedAt: new Date(),
-                statusHistory: [{
-                        status: 'payment_done',
-                        timestamp: new Date(),
-                        notes: 'COD order created - payment will be collected on delivery'
-                    }]
+        if (err.message === 'PRODUCT_NOT_FOUND') {
+            return res.status(400).json({
+                success: false,
+                error: { message: 'Product not found', code: 'PRODUCT_NOT_FOUND' }
             });
-            // Create notification for admin users about new order
-            try {
-                await notificationService_1.NotificationService.createNewOrderNotification({
-                    orderId: order.orderId,
-                    customerName: shippingDetails.recipientName,
-                    totalPrice: order.totalPrice,
-                    orderStatus: order.orderStatus
-                });
-            }
-            catch (notificationError) {
-                console.error('Error creating notification for new order:', notificationError);
-                // Don't fail the order creation if notification fails
-            }
-            return res.status(201).json({
-                success: true,
-                data: {
-                    message: 'COD order created successfully',
-                    order: {
-                        id: order._id,
-                        orderId: order.orderId,
-                        totalPrice: order.totalPrice,
-                        orderStatus: order.orderStatus,
-                        paymentMethod: 'cod-test'
-                    }
+        }
+        if (err.message.startsWith('INSUFFICIENT_STOCK:')) {
+            const productName = err.message.split(':')[1];
+            return res.status(400).json({
+                success: false,
+                error: { message: `Insufficient stock for product ${productName}`, code: 'INSUFFICIENT_STOCK' }
+            });
+        }
+        if (err.message.startsWith('MISSING_COMBO_CONFIG:')) {
+            const productName = err.message.split(':')[1];
+            return res.status(400).json({
+                success: false,
+                error: {
+                    message: `Combo product ${productName} requires comboItemConfigurations`,
+                    code: 'MISSING_COMBO_CONFIG'
                 }
             });
         }
-        // Create regular order (Razorpay)
-        const order = await index_1.Order.create({
-            userId: req.user.id,
-            requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-            shippingDetails,
-            orderItems,
-            totalPrice,
-            orderStatus: 'payment_done',
-            statusHistory: [{
-                    status: 'payment_done',
-                    timestamp: new Date(),
-                    notes: 'Order created and payment received'
-                }]
-        });
-        // Create notification for admin users about new order
-        try {
-            await notificationService_1.NotificationService.createNewOrderNotification({
-                orderId: order.orderId,
-                customerName: shippingDetails.recipientName,
-                totalPrice: order.totalPrice,
-                orderStatus: order.orderStatus
+        if (err.message.startsWith('COMBO_PRICE_MISMATCH:')) {
+            const productName = err.message.split(':')[1];
+            return res.status(400).json({
+                success: false,
+                error: {
+                    message: `Combo base price mismatch for product ${productName}`,
+                    code: 'COMBO_PRICE_MISMATCH'
+                }
             });
         }
-        catch (notificationError) {
-            console.error('Error creating notification for new order:', notificationError);
-            // Don't fail the order creation if notification fails
-        }
-        return res.status(201).json({
-            success: true,
-            data: {
-                message: 'Order created successfully',
-                order: {
-                    id: order._id,
-                    orderId: order.orderId,
-                    totalPrice: order.totalPrice,
-                    orderStatus: order.orderStatus
-                }
-            }
-        });
-    }
-    catch (err) {
-        console.error('Order creation error:', err);
         return res.status(500).json({
             success: false,
             error: { message: 'Server error', code: 'SERVER_ERROR' }
         });
+    }
+    finally {
+        await session.endSession();
     }
 });
 // Get my orders (customer)

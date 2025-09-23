@@ -25,10 +25,10 @@ env_variables:
   CLOUDINARY_API_SECRET: "fQBjh1m4rF9ztey7u4FANZQUNhQ"
   
   # CORS Configuration - Allow production frontend
-  CORS_ORIGIN: "https://keralagiftsonline.in"
+  CORS_ORIGIN: "https://onyourbehlf.uc.r.appspot.com"
   
   # Frontend URL
-  FRONTEND_URL: "https://keralagiftsonline.in"
+  FRONTEND_URL: "https://onyourbehlf.uc.r.appspot.com"
   
   # API URL
   API_URL: "https://api-dot-onyourbehlf.uc.r.appspot.com"
@@ -46,29 +46,29 @@ env_variables:
 # Add health check configuration
 readiness_check:
   path: "/api/health"
-  check_interval_sec: 5
-  timeout_sec: 4
-  failure_threshold: 2
+  check_interval_sec: 10
+  timeout_sec: 8
+  failure_threshold: 3
   success_threshold: 2
-  app_start_timeout_sec: 300
+  app_start_timeout_sec: 600
 
 liveness_check:
   path: "/api/health"
-  check_interval_sec: 30
-  timeout_sec: 4
-  failure_threshold: 2
+  check_interval_sec: 60
+  timeout_sec: 10
+  failure_threshold: 3
   success_threshold: 2
 
 automatic_scaling:
-  target_cpu_utilization: 0.65
-  min_instances: 1
-  max_instances: 10
-  target_throughput_utilization: 0.6
+  target_cpu_utilization: 0.5
+  min_instances: 2
+  max_instances: 20
+  target_throughput_utilization: 0.4
 
 resources:
-  cpu: 1
-  memory_gb: 2
-  disk_size_gb: 10
+  cpu: 2
+  memory_gb: 4
+  disk_size_gb: 20
 
 handlers:
   - url: /.*

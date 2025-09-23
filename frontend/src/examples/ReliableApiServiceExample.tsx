@@ -30,7 +30,7 @@ const ReliableApiServiceExample: React.FC = () => {
       const response = await reliableApi.get('/products', {
         cacheStrategy,
         retries: 3,
-        timeout: 10000,
+        timeout: 30000,
         cacheTTL: 300000 // 5 minutes
       });
 

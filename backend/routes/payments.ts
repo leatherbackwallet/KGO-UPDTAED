@@ -6,11 +6,13 @@
 
 import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
+import mongoose from 'mongoose';
 import paymentService from '../services/payment.service';
 import { Order, Product } from '../models/index';
 import { ensureDatabaseConnection } from '../middleware/database';
 import { auth } from '../middleware/auth';
 import { calculateComboPrice } from '../utils/comboUtils';
+import stockService from '../services/stockService';
 
 const router = express.Router();
 
@@ -42,56 +44,57 @@ const validatePaymentVerification = [
 ];
 
 router.post('/create-order', auth, ensureDatabaseConnection, validatePaymentOrder, async (req: Request, res: Response): Promise<void> => {
+    const session = await mongoose.startSession();
+    
     try {
-        console.log('🔍 [Payment Route] Create order request received');
-        console.log('🔍 [Payment Route] Request body:', JSON.stringify(req.body, null, 2));
-        
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            console.log('❌ [Payment Route] Validation errors:', errors.array());
-            res.status(400).json({
-                success: false,
-                error: {
-                    message: 'Validation failed',
-                    code: 'VALIDATION_ERROR',
-                    details: errors.array()
+        await session.withTransaction(async () => {
+            console.log('🔍 [Payment Route] Create order request received');
+            console.log('🔍 [Payment Route] Request body:', JSON.stringify(req.body, null, 2));
+            
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                console.log('❌ [Payment Route] Validation errors:', errors.array());
+                throw new Error('VALIDATION_ERROR');
+            }
+
+            const { products, recipientAddress, orderNotes } = req.body;
+            const userId = (req as any).user.id;
+            console.log('🔍 [Payment Route] User ID:', userId);
+            console.log('🔍 [Payment Route] Products:', products);
+
+            // Check stock availability using stock service
+            const stockCheck = await stockService.checkStockAvailability(products, session);
+            
+            if (!stockCheck.available) {
+                const errorMessage = stockCheck.results
+                    .filter(r => !r.available)
+                    .map(r => `${r.productName}: ${r.currentStock} available, ${r.requestedQuantity} requested`)
+                    .join('; ');
+                throw new Error(`INSUFFICIENT_STOCK:${errorMessage}`);
+            }
+
+            // Reserve stock for this order
+            const sessionId = `payment_${Date.now()}_${userId}`;
+            const reservationResult = await stockService.reserveStock(
+                products,
+                userId,
+                sessionId,
+                session
+            );
+
+            if (!reservationResult.success) {
+                throw new Error(`STOCK_RESERVATION_FAILED:${reservationResult.errors.join('; ')}`);
+            }
+
+            // Calculate total amount
+            let totalAmount = 0;
+            const orderItems = [];
+
+            for (const item of products) {
+                const product = await Product.findById(item.product).session(session);
+                if (!product) {
+                    throw new Error(`PRODUCT_NOT_FOUND:${item.product}`);
                 }
-            });
-            return;
-        }
-
-        const { products, recipientAddress, orderNotes } = req.body;
-        const userId = (req as any).user.id;
-        console.log('🔍 [Payment Route] User ID:', userId);
-        console.log('🔍 [Payment Route] Products:', products);
-
-        // Calculate total amount
-        let totalAmount = 0;
-        const orderItems = [];
-
-        for (const item of products) {
-            const product = await Product.findById(item.product);
-            if (!product) {
-                res.status(400).json({
-                    success: false,
-                    error: {
-                        message: `Product with ID ${item.product} not found`,
-                        code: 'PRODUCT_NOT_FOUND'
-                    }
-                });
-                return;
-            }
-
-            if (product.stock < item.quantity) {
-                res.status(400).json({
-                    success: false,
-                    error: {
-                        message: `Insufficient stock for product ${product.name}`,
-                        code: 'INSUFFICIENT_STOCK'
-                    }
-                });
-                return;
-            }
 
             let itemTotal: number;
             let itemPrice: number;
@@ -182,19 +185,72 @@ router.post('/create-order', auth, ensureDatabaseConnection, validatePaymentOrde
 
         await order.save();
 
-        res.status(200).json({
-            success: true,
-            data: {
-                order_id: razorpayOrder.id, // Match Google's naming convention
-                orderId: order._id,
-                razorpayOrderId: razorpayOrder.id,
-                amount: totalAmount,
-                currency: 'INR',
-                key: process.env.RAZORPAY_KEY_ID
-            }
+            res.status(200).json({
+                success: true,
+                data: {
+                    order_id: razorpayOrder.id, // Match Google's naming convention
+                    orderId: order._id,
+                    razorpayOrderId: razorpayOrder.id,
+                    amount: totalAmount,
+                    currency: 'INR',
+                    key: process.env.RAZORPAY_KEY_ID,
+                    stockReservations: reservationResult.reservations // Include reservation info
+                }
+            });
         });
     } catch (error: any) {
         console.error('Error creating payment order:', error);
+        
+        // Handle specific error types
+        if (error.message === 'VALIDATION_ERROR') {
+            const errors = validationResult(req);
+            res.status(400).json({
+                success: false,
+                error: {
+                    message: 'Validation failed',
+                    code: 'VALIDATION_ERROR',
+                    details: errors.array()
+                }
+            });
+            return;
+        }
+        
+        if (error.message.startsWith('INSUFFICIENT_STOCK:')) {
+            const stockMessage = error.message.split(':')[1];
+            res.status(400).json({
+                success: false,
+                error: {
+                    message: `Insufficient stock: ${stockMessage}`,
+                    code: 'INSUFFICIENT_STOCK'
+                }
+            });
+            return;
+        }
+        
+        if (error.message.startsWith('STOCK_RESERVATION_FAILED:')) {
+            const reservationMessage = error.message.split(':')[1];
+            res.status(400).json({
+                success: false,
+                error: {
+                    message: `Stock reservation failed: ${reservationMessage}`,
+                    code: 'STOCK_RESERVATION_FAILED'
+                }
+            });
+            return;
+        }
+        
+        if (error.message.startsWith('PRODUCT_NOT_FOUND:')) {
+            const productId = error.message.split(':')[1];
+            res.status(400).json({
+                success: false,
+                error: {
+                    message: `Product with ID ${productId} not found`,
+                    code: 'PRODUCT_NOT_FOUND'
+                }
+            });
+            return;
+        }
+        
         res.status(500).json({
             success: false,
             error: {
@@ -202,6 +258,8 @@ router.post('/create-order', auth, ensureDatabaseConnection, validatePaymentOrde
                 code: 'PAYMENT_ORDER_ERROR'
             }
         });
+    } finally {
+        await session.endSession();
     }
 });
 

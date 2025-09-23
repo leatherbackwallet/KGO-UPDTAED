@@ -8,6 +8,7 @@ import { useRouter } from 'next/router';
 import { Product, ComboItem } from '../types/product';
 import { getProductImage, getOptimizedImagePath, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import FileUpload from './FileUpload';
+import AdminLayout from './AdminLayout';
 
 interface Category {
   _id: string;
@@ -67,7 +68,7 @@ const AdminProducts: React.FC = () => {
   // Combo product state
   const [comboItems, setComboItems] = useState<ComboItem[]>([]);
 
-  // Preload all product images
+  // Preload all product images with better error handling
   useEffect(() => {
     const preloadImages = async () => {
       const newCache = new Map<string, string>();
@@ -77,16 +78,24 @@ const AdminProducts: React.FC = () => {
         if (imagePath) {
           try {
             const imageUrl = getProductImage(imagePath, product.slug);
-            // Preload the image
-            await new Promise<string>((resolve, reject) => {
+            
+            // Only preload if it's not a default image
+            if (imageUrl !== DEFAULT_PRODUCT_IMAGE) {
+              // Try to preload the image silently
               const img = new Image();
-              img.onload = () => resolve(imageUrl);
-              img.onerror = () => reject(new Error('Failed to load image'));
+              img.onload = () => {
+                newCache.set(product._id, imageUrl);
+              };
+              img.onerror = () => {
+                // Silently fall back to default image without console errors
+                newCache.set(product._id, DEFAULT_PRODUCT_IMAGE);
+              };
               img.src = imageUrl;
-            });
-            newCache.set(product._id, imageUrl);
+            } else {
+              newCache.set(product._id, DEFAULT_PRODUCT_IMAGE);
+            }
           } catch (err) {
-            console.warn(`Failed to preload image for product ${product._id}:`, err);
+            // Silently handle errors and use default image
             newCache.set(product._id, DEFAULT_PRODUCT_IMAGE);
           }
         } else {
@@ -485,8 +494,10 @@ const AdminProducts: React.FC = () => {
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
-    console.error('Image failed to load:', target.src);
-    target.src = DEFAULT_PRODUCT_IMAGE;
+    // Silently handle image errors without console spam
+    if (target.src !== DEFAULT_PRODUCT_IMAGE) {
+      target.src = DEFAULT_PRODUCT_IMAGE;
+    }
   };
 
   const handleImageUploadSuccess = (fileData: { public_id?: string; filename: string; url: string; originalName: string }) => {
@@ -626,7 +637,7 @@ const AdminProducts: React.FC = () => {
   return (
     <div className="flex gap-6">
       {/* Left Sidebar - CRUD Operations */}
-      <div className="w-80 flex-shrink-0">
+      <div className="w-72 flex-shrink-0">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Management</h3>
           
@@ -881,25 +892,25 @@ const AdminProducts: React.FC = () => {
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">
                   Product
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                   Categories
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                   Occasions
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                   Price
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                   Stock
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                   Status
                 </th>
               </tr>
@@ -929,19 +940,19 @@ const AdminProducts: React.FC = () => {
                     }}
                     title={isDisabled ? 'Product is being processed' : isSelected ? 'Click to deselect' : 'Click to select this product'}
                   >
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       <div className="flex items-start">
-                        <div className="flex-shrink-0 h-12 w-12">
+                        <div className="flex-shrink-0 h-10 w-10">
                           <img
-                            className="h-12 w-12 rounded-lg object-cover"
+                            className="h-10 w-10 rounded-lg object-cover"
                             src={imageUrl}
                             alt={getMultilingualText(product.name)}
                             onError={handleImageError}
                             style={{ opacity: 1 }} // No opacity change needed for preloaded images
                           />
                         </div>
-                        <div className="ml-4 min-w-0 flex-1">
-                          <div className="text-sm font-medium text-gray-900 mb-1">
+                        <div className="ml-3 min-w-0 flex-1">
+                          <div className="text-sm font-medium text-gray-900 mb-1 truncate">
                             {getMultilingualText(product.name)}
                           </div>
                           <div className="text-xs text-gray-500 break-words whitespace-normal leading-relaxed max-w-xs">
@@ -950,23 +961,23 @@ const AdminProducts: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-4 py-4 text-sm text-gray-900">
                       <div className="max-w-xs">
                         {getCategoryNames(product.categories || [])}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-4 py-4 text-sm text-gray-900">
                       <div className="max-w-xs">
                         {getOccasionNames(product.occasions || [])}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-4 py-4 text-sm text-gray-900">
                       ₹{product.price?.toFixed(2) || '0.00'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-4 py-4 text-sm text-gray-900">
                       {product.stock || 0}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         product.isFeatured 
                           ? 'bg-yellow-100 text-yellow-800' 
@@ -979,7 +990,7 @@ const AdminProducts: React.FC = () => {
                 );
               }) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-4 text-center text-gray-500">
                     No products found
                   </td>
                 </tr>

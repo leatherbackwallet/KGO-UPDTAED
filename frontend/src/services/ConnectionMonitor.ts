@@ -100,7 +100,7 @@ export class ConnectionMonitor {
       const response = await fetch(testUrl, {
         method: 'HEAD',
         cache: 'no-cache',
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(10000) // 10 second timeout
       });
 
       const endTime = performance.now();
