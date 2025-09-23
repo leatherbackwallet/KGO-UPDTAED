@@ -60,10 +60,11 @@ liveness_check:
   success_threshold: 2
 
 automatic_scaling:
-  target_cpu_utilization: 0.5
-  min_instances: 2
-  max_instances: 20
-  target_throughput_utilization: 0.4
+  min_num_instances: 2
+  max_num_instances: 20
+  cool_down_period_sec: 120
+  cpu_utilization:
+    target_utilization: 0.5
 
 resources:
   cpu: 2
