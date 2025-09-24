@@ -53,8 +53,10 @@ const router = express_1.default.Router();
 // Get all products with SMART caching (re-enabled with proper invalidation)
 router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
-        // Removed excessive debug logging for better performance
-        const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false, admin = false } = req.query;
+        // Debug pagination parameters
+        console.log('🔍 Request query params:', req.query);
+        const { category, min, max, search, featured, occasions, page = 1, limit = 24, includeDeleted = false, admin = false } = req.query;
+        console.log('📄 Parsed pagination:', { page: Number(page), limit: Number(limit) });
         // For admin requests, use a high limit to get all products
         const effectiveLimit = admin === 'true' ? 1000 : Number(limit);
         let filter = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
@@ -126,6 +128,7 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
             ];
         }
         const skip = (Number(page) - 1) * effectiveLimit;
+        console.log('⏭️ Skip calculation:', { page: Number(page), effectiveLimit, skip });
         // Optimize: Select only needed fields for better performance
         let query = products_model_1.Product.find(filter)
             .select('name description price stock images isFeatured categories vendors occasions createdAt updatedAt')
@@ -319,7 +322,7 @@ router.get('/featured/list', database_1.ensureDatabaseConnection, async (req, re
 // Search products
 router.get('/search/query', database_1.ensureDatabaseConnection, async (req, res) => {
     try {
-        const { q, category, min, max, page = 1, limit = 20 } = req.query;
+        const { q, category, min, max, page = 1, limit = 24 } = req.query;
         if (!q) {
             res.status(400).json({ success: false, error: 'Search query is required' });
             return;

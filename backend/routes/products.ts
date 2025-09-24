@@ -25,9 +25,12 @@ const router = express.Router();
 // Get all products with SMART caching (re-enabled with proper invalidation)
 router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Request, res: Response): Promise<void> => {
   try {
-    // Removed excessive debug logging for better performance
+    // Debug pagination parameters
+    console.log('🔍 Request query params:', req.query);
     
-    const { category, min, max, search, featured, occasions, page = 1, limit = 20, includeDeleted = false, admin = false } = req.query;
+    const { category, min, max, search, featured, occasions, page = 1, limit = 24, includeDeleted = false, admin = false } = req.query;
+    
+    console.log('📄 Parsed pagination:', { page: Number(page), limit: Number(limit) });
     
     // For admin requests, use a high limit to get all products
     const effectiveLimit = admin === 'true' ? 1000 : Number(limit);
@@ -101,6 +104,7 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
     }
 
     const skip = (Number(page) - 1) * effectiveLimit;
+    console.log('⏭️ Skip calculation:', { page: Number(page), effectiveLimit, skip });
     
     // Optimize: Select only needed fields for better performance
     let query = Product.find(filter)
@@ -317,7 +321,7 @@ router.get('/featured/list', ensureDatabaseConnection, async (req: Request, res:
 // Search products
 router.get('/search/query', ensureDatabaseConnection, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { q, category, min, max, page = 1, limit = 20 } = req.query;
+    const { q, category, min, max, page = 1, limit = 24 } = req.query;
     
     if (!q) {
       res.status(400).json({ success: false, error: 'Search query is required' });

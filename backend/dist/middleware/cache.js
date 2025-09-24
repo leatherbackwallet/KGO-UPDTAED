@@ -118,13 +118,13 @@ const createCacheMiddleware = (ttl = 300, keyGenerator = null, options = {}) => 
 exports.createCacheMiddleware = createCacheMiddleware;
 // Specific cache configurations with enhanced headers
 exports.cacheConfigs = {
-    // Product listings - cache for 5 minutes with ETag support
-    products: (0, exports.createCacheMiddleware)(300, (req) => {
-        const { search, category, min, max, occasions, featured } = req.query;
-        return `products:${search || ''}:${category || ''}:${min || ''}:${max || ''}:${occasions || ''}:${featured || ''}`;
+    // Product listings - cache for 3 minutes with ETag support (optimized)
+    products: (0, exports.createCacheMiddleware)(180, (req) => {
+        const { search, category, min, max, occasions, featured, page, limit } = req.query;
+        return `products:${search || ''}:${category || ''}:${min || ''}:${max || ''}:${occasions || ''}:${featured || ''}:${page || 1}:${limit || 24}`;
     }, {
         enableETag: true,
-        cacheControl: 'public, max-age=300, stale-while-revalidate=60',
+        cacheControl: 'public, max-age=180, stale-while-revalidate=60',
         staleWhileRevalidate: true
     }),
     // Single product - cache for 10 minutes with ETag

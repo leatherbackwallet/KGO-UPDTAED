@@ -119,7 +119,7 @@ const ProductsPage: React.FC = () => {
       
       // Add pagination parameters
       params.append('page', currentPage.toString());
-      params.append('limit', '20'); // Show 20 products per page for better performance
+      params.append('limit', '24'); // Show 24 products per page for optimal UX
       
       // Add cache busting parameter
       params.append('_t', Date.now().toString());
@@ -147,13 +147,17 @@ const ProductsPage: React.FC = () => {
       const paginationInfo = response.data;
       setTotalProducts(paginationInfo.total || productsData.length);
       setTotalPages(paginationInfo.pages || 1);
-      setAllProductsLoaded(paginationInfo.allProductsLoaded || false);
+      
+      // FIXED: Use backend's allProductsLoaded flag instead of overriding it
+      const backendAllProductsLoaded = paginationInfo.allProductsLoaded || false;
+      setAllProductsLoaded(backendAllProductsLoaded);
       
       console.log('📊 Pagination Info:', {
         total: paginationInfo.total,
         pages: paginationInfo.pages,
         currentPage: paginationInfo.page,
-        allProductsLoaded: paginationInfo.allProductsLoaded
+        allProductsLoaded: backendAllProductsLoaded,
+        productsCount: productsData.length
       });
       
       // Validate products data with detailed logging
@@ -180,9 +184,6 @@ const ProductsPage: React.FC = () => {
       if (!initialLoadComplete) {
         setInitialLoadComplete(true);
       }
-      
-      // Set all products loaded flag
-      setAllProductsLoaded(validProducts.length > 0);
       
       // Professional image preloading for all products
       if (validProducts.length > 0) {
@@ -220,7 +221,10 @@ const ProductsPage: React.FC = () => {
 
   // Handle page changes
   const handlePageChange = useCallback((page: number) => {
+    console.log(`📄 Changing to page ${page}`);
     setCurrentPage(page);
+    // Trigger scroll to top for better UX
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   // Reset pagination when filters change
@@ -491,10 +495,10 @@ const ProductsPage: React.FC = () => {
                   <div className="inline-flex items-center px-4 py-2 bg-gray-50 rounded-full text-gray-600 text-sm">
                     {allProductsLoaded ? `Showing all ${products.length} products` : `Showing ${products.length} of ${totalProducts} products`}
                   </div>
-                  {totalProducts > 20 && !allProductsLoaded && (
+                  {totalProducts > 24 && !allProductsLoaded && (
                     <div className="mt-2">
                       <span className="inline-flex items-center px-2 py-1 text-xs text-green-600 bg-green-50 rounded-full">
-                        ⚡ Optimized for faster loading
+                        ⚡ 24 products per page for optimal performance
                       </span>
                     </div>
                   )}
