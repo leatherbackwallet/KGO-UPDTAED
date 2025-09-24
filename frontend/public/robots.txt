@@ -11,7 +11,6 @@ Disallow: /_next/
 Disallow: /test-api
 Disallow: /debug
 Disallow: /checkout/
-Disallow: /profile/
 Disallow: /orders/
 Disallow: /*?*utm_*
 Disallow: /*?*fbclid=*
@@ -23,10 +22,6 @@ Allow: /product/
 Allow: /about
 Allow: /contact
 Allow: /content
-Allow: /login
-Allow: /register
-Allow: /cart
-Allow: /wishlist
 Allow: /privacy
 Allow: /terms
 

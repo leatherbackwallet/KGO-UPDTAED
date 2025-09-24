@@ -77,7 +77,7 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <Link href="/items" className="nav-link font-semibold">
-              Browse Items
+              Products
             </Link>
             <Link href="/categories" className="nav-link">
               Categories
@@ -196,7 +196,7 @@ export default function Navbar() {
               <div className="flex flex-col space-y-4">
                 {/* Main Navigation Links */}
                 <Link href="/items" className="text-gray-700 hover:text-purple-600 transition-colors font-semibold">
-                  Browse Items
+                  Products
                 </Link>
                 <Link href="/content" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">
                   Cultural Content

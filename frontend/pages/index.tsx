@@ -191,7 +191,7 @@ export default function Home() {
                 href="/items"
                 className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white border-2 border-white rounded-full hover:bg-white hover:text-green-900 transition-all duration-300 transform hover:scale-105"
               >
-                Browse Items
+                Products
               </Link>
             </div>
 

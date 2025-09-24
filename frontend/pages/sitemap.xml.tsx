@@ -17,7 +17,7 @@ function generateSiteMap(products: any[], categories: any[], occasions: any[] = 
        <priority>1.0</priority>
      </url>
      <url>
-       <loc>${baseUrl}/items</loc>
+       <loc>${baseUrl}/products</loc>
        <lastmod>${new Date().toISOString()}</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.9</priority>
@@ -47,34 +47,10 @@ function generateSiteMap(products: any[], categories: any[], occasions: any[] = 
        <priority>0.3</priority>
      </url>
      <url>
-       <loc>${baseUrl}/login</loc>
-       <lastmod>${new Date().toISOString()}</lastmod>
-       <changefreq>monthly</changefreq>
-       <priority>0.5</priority>
-     </url>
-     <url>
-       <loc>${baseUrl}/register</loc>
-       <lastmod>${new Date().toISOString()}</lastmod>
-       <changefreq>monthly</changefreq>
-       <priority>0.5</priority>
-     </url>
-     <url>
        <loc>${baseUrl}/cart</loc>
        <lastmod>${new Date().toISOString()}</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6</priority>
-     </url>
-     <url>
-       <loc>${baseUrl}/wishlist</loc>
-       <lastmod>${new Date().toISOString()}</lastmod>
-       <changefreq>weekly</changefreq>
-       <priority>0.5</priority>
-     </url>
-     <url>
-       <loc>${baseUrl}/profile</loc>
-       <lastmod>${new Date().toISOString()}</lastmod>
-       <changefreq>monthly</changefreq>
-       <priority>0.4</priority>
      </url>
      
      <!-- Category Pages with Enhanced SEO -->

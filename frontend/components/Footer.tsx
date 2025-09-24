@@ -44,7 +44,7 @@ const Footer: React.FC = () => {
             <ul className="space-y-2">
               <li>
                 <Link href="/items" className="text-gray-300 hover:text-white transition-colors font-semibold">
-                  Browse Items
+                  Products
                 </Link>
               </li>
               <li>
