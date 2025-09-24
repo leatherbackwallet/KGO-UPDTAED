@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
           <div className="lg:col-span-2">
             <div className="flex items-center mb-4">
               <img 
-                src="/images/logo.svg" 
+                src="/images/logo.png" 
                 alt="KeralaGiftsOnline Logo" 
                 className="h-8 w-auto"
               />
@@ -43,8 +43,8 @@ const Footer: React.FC = () => {
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/products" className="text-gray-300 hover:text-white transition-colors">
-                  Products
+                <Link href="/items" className="text-gray-300 hover:text-white transition-colors font-semibold">
+                  Browse Items
                 </Link>
               </li>
               <li>

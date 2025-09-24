@@ -181,17 +181,17 @@ export default function Home() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link 
-                href="/products"
+                href="/items"
                 className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-green-900 bg-yellow-400 rounded-full hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 <span className="relative z-10">Shop Now</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </Link>
               <Link 
-                href="/about"
+                href="/items"
                 className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white border-2 border-white rounded-full hover:bg-white hover:text-green-900 transition-all duration-300 transform hover:scale-105"
               >
-                Learn More
+                Browse Items
               </Link>
             </div>
 
@@ -274,7 +274,7 @@ export default function Home() {
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {categories.map((category) => (
-                  <Link key={category._id} href={`/products?category=${category.slug}`}>
+                  <Link key={category._id} href={`/items?category=${category.slug}`}>
                     <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer group">
                       <div className="bg-gradient-to-br from-kgo-green to-emerald-600 h-40 rounded-xl mb-4 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                         <span className="text-white text-4xl font-bold">
@@ -352,10 +352,10 @@ export default function Home() {
             {products.length > 8 && (
               <div className="text-center mt-16">
                 <Link
-                  href="/products"
+                  href="/items"
                   className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-lg"
                 >
-                  View All Products
+                  View All Items
                   <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>

@@ -71,7 +71,7 @@ const ProductDetailPage: React.FC = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h2>
           <p className="text-gray-600 mb-4">{error || 'The product you are looking for does not exist.'}</p>
-          <a href="/products" className="text-blue-600 hover:text-blue-800">Back to Products</a>
+          <a href="/items" className="text-blue-600 hover:text-blue-800">Back to Items</a>
         </div>
       </div>
     );

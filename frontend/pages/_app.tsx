@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { AuthProvider } from '../context/AuthContext';
 import { CartProvider } from '../context/CartContext';
 import { WishlistProvider } from '../context/WishlistContext';
+import { LoadingProvider } from '../context/LoadingContext';
 import WhatsAppButton from '../components/WhatsAppButton';
 import Footer from '../components/Footer';
 import '../styles/globals.css';
@@ -44,9 +45,16 @@ class SimpleErrorBoundary extends Component<{children: ReactNode}, {hasError: bo
 function AppContent({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  const [showComponents, setShowComponents] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    // Add a small delay to prevent hydration mismatch and flashing
+    const timer = setTimeout(() => {
+      setShowComponents(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Check if current route is an admin page
@@ -57,8 +65,14 @@ function AppContent({ Component, pageProps }: AppProps) {
       <main className="flex-grow">
         <Component {...pageProps} />
       </main>
-      {isClient && <Footer />}
-      {isClient && <WhatsAppButton hideOnAdminPages={isAdminPage} />}
+      {/* Render Footer with smooth transition */}
+      <div className={`transition-opacity duration-300 ${showComponents ? 'opacity-100' : 'opacity-0'}`}>
+        {isClient && <Footer />}
+      </div>
+      {/* Render WhatsApp Button with smooth transition */}
+      <div className={`transition-opacity duration-300 ${showComponents ? 'opacity-100' : 'opacity-0'}`}>
+        {isClient && <WhatsAppButton hideOnAdminPages={isAdminPage} />}
+      </div>
     </div>
   );
 }
@@ -66,13 +80,15 @@ function AppContent({ Component, pageProps }: AppProps) {
 export default function App(props: AppProps) {
   return (
     <SimpleErrorBoundary>
-      <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <AppContent {...props} />
-          </WishlistProvider>
-        </CartProvider>
-      </AuthProvider>
+      <LoadingProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <AppContent {...props} />
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </LoadingProvider>
     </SimpleErrorBoundary>
   );
 }

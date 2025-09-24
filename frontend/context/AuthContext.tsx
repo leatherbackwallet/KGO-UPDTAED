@@ -76,6 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [tokens, setTokens] = useState<TokenPair | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [loadingDebounceTimer, setLoadingDebounceTimer] = useState<NodeJS.Timeout | null>(null);
 
   // Check if token is expired
   const isTokenExpired = (expiry: number): boolean => {
@@ -126,8 +127,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         safeLocalStorage.removeItem('tokens');
         safeLocalStorage.removeItem('user');
       } finally {
-        setIsLoading(false);
-        setIsHydrated(true);
+        // Add small delay to prevent flashing during hydration
+        setTimeout(() => {
+          setIsLoading(false);
+          setIsHydrated(true);
+        }, 150);
       }
     };
 

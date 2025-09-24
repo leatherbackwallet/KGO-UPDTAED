@@ -33,15 +33,22 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Only access localStorage on client side
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('cart');
-      if (stored) {
-        setCart(JSON.parse(stored));
+      try {
+        const stored = localStorage.getItem('cart');
+        if (stored) {
+          setCart(JSON.parse(stored));
+        }
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error);
+        localStorage.removeItem('cart'); // Clear corrupted data
       }
-      setIsLoaded(true);
-    } else {
-      setIsLoaded(true);
     }
-    setIsHydrated(true);
+    
+    // Add small delay to prevent flashing during hydration
+    setTimeout(() => {
+      setIsLoaded(true);
+      setIsHydrated(true);
+    }, 100);
   }, []);
 
   const saveCart = (cart: CartItem[]) => {

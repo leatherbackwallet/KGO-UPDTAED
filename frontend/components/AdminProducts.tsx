@@ -258,7 +258,10 @@ const AdminProducts: React.FC = () => {
       price: product.price,
       categories: product.categories,
       stock: product.stock,
-      occasions: product.occasions,
+      // Convert populated occasions to string IDs if needed
+      occasions: (product.occasions || []).map((occ: any) => 
+        typeof occ === 'string' ? occ : occ._id
+      ),
       isFeatured: product.isFeatured,
       isCombo: product.isCombo,
       comboBasePrice: product.comboBasePrice,
@@ -551,13 +554,21 @@ const AdminProducts: React.FC = () => {
     }
   };
 
-  const getOccasionNames = (productOccasions: string[]) => {
+  const getOccasionNames = (productOccasions: any[]) => {
     if (!productOccasions || productOccasions.length === 0) return 'No Occasions';
     
-    // Map occasion IDs to names
-    const occasionNames = productOccasions.map(occasionId => {
-      const occasion = occasions.find(occ => occ._id === occasionId);
-      return occasion ? occasion.name : occasionId;
+    // Handle both populated objects and string IDs
+    const occasionNames = productOccasions.map(occasion => {
+      // If it's already a populated object with a name property
+      if (typeof occasion === 'object' && occasion.name) {
+        return occasion.name;
+      }
+      // If it's a string ID, look it up in the occasions array
+      if (typeof occasion === 'string') {
+        const foundOccasion = occasions.find(occ => occ._id === occasion);
+        return foundOccasion ? foundOccasion.name : occasion;
+      }
+      return null;
     }).filter(Boolean);
     
     if (occasionNames.length === 0) return 'No Occasions';
@@ -1158,7 +1169,10 @@ const AdminProducts: React.FC = () => {
                 <div className="border border-gray-300 rounded-md p-3 max-h-48 overflow-y-auto bg-gray-50">
                   <div className="grid grid-cols-1 gap-2">
                     {occasions.filter(occasion => occasion.isActive).map((occasion) => {
-                      const isSelected = editingProduct.occasions?.includes(occasion._id) || false;
+                      // Handle both string IDs and populated objects in editingProduct.occasions
+                      const isSelected = editingProduct.occasions?.some(occ => 
+                        typeof occ === 'string' ? occ === occasion._id : (occ as any)._id === occasion._id
+                      ) || false;
                       const isCurrentlyActive = isOccasionCurrentlyActive(occasion);
                       
                       return (
@@ -1167,21 +1181,24 @@ const AdminProducts: React.FC = () => {
                             type="checkbox"
                             checked={isSelected}
                             onChange={(e) => {
-                              let newOccasions = [...(editingProduct.occasions || [])];
+                              // Always work with string IDs, convert populated objects to IDs if needed
+                              let currentOccasionIds = (editingProduct.occasions || []).map(occ => 
+                                typeof occ === 'string' ? occ : (occ as any)._id
+                              );
                               
                               if (e.target.checked) {
                                 // Add occasion if not already present
-                                if (!newOccasions.includes(occasion._id)) {
-                                  newOccasions.push(occasion._id);
+                                if (!currentOccasionIds.includes(occasion._id)) {
+                                  currentOccasionIds.push(occasion._id);
                                 }
                               } else {
                                 // Remove occasion
-                                newOccasions = newOccasions.filter(occ => occ !== occasion._id);
+                                currentOccasionIds = currentOccasionIds.filter(occ => occ !== occasion._id);
                               }
                               
                               setEditingProduct({
                                 ...editingProduct,
-                                occasions: newOccasions
+                                occasions: currentOccasionIds
                               });
                             }}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"

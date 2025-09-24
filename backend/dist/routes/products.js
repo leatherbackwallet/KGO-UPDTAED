@@ -53,10 +53,7 @@ const router = express_1.default.Router();
 // Get all products with SMART caching (re-enabled with proper invalidation)
 router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
-        // Debug pagination parameters
-        console.log('🔍 Request query params:', req.query);
-        const { category, min, max, search, featured, occasions, page = 1, limit = 24, includeDeleted = false, admin = false } = req.query;
-        console.log('📄 Parsed pagination:', { page: Number(page), limit: Number(limit) });
+        const { category, min, max, search, featured, occasions, page = 1, limit = 24, includeDeleted = false, admin = false, sort = 'newest' } = req.query;
         // For admin requests, use a high limit to get all products
         const effectiveLimit = admin === 'true' ? 1000 : Number(limit);
         let filter = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
@@ -128,7 +125,27 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
             ];
         }
         const skip = (Number(page) - 1) * effectiveLimit;
-        console.log('⏭️ Skip calculation:', { page: Number(page), effectiveLimit, skip });
+        // Determine sort order based on sort parameter
+        let sortOrder = { isFeatured: -1, createdAt: -1 }; // Default sort
+        switch (sort) {
+            case 'name':
+                sortOrder = { name: 1 }; // A-Z
+                break;
+            case 'price-low':
+                // Filter out products without price when sorting by price
+                filter.price = { $exists: true, $ne: null, $gt: 0 };
+                sortOrder = { price: 1, createdAt: -1 }; // Low to High, then newest
+                break;
+            case 'price-high':
+                // Filter out products without price when sorting by price
+                filter.price = { $exists: true, $ne: null, $gt: 0 };
+                sortOrder = { price: -1, createdAt: -1 }; // High to Low, then newest
+                break;
+            case 'newest':
+            default:
+                sortOrder = { isFeatured: -1, createdAt: -1 }; // Newest first (default)
+                break;
+        }
         // Optimize: Select only needed fields for better performance
         let query = products_model_1.Product.find(filter)
             .select('name description price stock images isFeatured categories vendors occasions createdAt updatedAt')
@@ -147,7 +164,7 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
             select: 'name slug dateRange priority seasonalFlags',
             options: { strictPopulate: false }
         })
-            .sort({ isFeatured: -1, createdAt: -1 });
+            .sort(sortOrder);
         // For admin requests or when limit is high (>=100), don't apply pagination limits
         // This ensures all products are returned when requested
         if (admin !== 'true' && effectiveLimit < 100) {

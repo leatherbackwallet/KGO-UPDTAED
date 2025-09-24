@@ -40,7 +40,7 @@ const LocationDeliveryPage: React.FC<LocationPageProps> = ({
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Delivery Location Not Found</h1>
             <p className="text-gray-600 mb-6">We don't deliver to this location yet, but we're expanding!</p>
             <a 
-              href="/products" 
+              href="/items" 
               className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
             >
               Browse All Products
@@ -72,7 +72,7 @@ const LocationDeliveryPage: React.FC<LocationPageProps> = ({
           {/* Breadcrumb Navigation */}
           <Breadcrumb
             items={[
-              { name: 'Delivery Areas', href: '/products' },
+              { name: 'Delivery Areas', href: '/items' },
               { name: `${city.name} Delivery`, current: true }
             ]}
             className="mb-8"
@@ -171,7 +171,7 @@ const LocationDeliveryPage: React.FC<LocationPageProps> = ({
             {products.length > 8 && (
               <div className="text-center mt-8">
                 <a
-                  href="/products"
+                  href="/items"
                   className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold"
                 >
                   View All Products

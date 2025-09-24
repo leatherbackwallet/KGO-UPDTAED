@@ -67,8 +67,8 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/products" className="nav-link">
-              Products
+            <Link href="/items" className="nav-link font-semibold">
+              Browse Items
             </Link>
             <Link href="/categories" className="nav-link">
               Categories
@@ -187,8 +187,8 @@ export default function Navbar() {
             <div className="border-t border-gray-200 py-4">
               <div className="flex flex-col space-y-4">
                 {/* Main Navigation Links */}
-                <Link href="/products" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">
-                  All Products
+                <Link href="/items" className="text-gray-700 hover:text-purple-600 transition-colors font-semibold">
+                  Browse Items
                 </Link>
                 <Link href="/content" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">
                   Cultural Content
@@ -216,7 +216,7 @@ export default function Navbar() {
                       {categories.map((category) => (
                         <Link
                           key={category._id}
-                          href={`/products?category=${category._id}`}
+                          href={`/items?category=${category._id}`}
                           className="block text-gray-600 hover:text-purple-600 transition-colors py-1 pl-4 border-l-2 border-transparent hover:border-purple-300"
                           onClick={() => setIsMenuOpen(false)}
                         >

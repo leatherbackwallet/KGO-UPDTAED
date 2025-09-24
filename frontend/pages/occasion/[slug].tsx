@@ -125,7 +125,7 @@ const OccasionPage: React.FC<OccasionPageProps> = ({
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Occasion Not Found</h1>
             <p className="text-gray-600 mb-6">The occasion you are looking for does not exist.</p>
             <a 
-              href="/products" 
+              href="/items" 
               className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
             >
               Browse All Products
@@ -156,7 +156,7 @@ const OccasionPage: React.FC<OccasionPageProps> = ({
           {/* Breadcrumb Navigation */}
           <Breadcrumb
             items={[
-              { name: 'Occasions', href: '/products' },
+              { name: 'Occasions', href: '/items' },
               { name: `${occasion.name} Gifts`, current: true }
             ]}
             className="mb-8"
@@ -252,7 +252,7 @@ const OccasionPage: React.FC<OccasionPageProps> = ({
                 We're curating the perfect {occasion.name.toLowerCase()} gift collection for you. Check back soon!
               </p>
               <a 
-                href="/products" 
+                href="/items" 
                 className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
               >
                 Browse All Products

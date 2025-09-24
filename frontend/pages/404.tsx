@@ -31,7 +31,7 @@ export default function Custom404() {
           
           <div>
             <Link 
-              href="/products"
+              href="/items"
               className="text-blue-600 hover:text-blue-800 transition-colors"
             >
               Browse Products

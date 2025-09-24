@@ -232,7 +232,7 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
         {uniqueProducts.length > limit && (
           <div className="mt-6 text-center">
             <button
-              onClick={() => window.location.href = '/products'}
+              onClick={() => window.location.href = '/items'}
               className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               View All Recommendations

@@ -53,7 +53,7 @@ export default function Cart() {
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h3>
               <p className="text-gray-600 mb-8">Looks like you haven't added any items to your cart yet.</p>
               <Link 
-                href="/products" 
+                href="/items" 
                 className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-kgo-red to-red-700 text-white rounded-full font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 Start Shopping
@@ -122,7 +122,7 @@ export default function Cart() {
 
                   {/* Continue Shopping */}
                   <Link 
-                    href="/products" 
+                    href="/items" 
                     className="w-full bg-gray-100 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-200 transition-colors duration-300 flex items-center justify-center"
                   >
                     <svg className="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

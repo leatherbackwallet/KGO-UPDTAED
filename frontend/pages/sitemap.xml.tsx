@@ -17,7 +17,7 @@ function generateSiteMap(products: any[], categories: any[], occasions: any[] = 
        <priority>1.0</priority>
      </url>
      <url>
-       <loc>${baseUrl}/products</loc>
+       <loc>${baseUrl}/items</loc>
        <lastmod>${new Date().toISOString()}</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.9</priority>
@@ -83,7 +83,7 @@ function generateSiteMap(products: any[], categories: any[], occasions: any[] = 
          const categoryName = typeof category.name === 'string' ? category.name : category.name?.en || 'Category';
          return `
        <url>
-         <loc>${baseUrl}/products?category=${encodeURIComponent(category.slug || category._id)}</loc>
+         <loc>${baseUrl}/items?category=${encodeURIComponent(category.slug || category._id)}</loc>
          <lastmod>${new Date().toISOString()}</lastmod>
          <changefreq>weekly</changefreq>
          <priority>0.8</priority>
@@ -98,7 +98,7 @@ function generateSiteMap(products: any[], categories: any[], occasions: any[] = 
          const occasionName = typeof occasion.name === 'string' ? occasion.name : occasion.name?.en || 'Occasion';
          return `
        <url>
-         <loc>${baseUrl}/products?occasions=${encodeURIComponent(occasion.slug || occasion._id)}</loc>
+         <loc>${baseUrl}/items?occasions=${encodeURIComponent(occasion.slug || occasion._id)}</loc>
          <lastmod>${new Date().toISOString()}</lastmod>
          <changefreq>weekly</changefreq>
          <priority>0.7</priority>

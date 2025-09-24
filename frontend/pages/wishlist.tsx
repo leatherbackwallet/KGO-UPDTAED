@@ -150,7 +150,7 @@ const WishlistPage: React.FC = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Your wishlist is empty</h3>
               <p className="text-gray-600 mb-4">Start adding items to your wishlist while browsing our products.</p>
-              <a href="/products" className="btn-primary">
+              <a href="/items" className="btn-primary">
                 Browse Products
               </a>
             </div>

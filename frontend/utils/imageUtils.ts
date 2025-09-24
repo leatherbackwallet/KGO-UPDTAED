@@ -34,7 +34,7 @@ export function getProductImage(imagePath?: string, slug?: string): string {
   if (imagePath && imagePath.startsWith('keralagiftsonline/products/')) {
     // Validate the public_id format before creating URL
     if (imagePath.length > 30 && !imagePath.includes('..')) {
-      return `https://res.cloudinary.com/deojqbepy/image/upload/w_400,h_auto,q_auto,f_auto/${imagePath}`;
+      return `https://res.cloudinary.com/deojqbepy/image/upload/w_400,h_400,c_fill,q_auto,f_auto/${imagePath}`;
     } else {
       // Invalid public_id, return default
       return DEFAULT_PRODUCT_IMAGE;

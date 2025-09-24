@@ -187,24 +187,43 @@ body {
     @apply border-2 border-white text-white hover:bg-white hover:text-green-900 transition-all duration-300 transform hover:scale-105;
   }
 
-  /* Floating animation for festive elements */
+  /* Floating animation for festive elements - optimized for performance */
   .float-animation {
     animation: float 6s ease-in-out infinite;
+    will-change: transform;
+    backface-visibility: hidden;
   }
 
   .float-animation-delay-1 {
     animation: float 6s ease-in-out infinite;
     animation-delay: 1s;
+    will-change: transform;
+    backface-visibility: hidden;
   }
 
   .float-animation-delay-2 {
     animation: float 6s ease-in-out infinite;
     animation-delay: 2s;
+    will-change: transform;
+    backface-visibility: hidden;
   }
 
   .float-animation-delay-3 {
     animation: float 6s ease-in-out infinite;
     animation-delay: 3s;
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  /* Respect user's motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .float-animation,
+    .float-animation-delay-1,
+    .float-animation-delay-2,
+    .float-animation-delay-3 {
+      animation: none;
+      transform: none;
+    }
   }
 
   /* Festive pattern background */
@@ -325,6 +344,30 @@ body {
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
     background-size: 200px 100%;
     animation: shimmer 2s infinite;
+    will-change: background-position;
+  }
+
+  /* Optimize common loading animations */
+  .animate-spin {
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  .animate-pulse {
+    will-change: opacity;
+  }
+
+  /* Prevent animation conflicts with reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-spin,
+    .animate-pulse,
+    .shimmer {
+      animation: none;
+    }
+    
+    .animate-spin {
+      transform: none;
+    }
   }
 
   /* Glass morphism effect */
