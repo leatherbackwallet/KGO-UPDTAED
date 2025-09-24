@@ -50,7 +50,7 @@ const logger_1 = require("./middleware/logger");
 // Load environment variables
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-// CORS Configuration - Fixed for internet access
+// CORS Configuration - Enhanced for production reliability
 const corsOptions = {
     origin: function (origin, callback) {
         const allowedOrigins = [
@@ -76,12 +76,62 @@ const corsOptions = {
     },
     credentials: true,
     optionsSuccessStatus: 200,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-    exposedHeaders: ['Content-Length', 'Content-Type']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+        'Access-Control-Request-Method',
+        'Access-Control-Request-Headers',
+        'Cache-Control',
+        'Pragma'
+    ],
+    exposedHeaders: [
+        'Content-Length',
+        'Content-Type',
+        'Access-Control-Allow-Origin',
+        'Access-Control-Allow-Credentials'
+    ],
+    preflightContinue: false,
+    maxAge: 86400 // 24 hours
 };
 // Trust proxy for production environments
 app.set('trust proxy', 1);
+// Enhanced CORS middleware to handle edge cases - MUST be before rate limiting
+app.use((req, res, next) => {
+    // Always set CORS headers for allowed origins
+    const origin = req.headers.origin;
+    const allowedOrigins = [
+        process.env.CORS_ORIGIN || 'http://localhost:3000',
+        process.env.FRONTEND_URL || 'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:3002',
+        'http://localhost:3003',
+        'https://onyourbehlf.uc.r.appspot.com',
+        'https://keralagiftsonline.in',
+        'https://www.keralagiftsonline.in'
+    ];
+    if (origin && allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    else if (!origin) {
+        // Allow requests with no origin (mobile apps, curl, etc.)
+        res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Cache-Control, Pragma');
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Credentials');
+    res.setHeader('Access-Control-Max-Age', '86400');
+    // Handle preflight requests - MUST be before rate limiting
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
+    next();
+});
 // Middleware
 app.use(rateLimit_1.generalLimiter);
 app.use(logger_1.logger);
@@ -254,6 +304,21 @@ app.get('/api/health-status', async (req, res) => {
         });
     }
 });
+// CORS test endpoint for debugging
+app.get('/api/cors-test', (req, res) => {
+    res.json({
+        success: true,
+        message: 'CORS test successful',
+        timestamp: new Date().toISOString(),
+        origin: req.headers.origin,
+        method: req.method,
+        headers: {
+            origin: req.headers.origin,
+            'user-agent': req.headers['user-agent'],
+            'access-control-request-method': req.headers['access-control-request-method']
+        }
+    });
+});
 // Apply routes
 app.use('/api/auth', rateLimit_1.authLimiter, auth_1.default);
 app.use('/api/upload', rateLimit_1.apiLimiter, upload_1.default);
@@ -280,6 +345,33 @@ app.use('/api/monitoring', rateLimit_1.apiLimiter, monitoring_1.default);
 app.use('/api/occasions', rateLimit_1.apiLimiter, occasions_1.default);
 app.use('/api/occasions', rateLimit_1.apiLimiter, occasions_seed_1.default);
 app.use('/api/notifications', rateLimit_1.apiLimiter, notifications_1.default);
+// CORS error handler middleware
+app.use((err, req, res, next) => {
+    if (err.message === 'Not allowed by CORS') {
+        console.log('CORS Error:', {
+            origin: req.headers.origin,
+            method: req.method,
+            path: req.path,
+            userAgent: req.headers['user-agent']
+        });
+        // Still send CORS headers even for rejected origins
+        const origin = req.headers.origin;
+        if (origin) {
+            res.setHeader('Access-Control-Allow-Origin', origin);
+        }
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+        return res.status(403).json({
+            success: false,
+            error: {
+                message: 'CORS policy violation',
+                code: 'CORS_ERROR'
+            }
+        });
+    }
+    next(err);
+});
 // Error logging middleware
 app.use(logger_1.errorLogger);
 // Start server

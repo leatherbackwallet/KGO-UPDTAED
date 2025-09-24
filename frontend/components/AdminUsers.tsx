@@ -81,27 +81,6 @@ export default function AdminUsers() {
     }
   };
 
-  const grantAdmin = async (id: string) => {
-    try {
-      await api.put(`/users/${id}/grant`, {}, { 
-        headers: { Authorization: `Bearer ${tokens?.accessToken}` } 
-      });
-      fetchUsers();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error granting admin');
-    }
-  };
-
-  const revokeAdmin = async (id: string) => {
-    try {
-      await api.put(`/users/${id}/revoke`, {}, { 
-        headers: { Authorization: `Bearer ${tokens?.accessToken}` } 
-      });
-      fetchUsers();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error revoking admin');
-    }
-  };
 
   const toggleUserDetails = (user: User) => {
     setSelectedUser(selectedUser?._id === user._id ? null : user);
@@ -332,7 +311,7 @@ export default function AdminUsers() {
                       Joined
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
-                      Actions
+                      Role Status
                     </th>
                   </tr>
                 </thead>
@@ -384,21 +363,9 @@ export default function AdminUsers() {
                           {formatDate(user.createdAt)}
                         </td>
                         <td className="px-4 py-4">
-                          {user.roleId?.name === 'admin' ? (
-                            <button 
-                              onClick={() => revokeAdmin(user._id)} 
-                              className="text-red-600 hover:text-red-700 text-sm"
-                            >
-                              Revoke Admin
-                            </button>
-                          ) : (
-                            <button 
-                              onClick={() => grantAdmin(user._id)} 
-                              className="text-blue-600 hover:text-blue-700 text-sm"
-                            >
-                              Grant Admin
-                            </button>
-                          )}
+                          <span className="text-sm text-gray-500">
+                            {user.roleId?.name === 'admin' ? 'Admin' : 'Customer'}
+                          </span>
                         </td>
                       </tr>
                       {selectedUser?._id === user._id && (

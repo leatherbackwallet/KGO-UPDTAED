@@ -327,17 +327,10 @@ const ItemsPage: React.FC = () => {
 
       <Navbar />
       <main className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header Section */}
-          <div className="mb-8">
-            <div className="text-center mb-6">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">All Items</h1>
-              <p className="text-lg text-gray-600">Discover our complete collection of premium products</p>
-            </div>
-
-            {/* Search Bar */}
-            <div className="max-w-4xl mx-auto">
-              <div className="flex flex-col sm:flex-row gap-4 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          {/* Search Bar with Pagination */}
+          <div className="max-w-6xl mx-auto mb-6">
+              <div className="flex flex-col lg:flex-row gap-4 items-center">
                 {/* Search Input */}
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -382,12 +375,41 @@ const ItemsPage: React.FC = () => {
                     </svg>
                   </div>
                 </div>
+
+                {/* Pagination Controls - Inline */}
+                {totalPages > 1 && (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    
+                    <span className="text-sm text-gray-600 px-2">
+                      {currentPage} of {totalPages}
+                    </span>
+                    
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Products Grid */}
-          <div className="mt-8">
+          <div className="mt-4">
             {!isHydrated ? (
               // Show skeleton loading during SSR
               <div className="space-y-6">
@@ -478,24 +500,8 @@ const ItemsPage: React.FC = () => {
               </div>
             ) : (
               <>
-                {/* Results Summary */}
-                <div className="mb-6 text-center">
-                  <div className="inline-flex items-center px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200">
-                    <span className="text-gray-600">
-                      {searchTerm ? (
-                        <>Showing <span className="font-semibold text-gray-900">{products.length}</span> results for "<span className="font-semibold text-blue-600">{searchTerm}</span>"</>
-                      ) : (
-                        <>Showing <span className="font-semibold text-gray-900">{products.length}</span> of <span className="font-semibold text-gray-900">{totalProducts}</span> items</>
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Top Pagination Controls */}
-                <PaginationControls position="top" />
-
                 {/* Product Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 border-t border-gray-200 pt-6 px-4 sm:px-6 lg:px-8">
                   {products.map((product, index) => (
                     <div 
                       key={product._id}
@@ -512,25 +518,9 @@ const ItemsPage: React.FC = () => {
                     </div>
                   ))}
                 </div>
-                
-                {/* Bottom Pagination Controls */}
-                <PaginationControls position="bottom" />
-                
-                {/* Page Info */}
-                <div className="text-center mt-6">
-                  <div className="text-sm text-gray-500">
-                    Page {currentPage} of {totalPages}
-                  </div>
-                  <div className="mt-2">
-                    <span className="inline-flex items-center px-2 py-1 text-xs text-blue-600 bg-blue-50 rounded-full">
-                      ⚡ 24 items per page for optimal browsing
-                    </span>
-                  </div>
-                </div>
               </>
             )}
           </div>
-        </div>
       </main>
 
       {/* Quick View Modal */}

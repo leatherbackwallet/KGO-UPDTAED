@@ -9,7 +9,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const users_model_1 = require("../models/users.model");
-const roles_model_1 = require("../models/roles.model");
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
 const apiSecurity_1 = require("../middleware/apiSecurity");
@@ -19,46 +18,6 @@ router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), apiSecurity_1.val
     try {
         const users = await users_model_1.User.find({}, '-password').populate('roleId');
         res.json(users);
-    }
-    catch (err) {
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-// Grant admin
-router.put('/:id/grant', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
-    try {
-        // Find the admin role first
-        const adminRole = await roles_model_1.Role.findOne({ name: 'admin' });
-        if (!adminRole) {
-            res.status(500).json({ message: 'Admin role not found' });
-            return;
-        }
-        const user = await users_model_1.User.findByIdAndUpdate(req.params.id, { roleId: adminRole._id }, { new: true });
-        if (!user) {
-            res.status(404).json({ message: 'User not found' });
-            return;
-        }
-        res.json({ message: 'Admin granted', user });
-    }
-    catch (err) {
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-// Revoke admin
-router.put('/:id/revoke', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
-    try {
-        // Find the customer role first
-        const customerRole = await roles_model_1.Role.findOne({ name: 'customer' });
-        if (!customerRole) {
-            res.status(500).json({ message: 'Customer role not found' });
-            return;
-        }
-        const user = await users_model_1.User.findByIdAndUpdate(req.params.id, { roleId: customerRole._id }, { new: true });
-        if (!user) {
-            res.status(404).json({ message: 'User not found' });
-            return;
-        }
-        res.json({ message: 'Admin revoked', user });
     }
     catch (err) {
         res.status(500).json({ message: 'Server error' });
