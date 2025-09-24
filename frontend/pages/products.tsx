@@ -119,7 +119,7 @@ const ProductsPage: React.FC = () => {
       
       // Add pagination parameters
       params.append('page', currentPage.toString());
-      params.append('limit', '100'); // Show 100 products per page
+      params.append('limit', '20'); // Show 20 products per page for better performance
       
       // Add cache busting parameter
       params.append('_t', Date.now().toString());
@@ -491,6 +491,13 @@ const ProductsPage: React.FC = () => {
                   <div className="inline-flex items-center px-4 py-2 bg-gray-50 rounded-full text-gray-600 text-sm">
                     {allProductsLoaded ? `Showing all ${products.length} products` : `Showing ${products.length} of ${totalProducts} products`}
                   </div>
+                  {totalProducts > 20 && !allProductsLoaded && (
+                    <div className="mt-2">
+                      <span className="inline-flex items-center px-2 py-1 text-xs text-green-600 bg-green-50 rounded-full">
+                        ⚡ Optimized for faster loading
+                      </span>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Pagination Controls */}
