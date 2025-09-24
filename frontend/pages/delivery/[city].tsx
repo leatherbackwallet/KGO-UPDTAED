@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { GetServerSideProps } from 'next/server';
+import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Navbar from '../../components/Navbar';
 import ProductCard from '../../components/ProductCard';
@@ -59,7 +59,7 @@ const LocationDeliveryPage: React.FC<LocationPageProps> = ({
         title={seoData.title}
         description={seoData.description}
         keywords={seoData.keywords}
-        url={`https://keralgiftsonline.in/delivery/${city.slug}`}
+        url={`https://keralagiftsonline.in/delivery/${city.slug}`}
         structuredData={seoData.structuredData}
         products={products}
         location={city.name}

@@ -181,7 +181,7 @@ export function generateLocationSEO(citySlug: string, products: any[] = []) {
       "@type": "LocalBusiness",
       "name": `KeralGiftsOnline - ${city.name}`,
       "description": description,
-      "url": `https://keralgiftsonline.in/delivery/${city.slug}`,
+      "url": `https://keralagiftsonline.in/delivery/${city.slug}`,
       "areaServed": {
         "@type": "City",
         "name": city.name,

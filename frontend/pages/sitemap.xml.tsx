@@ -3,7 +3,7 @@ import { generateKeywords } from '../utils/seoKeywords';
 
 // Enhanced sitemap generation with comprehensive SEO
 function generateSiteMap(products: any[], categories: any[], occasions: any[] = []) {
-  const baseUrl = 'https://keralgiftsonline.in';
+  const baseUrl = 'https://keralagiftsonline.in';
   
   return `<?xml version="1.0" encoding="UTF-8"?>
    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"

@@ -54,7 +54,7 @@ const OccasionPage: React.FC<OccasionPageProps> = ({
       "@type": "CollectionPage",
       "name": `${occasionName} Gifts Collection`,
       "description": description,
-      "url": `https://keralgiftsonline.in/occasion/${occasion.slug}`,
+      "url": `https://keralagiftsonline.in/occasion/${occasion.slug}`,
       "about": {
         "@type": "Event",
         "name": occasionName,
@@ -68,8 +68,8 @@ const OccasionPage: React.FC<OccasionPageProps> = ({
           "position": index + 1,
           "name": product.name,
           "description": product.description,
-          "image": product.images?.[0] ? `https://keralgiftsonline.in/images/${product.images[0]}` : undefined,
-          "url": `https://keralgiftsonline.in/product/${product._id}`,
+          "image": product.images?.[0] ? `https://keralagiftsonline.in/images/${product.images[0]}` : undefined,
+          "url": `https://keralagiftsonline.in/product/${product._id}`,
           "category": "Gifts",
           "audience": {
             "@type": "Audience",
@@ -90,19 +90,19 @@ const OccasionPage: React.FC<OccasionPageProps> = ({
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://keralgiftsonline.in/"
+            "item": "https://keralagiftsonline.in/"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Occasions",
-            "item": "https://keralgiftsonline.in/products"
+            "item": "https://keralagiftsonline.in/products"
           },
           {
             "@type": "ListItem",
             "position": 3,
             "name": `${occasionName} Gifts`,
-            "item": `https://keralgiftsonline.in/occasion/${occasion.slug}`
+            "item": `https://keralagiftsonline.in/occasion/${occasion.slug}`
           }
         ]
       }
@@ -143,7 +143,7 @@ const OccasionPage: React.FC<OccasionPageProps> = ({
       <SEOHead
         title={seoData.title}
         description={seoData.description}
-        url={`https://keralgiftsonline.in/occasion/${occasion.slug}`}
+        url={`https://keralagiftsonline.in/occasion/${occasion.slug}`}
         structuredData={seoData.structuredData}
         products={products}
         occasions={[occasion]}

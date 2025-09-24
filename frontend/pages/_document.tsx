@@ -22,10 +22,10 @@ export default function Document() {
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://keralgiftsonline.in/" />
+        <meta property="og:url" content="https://keralagiftsonline.in/" />
         <meta property="og:title" content="KeralGiftsOnline - Premium Gifts & Traditional Products | Kerala's Best Online Gift Store" />
         <meta property="og:description" content="Discover premium quality gifts, traditional Kerala products, and authentic items. Fast delivery across Kerala with advanced logistics. Shop for festivals, occasions & special moments." />
-        <meta property="og:image" content="https://keralgiftsonline.in/images/og-image.jpg" />
+        <meta property="og:image" content="https://keralagiftsonline.in/images/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="KeralGiftsOnline - Premium Gifts and Traditional Products" />
@@ -37,10 +37,10 @@ export default function Document() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@keralgiftsonline" />
         <meta name="twitter:creator" content="@keralgiftsonline" />
-        <meta name="twitter:url" content="https://keralgiftsonline.in/" />
+        <meta name="twitter:url" content="https://keralagiftsonline.in/" />
         <meta name="twitter:title" content="KeralGiftsOnline - Premium Gifts & Traditional Products | Kerala's Best Online Gift Store" />
         <meta name="twitter:description" content="Discover premium quality gifts, traditional Kerala products, and authentic items. Fast delivery across Kerala with advanced logistics. Shop for festivals, occasions & special moments." />
-        <meta name="twitter:image" content="https://keralgiftsonline.in/images/og-image.jpg" />
+        <meta name="twitter:image" content="https://keralagiftsonline.in/images/og-image.jpg" />
         <meta name="twitter:image:alt" content="KeralGiftsOnline - Premium Gifts and Traditional Products" />
         
         {/* Additional Meta Tags */}
@@ -84,10 +84,10 @@ export default function Document() {
               "@type": "Organization",
               "name": "KeralGiftsOnline",
               "alternateName": "Kerala Gifts Online",
-              "url": "https://keralgiftsonline.in",
+              "url": "https://keralagiftsonline.in",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://keralgiftsonline.in/favicon.svg",
+                "url": "https://keralagiftsonline.in/favicon.svg",
                 "width": 512,
                 "height": 512
               },
@@ -150,14 +150,14 @@ export default function Document() {
               "@context": "https://schema.org",
               "@type": "WebSite",
               "name": "KeralGiftsOnline",
-              "url": "https://keralgiftsonline.in",
+              "url": "https://keralagiftsonline.in",
               "description": "Premium gifts and traditional products delivery service in Kerala",
               "inLanguage": "en-US",
               "potentialAction": {
                 "@type": "SearchAction",
                 "target": {
                   "@type": "EntryPoint",
-                  "urlTemplate": "https://keralgiftsonline.in/products?search={search_term_string}"
+                  "urlTemplate": "https://keralagiftsonline.in/products?search={search_term_string}"
                 },
                 "query-input": "required name=search_term_string"
               }

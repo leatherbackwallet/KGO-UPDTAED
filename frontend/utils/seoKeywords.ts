@@ -159,7 +159,7 @@ export function generateKeywords(context: {
   // Category-specific keywords
   if (context.categories && context.categories.length > 0) {
     context.categories.forEach(category => {
-      const catName = typeof category.name === 'string' ? category.name : category.name?.en;
+      const catName = typeof category.name === 'string' ? category.name : (category.name as any)?.en;
       if (catName) {
         keywords.push(
           `${catName.toLowerCase()} kerala`,
@@ -175,7 +175,7 @@ export function generateKeywords(context: {
   // Occasion-specific keywords
   if (context.occasions && context.occasions.length > 0) {
     context.occasions.forEach(occasion => {
-      const occName = typeof occasion.name === 'string' ? occasion.name : occasion.name?.en;
+      const occName = typeof occasion.name === 'string' ? occasion.name : (occasion.name as any)?.en;
       if (occName) {
         keywords.push(
           `${occName.toLowerCase()} gifts kerala`,
@@ -209,7 +209,7 @@ export function generateKeywords(context: {
   }
 
   // Remove duplicates and return as comma-separated string
-  const uniqueKeywords = [...new Set(keywords)]
+  const uniqueKeywords = Array.from(new Set(keywords))
     .filter(keyword => keyword.length > 0)
     .slice(0, 100); // Limit to 100 most relevant keywords
 

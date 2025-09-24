@@ -25,7 +25,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   title = 'KeralGiftsOnline - Premium Gifts & Traditional Products | Kerala\'s Best Online Gift Store',
   description = 'Discover premium quality gifts, traditional Kerala products & authentic items. Fast delivery across Kerala with advanced logistics. Perfect for festivals, occasions & special moments.',
   keywords,
-  image = 'https://keralgiftsonline.in/images/og-image.jpg',
+  image = 'https://keralagiftsonline.in/images/og-image.jpg',
   url,
   type = 'website',
   structuredData,
@@ -39,7 +39,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   isHomepage = false
 }) => {
   const router = useRouter();
-  const currentUrl = url || `https://keralgiftsonline.in${router.asPath}`;
+  const currentUrl = url || `https://keralagiftsonline.in${router.asPath}`;
   const canonicalUrl = canonical || currentUrl;
 
   // Generate comprehensive keywords using the new utility

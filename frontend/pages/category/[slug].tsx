@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { GetServerSideProps } from 'next/server';
+import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Navbar from '../../components/Navbar';
 import ProductCard from '../../components/ProductCard';
@@ -53,7 +53,7 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
       "@type": "CollectionPage",
       "name": `${categoryName} Collection`,
       "description": description,
-      "url": `https://keralgiftsonline.in/category/${category.slug}`,
+      "url": `https://keralagiftsonline.in/category/${category.slug}`,
       "mainEntity": {
         "@type": "ItemList",
         "numberOfItems": totalProducts,
@@ -62,8 +62,8 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
           "position": index + 1,
           "name": product.name,
           "description": product.description,
-          "image": product.images?.[0] ? `https://keralgiftsonline.in/images/${product.images[0]}` : undefined,
-          "url": `https://keralgiftsonline.in/product/${product._id}`,
+          "image": product.images?.[0] ? `https://keralagiftsonline.in/images/${product.images[0]}` : undefined,
+          "url": `https://keralagiftsonline.in/product/${product._id}`,
           "category": categoryName,
           "offers": {
             "@type": "Offer",
@@ -80,19 +80,19 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://keralgiftsonline.in/"
+            "item": "https://keralagiftsonline.in/"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Categories",
-            "item": "https://keralgiftsonline.in/products"
+            "item": "https://keralagiftsonline.in/products"
           },
           {
             "@type": "ListItem",
             "position": 3,
             "name": categoryName,
-            "item": `https://keralgiftsonline.in/category/${category.slug}`
+            "item": `https://keralagiftsonline.in/category/${category.slug}`
           }
         ]
       }
@@ -133,7 +133,7 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
       <SEOHead
         title={seoData.title}
         description={seoData.description}
-        url={`https://keralgiftsonline.in/category/${category.slug}`}
+        url={`https://keralagiftsonline.in/category/${category.slug}`}
         structuredData={seoData.structuredData}
         products={products}
         categories={[category]}
@@ -239,14 +239,14 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res }) =>
     let totalProducts = 0;
 
     // Find category by slug
-    if (categoryResponse.ok) {
+    if (categoryResponse.ok && 'json' in categoryResponse) {
       const categoriesData = await categoryResponse.json();
       const categories = categoriesData.data || categoriesData || [];
       category = categories.find((cat: any) => cat.slug === slug);
     }
 
     // Fetch products for this category
-    if (category && productsResponse.ok) {
+    if (category && productsResponse.ok && 'json' in productsResponse) {
       const productsData = await productsResponse.json();
       const allProducts = productsData.data || productsData || [];
       

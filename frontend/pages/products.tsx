@@ -325,7 +325,7 @@ const ProductsPage: React.FC = () => {
       "@type": "CollectionPage",
       "name": title,
       "description": description,
-      "url": "https://keralgiftsonline.in/products",
+      "url": "https://keralagiftsonline.in/products",
       "mainEntity": {
         "@type": "ItemList",
         "numberOfItems": totalProducts,
@@ -335,7 +335,7 @@ const ProductsPage: React.FC = () => {
           "name": product.name,
           "description": product.description,
           "image": product.images?.[0] || '',
-          "url": `https://keralgiftsonline.in/product/${product._id}`,
+          "url": `https://keralagiftsonline.in/product/${product._id}`,
           "offers": {
             "@type": "Offer",
             "price": product.price,
@@ -351,13 +351,13 @@ const ProductsPage: React.FC = () => {
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://keralgiftsonline.in/"
+            "item": "https://keralagiftsonline.in/"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Products",
-            "item": "https://keralgiftsonline.in/products"
+            "item": "https://keralagiftsonline.in/products"
           }
         ]
       }
@@ -373,7 +373,7 @@ const ProductsPage: React.FC = () => {
       <SEOHead
         title={seoData.title}
         description={seoData.description}
-        url="https://keralgiftsonline.in/products"
+        url="https://keralagiftsonline.in/products"
         structuredData={seoData.structuredData}
         products={products}
         categories={categories.map(cat => ({

@@ -96,16 +96,16 @@ const ProductDetailPage: React.FC = () => {
     const description = `Buy ${productName} online. ${productDescription}. Fast delivery across Kerala. Premium quality ${categoryName.toLowerCase()} with authentic traditional craftsmanship.`;
     
     const productImage = product.images?.[0] 
-      ? `https://keralgiftsonline.in/images/${product.images[0]}`
-      : 'https://keralgiftsonline.in/images/og-image.jpg';
+      ? `https://keralagiftsonline.in/images/${product.images[0]}`
+      : 'https://keralagiftsonline.in/images/og-image.jpg';
 
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "Product",
       "name": productName,
       "description": productDescription,
-      "image": product.images?.map(img => `https://keralgiftsonline.in/images/${img}`) || [productImage],
-      "url": `https://keralgiftsonline.in/product/${product._id}`,
+      "image": product.images?.map(img => `https://keralagiftsonline.in/images/${img}`) || [productImage],
+      "url": `https://keralagiftsonline.in/product/${product._id}`,
       "sku": product._id,
       "category": categoryName,
       "brand": {
@@ -120,7 +120,7 @@ const ProductDetailPage: React.FC = () => {
         "seller": {
           "@type": "Organization",
           "name": "KeralGiftsOnline",
-          "url": "https://keralgiftsonline.in"
+          "url": "https://keralagiftsonline.in"
         },
         "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 1 year from now
       },
@@ -135,7 +135,7 @@ const ProductDetailPage: React.FC = () => {
 
     // Add combo-specific structured data
     if (product.isCombo && product.comboItems) {
-      structuredData["isVariantOf"] = {
+      (structuredData as any)["isVariantOf"] = {
         "@type": "ProductGroup",
         "name": `${productName} Collection`,
         "hasVariant": product.comboItems.map(item => ({
@@ -173,7 +173,7 @@ const ProductDetailPage: React.FC = () => {
         description={productSEO.description}
         type="product"
         image={productSEO.image}
-        url={`https://keralgiftsonline.in/product/${product._id}`}
+        url={`https://keralagiftsonline.in/product/${product._id}`}
         structuredData={productSEO.structuredData}
         products={[{
           name: getMultilingualText(product.name),

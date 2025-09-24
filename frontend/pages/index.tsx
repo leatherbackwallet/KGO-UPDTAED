@@ -80,11 +80,11 @@ export default function Home() {
       "@type": "WebPage",
       "name": "KeralGiftsOnline - Premium Gifts & Traditional Products",
       "description": "Kerala's premier online gift store offering traditional products and premium gifts with fast delivery across Kerala and worldwide",
-      "url": "https://keralgiftsonline.in/",
+      "url": "https://keralagiftsonline.in/",
       "mainEntity": {
         "@type": "Organization",
         "name": "KeralGiftsOnline",
-        "url": "https://keralgiftsonline.in",
+        "url": "https://keralagiftsonline.in",
         "description": "Premium gift delivery service specializing in authentic Kerala products and traditional gifts"
       },
       "breadcrumb": {
@@ -94,7 +94,7 @@ export default function Home() {
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://keralgiftsonline.in/"
+            "item": "https://keralagiftsonline.in/"
           }
         ]
       }
@@ -112,8 +112,8 @@ export default function Home() {
             "@type": "Product",
             "name": product.name,
             "description": product.description,
-            "image": product.images?.[0] ? `https://keralgiftsonline.in/images/${product.images[0]}` : undefined,
-            "url": `https://keralgiftsonline.in/product/${product._id}`
+            "image": product.images?.[0] ? `https://keralagiftsonline.in/images/${product.images[0]}` : undefined,
+            "url": `https://keralagiftsonline.in/product/${product._id}`
           },
           "price": product.price,
           "priceCurrency": "INR",
@@ -130,7 +130,7 @@ export default function Home() {
       <SEOHead
         title="KeralGiftsOnline - Premium Gifts & Traditional Products | Kerala's Best Online Gift Store"
         description="Discover premium quality gifts, traditional Kerala products & authentic items. Fast delivery across Kerala with advanced logistics. Perfect for festivals, occasions & special moments. Shop now!"
-        url="https://keralgiftsonline.in/"
+        url="https://keralagiftsonline.in/"
         type="website"
         products={products}
         categories={categories}
