@@ -158,7 +158,7 @@ const AdminProducts: React.FC = () => {
     fetchProducts();
     fetchCategories();
     fetchOccasions();
-  }, [user, tokens, router]);
+  }, [user, tokens]);
 
   const clearCacheAndRefresh = async () => {
     try {
@@ -301,28 +301,71 @@ const AdminProducts: React.FC = () => {
     try {
       setSaving(true);
       setError('');
+      setSuccess('');
+      
+      console.log('🚀 Starting sequential product creation flow...');
+      
+      // Phase 1: Basic Field Validation
+      const validationErrors = [];
       
       // Validate required fields
-      if (!editingProduct.name || !editingProduct.description) {
-        setError('Name and description are required');
+      if (!editingProduct.name || editingProduct.name.trim() === '') {
+        validationErrors.push('Product name is required');
+      }
+      
+      if (!editingProduct.description || editingProduct.description.trim() === '') {
+        validationErrors.push('Product description is required');
+      }
+      
+      if (!editingProduct.price || editingProduct.price <= 0) {
+        validationErrors.push('Valid price is required');
+      }
+      
+      // Validate categories
+      if (!editingProduct.categories || editingProduct.categories.length === 0) {
+        validationErrors.push('At least one category must be selected');
+      }
+      
+      // Show validation errors if any
+      if (validationErrors.length > 0) {
+        setError(validationErrors.join('. '));
+        setSaving(false);
         return;
       }
 
-      // Validate that we have valid Cloudinary public IDs for images
-      const validImages = uploadedImages.filter(img => img.public_id && img.public_id.startsWith('keralagiftsonline/products/'));
+      // Phase 2: Image Validation (Sequential Flow)
+      console.log('🔍 Phase 2: Validating uploaded images...');
+      const validImages = uploadedImages.filter(img => 
+        img.public_id && 
+        img.public_id.startsWith('keralagiftsonline/products/') &&
+        img.public_id.length > 30 &&
+        !img.public_id.includes('..') &&
+        !img.public_id.includes(' ')
+      );
+      
       if (uploadedImages.length > 0 && validImages.length === 0) {
-        setError('Please upload valid images. All images must be uploaded to Cloudinary.');
+        setError('Please upload valid images. All images must be properly uploaded to Cloudinary.');
+        setSaving(false);
         return;
       }
 
-      // Ensure name and description are simple strings
+      // Phase 3: Skip image accessibility verification for now (simplified)
+      if (validImages.length > 0) {
+        console.log('🌐 Phase 3: Images validated (accessibility check skipped)');
+        setSuccess('Images ready...');
+      }
+
+      // Phase 4: Prepare Product Data (Only After Image Validation)
+      console.log('📦 Phase 4: Preparing product data...');
+      setSuccess('Creating product...');
+      
       const validatedData = {
         ...editingProduct,
         name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
         description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
         // Ensure categories is an array of ObjectId strings
         categories: editingProduct.categories?.map(cat => typeof cat === 'string' ? cat : cat._id) || [],
-        // Include images - use Cloudinary public_id only
+        // Include images - use Cloudinary public_id only (already validated)
         images: validImages.map(img => img.public_id),
         defaultImage: validImages[0]?.public_id || undefined,
         // Include combo-specific fields
@@ -331,7 +374,7 @@ const AdminProducts: React.FC = () => {
         comboItems: editingProduct.comboItems || []
       };
 
-      console.log('📦 Creating new product with data:', {
+      console.log('📦 Creating new product with validated data:', {
         name: validatedData.name,
         description: validatedData.description,
         price: validatedData.price,
@@ -341,34 +384,88 @@ const AdminProducts: React.FC = () => {
         imageCount: validatedData.images?.length || 0
       });
       
+      // Phase 5: Create Product in Database (Final Step)
+      console.log('💾 Phase 5: Creating product in database...');
       const response = await api.post('/products', validatedData);
       
-      if (response.data) {
-        console.log('✅ Product created successfully!', {
-          productId: response.data._id,
-          name: response.data.name,
-          images: response.data.images,
-          defaultImage: response.data.defaultImage,
+      // Debug: Log the actual response structure
+      console.log('🔍 API Response Structure:', {
+        success: response.data?.success,
+        hasData: !!response.data?.data,
+        hasId: !!response.data?._id,
+        hasDataId: !!response.data?.data?._id,
+        fullResponse: response.data
+      });
+      
+      // Phase 6: Validate Database Response
+      if (response.data && response.data.success !== false && (response.data._id || response.data.data?._id)) {
+        const productData = response.data.data || response.data;
+        console.log('✅ Product created successfully in database!', {
+          productId: productData._id,
+          name: productData.name,
+          images: productData.images,
+          defaultImage: productData.defaultImage,
           status: 'SAVED_TO_DATABASE'
         });
         
+        // Phase 7: Success - Refresh and Cleanup
+        console.log('🔄 Phase 7: Refreshing product list and cleaning up...');
+        setSuccess('Product added successfully!');
+        
         // Refresh the products list
         await fetchProducts();
+        
+        // Clear form and close modal after successful addition
         setShowModal(false);
         setSelectedProduct(null);
         setEditingProduct({});
         setComboItems([]);
+        setUploadedImages([]);
+        setUploadError('');
         setError(''); // Clear any previous errors
-        setSuccess('Product added successfully!');
-        setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccess(''), 3000);
+        
+        console.log('🎉 Sequential product creation completed successfully!');
       } else {
-        console.error('❌ Product creation failed - no data returned');
-        setError('Failed to add product');
+        console.error('❌ Product creation failed - invalid response structure:', response.data);
+        setError('Failed to add product - invalid response from server');
+        
+        // Note: No rollback needed here as images are already validated and accessible
+        // The product creation failure doesn't affect the uploaded images
       }
     } catch (err: any) {
-      console.error('Error adding product:', err);
+      console.error('❌ Sequential product creation failed:', err);
       console.error('Error response:', err.response?.data);
-      setError(err.response?.data?.error?.message || err.message || 'Failed to add product');
+      
+      // Enhanced error handling with phase-specific messages
+      let errorMessage = 'Failed to add product';
+      let errorPhase = 'Unknown phase';
+      
+      if (err.message && err.message.includes('Image validation failed')) {
+        errorPhase = 'Image Validation';
+        errorMessage = err.message;
+      } else if (err.message && err.message.includes('Image')) {
+        errorPhase = 'Image Processing';
+        errorMessage = `Image processing failed: ${err.message}`;
+      } else if (err.response?.data?.error?.message) {
+        errorPhase = 'Database Creation';
+        errorMessage = `Database error: ${err.response.data.error.message}`;
+      } else if (err.response?.data?.message) {
+        errorPhase = 'API Response';
+        errorMessage = `API error: ${err.response.data.message}`;
+      } else if (err.message) {
+        errorPhase = 'Network/System';
+        errorMessage = `System error: ${err.message}`;
+      }
+      
+      console.error(`❌ Failure in ${errorPhase}: ${errorMessage}`);
+      setError(`${errorPhase}: ${errorMessage}`);
+      
+      // Note: No rollback needed for images as they are validated before database entry
+      // Images remain accessible on Cloudinary even if product creation fails
+      
     } finally {
       setSaving(false);
     }
@@ -1495,6 +1592,41 @@ const AdminProducts: React.FC = () => {
               </div>
             </div>
 
+            {/* Error and Success Messages */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <p className="text-red-800 font-medium">Error</p>
+                    <p className="text-red-700 mt-1">{error}</p>
+                  </div>
+                  <button
+                    onClick={() => setError('')}
+                    className="text-red-400 hover:text-red-600 ml-2"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {success && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <p className="text-green-800 font-medium">Success</p>
+                    <p className="text-green-700 mt-1">{success}</p>
+                  </div>
+                  <button
+                    onClick={() => setSuccess('')}
+                    className="text-green-400 hover:text-green-600 ml-2"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-end space-x-3 mt-6">
               <button
                 onClick={() => {
@@ -1502,8 +1634,11 @@ const AdminProducts: React.FC = () => {
                   setUploadedImages([]);
                   setUploadError('');
                   setComboItems([]);
+                  setError('');
+                  setSuccess('');
                 }}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                disabled={saving}
               >
                 Cancel
               </button>

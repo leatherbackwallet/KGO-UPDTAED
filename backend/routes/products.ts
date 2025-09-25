@@ -98,7 +98,8 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
       ];
     }
 
-    const skip = (Number(page) - 1) * effectiveLimit;
+    // Calculate skip only for non-admin requests
+    const skip = admin !== 'true' ? (Number(page) - 1) * Number(limit) : 0;
     
     // Determine sort order based on sort parameter
     let sortOrder: any = { isFeatured: -1, createdAt: -1 }; // Default sort
@@ -125,15 +126,10 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
     
     // Optimize: Select only needed fields for better performance
     let query = Product.find(filter)
-      .select('name description price stock images isFeatured categories vendors occasions createdAt updatedAt')
+      .select('name description price stock images isFeatured categories occasions createdAt updatedAt')
       .populate({
         path: 'categories',
         select: 'name slug',
-        options: { strictPopulate: false }
-      })
-      .populate({
-        path: 'vendors',
-        select: 'storeName',
         options: { strictPopulate: false }
       })
       .populate({
@@ -143,13 +139,13 @@ router.get('/', cacheConfigs.products, ensureDatabaseConnection, async (req: Req
       })
       .sort(sortOrder);
     
-    // For admin requests or when limit is high (>=100), don't apply pagination limits
-    // This ensures all products are returned when requested
-    if (admin !== 'true' && effectiveLimit < 100) {
-      query = query.skip(skip).limit(effectiveLimit);
-    } else if (admin === 'true') {
+    // Apply pagination logic correctly
+    if (admin === 'true') {
       // For admin requests, return all products without pagination
       console.log('Admin request: returning all products without pagination');
+    } else {
+      // For regular requests, apply pagination
+      query = query.skip(skip).limit(effectiveLimit);
     }
     
     // Optimize: Run count query in parallel with main query for better performance
@@ -190,11 +186,6 @@ router.get('/:id', ensureDatabaseConnection, async (req: Request, res: Response)
         options: { strictPopulate: false }
       })
       .populate({
-        path: 'vendors',
-        select: 'storeName',
-        options: { strictPopulate: false }
-      })
-      .populate({
         path: 'attributes',
         options: { strictPopulate: false }
       })
@@ -224,32 +215,137 @@ router.post('/', auth, requireRole('admin'), ensureDatabaseConnection, async (re
   try {
     const productData = req.body;
     
+    console.log('📦 Creating product with data:', {
+      name: productData.name,
+      price: productData.price,
+      categories: productData.categories,
+      images: productData.images,
+      isCombo: productData.isCombo
+    });
+    
+    // Enhanced validation
+    const validationErrors = [];
+    
     // Validate required fields
-    if (!productData.name || !productData.price || !productData.categories) {
+    if (!productData.name || productData.name.trim() === '') {
+      validationErrors.push('Product name is required');
+    }
+    
+    if (!productData.description || productData.description.trim() === '') {
+      validationErrors.push('Product description is required');
+    }
+    
+    if (!productData.price || productData.price <= 0) {
+      validationErrors.push('Valid price is required');
+    }
+    
+    if (!productData.categories || !Array.isArray(productData.categories) || productData.categories.length === 0) {
+      validationErrors.push('At least one category is required');
+    }
+    
+    // Validate images if provided
+    if (productData.images && Array.isArray(productData.images)) {
+      for (const image of productData.images) {
+        if (image && !image.startsWith('keralagiftsonline/products/') && !/^[a-zA-Z0-9._-]+$/.test(image)) {
+          validationErrors.push(`Invalid image format: ${image}`);
+        }
+      }
+    }
+    
+    // Validate defaultImage if provided
+    if (productData.defaultImage && !productData.defaultImage.startsWith('keralagiftsonline/products/') && !/^[a-zA-Z0-9._-]+$/.test(productData.defaultImage)) {
+      validationErrors.push(`Invalid default image format: ${productData.defaultImage}`);
+    }
+    
+    if (validationErrors.length > 0) {
+      console.error('❌ Product validation failed:', validationErrors);
       res.status(400).json({ 
         success: false, 
-        error: 'Name, price, and categories are required' 
+        error: validationErrors.join('. ')
       });
       return;
     }
 
-    const product = new Product(productData);
+    // Ensure required fields have defaults
+    const validatedProductData = {
+      ...productData,
+      stock: productData.stock || 200,
+      costPrice: productData.costPrice || 0,
+      isFeatured: productData.isFeatured || false,
+      isDeleted: false,
+      isCombo: productData.isCombo || false,
+      comboBasePrice: productData.comboBasePrice || 0,
+      comboItems: productData.comboItems || []
+    };
+
+    console.log('✅ Product data validated, creating product...');
+    
+    const product = new Product(validatedProductData);
     await product.save();
 
-    // Invalidate cache
-    await invalidateProductCache();
-
-    // Log activity
-    await ActivityLog.create({
-      userId: (req as any).user?.id,
-      action: 'CREATE_PRODUCT',
-      details: { productId: product._id, productName: product.name }
+    console.log('✅ Product created successfully:', {
+      id: product._id,
+      name: product.name,
+      price: product.price,
+      categories: product.categories.length,
+      images: product.images?.length || 0
     });
 
-    res.status(201).json({ success: true, data: product });
-  } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ success: false, error: 'Failed to create product' });
+    // Invalidate cache
+    try {
+      await invalidateProductCache();
+    } catch (cacheError) {
+      console.warn('Cache invalidation failed (non-critical):', cacheError);
+    }
+
+    // Log activity (non-critical)
+    try {
+      await ActivityLog.create({
+        actorId: (req as any).user?.id,
+        actionType: 'CREATE_PRODUCT',
+        target: {
+          type: 'Product',
+          id: product._id
+        },
+        details: { productName: product.name }
+      });
+    } catch (logError) {
+      console.warn('Activity logging failed (non-critical):', logError);
+    }
+
+    res.status(201).json({ 
+      success: true, 
+      data: product,
+      message: 'Product created successfully'
+    });
+  } catch (error: any) {
+    console.error('❌ Error creating product:', error);
+    
+    // Handle specific MongoDB validation errors
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map((err: any) => err.message);
+      res.status(400).json({ 
+        success: false, 
+        error: `Validation failed: ${validationErrors.join(', ')}`
+      });
+      return;
+    }
+    
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      res.status(400).json({ 
+        success: false, 
+        error: 'Product with this name already exists'
+      });
+      return;
+    }
+    
+    // Handle other errors
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to create product',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -369,11 +465,6 @@ router.get('/search/query', ensureDatabaseConnection, async (req: Request, res: 
       .populate({
         path: 'categories',
         select: 'name slug',
-        options: { strictPopulate: false }
-      })
-      .populate({
-        path: 'vendors',
-        select: 'storeName',
         options: { strictPopulate: false }
       })
       .populate({

@@ -198,7 +198,6 @@ export const enhanceProductsWithBatchLoading = async (req: Request, res: Respons
     const [products, categories] = await Promise.all([
       Product.find(filter)
         .populate('categories', 'name slug')
-        .populate('vendors', 'storeName')
         .sort({ isFeatured: -1, createdAt: -1 })
         .limit(100),
       

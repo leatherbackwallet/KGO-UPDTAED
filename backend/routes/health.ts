@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import { healthCheckMiddleware, keepAliveMiddleware } from '../utils/keepAlive';
 
 const router = express.Router();
 
@@ -76,5 +77,15 @@ router.get('/ready', (req, res) => {
     });
   }
 });
+
+/**
+ * Enhanced health check with detailed monitoring
+ */
+router.get('/health-status', healthCheckMiddleware);
+
+/**
+ * Keep-alive endpoint to prevent service sleep
+ */
+router.get('/keep-alive', keepAliveMiddleware);
 
 export default router;

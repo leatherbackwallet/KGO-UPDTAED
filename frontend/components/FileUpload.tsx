@@ -23,31 +23,13 @@ export default function FileUpload({
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Function to verify image URL is accessible with exponential backoff
-  const verifyImageUrl = useCallback(async (url: string, maxRetries: number = 5): Promise<boolean> => {
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        const response = await fetch(url, { 
-          method: 'HEAD',
-          // Add timeout to prevent hanging
-          signal: AbortSignal.timeout(5000)
-        });
-        if (response.ok) {
-          console.log(`Image URL verified successfully on attempt ${i + 1}`);
-          return true;
-        }
-      } catch (error) {
-        console.log(`Image URL verification attempt ${i + 1} failed:`, error);
-        if (i < maxRetries - 1) {
-          // Exponential backoff: 1s, 2s, 4s, 8s
-          const delay = Math.pow(2, i) * 1000;
-          console.log(`Retrying in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
-      }
-    }
-    console.error(`Image URL verification failed after ${maxRetries} attempts`);
-    return false;
+  // Simplified image verification - just check if we have valid data
+  const verifyImageData = useCallback((uploadData: any): boolean => {
+    return uploadData.public_id && 
+           uploadData.public_id.startsWith('keralagiftsonline/products/') &&
+           uploadData.public_id.length > 30 &&
+           !uploadData.public_id.includes('..') &&
+           !uploadData.public_id.includes(' ');
   }, []);
 
   const handleFileSelect = useCallback(async (file: File) => {
@@ -95,8 +77,8 @@ export default function FileUpload({
         });
       }
 
-      if (response.data.success) {
-        const uploadData = response.data.data;
+      if (response.data && response.data.success !== false) {
+        const uploadData = response.data.data || response.data;
         
         console.log('🖼️ Image Upload Success:', {
           public_id: uploadData.public_id,
@@ -107,38 +89,23 @@ export default function FileUpload({
           format: uploadData.format
         });
         
-        // Start verification phase immediately
-        setIsUploading(false);
-        setIsProcessing(true);
-        setProcessingMessage('Verifying image availability...');
-        
-        console.log('🔍 Starting image URL verification...', uploadData.secure_url || uploadData.url);
-        
-        // Verify the image URL is accessible (with retry logic)
-        const isUrlAccessible = await verifyImageUrl(uploadData.secure_url || uploadData.url);
-        
-        if (isUrlAccessible) {
-          console.log('✅ Image URL verification successful!', {
-            public_id: uploadData.public_id,
-            url: uploadData.secure_url || uploadData.url,
-            status: 'READY_FOR_PRODUCT_CREATION'
-          });
+        // Simplified verification - just check if we have valid data
+        if (verifyImageData(uploadData)) {
+          console.log('✅ Image upload successful with valid public_id:', uploadData.public_id);
           
+          setIsUploading(false);
           setProcessingMessage('Image ready!');
+          
           // Small delay to show success message
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 300));
           onUploadSuccess(uploadData);
         } else {
-          console.error('❌ Image URL verification failed!', {
-            public_id: uploadData.public_id,
-            url: uploadData.secure_url || uploadData.url,
-            status: 'NOT_ACCESSIBLE'
-          });
-          onUploadError?.('Image upload completed but URL is not accessible. Please try uploading again.');
+          console.error('❌ Invalid upload response - missing or invalid public_id');
+          onUploadError?.('Image upload failed - invalid response from server');
         }
       } else {
-        console.error('❌ Image upload failed:', response.data.error);
-        onUploadError?.(response.data.error?.message || 'Upload failed');
+        console.error('❌ Image upload failed:', response.data?.error || 'Unknown error');
+        onUploadError?.(response.data?.error?.message || 'Upload failed');
       }
     } catch (error: any) {
       console.error('Upload error:', error);

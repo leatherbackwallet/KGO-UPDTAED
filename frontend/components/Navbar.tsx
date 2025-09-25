@@ -39,10 +39,12 @@ export default function Navbar() {
 
   useEffect(() => {
     setIsHydrated(true);
-    fetchCategories();
+    // Remove automatic categories fetch - will be loaded on demand
   }, []);
 
   const fetchCategories = async () => {
+    if (categories.length > 0) return; // Already loaded
+    
     try {
       setCategoriesLoading(true);
       const response = await api.get('/categories');
@@ -52,6 +54,10 @@ export default function Navbar() {
     } finally {
       setCategoriesLoading(false);
     }
+  };
+
+  const handleCategoriesClick = () => {
+    fetchCategories();
   };
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
@@ -79,7 +85,7 @@ export default function Navbar() {
             <Link href="/items" className="nav-link font-semibold">
               Products
             </Link>
-            <Link href="/categories" className="nav-link">
+            <Link href="/categories" className="nav-link" onClick={handleCategoriesClick}>
               Categories
             </Link>
             <Link href="/content" className="nav-link">

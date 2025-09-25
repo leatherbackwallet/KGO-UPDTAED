@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+// Temporarily disable recharts to fix runtime errors
+// import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 interface MonitoringMetrics {
   timestamp: Date;
@@ -373,55 +374,16 @@ export const ProductionMonitoringDashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Error Rate & Response Time</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" />
-              <YAxis yAxisId="left" />
-              <YAxis yAxisId="right" orientation="right" />
-              <Tooltip />
-              <Legend />
-              <Line 
-                yAxisId="left" 
-                type="monotone" 
-                dataKey="errorRate" 
-                stroke="#ef4444" 
-                name="Error Rate (%)" 
-              />
-              <Line 
-                yAxisId="right" 
-                type="monotone" 
-                dataKey="responseTime" 
-                stroke="#3b82f6" 
-                name="Response Time (ms)" 
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="w-full h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
+            <p className="text-gray-500">Error Rate & Response Time Chart (Temporarily Disabled)</p>
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Cache Performance</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="cacheHitRate" 
-                stroke="#10b981" 
-                name="Cache Hit Rate (%)" 
-              />
-              <Line 
-                type="monotone" 
-                dataKey="loadingFailureRate" 
-                stroke="#f59e0b" 
-                name="Loading Failure Rate (%)" 
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="w-full h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
+            <p className="text-gray-500">Cache Performance Chart (Temporarily Disabled)</p>
+          </div>
         </div>
       </div>
 

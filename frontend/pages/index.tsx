@@ -2,80 +2,20 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
-import ProductCard from '../components/ProductCard';
-import ProductSkeleton, { ProductSkeletonGrid } from '../components/ProductSkeleton';
-import QuickViewModal from '../components/QuickViewModal';
 import SEOHead from '../components/SEOHead';
-import api from '../utils/api';
-import { Product } from '../types/product';
-
-interface Category {
-  _id: string;
-  name: string;
-  slug: string;
-  description?: string;
-}
 
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [showQuickView, setShowQuickView] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
     setIsHydrated(true);
-    fetchProducts();
-    fetchCategories();
   }, []);
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get(`/products?featured=true&limit=8`);
-      const productsData = response.data?.data || response.data || [];
-      setProducts(Array.isArray(productsData) ? productsData : []);
-    } catch (err: any) {
-      console.error('Error fetching products:', err);
-      setError(err.response?.data?.error?.message || 'Failed to fetch products');
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      setCategoriesLoading(true);
-      const response = await api.get(`/categories`);
-      const categoriesData = response.data?.data || response.data || [];
-      setCategories(Array.isArray(categoriesData) ? categoriesData.slice(0, 6) : []); // Limit to 6 categories for display
-    } catch (err: any) {
-      console.error('Error fetching categories:', err);
-      setCategories([]);
-    } finally {
-      setCategoriesLoading(false);
-    }
-  };
-
-  const handleQuickView = (product: Product) => {
-    setSelectedProduct(product);
-    setShowQuickView(true);
-  };
-
-  const closeQuickView = () => {
-    setSelectedProduct(null);
-    setShowQuickView(false);
-  };
-
-  // Generate enhanced homepage structured data with products
+  // Generate enhanced homepage structured data
   const generateHomepageStructuredData = () => {
-    const baseStructuredData = {
+    return {
       "@context": "https://schema.org",
       "@type": "WebPage",
       "name": "KeralGiftsOnline - Premium Gifts & Traditional Products",
@@ -99,30 +39,6 @@ export default function Home() {
         ]
       }
     };
-
-    // Add product information if available
-    if (products.length > 0) {
-      (baseStructuredData.mainEntity as any).hasOfferCatalog = {
-        "@type": "OfferCatalog",
-        "name": "Premium Kerala Gifts Collection",
-        "itemListElement": products.slice(0, 10).map((product, index) => ({
-          "@type": "Offer",
-          "position": index + 1,
-          "itemOffered": {
-            "@type": "Product",
-            "name": product.name,
-            "description": product.description,
-            "image": product.images?.[0] ? `https://keralagiftsonline.in/images/${product.images[0]}` : undefined,
-            "url": `https://keralagiftsonline.in/product/${product._id}`
-          },
-          "price": product.price,
-          "priceCurrency": "INR",
-          "availability": "https://schema.org/InStock"
-        }))
-      };
-    }
-
-    return baseStructuredData;
   };
 
   return (
@@ -132,8 +48,6 @@ export default function Home() {
         description="Discover premium quality gifts, traditional Kerala products & authentic items. Fast delivery across Kerala with advanced logistics. Perfect for festivals, occasions & special moments. Shop now!"
         url="https://keralagiftsonline.in/"
         type="website"
-        products={products}
-        categories={categories}
         isHomepage={true}
         structuredData={generateHomepageStructuredData()}
       />
@@ -249,121 +163,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Categories Showcase */}
-        <section className="py-20 bg-gray-50" aria-labelledby="categories-heading">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 id="categories-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Shop by Category
-              </h2>
-              <p className="text-xl text-gray-600">
-                Explore our carefully curated selection of authentic Kerala products
-              </p>
-            </div>
-
-            {categoriesLoading ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-2xl p-6 shadow-lg animate-pulse">
-                    <div className="bg-gray-200 h-40 rounded-xl mb-4"></div>
-                    <div className="bg-gray-200 h-6 rounded mb-2"></div>
-                    <div className="bg-gray-200 h-4 rounded w-2/3"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {categories.map((category) => (
-                  <Link key={category._id} href={`/items?category=${category.slug}`}>
-                    <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer group">
-                      <div className="bg-gradient-to-br from-kgo-green to-emerald-600 h-40 rounded-xl mb-4 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                        <span className="text-white text-4xl font-bold">
-                          {category.name.charAt(0)}
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">{category.name}</h3>
-                      <p className="text-gray-600">{category.description || `Discover authentic ${category.name.toLowerCase()}`}</p>
-                      <div className="mt-4 flex items-center text-kgo-green font-medium group-hover:text-kgo-red transition-colors duration-300">
-                        Shop Now
-                        <svg className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Featured Products Section */}
-        <section className="py-20 bg-white" aria-labelledby="products-heading">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 id="products-heading" className="text-4xl font-bold text-green-900 mb-4">Featured Products</h2>
-              <p className="text-xl text-green-700">Discover our most popular traditional items and premium gifts</p>
-            </div>
-
-            {!isHydrated ? (
-              // Show skeleton during SSR to prevent hydration mismatch
-              <ProductSkeletonGrid count={8} />
-            ) : loading ? (
-              // Show skeleton during loading
-              <ProductSkeletonGrid count={8} />
-            ) : error ? (
-              <div className="text-center py-16">
-                <div className="text-red-500 mb-6">
-                  <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-green-900 mb-4">Error Loading Products</h3>
-                <p className="text-green-700 mb-6">{error}</p>
-                <button
-                  onClick={fetchProducts}
-                  className="bg-green-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-700 transition-colors"
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : products.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="text-green-400 mb-6">
-                  <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-green-900 mb-4">No Products Available</h3>
-                <p className="text-green-700">Check back later for new products</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {products.slice(0, 8).map((product) => (
-                  <ProductCard
-                    key={product._id}
-                    product={product}
-                    onQuickView={handleQuickView}
-                  />
-                ))}
-              </div>
-            )}
-
-            {products.length > 8 && (
-              <div className="text-center mt-16">
-                <Link
-                  href="/items"
-                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                >
-                  View All Items
-                  <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
-              </div>
-            )}
-          </div>
-        </section>
 
         {/* Celebration Banner */}
         <section className="py-20 bg-gradient-to-r from-green-600 via-green-700 to-green-800 relative overflow-hidden">
@@ -421,16 +220,6 @@ export default function Home() {
           </div>
         </section>
       </main>
-
-
-      {/* Quick View Modal */}
-      {selectedProduct && (
-        <QuickViewModal
-          product={selectedProduct}
-          isOpen={showQuickView}
-          onClose={closeQuickView}
-        />
-      )}
 
       <style jsx>{`
         .bg-pattern {

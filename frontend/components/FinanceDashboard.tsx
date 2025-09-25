@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { format, subDays, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
-import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
-} from 'recharts';
+// Temporarily disable recharts to fix the runtime error
+// import {
+//   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+//   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+// } from 'recharts';
 import api from '../utils/api';
 import AdminTabs from './AdminTabs';
 
@@ -323,89 +324,33 @@ export default function FinanceDashboard() {
             {/* Revenue vs Cost Chart */}
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue vs Cost Trend</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={financialData.monthlyData || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="month" 
-                    tickFormatter={(value) => format(new Date(value + '-01'), 'MMM yyyy')}
-                  />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value: number) => formatCurrency(value)}
-                    labelFormatter={(label) => format(new Date(label + '-01'), 'MMMM yyyy')}
-                  />
-                  <Legend />
-                  <Area type="monotone" dataKey="revenue" stackId="1" stroke="#8884d8" fill="#8884d8" name="Revenue" />
-                  <Area type="monotone" dataKey="cost" stackId="1" stroke="#82ca9d" fill="#82ca9d" name="Cost" />
-                </AreaChart>
-              </ResponsiveContainer>
+              <div className="w-full h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500">Revenue vs Cost Chart (Temporarily Disabled)</p>
+              </div>
             </div>
 
             {/* Profit Trend */}
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Profit Trend</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={financialData.monthlyData || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="month" 
-                    tickFormatter={(value) => format(new Date(value + '-01'), 'MMM yyyy')}
-                  />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value: number) => formatCurrency(value)}
-                    labelFormatter={(label) => format(new Date(label + '-01'), 'MMMM yyyy')}
-                  />
-                  <Legend />
-                  <Line type="monotone" dataKey="profit" stroke="#00C49F" strokeWidth={2} name="Profit" />
-                </LineChart>
-              </ResponsiveContainer>
+              <div className="w-full h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500">Profit Trend Chart (Temporarily Disabled)</p>
+              </div>
             </div>
 
             {/* Category Performance */}
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue by Category</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={financialData.categoryData || []}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={(props: any) => `${props.category}: ${formatCurrency(props.revenue)}`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="revenue"
-                  >
-                    {(financialData.categoryData || []).map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="w-full h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500">Category Revenue Chart (Temporarily Disabled)</p>
+              </div>
             </div>
 
             {/* Order Volume */}
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Volume</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={financialData.monthlyData || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="month" 
-                    tickFormatter={(value) => format(new Date(value + '-01'), 'MMM yyyy')}
-                  />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value: number) => value}
-                    labelFormatter={(label) => format(new Date(label + '-01'), 'MMMM yyyy')}
-                  />
-                  <Legend />
-                  <Bar dataKey="orders" fill="#FFBB28" name="Orders" />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="w-full h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500">Order Volume Chart (Temporarily Disabled)</p>
+              </div>
             </div>
           </div>
         </div>

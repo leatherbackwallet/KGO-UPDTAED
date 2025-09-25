@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const keepAlive_1 = require("../utils/keepAlive");
 const router = express_1.default.Router();
 /**
  * Health check endpoint for App Engine
@@ -80,4 +81,12 @@ router.get('/ready', (req, res) => {
         });
     }
 });
+/**
+ * Enhanced health check with detailed monitoring
+ */
+router.get('/health-status', keepAlive_1.healthCheckMiddleware);
+/**
+ * Keep-alive endpoint to prevent service sleep
+ */
+router.get('/keep-alive', keepAlive_1.keepAliveMiddleware);
 exports.default = router;

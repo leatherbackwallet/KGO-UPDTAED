@@ -33,10 +33,13 @@ export function getProductImage(imagePath?: string, slug?: string): string {
   // If we have a Cloudinary public_id (starts with keralagiftsonline/products/)
   if (imagePath && imagePath.startsWith('keralagiftsonline/products/')) {
     // Validate the public_id format before creating URL
-    if (imagePath.length > 30 && !imagePath.includes('..')) {
-      return `https://res.cloudinary.com/deojqbepy/image/upload/w_400,h_400,c_fill,q_auto,f_auto/${imagePath}`;
+    if (imagePath.length > 30 && !imagePath.includes('..') && !imagePath.includes(' ')) {
+      // Use optimized Cloudinary URL with proper transformations
+      // Remove any existing transformations to avoid conflicts
+      const cleanPublicId = imagePath.replace(/^keralagiftsonline\/products\//, '');
+      return `https://res.cloudinary.com/deojqbepy/image/upload/w_400,h_400,c_fill,q_auto,f_auto/keralagiftsonline/products/${cleanPublicId}`;
     } else {
-      // Invalid public_id, return default
+      console.warn('Invalid Cloudinary public_id format:', imagePath);
       return DEFAULT_PRODUCT_IMAGE;
     }
   }

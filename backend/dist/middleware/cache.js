@@ -210,9 +210,8 @@ const warmCache = async (warmingConfig) => {
         if (warmingConfig.products) {
             // Cache featured products with optimized query
             const featuredProducts = await products_model_1.Product.find({ isFeatured: true })
-                .select('name description price stock images isFeatured categories vendors')
+                .select('name description price stock images isFeatured categories')
                 .populate('categories', 'name slug')
-                .populate('vendors', 'storeName')
                 .limit(20);
             const featuredKey = 'products::::true';
             const etag = generateETag(featuredProducts);
@@ -225,9 +224,8 @@ const warmCache = async (warmingConfig) => {
             const popularCategories = await categories_model_1.Category.find({ isPopular: true }).limit(5);
             for (const category of popularCategories) {
                 const categoryProducts = await products_model_1.Product.find({ categories: category._id })
-                    .select('name description price stock images isFeatured categories vendors')
+                    .select('name description price stock images isFeatured categories')
                     .populate('categories', 'name slug')
-                    .populate('vendors', 'storeName')
                     .limit(20);
                 const categoryKey = `products::${category._id}:::`;
                 const categoryEtag = generateETag(categoryProducts);
