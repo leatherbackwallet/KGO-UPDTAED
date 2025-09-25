@@ -122,7 +122,6 @@ steps:
         
         echo "✅ Cleanup completed"
     id: 'cleanup-versions'
-    waitFor: ['promote-backend', 'promote-frontend']
 
 # Build options for optimization
 options:
