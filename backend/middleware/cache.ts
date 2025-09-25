@@ -131,8 +131,8 @@ export const createCacheMiddleware = (
 export const cacheConfigs = {
   // Product listings - cache for 3 minutes with ETag support (optimized)
   products: createCacheMiddleware(180, (req: Request) => {
-    const { search, category, min, max, occasions, featured, page, limit, sort } = req.query;
-    return `products:${search || ''}:${category || ''}:${min || ''}:${max || ''}:${occasions || ''}:${featured || ''}:${sort || 'newest'}:${page || 1}:${limit || 24}`;
+    const { search, category, min, max, occasions, featured, page, limit, sort, admin } = req.query;
+    return `products:${search || ''}:${category || ''}:${min || ''}:${max || ''}:${occasions || ''}:${featured || ''}:${sort || 'newest'}:${page || 1}:${limit || 24}:${admin || 'false'}`;
   }, {
     enableETag: true,
     cacheControl: 'public, max-age=180, stale-while-revalidate=60',

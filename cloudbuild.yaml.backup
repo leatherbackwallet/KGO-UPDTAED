@@ -42,7 +42,6 @@ steps:
       - '--quiet'
       - '--no-promote'  # Don't promote immediately
     id: 'deploy-backend'
-    waitFor: ['build-backend']
 
   # Step 4: Deploy frontend service (default) - App Engine Standard
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -55,7 +54,6 @@ steps:
       - '--quiet'
       - '--no-promote'  # Don't promote immediately
     id: 'deploy-frontend'
-    waitFor: ['build-frontend']
 
   # Step 5: Health check backend before promoting
   - name: 'gcr.io/cloud-builders/curl'
@@ -69,8 +67,6 @@ steps:
       - '30'
       - 'https://v$BUILD_ID-dot-api-dot-$PROJECT_ID.uc.r.appspot.com/api/health'
     id: 'health-check-backend'
-    waitFor: ['deploy-backend']
-
   # Step 6: Health check frontend before promoting
   - name: 'gcr.io/cloud-builders/curl'
     args:
@@ -83,7 +79,6 @@ steps:
       - '30'
       - 'https://v$BUILD_ID-dot-$PROJECT_ID.uc.r.appspot.com/api/health'
     id: 'health-check-frontend'
-    waitFor: ['deploy-frontend']
 
   # Step 7: Promote backend to 100% traffic after health check passes
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -96,7 +91,6 @@ steps:
       - '--project=$PROJECT_ID'
       - '--quiet'
     id: 'promote-backend'
-    waitFor: ['health-check-backend']
 
   # Step 8: Promote frontend to 100% traffic after health check passes
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -109,7 +103,6 @@ steps:
       - '--project=$PROJECT_ID'
       - '--quiet'
     id: 'promote-frontend'
-    waitFor: ['health-check-frontend']
 
   # Step 9: Clean up old versions (keep last 5 for rollback capability)
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -129,18 +122,15 @@ steps:
         
         echo "✅ Cleanup completed"
     id: 'cleanup-versions'
-    waitFor: ['promote-backend', 'promote-frontend']
 
 # Build options for optimization
 options:
   logging: CLOUD_LOGGING_ONLY
-  machineType: 'E2_HIGHCPU_8'
-  diskSizeGb: 100
   substitution_option: 'ALLOW_LOOSE'
 
 # Timeout for the entire build process (45 minutes)
-timeout: '2700s'
+# timeout: '2700s'  # Commented out due to parsing issues
 
 # Substitution variables
-substitutions:
-  _DEPLOY_ENV: 'production'
+# substitutions:
+#   _DEPLOY_ENV: 'production'  # Commented out due to parsing issues
