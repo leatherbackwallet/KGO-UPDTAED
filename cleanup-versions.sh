@@ -47,7 +47,7 @@ cleanup_old_versions() {
     
     # Backend cleanup
     log_info "Cleaning backend versions..."
-    local backend_zero_traffic=$(gcloud app versions list --service="$BACKEND_SERVICE" --format="table(version.id,traffic_split,serving_status)" | grep "0.00.*SERVING" | awk '{print $1}' || true)
+    local backend_zero_traffic=$(gcloud app versions list --service="$BACKEND_SERVICE" --format="table(version.id,traffic_split,serving_status)" | grep "0.00" | awk '{print $1}' || true)
     if [ -n "$backend_zero_traffic" ]; then
         echo "$backend_zero_traffic" | xargs -r gcloud app versions stop --service="$BACKEND_SERVICE" --quiet 2>/dev/null || true
         log_success "Stopped backend versions with 0% traffic: $backend_zero_traffic"
@@ -57,7 +57,7 @@ cleanup_old_versions() {
     
     # Frontend cleanup
     log_info "Cleaning frontend versions..."
-    local frontend_zero_traffic=$(gcloud app versions list --service="$FRONTEND_SERVICE" --format="table(version.id,traffic_split,serving_status)" | grep "0.00.*SERVING" | awk '{print $1}' || true)
+    local frontend_zero_traffic=$(gcloud app versions list --service="$FRONTEND_SERVICE" --format="table(version.id,traffic_split,serving_status)" | grep "0.00" | awk '{print $1}' || true)
     if [ -n "$frontend_zero_traffic" ]; then
         echo "$frontend_zero_traffic" | xargs -r gcloud app versions stop --service="$FRONTEND_SERVICE" --quiet 2>/dev/null || true
         log_success "Stopped frontend versions with 0% traffic: $frontend_zero_traffic"
@@ -127,9 +127,9 @@ dry_run() {
     # Show 0% traffic versions that would be stopped
     log_info "Versions with 0% traffic that would be STOPPED:"
     echo "Backend:"
-    gcloud app versions list --service="$BACKEND_SERVICE" --format="table(version.id,traffic_split,serving_status)" | grep "0.00.*SERVING" || echo "  None"
+    gcloud app versions list --service="$BACKEND_SERVICE" --format="table(version.id,traffic_split,serving_status)" | grep "0.00" || echo "  None"
     echo "Frontend:"
-    gcloud app versions list --service="$FRONTEND_SERVICE" --format="table(version.id,traffic_split,serving_status)" | grep "0.00.*SERVING" || echo "  None"
+    gcloud app versions list --service="$FRONTEND_SERVICE" --format="table(version.id,traffic_split,serving_status)" | grep "0.00" || echo "  None"
     echo ""
     
     # Show old versions that would be deleted
