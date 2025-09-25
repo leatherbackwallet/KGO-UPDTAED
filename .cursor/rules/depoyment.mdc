@@ -1,0 +1,5 @@
+---
+description: always use deploy-bulletproof.sh for deployment . use no other or generic deployment patters
+globs: never deploy without explicit confirmation from user 
+alwaysApply: true
+---

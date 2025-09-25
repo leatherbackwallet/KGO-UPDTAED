@@ -51,7 +51,8 @@ const corsOptions = {
     'Access-Control-Request-Method',
     'Access-Control-Request-Headers',
     'Cache-Control',
-    'Pragma'
+    'Pragma',
+    'Expires'
   ],
   exposedHeaders: [
     'Content-Length', 
@@ -90,7 +91,7 @@ app.use((req, res, next) => {
 
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Cache-Control, Pragma');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Cache-Control, Pragma, Expires');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Credentials');
   res.setHeader('Access-Control-Max-Age', '86400');
 
@@ -352,7 +353,7 @@ app.use((err: any, req: any, res: any, next: any) => {
     }
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, Pragma, Expires');
     
     return res.status(403).json({
       success: false,

@@ -34,6 +34,21 @@ const ItemsPage: React.FC = () => {
   useEffect(() => {
     setIsClient(true);
     setIsHydrated(true);
+
+    // Clear service worker cache if available
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'caches' in window) {
+      caches.keys().then(cacheNames => {
+        cacheNames.forEach(cacheName => {
+          if (cacheName.includes('api') || cacheName.includes('products')) {
+            caches.delete(cacheName);
+            console.log('🧹 Cleared cache:', cacheName);
+          }
+        });
+      }).catch(err => {
+        console.warn('Cache clearing failed:', err);
+      });
+    }
+
     fetchProducts();
     setIsInitialLoad(false);
   }, []);
@@ -45,7 +60,7 @@ const ItemsPage: React.FC = () => {
     sort?: string;
   } = {}) => {
     const { retryCount = 0, page = currentPage, search = searchTerm, sort = sortBy } = options;
-    const MAX_RETRIES = 3;
+    const MAX_RETRIES = 2; // Reduced from 3 to 2
     
     try {
       setLoading(true);
@@ -66,20 +81,23 @@ const ItemsPage: React.FC = () => {
       
       console.log(`📄 Pagination: Page ${page}, Search: "${search}", Sort: ${sort}`);
       
-      // Add cache busting parameter
-      params.append('_t', Date.now().toString());
+      // Enhanced cache busting with random component
+      const cacheBuster = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      params.append('_t', cacheBuster);
 
       const apiUrl = `/products?${params.toString()}`;
       console.log('🔗 Full API URL:', `${api.defaults.baseURL}${apiUrl}`);
-      console.log('🔗 Full params:', params.toString());
+      console.log('🔗 Cache buster:', cacheBuster);
       
-      // Add a timeout promise
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout after 30 seconds')), 30000);
-      });
-      
-      const apiPromise = api.get(apiUrl);
-      const response = await Promise.race([apiPromise, timeoutPromise]) as any;
+      // Use the ReliableApiService for better error handling
+      const response = await api.get(apiUrl, {
+        timeout: 15000, // Reduced timeout to 15 seconds
+        // Remove problematic cache headers that cause CORS issues
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }) as any;
       
       const productsData = response.data?.data || response.data || [];
       
@@ -113,20 +131,37 @@ const ItemsPage: React.FC = () => {
     } catch (err: any) {
       console.error(`❌ Error fetching items (attempt ${retryCount + 1}):`, err);
       
-      // Retry logic for network errors
-      if (retryCount < MAX_RETRIES && (
-        err.message.includes('timeout') || 
-        err.message.includes('Network Error') ||
-        err.code === 'ECONNABORTED'
-      )) {
-        console.log(`🔄 Retrying in ${(retryCount + 1) * 2} seconds...`);
+      // Improved retry logic - only retry on specific network errors
+      const shouldRetry = retryCount < MAX_RETRIES && (
+        err.code === 'ECONNABORTED' || // Timeout
+        err.code === 'ERR_NETWORK' || // Network error
+        err.message?.includes('timeout') ||
+        (err.response?.status >= 500 && err.response?.status < 600) // Server errors
+      );
+      
+      if (shouldRetry) {
+        const delay = Math.min(1000 * Math.pow(2, retryCount), 5000); // Exponential backoff, max 5s
+        console.log(`🔄 Retrying in ${delay}ms... (${retryCount + 1}/${MAX_RETRIES})`);
         setTimeout(() => {
           fetchProducts({ retryCount: retryCount + 1, page, search, sort });
-        }, (retryCount + 1) * 2000);
+        }, delay);
         return;
       }
       
-      const errorMessage = err.response?.data?.error?.message || err.message || 'Failed to fetch items';
+      // Better error messages for users
+      let errorMessage = 'Unable to load products';
+      if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        errorMessage = 'Request timed out. Please check your connection and try again.';
+      } else if (err.code === 'ERR_NETWORK' || !err.response) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (err.response?.status === 403) {
+        errorMessage = 'Access denied. Please refresh the page.';
+      } else if (err.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again in a moment.';
+      } else if (err.response?.data?.error?.message) {
+        errorMessage = err.response.data.error.message;
+      }
+      
       setError(errorMessage);
       setProducts([]);
       

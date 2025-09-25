@@ -134,10 +134,7 @@ export default function AdminCategories() {
       // Add multiple cache busting parameters to force fresh data
       const response = await api.get(`/categories?includeInactive=true&_t=${Date.now()}&_refresh=${Math.random()}`, {
         headers: { 
-          Authorization: `Bearer ${tokens?.accessToken}`,
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
+          Authorization: `Bearer ${tokens?.accessToken}`
         }
       });
       console.log('🔄 Refreshed categories data:', response.data);
