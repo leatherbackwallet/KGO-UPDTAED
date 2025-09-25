@@ -572,3 +572,7 @@ To view your application in the web browser run:
 [0;34m[INFO][0m Checking Frontend health at https://v20250925132240-dot-onyourbehlf.uc.r.appspot.com/api/health
 [1;33m[WARNING][0m Frontend health check attempt 1/10 failed
 [1;33m[WARNING][0m Frontend health check attempt 2/10 failed
+[1;33m[WARNING][0m Frontend health check attempt 3/10 failed
+[1;33m[WARNING][0m Frontend health check attempt 4/10 failed
+[1;33m[WARNING][0m Frontend health check attempt 5/10 failed
+[1;33m[WARNING][0m Frontend health check attempt 6/10 failed
