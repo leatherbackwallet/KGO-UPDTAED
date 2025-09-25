@@ -18,6 +18,7 @@ import { requireRole } from '../middleware/role';
 import { validate } from '../middleware/validation';
 import { cacheConfigs, invalidateProductCache } from '../middleware/cache';
 import { ensureDatabaseConnection } from '../middleware/database';
+import { validateProductData } from '../utils/productValidation';
 import { verifyImageExists } from '../utils/cloudinary';
 
 const router = express.Router();
@@ -223,60 +224,19 @@ router.post('/', auth, requireRole('admin'), ensureDatabaseConnection, async (re
       isCombo: productData.isCombo
     });
     
-    // Enhanced validation
-    const validationErrors = [];
+    // Enhanced validation using centralized validation utility
+    const validationResult = validateProductData(productData, false);
     
-    // Validate required fields
-    if (!productData.name || productData.name.trim() === '') {
-      validationErrors.push('Product name is required');
-    }
-    
-    if (!productData.description || productData.description.trim() === '') {
-      validationErrors.push('Product description is required');
-    }
-    
-    if (!productData.price || productData.price <= 0) {
-      validationErrors.push('Valid price is required');
-    }
-    
-    if (!productData.categories || !Array.isArray(productData.categories) || productData.categories.length === 0) {
-      validationErrors.push('At least one category is required');
-    }
-    
-    // Validate images if provided
-    if (productData.images && Array.isArray(productData.images)) {
-      for (const image of productData.images) {
-        if (image && !image.startsWith('keralagiftsonline/products/') && !/^[a-zA-Z0-9._-]+$/.test(image)) {
-          validationErrors.push(`Invalid image format: ${image}`);
-        }
-      }
-    }
-    
-    // Validate defaultImage if provided
-    if (productData.defaultImage && !productData.defaultImage.startsWith('keralagiftsonline/products/') && !/^[a-zA-Z0-9._-]+$/.test(productData.defaultImage)) {
-      validationErrors.push(`Invalid default image format: ${productData.defaultImage}`);
-    }
-    
-    if (validationErrors.length > 0) {
-      console.error('❌ Product validation failed:', validationErrors);
+    if (!validationResult.isValid) {
+      console.error('❌ Product validation failed:', validationResult.errors);
       res.status(400).json({ 
         success: false, 
-        error: validationErrors.join('. ')
+        error: validationResult.errors.join('. ')
       });
       return;
     }
 
-    // Ensure required fields have defaults
-    const validatedProductData = {
-      ...productData,
-      stock: productData.stock || 200,
-      costPrice: productData.costPrice || 0,
-      isFeatured: productData.isFeatured || false,
-      isDeleted: false,
-      isCombo: productData.isCombo || false,
-      comboBasePrice: productData.comboBasePrice || 0,
-      comboItems: productData.comboItems || []
-    };
+    const validatedProductData = validationResult.sanitizedData;
 
     console.log('✅ Product data validated, creating product...');
     
@@ -352,9 +312,37 @@ router.post('/', auth, requireRole('admin'), ensureDatabaseConnection, async (re
 // Update product (admin only)
 router.put('/:id', auth, requireRole('admin'), ensureDatabaseConnection, async (req: Request, res: Response): Promise<void> => {
   try {
+    const productData = req.body;
+    const productId = req.params.id;
+    
+    console.log('📦 Updating product with data:', {
+      id: productId,
+      name: productData.name,
+      price: productData.price,
+      categories: productData.categories,
+      images: productData.images,
+      isCombo: productData.isCombo
+    });
+    
+    // Enhanced validation using centralized validation utility
+    const validationResult = validateProductData(productData, true);
+    
+    if (!validationResult.isValid) {
+      console.error('❌ Product validation failed:', validationResult.errors);
+      res.status(400).json({ 
+        success: false, 
+        error: validationResult.errors.join('. ')
+      });
+      return;
+    }
+
+    const validatedProductData = validationResult.sanitizedData;
+
+    console.log('✅ Product data validated, updating product...');
+    
     const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
+      productId,
+      validatedProductData,
       { new: true, runValidators: true }
     ).populate('categories', 'name slug');
 
@@ -363,20 +351,69 @@ router.put('/:id', auth, requireRole('admin'), ensureDatabaseConnection, async (
       return;
     }
 
-    // Invalidate cache
-    await invalidateProductCache();
-
-    // Log activity
-    await ActivityLog.create({
-      userId: (req as any).user?.id,
-      action: 'UPDATE_PRODUCT',
-      details: { productId: product._id, productName: product.name }
+    console.log('✅ Product updated successfully:', {
+      id: product._id,
+      name: product.name,
+      price: product.price,
+      categories: product.categories.length,
+      images: product.images?.length || 0
     });
 
-    res.json({ success: true, data: product });
-  } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(500).json({ success: false, error: 'Failed to update product' });
+    // Invalidate cache
+    try {
+      await invalidateProductCache();
+    } catch (cacheError) {
+      console.warn('Cache invalidation failed (non-critical):', cacheError);
+    }
+
+    // Log activity (FIXED: Use correct schema)
+    try {
+      await ActivityLog.create({
+        actorId: (req as any).user?.id,
+        actionType: 'UPDATE_PRODUCT',
+        target: {
+          type: 'Product',
+          id: product._id
+        },
+        details: { productName: product.name }
+      });
+    } catch (logError) {
+      console.warn('Activity logging failed (non-critical):', logError);
+    }
+
+    res.json({ 
+      success: true, 
+      data: product,
+      message: 'Product updated successfully'
+    });
+  } catch (error: any) {
+    console.error('❌ Error updating product:', error);
+    
+    // Handle specific MongoDB validation errors
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map((err: any) => err.message);
+      res.status(400).json({ 
+        success: false, 
+        error: `Validation failed: ${validationErrors.join(', ')}`
+      });
+      return;
+    }
+    
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      res.status(400).json({ 
+        success: false, 
+        error: 'Product with this name already exists'
+      });
+      return;
+    }
+    
+    // Handle other errors
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to update product',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 

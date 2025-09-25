@@ -50,6 +50,8 @@ const logger_1 = require("./middleware/logger");
 // Load environment variables
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+// Trust proxy for production environments
+app.set('trust proxy', 1);
 // CORS Configuration - Enhanced for production reliability
 const corsOptions = {
     origin: function (origin, callback) {
@@ -86,7 +88,8 @@ const corsOptions = {
         'Access-Control-Request-Method',
         'Access-Control-Request-Headers',
         'Cache-Control',
-        'Pragma'
+        'Pragma',
+        'Expires'
     ],
     exposedHeaders: [
         'Content-Length',
@@ -97,45 +100,11 @@ const corsOptions = {
     preflightContinue: false,
     maxAge: 86400 // 24 hours
 };
-// Trust proxy for production environments
-app.set('trust proxy', 1);
-// Enhanced CORS middleware to handle edge cases - MUST be before rate limiting
-app.use((req, res, next) => {
-    // Always set CORS headers for allowed origins
-    const origin = req.headers.origin;
-    const allowedOrigins = [
-        process.env.CORS_ORIGIN || 'http://localhost:3000',
-        process.env.FRONTEND_URL || 'http://localhost:3000',
-        'http://localhost:3001',
-        'http://localhost:3002',
-        'http://localhost:3003',
-        'https://onyourbehlf.uc.r.appspot.com',
-        'https://keralagiftsonline.in',
-        'https://www.keralagiftsonline.in'
-    ];
-    if (origin && allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-    else if (!origin) {
-        // Allow requests with no origin (mobile apps, curl, etc.)
-        res.setHeader('Access-Control-Allow-Origin', '*');
-    }
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Cache-Control, Pragma');
-    res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Credentials');
-    res.setHeader('Access-Control-Max-Age', '86400');
-    // Handle preflight requests - MUST be before rate limiting
-    if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
-    }
-    next();
-});
+// Apply CORS middleware - MUST be before rate limiting
+app.use((0, cors_1.default)(corsOptions));
 // Middleware
 app.use(rateLimit_1.generalLimiter);
 app.use(logger_1.logger);
-app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
 // Serve static files
@@ -361,7 +330,7 @@ app.use((err, req, res, next) => {
         }
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, Pragma, Expires');
         return res.status(403).json({
             success: false,
             error: {

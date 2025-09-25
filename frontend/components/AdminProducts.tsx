@@ -477,57 +477,128 @@ const AdminProducts: React.FC = () => {
     try {
       setSaving(true);
       setError('');
+      setSuccess('');
+      
+      console.log('🚀 Starting comprehensive product update validation...');
+      
+      // Phase 1: Enhanced Field Validation (same as creation)
+      const validationErrors = [];
       
       // Validate required fields
-      if (!editingProduct.name || !editingProduct.description) {
-        setError('Name and description are required');
+      if (!editingProduct.name || editingProduct.name.trim() === '') {
+        validationErrors.push('Product name is required');
+      }
+      
+      if (!editingProduct.description || editingProduct.description.trim() === '') {
+        validationErrors.push('Product description is required');
+      }
+      
+      if (!editingProduct.price || editingProduct.price <= 0) {
+        validationErrors.push('Valid price is required');
+      }
+      
+      // Validate categories
+      if (!editingProduct.categories || editingProduct.categories.length === 0) {
+        validationErrors.push('At least one category must be selected');
+      }
+      
+      // Show validation errors if any
+      if (validationErrors.length > 0) {
+        setError(validationErrors.join('. '));
+        setSaving(false);
         return;
       }
 
-      // Validate that we have valid Cloudinary public IDs for images
-      const validImages = uploadedImages.filter(img => img.public_id && img.public_id.startsWith('keralagiftsonline/products/'));
+      // Phase 2: Image Validation (Enhanced)
+      console.log('🔍 Phase 2: Validating uploaded images...');
+      const validImages = uploadedImages.filter(img => 
+        img.public_id && 
+        img.public_id.startsWith('keralagiftsonline/products/') &&
+        img.public_id.length > 30 &&
+        !img.public_id.includes('..') &&
+        !img.public_id.includes(' ')
+      );
+      
       if (uploadedImages.length > 0 && validImages.length === 0) {
-        setError('Please upload valid images. All images must be uploaded to Cloudinary.');
+        setError('Please upload valid images. All images must be properly uploaded to Cloudinary.');
+        setSaving(false);
         return;
       }
 
-              // Ensure name and description are simple strings
-        const validatedData = {
-          ...editingProduct,
-          name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
-          description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
-          // Include images - use Cloudinary public_id only
-          images: validImages.map(img => img.public_id),
-          defaultImage: validImages[0]?.public_id || undefined,
-          // Include combo-specific fields
-          isCombo: editingProduct.isCombo || false,
-          comboBasePrice: editingProduct.comboBasePrice || 0,
-          comboItems: editingProduct.comboItems || []
-        };
+      // Phase 3: Prepare Validated Data (Enhanced)
+      console.log('📦 Phase 3: Preparing validated update data...');
+      setSuccess('Updating product...');
+      
+      const validatedData = {
+        ...editingProduct,
+        name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
+        description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
+        // Ensure categories is an array of ObjectId strings
+        categories: editingProduct.categories?.map(cat => typeof cat === 'string' ? cat : cat._id) || [],
+        // Include images - use Cloudinary public_id only (already validated)
+        images: validImages.map(img => img.public_id),
+        defaultImage: validImages[0]?.public_id || undefined,
+        // Include combo-specific fields
+        isCombo: editingProduct.isCombo || false,
+        comboBasePrice: editingProduct.comboBasePrice || 0,
+        comboItems: editingProduct.comboItems || []
+      };
 
-      console.log('Sending validated update data:', validatedData);
-      console.log('Product ID:', selectedProduct._id);
+      console.log('📦 Updating product with validated data:', {
+        name: validatedData.name,
+        description: validatedData.description,
+        price: validatedData.price,
+        categories: validatedData.categories,
+        images: validatedData.images,
+        defaultImage: validatedData.defaultImage,
+        imageCount: validatedData.images?.length || 0
+      });
       
+      // Phase 4: Update Product in Database
+      console.log('💾 Phase 4: Updating product in database...');
       const response = await api.put(`/products/${selectedProduct._id}`, validatedData);
-      console.log('Update response:', response.data);
       
+      // Debug: Log the actual response structure
+      console.log('🔍 Update Response Structure:', {
+        success: response.data?.success,
+        hasData: !!response.data?.data,
+        hasId: !!response.data?._id,
+        hasDataId: !!response.data?.data?._id,
+        fullResponse: response.data
+      });
+      
+      // Phase 5: Validate Database Response
       if (response.data.success) {
+        console.log('✅ Product updated successfully in database');
+        
         // Refresh the products list
         await fetchProducts();
         setShowModal(false);
         setSelectedProduct(null);
         setEditingProduct({});
         setComboItems([]);
+        setUploadedImages([]);
         setError(''); // Clear any previous errors
         setSuccess('Product updated successfully!');
         setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
       } else {
-        setError(response.data.error?.message || 'Failed to update product');
+        console.error('❌ Update failed:', response.data.error);
+        setError(response.data.error || 'Failed to update product');
       }
     } catch (err: any) {
-      console.error('Error updating product:', err);
+      console.error('❌ Error updating product:', err);
       console.error('Error response:', err.response?.data);
-      setError(err.response?.data?.error?.message || err.message || 'Failed to update product');
+      
+      // Enhanced error handling
+      if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('Failed to update product. Please try again.');
+      }
     } finally {
       setSaving(false);
     }
