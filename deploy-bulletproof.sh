@@ -284,15 +284,31 @@ deploy_frontend() {
 cleanup_old_versions() {
     log_info "🧹 Cleaning up old versions..."
     
-    # Clean up old backend versions (keep last 3)
-    log_info "Cleaning old backend versions..."
-    gcloud app versions list --service="$BACKEND_SERVICE" --sort-by=~version.createTime --format="value(version.id)" | tail -n +4 | xargs -r gcloud app versions delete --service="$BACKEND_SERVICE" --quiet 2>/dev/null || true
+    # Stop ALL versions with 0% traffic (these cause database conflicts)
+    log_info "Stopping versions with 0% traffic..."
     
-    # Clean up old frontend versions (keep last 3)
-    log_info "Cleaning old frontend versions..."
-    gcloud app versions list --service="$FRONTEND_SERVICE" --sort-by=~version.createTime --format="value(version.id)" | tail -n +4 | xargs -r gcloud app versions delete --service="$FRONTEND_SERVICE" --quiet 2>/dev/null || true
+    # Backend cleanup
+    log_info "Cleaning backend versions..."
+    local backend_zero_traffic=$(gcloud app versions list --service="$BACKEND_SERVICE" --format="table(version.id,traffic_split,serving_status)" | grep "0.00.*SERVING" | awk '{print $1}' || true)
+    if [ -n "$backend_zero_traffic" ]; then
+        echo "$backend_zero_traffic" | xargs -r gcloud app versions stop --service="$BACKEND_SERVICE" --quiet 2>/dev/null || true
+        log_info "Stopped backend versions with 0% traffic: $backend_zero_traffic"
+    fi
     
-    log_success "Old versions cleaned up"
+    # Frontend cleanup
+    log_info "Cleaning frontend versions..."
+    local frontend_zero_traffic=$(gcloud app versions list --service="$FRONTEND_SERVICE" --format="table(version.id,traffic_split,serving_status)" | grep "0.00.*SERVING" | awk '{print $1}' || true)
+    if [ -n "$frontend_zero_traffic" ]; then
+        echo "$frontend_zero_traffic" | xargs -r gcloud app versions stop --service="$FRONTEND_SERVICE" --quiet 2>/dev/null || true
+        log_info "Stopped frontend versions with 0% traffic: $frontend_zero_traffic"
+    fi
+    
+    # Delete old versions (keep only current + 1 backup)
+    log_info "Deleting old versions (keeping only current + 1 backup)..."
+    gcloud app versions list --service="$BACKEND_SERVICE" --sort-by=~version.createTime --format="value(version.id)" | tail -n +3 | xargs -r gcloud app versions delete --service="$BACKEND_SERVICE" --quiet 2>/dev/null || true
+    gcloud app versions list --service="$FRONTEND_SERVICE" --sort-by=~version.createTime --format="value(version.id)" | tail -n +3 | xargs -r gcloud app versions delete --service="$FRONTEND_SERVICE" --quiet 2>/dev/null || true
+    
+    log_success "Old versions cleaned up (stopped 0% traffic versions, deleted old versions)"
 }
 
 # Function to display deployment summary

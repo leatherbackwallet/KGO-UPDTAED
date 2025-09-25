@@ -112,7 +112,7 @@ steps:
     id: 'promote-frontend'
     waitFor: ['health-check-frontend']
 
-  # Step 9: Clean up old versions (keep last 5 for rollback capability)
+  # Step 9: Clean up old versions (stop 0% traffic versions, keep only current + 1 backup)
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
@@ -120,15 +120,31 @@ steps:
       - |
         echo "🧹 Cleaning up old versions..."
         
-        # Clean up old backend versions (keep last 5)
+        # Stop ALL versions with 0% traffic (these cause database conflicts)
+        echo "Stopping versions with 0% traffic..."
+        
+        # Backend cleanup
         echo "Cleaning backend versions..."
-        gcloud app versions list --service=api --sort-by=~version.createTime --format="value(version.id)" | tail -n +6 | xargs -r gcloud app versions delete --service=api --quiet || echo "No old backend versions to clean"
+        backend_zero_traffic=$(gcloud app versions list --service=api --format="table(version.id,traffic_split,serving_status)" | grep "0.00.*SERVING" | awk '{print $1}' || true)
+        if [ -n "$backend_zero_traffic" ]; then
+          echo "$backend_zero_traffic" | xargs -r gcloud app versions stop --service=api --quiet 2>/dev/null || true
+          echo "Stopped backend versions with 0% traffic: $backend_zero_traffic"
+        fi
         
-        # Clean up old frontend versions (keep last 5)
+        # Frontend cleanup
         echo "Cleaning frontend versions..."
-        gcloud app versions list --service=default --sort-by=~version.createTime --format="value(version.id)" | tail -n +6 | xargs -r gcloud app versions delete --service=default --quiet || echo "No old frontend versions to clean"
+        frontend_zero_traffic=$(gcloud app versions list --service=default --format="table(version.id,traffic_split,serving_status)" | grep "0.00.*SERVING" | awk '{print $1}' || true)
+        if [ -n "$frontend_zero_traffic" ]; then
+          echo "$frontend_zero_traffic" | xargs -r gcloud app versions stop --service=default --quiet 2>/dev/null || true
+          echo "Stopped frontend versions with 0% traffic: $frontend_zero_traffic"
+        fi
         
-        echo "✅ Cleanup completed"
+        # Delete old versions (keep only current + 1 backup)
+        echo "Deleting old versions (keeping only current + 1 backup)..."
+        gcloud app versions list --service=api --sort-by=~version.createTime --format="value(version.id)" | tail -n +3 | xargs -r gcloud app versions delete --service=api --quiet 2>/dev/null || true
+        gcloud app versions list --service=default --sort-by=~version.createTime --format="value(version.id)" | tail -n +3 | xargs -r gcloud app versions delete --service=default --quiet 2>/dev/null || true
+        
+        echo "✅ Old versions cleaned up (stopped 0% traffic versions, deleted old versions)"
     id: 'cleanup-versions'
     waitFor: ['promote-backend', 'promote-frontend']
 

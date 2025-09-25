@@ -6,6 +6,7 @@ import QuickViewModal from '../components/QuickViewModal';
 import ProductSkeleton, { ProductSkeletonGrid } from '../components/ProductSkeleton';
 import SEOHead from '../components/SEOHead';
 import api from '../utils/api';
+import { ReliableApiService } from '../services/ReliableApiService';
 import { preloadProductImages } from '../utils/imageUtils';
 import { Product } from '../types/product';
 
@@ -90,19 +91,18 @@ const ItemsPage: React.FC = () => {
       console.log('🔗 Cache buster:', cacheBuster);
       
       // Use the ReliableApiService for better error handling
-      const response = await api.get(apiUrl, {
-        timeout: 15000, // Reduced timeout to 15 seconds
-        // Remove problematic cache headers that cause CORS issues
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      }) as any;
+      const reliableApi = new ReliableApiService(process.env.NEXT_PUBLIC_API_URL, 15000);
+      const response = await reliableApi.get(apiUrl, {
+        retries: 3,
+        timeout: 15000,
+        cacheTTL: 300000 // 5 minutes cache
+      });
       
-      const productsData = response.data?.data || response.data || [];
+      const apiResponse = response.data as any;
+      const productsData = apiResponse?.data || apiResponse || [];
       
       // Extract pagination information
-      const paginationInfo = response.data;
+      const paginationInfo = apiResponse;
       setTotalProducts(paginationInfo.total || productsData.length);
       setTotalPages(paginationInfo.pages || 1);
       
@@ -131,22 +131,7 @@ const ItemsPage: React.FC = () => {
     } catch (err: any) {
       console.error(`❌ Error fetching items (attempt ${retryCount + 1}):`, err);
       
-      // Improved retry logic - only retry on specific network errors
-      const shouldRetry = retryCount < MAX_RETRIES && (
-        err.code === 'ECONNABORTED' || // Timeout
-        err.code === 'ERR_NETWORK' || // Network error
-        err.message?.includes('timeout') ||
-        (err.response?.status >= 500 && err.response?.status < 600) // Server errors
-      );
-      
-      if (shouldRetry) {
-        const delay = Math.min(1000 * Math.pow(2, retryCount), 5000); // Exponential backoff, max 5s
-        console.log(`🔄 Retrying in ${delay}ms... (${retryCount + 1}/${MAX_RETRIES})`);
-        setTimeout(() => {
-          fetchProducts({ retryCount: retryCount + 1, page, search, sort });
-        }, delay);
-        return;
-      }
+      // ReliableApiService handles retries automatically, so we don't need manual retry logic
       
       // Better error messages for users
       let errorMessage = 'Unable to load products';
