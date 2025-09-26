@@ -2,11 +2,14 @@ name: Keep API Alive (Prevent Cold Starts)
 
 on:
   schedule:
-    # Run every 4 minutes during business hours (6 AM - 11 PM IST)
-    # IST is UTC+5:30, so 6 AM IST = 0:30 UTC, 11 PM IST = 17:30 UTC
-    - cron: '*/4 0-17 * * *'  # Every 4 minutes from 0:30 to 17:30 UTC
-    # Less frequent during night hours to save GitHub Actions minutes
-    - cron: '*/15 18-23,0 * * *'  # Every 15 minutes during night
+    # BUSINESS HOURS (6 AM - 11 PM IST = 0:30 - 17:30 UTC)
+    # Run every 3 minutes to prevent cold starts
+    - cron: '*/3 1-17 * * *'  # Every 3 minutes during business hours
+    
+    # NIGHT HOURS (11 PM - 6 AM IST = 17:30 - 0:30 UTC)  
+    # Run every 20 minutes to save GitHub Actions minutes
+    - cron: '*/20 18-23 * * *'  # Every 20 minutes evening
+    - cron: '*/20 0 * * *'      # Every 20 minutes midnight hour
   
   # Allow manual trigger
   workflow_dispatch:

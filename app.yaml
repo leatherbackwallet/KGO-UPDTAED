@@ -58,11 +58,11 @@ liveness_check:
   success_threshold: 1  # Faster recovery
 
 automatic_scaling:
-  min_num_instances: 0  # Zero cost - let it scale to zero
+  min_num_instances: 1  # Minimum required by App Engine
   max_num_instances: 10
-  cool_down_period_sec: 180  # 3 minutes - balanced
+  cool_down_period_sec: 300  # 5 minutes - prevents frequent scaling
   cpu_utilization:
-    target_utilization: 0.6
+    target_utilization: 0.8  # Higher threshold for scaling
 
 resources:
   cpu: 2
