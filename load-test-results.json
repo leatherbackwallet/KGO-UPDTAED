@@ -1,0 +1,4099 @@
+{
+  "startTime": "2025-09-26T09:28:56.402Z",
+  "endTime": "2025-09-26T09:43:56.440Z",
+  "totalRequests": 57,
+  "successfulRequests": 27,
+  "failedRequests": 30,
+  "errors": [
+    {
+      "userId": 6,
+      "endpoint": "/api/auth/login",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:28:57.416Z",
+      "duration": 1010
+    },
+    {
+      "userId": 11,
+      "endpoint": "/api/auth/login",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:28:57.418Z",
+      "duration": 1012
+    },
+    {
+      "userId": 3,
+      "endpoint": "/api/auth/login",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:28:57.882Z",
+      "duration": 1476
+    },
+    {
+      "userId": 1,
+      "endpoint": "/api/auth/login",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:28:58.496Z",
+      "duration": 2090
+    },
+    {
+      "userId": 13,
+      "endpoint": "/api/auth/login",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:28:58.719Z",
+      "duration": 2313
+    },
+    {
+      "userId": 8,
+      "endpoint": "/api/auth/login",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:28:58.724Z",
+      "duration": 2318
+    },
+    {
+      "userId": 14,
+      "endpoint": "/api/auth/guest",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:29:00.087Z",
+      "duration": 308
+    },
+    {
+      "userId": 12,
+      "endpoint": "/api/auth/guest",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:29:00.088Z",
+      "duration": 293
+    },
+    {
+      "userId": 14,
+      "endpoint": "/api/orders",
+      "method": "post",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:00.227Z",
+      "duration": 139
+    },
+    {
+      "userId": 7,
+      "endpoint": "/api/auth/guest",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:29:00.286Z",
+      "duration": 635
+    },
+    {
+      "userId": 2,
+      "endpoint": "/api/auth/guest",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:29:00.422Z",
+      "duration": 167
+    },
+    {
+      "userId": 9,
+      "endpoint": "/api/auth/guest",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:29:00.472Z",
+      "duration": 155
+    },
+    {
+      "userId": 4,
+      "endpoint": "/api/auth/guest",
+      "method": "post",
+      "status": 400,
+      "message": "Request failed with status code 400",
+      "timestamp": "2025-09-26T09:29:00.526Z",
+      "duration": 745
+    },
+    {
+      "userId": 6,
+      "endpoint": "/api/orders/my",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:00.528Z",
+      "duration": 735
+    },
+    {
+      "userId": 11,
+      "endpoint": "/api/orders/my",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:00.529Z",
+      "duration": 758
+    },
+    {
+      "userId": 9,
+      "endpoint": "/api/orders",
+      "method": "post",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:00.706Z",
+      "duration": 234
+    },
+    {
+      "userId": 4,
+      "endpoint": "/api/orders",
+      "method": "post",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:00.927Z",
+      "duration": 401
+    },
+    {
+      "userId": 11,
+      "endpoint": "/api/cart",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:00.928Z",
+      "duration": 399
+    },
+    {
+      "userId": 1,
+      "endpoint": "/api/orders/my",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:00.970Z",
+      "duration": 147
+    },
+    {
+      "userId": 6,
+      "endpoint": "/api/cart",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:01.075Z",
+      "duration": 547
+    },
+    {
+      "userId": 3,
+      "endpoint": "/api/orders",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:01.132Z",
+      "duration": 256
+    },
+    {
+      "userId": 1,
+      "endpoint": "/api/cart",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:01.164Z",
+      "duration": 193
+    },
+    {
+      "userId": 3,
+      "endpoint": "/api/notifications/unread-count",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:01.349Z",
+      "duration": 217
+    },
+    {
+      "userId": 13,
+      "endpoint": "/api/orders",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:01.653Z",
+      "duration": 137
+    },
+    {
+      "userId": 8,
+      "endpoint": "/api/orders",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:01.664Z",
+      "duration": 147
+    },
+    {
+      "userId": 13,
+      "endpoint": "/api/notifications/unread-count",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:01.785Z",
+      "duration": 132
+    },
+    {
+      "userId": 8,
+      "endpoint": "/api/notifications/unread-count",
+      "method": "get",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:01.806Z",
+      "duration": 142
+    },
+    {
+      "userId": 12,
+      "endpoint": "/api/cart/merge",
+      "method": "post",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:02.849Z",
+      "duration": 140
+    },
+    {
+      "userId": 2,
+      "endpoint": "/api/cart/merge",
+      "method": "post",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:02.983Z",
+      "duration": 133
+    },
+    {
+      "userId": 7,
+      "endpoint": "/api/cart/merge",
+      "method": "post",
+      "status": 401,
+      "message": "Request failed with status code 401",
+      "timestamp": "2025-09-26T09:29:03.228Z",
+      "duration": 152
+    }
+  ],
+  "responseTimes": [
+    1243,
+    352,
+    1372,
+    1373,
+    374,
+    1386,
+    1386,
+    1386,
+    1847,
+    1847,
+    1910,
+    325,
+    993,
+    794,
+    789,
+    452,
+    618,
+    419,
+    1083,
+    1134,
+    789,
+    376,
+    329,
+    299,
+    631,
+    627,
+    613
+  ],
+  "outages": [],
+  "userSessions": [
+    {
+      "userId": 14,
+      "scenario": "Checkout Flow",
+      "startTime": "2025-09-26T09:28:56.406Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 1372,
+          "timestamp": "2025-09-26T09:28:57.778Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/guest",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:29:00.087Z"
+        },
+        {
+          "endpoint": "/api/orders",
+          "method": "POST",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:00.227Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:00.227Z",
+      "duration": 3821
+    },
+    {
+      "userId": 9,
+      "scenario": "Checkout Flow",
+      "startTime": "2025-09-26T09:28:56.405Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 1911,
+          "timestamp": "2025-09-26T09:28:58.316Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/guest",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:29:00.472Z"
+        },
+        {
+          "endpoint": "/api/orders",
+          "method": "POST",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:00.706Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:00.706Z",
+      "duration": 4301
+    },
+    {
+      "userId": 4,
+      "scenario": "Checkout Flow",
+      "startTime": "2025-09-26T09:28:56.405Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 1374,
+          "timestamp": "2025-09-26T09:28:57.779Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/guest",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:29:00.526Z"
+        },
+        {
+          "endpoint": "/api/orders",
+          "method": "POST",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:00.928Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:00.928Z",
+      "duration": 4523
+    },
+    {
+      "userId": 11,
+      "scenario": "Authenticated User",
+      "startTime": "2025-09-26T09:28:56.406Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 352,
+          "timestamp": "2025-09-26T09:28:57.770Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/login",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:28:57.418Z"
+        },
+        {
+          "endpoint": "/api/orders/my",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:00.529Z"
+        },
+        {
+          "endpoint": "/api/cart",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:00.928Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:00.928Z",
+      "duration": 4522
+    },
+    {
+      "userId": 6,
+      "scenario": "Authenticated User",
+      "startTime": "2025-09-26T09:28:56.405Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 374,
+          "timestamp": "2025-09-26T09:28:57.791Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/login",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:28:57.417Z"
+        },
+        {
+          "endpoint": "/api/orders/my",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:00.528Z"
+        },
+        {
+          "endpoint": "/api/cart",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:01.075Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:01.075Z",
+      "duration": 4670
+    },
+    {
+      "userId": 1,
+      "scenario": "Authenticated User",
+      "startTime": "2025-09-26T09:28:56.404Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 325,
+          "timestamp": "2025-09-26T09:28:58.822Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/login",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:28:58.497Z"
+        },
+        {
+          "endpoint": "/api/orders/my",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:00.970Z"
+        },
+        {
+          "endpoint": "/api/cart",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:01.164Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:01.164Z",
+      "duration": 4760
+    },
+    {
+      "userId": 3,
+      "scenario": "Admin User",
+      "startTime": "2025-09-26T09:28:56.405Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 993,
+          "timestamp": "2025-09-26T09:28:58.876Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/login",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:28:57.883Z"
+        },
+        {
+          "endpoint": "/api/orders",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:01.132Z"
+        },
+        {
+          "endpoint": "/api/notifications/unread-count",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:01.349Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:01.349Z",
+      "duration": 4944
+    },
+    {
+      "userId": 13,
+      "scenario": "Admin User",
+      "startTime": "2025-09-26T09:28:56.406Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 794,
+          "timestamp": "2025-09-26T09:28:59.514Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/login",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:28:58.720Z"
+        },
+        {
+          "endpoint": "/api/orders",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:01.653Z"
+        },
+        {
+          "endpoint": "/api/notifications/unread-count",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:01.785Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:01.785Z",
+      "duration": 5379
+    },
+    {
+      "userId": 8,
+      "scenario": "Admin User",
+      "startTime": "2025-09-26T09:28:56.405Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 789,
+          "timestamp": "2025-09-26T09:28:59.514Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/login",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:28:58.725Z"
+        },
+        {
+          "endpoint": "/api/orders",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:01.664Z"
+        },
+        {
+          "endpoint": "/api/notifications/unread-count",
+          "method": "GET",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:01.806Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:01.806Z",
+      "duration": 5401
+    },
+    {
+      "userId": 12,
+      "scenario": "Guest User",
+      "startTime": "2025-09-26T09:28:56.406Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 1386,
+          "timestamp": "2025-09-26T09:28:57.792Z"
+        },
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 619,
+          "timestamp": "2025-09-26T09:29:00.707Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/guest",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:29:00.088Z"
+        },
+        {
+          "endpoint": "/api/cart/merge",
+          "method": "POST",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:02.850Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:02.850Z",
+      "duration": 6444
+    },
+    {
+      "userId": 2,
+      "scenario": "Guest User",
+      "startTime": "2025-09-26T09:28:56.405Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 1848,
+          "timestamp": "2025-09-26T09:28:58.253Z"
+        },
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 419,
+          "timestamp": "2025-09-26T09:29:00.841Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/guest",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:29:00.422Z"
+        },
+        {
+          "endpoint": "/api/cart/merge",
+          "method": "POST",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:02.983Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:02.983Z",
+      "duration": 6578
+    },
+    {
+      "userId": 7,
+      "scenario": "Guest User",
+      "startTime": "2025-09-26T09:28:56.405Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 1244,
+          "timestamp": "2025-09-26T09:28:57.649Z"
+        },
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 789,
+          "timestamp": "2025-09-26T09:29:01.075Z"
+        }
+      ],
+      "errors": [
+        {
+          "endpoint": "/api/auth/guest",
+          "method": "POST",
+          "error": "Request failed with status code 400",
+          "status": 400,
+          "timestamp": "2025-09-26T09:29:00.286Z"
+        },
+        {
+          "endpoint": "/api/cart/merge",
+          "method": "POST",
+          "error": "Request failed with status code 401",
+          "status": 401,
+          "timestamp": "2025-09-26T09:29:03.229Z"
+        }
+      ],
+      "endTime": "2025-09-26T09:29:03.229Z",
+      "duration": 6824
+    },
+    {
+      "userId": 5,
+      "scenario": "Product Browser",
+      "startTime": "2025-09-26T09:28:56.405Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 1848,
+          "timestamp": "2025-09-26T09:28:58.253Z"
+        },
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 452,
+          "timestamp": "2025-09-26T09:29:00.707Z"
+        },
+        {
+          "endpoint": "/api/categories",
+          "method": "GET",
+          "status": 200,
+          "duration": 377,
+          "timestamp": "2025-09-26T09:29:03.085Z"
+        },
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 632,
+          "timestamp": "2025-09-26T09:29:05.717Z"
+        }
+      ],
+      "errors": [],
+      "endTime": "2025-09-26T09:29:07.718Z",
+      "duration": 11313
+    },
+    {
+      "userId": 15,
+      "scenario": "Product Browser",
+      "startTime": "2025-09-26T09:28:56.406Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 1386,
+          "timestamp": "2025-09-26T09:28:57.792Z"
+        },
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 1083,
+          "timestamp": "2025-09-26T09:29:00.877Z"
+        },
+        {
+          "endpoint": "/api/categories",
+          "method": "GET",
+          "status": 200,
+          "duration": 332,
+          "timestamp": "2025-09-26T09:29:03.213Z"
+        },
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 627,
+          "timestamp": "2025-09-26T09:29:05.841Z"
+        }
+      ],
+      "errors": [],
+      "endTime": "2025-09-26T09:29:07.842Z",
+      "duration": 11436
+    },
+    {
+      "userId": 10,
+      "scenario": "Product Browser",
+      "startTime": "2025-09-26T09:28:56.405Z",
+      "actions": [
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 1387,
+          "timestamp": "2025-09-26T09:28:57.792Z"
+        },
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 1134,
+          "timestamp": "2025-09-26T09:29:00.928Z"
+        },
+        {
+          "endpoint": "/api/categories",
+          "method": "GET",
+          "status": 200,
+          "duration": 299,
+          "timestamp": "2025-09-26T09:29:03.228Z"
+        },
+        {
+          "endpoint": "/api/products",
+          "method": "GET",
+          "status": 200,
+          "duration": 613,
+          "timestamp": "2025-09-26T09:29:05.842Z"
+        }
+      ],
+      "errors": [],
+      "endTime": "2025-09-26T09:29:07.842Z",
+      "duration": 11437
+    }
+  ],
+  "systemHealth": [
+    {
+      "timestamp": "2025-09-26T09:29:01.705Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:01.496Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:01.646Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:29:06.690Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:06.490Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:06.633Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:29:11.694Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:11.488Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:11.636Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:29:16.691Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:16.494Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:16.633Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:29:21.699Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:21.497Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:21.640Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:29:26.694Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:26.496Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:26.636Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:29:31.702Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:31.493Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:31.645Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:29:36.697Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:36.493Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:36.639Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:29:41.691Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:41.494Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:41.631Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:29:46.698Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:46.495Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:46.633Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:29:51.716Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:51.496Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:51.657Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:29:56.703Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:29:56.507Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:29:56.646Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:01.958Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:01.517Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:01.772Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:06.724Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:06.499Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:06.657Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:11.700Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:11.498Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:11.638Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:16.695Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:16.498Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:16.636Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:21.700Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:21.503Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:21.642Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:26.751Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:26.533Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:26.694Z",
+        "warmupTime": 3,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:31.708Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:31.505Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:31.651Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:36.699Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:36.503Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:36.643Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:41.729Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:41.531Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:41.671Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:46.723Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:46.503Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:46.645Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:51.722Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:51.508Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:51.664Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:30:56.952Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:30:56.509Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:30:56.828Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:01.757Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:01.538Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:01.693Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:06.763Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:06.563Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:06.706Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:11.796Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:11.511Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:11.726Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:16.738Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:16.527Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:16.680Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:21.707Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:21.512Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:21.649Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:26.744Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:26.515Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:26.653Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:31.744Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:31.512Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:31.684Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:36.716Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:36.518Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:36.657Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:41.713Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:41.517Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:41.656Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:46.721Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:46.516Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:46.660Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:51.716Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:51.517Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:51.657Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:31:56.727Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:31:56.520Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:31:56.658Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:01.719Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:01.521Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:01.662Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:06.735Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:06.532Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:06.678Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:11.723Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:11.519Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:11.658Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:16.722Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:16.523Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:16.663Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:21.716Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:21.521Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:21.658Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:26.731Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:26.527Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:26.672Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:31.722Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:31.525Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:31.664Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:36.788Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:36.576Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:36.716Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:41.726Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:41.525Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:41.663Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:46.734Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:46.527Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:46.677Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:51.731Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:51.530Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:51.669Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:32:56.733Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:32:56.539Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:32:56.677Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:01.725Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:01.529Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:01.667Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:06.764Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:06.534Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:06.707Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:11.731Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:11.532Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:11.674Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:16.742Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:16.532Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:16.681Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:21.735Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:21.533Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:21.671Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:26.738Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:26.534Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:26.675Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:31.747Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:31.542Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:31.683Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:36.740Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:36.540Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:36.679Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:41.758Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:41.537Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:41.700Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:46.740Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:46.541Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:46.678Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:51.739Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:51.539Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:51.677Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:33:56.757Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:33:56.542Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:33:56.693Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:01.751Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:01.542Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:01.680Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:06.742Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:06.543Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:06.684Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:11.740Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:11.544Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:11.680Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:16.764Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:16.562Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:16.705Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:21.757Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:21.550Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:21.697Z",
+        "warmupTime": 2,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:26.748Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:26.544Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:26.686Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:31.778Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:31.549Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:31.690Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:36.754Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:36.553Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:36.695Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:41.759Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:41.552Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:41.700Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:46.750Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:46.550Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:46.691Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:51.767Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:51.554Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:51.708Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:34:56.757Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:34:56.553Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:34:56.693Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:01.854Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:01.563Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:01.786Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:06.762Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:06.559Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:06.700Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:11.824Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:11.569Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:11.742Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:16.874Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:16.624Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:16.815Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:21.785Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:21.559Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:21.714Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:26.774Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:26.560Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:26.716Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:31.786Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:31.556Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:31.719Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:36.765Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:36.556Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:36.705Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:41.763Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:41.560Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:41.701Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:46.768Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:46.559Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:46.699Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:51.772Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:51.565Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:51.710Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:35:56.785Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:35:56.561Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:35:56.720Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:01.810Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:01.564Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:01.720Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:06.789Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:06.568Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:06.717Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:11.826Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:11.571Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:11.743Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:16.787Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:16.573Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:16.721Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:21.790Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:21.564Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:21.720Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:26.786Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:26.577Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:26.728Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:31.816Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:31.581Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:31.753Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:36.823Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:36.582Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:36.751Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:41.794Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:41.581Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:41.732Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:46.784Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:46.581Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:46.720Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:51.906Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:51.574Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:51.798Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:36:56.785Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:36:56.576Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:36:56.720Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:01.802Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:01.586Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:01.730Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:06.783Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:06.573Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:06.722Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:11.808Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:11.606Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:11.746Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:16.822Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:16.593Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:16.762Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:21.800Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:21.581Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:21.723Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:26.822Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:26.592Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:26.750Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:31.845Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:31.589Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:31.780Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:36.794Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:36.581Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:36.734Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:41.816Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:41.584Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:41.757Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:46.787Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:46.581Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:46.728Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:51.813Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:51.595Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:51.747Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:37:56.810Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:37:56.608Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:37:56.751Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:01.803Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:01.590Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:01.737Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:06.788Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:06.586Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:06.728Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:11.815Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:11.601Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:11.756Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:17.073Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:16.590Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:16.907Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:21.855Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:21.650Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:21.796Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:26.789Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:26.589Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:26.729Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:31.796Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:31.593Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:31.736Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:36.809Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:36.606Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:36.749Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:41.794Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:41.593Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:41.733Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:47.059Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:46.591Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:46.784Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:51.929Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:51.592Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:51.836Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:38:57.119Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:38:56.670Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:38:56.926Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:01.920Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:01.641Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:01.825Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:07.048Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:06.601Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:06.988Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:11.792Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:11.596Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:11.735Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:16.818Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:16.618Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:16.758Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:21.806Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:21.597Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:21.739Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:26.802Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:26.598Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:26.744Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:31.829Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:31.601Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:31.769Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:36.816Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:36.599Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:36.756Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:41.808Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:41.603Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:41.749Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:46.817Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:46.608Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:46.757Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:51.803Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:51.602Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:51.746Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:39:57.049Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:39:56.646Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:39:56.888Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:01.854Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:01.601Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:01.781Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:06.978Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:06.709Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:06.919Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:11.899Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:11.624Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:11.821Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:16.855Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:16.656Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:16.796Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:21.806Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:21.607Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:21.746Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:26.814Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:26.606Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:26.756Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:31.820Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:31.615Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:31.756Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:36.806Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:36.609Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:36.747Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:41.824Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:41.623Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:41.763Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:46.850Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:46.622Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:46.788Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:51.811Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:51.611Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:51.752Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:40:56.819Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:40:56.614Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:40:56.760Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:01.856Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:01.613Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:01.795Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:06.818Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:06.614Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:06.754Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:11.810Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:11.616Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:11.752Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:16.831Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:16.624Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:16.762Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:21.869Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:21.615Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:21.808Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:26.919Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:26.623Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:26.815Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:32.084Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:31.736Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:32.006Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:36.825Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:36.618Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:36.764Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:41.826Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:41.622Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:41.763Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:46.826Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:46.628Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:46.767Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:51.819Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:51.619Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:51.758Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:41:56.850Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:41:56.641Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:41:56.789Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:01.842Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:01.623Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:01.783Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:06.828Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:06.628Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:06.766Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:11.841Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:11.625Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:11.779Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:16.827Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:16.627Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:16.766Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:21.859Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:21.644Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:21.786Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:26.851Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:26.634Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:26.779Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:31.884Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:31.626Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:31.815Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:37.184Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:36.634Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:36.811Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:42.214Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:41.628Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:41.874Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:47.117Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:46.652Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:46.964Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:51.886Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:51.632Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:51.826Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:42:56.834Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:42:56.630Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:42:56.773Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:43:01.827Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:43:01.630Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:43:01.768Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:43:06.833Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:43:06.632Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:43:06.769Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:43:11.858Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:43:11.631Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:43:11.770Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:43:16.848Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:43:16.649Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:43:16.788Z",
+        "warmupTime": 1,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:43:21.838Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:43:21.634Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:43:21.775Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:43:26.855Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:43:26.634Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:43:26.789Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:43:32.976Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:43:31.677Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:43:32.440Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:43:37.485Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:43:36.665Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:43:37.124Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:43:43.424Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:43:42.286Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:43:42.978Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:43:48.381Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:43:46.665Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:43:47.591Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    },
+    {
+      "timestamp": "2025-09-26T09:43:52.575Z",
+      "health": {
+        "status": "ok",
+        "timestamp": "2025-09-26T09:43:51.639Z",
+        "environment": "production",
+        "database": "connected",
+        "version": "3.0.0"
+      },
+      "warmup": {
+        "status": "warmed",
+        "timestamp": "2025-09-26T09:43:52.111Z",
+        "warmupTime": 0,
+        "message": "Instance warmed up successfully",
+        "quickStart": true
+      },
+      "status": "healthy"
+    }
+  ],
+  "duration": 900038,
+  "successRate": 47.368421052631575,
+  "averageResponseTime": 916.5555555555555
+}
