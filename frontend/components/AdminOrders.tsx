@@ -275,8 +275,11 @@ const AdminOrders: React.FC = () => {
     window.print();
   };
 
-  const getStatusColor = (status: string) => {
-    if (!status) return 'bg-gray-100 text-gray-800';
+  const getStatusColor = (status: string | null | undefined) => {
+    if (!status || typeof status !== 'string') {
+      console.warn('getStatusColor received invalid status:', status, typeof status);
+      return 'bg-gray-100 text-gray-800';
+    }
     switch (status.toLowerCase()) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
@@ -299,8 +302,12 @@ const AdminOrders: React.FC = () => {
     }
   };
 
-  const getPaymentStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
+  const getPaymentStatusColor = (status: string | null | undefined) => {
+    if (!status || typeof status !== 'string') {
+      console.warn('getPaymentStatusColor received invalid status:', status, typeof status);
+      return 'bg-gray-100 text-gray-800';
+    }
+    switch (status.toLowerCase()) {
       case 'captured':
         return 'bg-green-100 text-green-800';
       case 'pending':
