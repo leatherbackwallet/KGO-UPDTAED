@@ -174,7 +174,6 @@ const AdminOrders: React.FC = () => {
   const [paymentMethodFilter, setPaymentMethodFilter] = useState('all');
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [downloading, setDownloading] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -269,39 +268,15 @@ const AdminOrders: React.FC = () => {
     }
   };
 
-  const handleDownloadReceipt = async (orderId: string) => {
-    try {
-      setDownloading(orderId);
-      const config: any = { 
-        responseType: 'blob',
-        headers: {}
-      };
-      
-      // Add authorization header if user is authenticated
-      if (tokens?.accessToken) {
-        config.headers.Authorization = `Bearer ${tokens.accessToken}`;
-      }
-      
-      const response = await api.get(`/orders/${orderId}/receipt`, config);
-
-      // Create blob link to download file
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `receipt-${orderId}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err: any) {
-      console.error('Error downloading receipt:', err);
-      setError('Failed to download receipt');
-    } finally {
-      setDownloading(null);
-    }
+  const handlePrintReceipt = (orderId: string) => {
+    console.log('Print receipt requested for order:', orderId);
+    // Open print dialog for the current page
+    // The receipt content will be styled for print
+    window.print();
   };
 
   const getStatusColor = (status: string) => {
+    if (!status) return 'bg-gray-100 text-gray-800';
     switch (status.toLowerCase()) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
@@ -452,18 +427,10 @@ const AdminOrders: React.FC = () => {
                 </button>
                 
                 <button
-                  onClick={() => handleDownloadReceipt(selectedOrder._id)}
-                  disabled={downloading === selectedOrder._id}
-                  className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                  onClick={() => handlePrintReceipt(selectedOrder._id)}
+                  className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
-                  {downloading === selectedOrder._id ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
-                      Generating...
-                    </div>
-                  ) : (
-                    '📄 Download Receipt'
-                  )}
+                  🖨️ Print Receipt
                 </button>
                 
                 <button
@@ -731,17 +698,11 @@ const AdminOrders: React.FC = () => {
                         {selectedOrder?._id === order._id ? '✓' : 'Select'}
                       </button>
                       <button
-                        onClick={() => handleDownloadReceipt(order._id)}
-                        disabled={downloading === order._id}
-                        className="px-2 py-1 rounded text-xs font-medium transition-colors bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handlePrintReceipt(order._id)}
+                        className="px-2 py-1 rounded text-xs font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700"
+                        title="Print Receipt"
                       >
-                        {downloading === order._id ? (
-                          <div className="flex items-center justify-center">
-                            <div className="animate-spin rounded-full h-2 w-2 border-b-2 border-white"></div>
-                          </div>
-                        ) : (
-                          '📄'
-                        )}
+                        🖨️
                       </button>
                     </div>
                   </td>

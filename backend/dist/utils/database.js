@@ -33,16 +33,20 @@ async function connectToDatabase() {
             throw new Error('MongoDB Atlas must be used. Local MongoDB is not allowed.');
         }
         await mongoose_1.default.connect(process.env.MONGODB_URI, {
-            maxPoolSize: 100, // Increased for better concurrency
-            minPoolSize: 10, // Higher minimum for production
-            maxIdleTimeMS: 60000, // Longer idle time to reduce reconnection overhead
-            serverSelectionTimeoutMS: 30000, // Longer timeout for better reliability
-            socketTimeoutMS: 60000, // Longer socket timeout
+            maxPoolSize: 50, // Optimized for App Engine
+            minPoolSize: 5, // Always maintain minimum connections
+            maxIdleTimeMS: 300000, // 5 minutes - keep connections alive longer
+            serverSelectionTimeoutMS: 45000, // Longer timeout for cold starts
+            socketTimeoutMS: 120000, // 2 minutes for slow operations
+            connectTimeoutMS: 45000, // Connection timeout for cold starts
             bufferCommands: false,
             retryWrites: true,
-            w: 'majority', // Write concern for better reliability
-            maxConnecting: 10, // Limit concurrent connection attempts
-            heartbeatFrequencyMS: 10000, // More frequent heartbeats
+            w: 'majority',
+            maxConnecting: 5, // Limit concurrent connection attempts
+            heartbeatFrequencyMS: 30000, // Less frequent heartbeats to reduce overhead
+            compressors: ['zstd', 'zlib', 'snappy'], // Enable compression
+            readPreference: 'primary', // Always read from primary
+            readConcern: { level: 'majority' }, // Ensure read consistency
         });
         isConnected = true;
         console.log('✅ MongoDB connected successfully');

@@ -21,6 +21,7 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
   
   try {
     await session.withTransaction(async () => {
+      
       const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod } = req.body;
       
       // Use recipientAddress if provided, otherwise fall back to other address formats
@@ -383,98 +384,6 @@ router.get('/:orderId', optionalAuth, ensureDatabaseConnection, async (req: any,
   }
 });
 
-// Generate PDF receipt for order (public endpoint for guest users)
-router.get('/:orderId/receipt', optionalAuth, ensureDatabaseConnection, async (req: any, res) => {
-  try {
-    const { orderId } = req.params;
-    
-    const order = await Order.findById(orderId)
-      .populate('userId', 'firstName lastName email phone')
-      .populate('orderItems.productId', 'name description images categories price')
-      .lean();
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        error: { message: 'Order not found', code: 'ORDER_NOT_FOUND' }
-      });
-    }
-
-    // Check if user can access this order (own order, admin, or guest with valid token)
-    if (req.user) {
-      const userId = typeof order.userId === 'string' ? order.userId : order.userId._id.toString();
-      if (userId !== req.user.id && req.user.roleName !== 'admin') {
-        return res.status(403).json({
-          success: false,
-          error: { message: 'Access denied', code: 'ACCESS_DENIED' }
-        });
-      }
-    } else {
-      // For guest users, allow access to orders with guest user IDs
-      const userId = typeof order.userId === 'string' ? order.userId : order.userId._id.toString();
-      if (!userId.startsWith('guest_')) {
-        return res.status(403).json({
-          success: false,
-          error: { message: 'Access denied - guest orders only', code: 'ACCESS_DENIED' }
-        });
-      }
-    }
-
-    // Import PDF service dynamically to avoid circular dependencies
-    const PDFService = (await import('../services/pdf.service')).default;
-    
-    console.log('Generating PDF for order:', order.orderId);
-    console.log('Order data:', JSON.stringify(order, null, 2));
-    
-    // Generate PDF
-    const pdfBuffer = await PDFService.generateOrderReceipt({
-      order: order as any,
-      companyInfo: {
-        name: 'OnYourBehlf - Kerala Gifts Online',
-        address: 'Kerala, India',
-        phone: '+91-XXXXXXXXXX',
-        email: 'info@keralgiftsonline.in',
-        website: 'https://keralgiftsonline.in'
-      }
-    });
-
-    // Check if this is a fallback text receipt or actual PDF
-    // Check the first few bytes to determine if it's a PDF (PDF files start with %PDF)
-    console.log('PDF buffer received, size:', pdfBuffer.length, 'bytes');
-    console.log('PDF buffer first 10 bytes:', Array.from(pdfBuffer.slice(0, 10)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '));
-    const isPDF = pdfBuffer.length > 4 && pdfBuffer[0] === 0x25 && pdfBuffer[1] === 0x50 && pdfBuffer[2] === 0x44 && pdfBuffer[3] === 0x46;
-    console.log('Is PDF:', isPDF);
-    
-    if (!isPDF) {
-      // Set response headers for text file download
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="receipt-${order.orderId}.txt"`);
-      res.setHeader('Content-Length', pdfBuffer.length);
-    } else {
-      // Set response headers for PDF download
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="receipt-${order.orderId}.pdf"`);
-      res.setHeader('Content-Length', pdfBuffer.length);
-    }
-
-    res.send(pdfBuffer);
-  } catch (err: any) {
-    console.error('Error generating PDF receipt:', err);
-    console.error('Error details:', {
-      message: err.message,
-      stack: err.stack,
-      orderId: req.params.orderId
-    });
-    res.status(500).json({
-      success: false,
-      error: { 
-        message: 'Failed to generate PDF receipt', 
-        code: 'PDF_GENERATION_ERROR',
-        details: process.env.NODE_ENV === 'development' ? err.message : undefined
-      }
-    });
-  }
-});
 
 // Get all orders (admin)
 router.get('/', auth, requireRole('admin'), ensureDatabaseConnection, async (req: any, res) => {
