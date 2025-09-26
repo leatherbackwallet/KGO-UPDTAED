@@ -7,7 +7,7 @@ import { Role } from './models/roles.model';
 import { hashPassword } from './utils/hash';
 import { ensureProductImagesDir } from './utils/fileUpload';
 import { connectToDatabase } from './utils/database';
-import { generalLimiter, authLimiter, apiLimiter } from './middleware/rateLimit';
+import { generalLimiter, authLimiter, apiLimiter, userAwareLimiter } from './middleware/rateLimit';
 import { logger, errorLogger } from './middleware/logger';
 
 // Load environment variables
@@ -68,6 +68,8 @@ const corsOptions = {
 };
 
 // Apply CORS middleware - MUST be before rate limiting
+// Add explicit preflight handling for cold starts
+app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
 // Middleware
@@ -232,8 +234,46 @@ import occasionsSeedRoutes from './routes/occasions-seed';
 import paymentRoutes from './routes/payments';
 import notificationRoutes from './routes/notifications';
 
-// Apply health routes first
-app.use('/api/health', apiLimiter as any, healthRoutes);
+// Apply health routes first (no rate limiting for health checks)
+app.use('/api/health', healthRoutes);
+
+// Cold start warmup endpoint - must be before rate limiting
+app.get('/api/warmup', async (req, res) => {
+  try {
+    const startTime = Date.now();
+    
+    // Warm up database connection
+    await connectToDatabase();
+    
+    // Pre-warm critical models to avoid lazy loading delays
+    const warmupPromises = [
+      // Warm up most used models
+      import('./models/products.model').then(m => m.Product.findOne().limit(1)),
+      import('./models/categories.model').then(m => m.Category.findOne().limit(1)),
+      import('./models/users.model').then(m => m.User.findOne().limit(1))
+    ];
+    
+    // Don't wait for all - respond quickly but let warmup continue
+    Promise.allSettled(warmupPromises);
+    
+    const warmupTime = Date.now() - startTime;
+    
+    res.json({
+      status: 'warmed',
+      timestamp: new Date().toISOString(),
+      warmupTime,
+      message: 'Instance warmed up successfully',
+      quickStart: warmupTime < 1000 // Flag if this was a quick warmup
+    });
+  } catch (error) {
+    console.error('Warmup failed:', error);
+    res.status(500).json({
+      status: 'warmup_failed',
+      timestamp: new Date().toISOString(),
+      error: 'Warmup failed'
+    });
+  }
+});
 
 // Enhanced health check with database status (backup endpoint)
 app.get('/api/health-status', async (req, res) => {
@@ -278,7 +318,8 @@ app.get('/api/cors-test', (req, res) => {
 app.use('/api/auth', authLimiter as any, authRoutes);
 app.use('/api/upload', apiLimiter as any, uploadRoutes);
 app.use('/api/profile', apiLimiter as any, profileRoutes);
-app.use('/api/products', apiLimiter as any, productsRoutes);
+// Use user-aware limiter for products instead of IP-based
+app.use('/api/products', userAwareLimiter as any, productsRoutes);
 app.use('/api/categories', apiLimiter as any, categoriesRoutes);
 app.use('/api/vendors', apiLimiter as any, vendorsRoutes);
 app.use('/api/orders', apiLimiter as any, ordersRoutes);

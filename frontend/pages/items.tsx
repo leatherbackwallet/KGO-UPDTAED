@@ -90,6 +90,28 @@ const ItemsPage: React.FC = () => {
       console.log('🔗 Full API URL:', `${api.defaults.baseURL}${apiUrl}`);
       console.log('🔗 Cache buster:', cacheBuster);
       
+      // Check localStorage cache first for instant loading
+      const cacheKey = `products_${page}_${search || 'all'}_${sort}`;
+      const cachedData = localStorage.getItem(cacheKey);
+      const cacheTime = localStorage.getItem(`${cacheKey}_time`);
+      
+      // Use cache if less than 2 minutes old (for instant loading during cold starts)
+      if (cachedData && cacheTime && (Date.now() - parseInt(cacheTime)) < 120000) {
+        console.log('📦 Using cached products for instant loading');
+        const parsedData = JSON.parse(cachedData);
+        setProducts(parsedData.products || []);
+        setTotalProducts(parsedData.total || 0);
+        setTotalPages(parsedData.pages || 1);
+        setLoading(false);
+        
+        // Still fetch fresh data in background
+        setTimeout(() => {
+          console.log('🔄 Fetching fresh data in background...');
+          fetchProducts({ ...options, retryCount: 0, backgroundUpdate: true });
+        }, 1000);
+        return;
+      }
+
       // Use the ReliableApiService for better error handling
       const reliableApi = new ReliableApiService(process.env.NEXT_PUBLIC_API_URL, 15000);
       const response = await reliableApi.get(apiUrl, {
@@ -122,6 +144,19 @@ const ItemsPage: React.FC = () => {
       
       setProducts(validProducts);
       setError('');
+      
+      // Cache successful response for instant loading next time
+      if (!options.backgroundUpdate) {
+        const cacheData = {
+          products: validProducts,
+          total: totalProducts,
+          pages: totalPages,
+          timestamp: Date.now()
+        };
+        localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+        localStorage.setItem(`${cacheKey}_time`, Date.now().toString());
+        console.log('💾 Cached products for instant loading');
+      }
       
       // Preload images for better UX
       if (validProducts.length > 0) {

@@ -1,0 +1,64 @@
+name: Keep API Alive (Prevent Cold Starts)
+
+on:
+  schedule:
+    # Run every 4 minutes during business hours (6 AM - 11 PM IST)
+    # IST is UTC+5:30, so 6 AM IST = 0:30 UTC, 11 PM IST = 17:30 UTC
+    - cron: '*/4 0-17 * * *'  # Every 4 minutes from 0:30 to 17:30 UTC
+    # Less frequent during night hours to save GitHub Actions minutes
+    - cron: '*/15 18-23,0 * * *'  # Every 15 minutes during night
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+    - name: Ping API Health Check
+      run: |
+        echo "🏓 Pinging API to prevent cold start..."
+        
+        # Function to ping endpoint with timeout
+        ping_endpoint() {
+          local url=$1
+          local name=$2
+          echo "📡 Pinging $name: $url"
+          
+          if curl -s --max-time 30 --fail "$url" > /dev/null; then
+            echo "✅ $name: OK"
+            return 0
+          else
+            echo "❌ $name: Failed"
+            return 1
+          fi
+        }
+        
+        # Ping multiple endpoints to ensure warmup
+        BASE_URL="https://api-dot-onyourbehlf.uc.r.appspot.com"
+        
+        ping_endpoint "$BASE_URL/api/health-status" "Health Check"
+        sleep 2
+        ping_endpoint "$BASE_URL/api/warmup" "Warmup"
+        sleep 2  
+        ping_endpoint "$BASE_URL/api/products?limit=1" "Products API"
+        
+        echo "🎯 Keep-alive ping completed at $(date)"
+        
+    - name: Test Frontend Connectivity
+      run: |
+        echo "🌐 Testing frontend connectivity..."
+        
+        if curl -s --max-time 20 --fail "https://keralagiftsonline.in" > /dev/null; then
+          echo "✅ Frontend: OK"
+        else
+          echo "⚠️ Frontend: May have issues"
+        fi
+        
+    - name: Log Status
+      run: |
+        echo "📊 Keep-alive job completed successfully"
+        echo "⏰ Next run in 4-15 minutes (depending on time)"
+        echo "🔄 This prevents Google App Engine cold starts"

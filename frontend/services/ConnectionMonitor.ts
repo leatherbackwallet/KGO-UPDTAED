@@ -96,6 +96,8 @@ export class ConnectionMonitor {
       const startTime = performance.now();
       
       // Use a small image or API endpoint to test speed
+      // Try warmup endpoint first for cold starts, then health
+      const warmupUrl = `${process.env.NEXT_PUBLIC_API_URL}/warmup?t=${Date.now()}`;
       const testUrl = `${process.env.NEXT_PUBLIC_API_URL}/health?t=${Date.now()}`;
       const response = await fetch(testUrl, {
         method: 'HEAD',

@@ -44,23 +44,23 @@ env_variables:
 # Add health check configuration
 readiness_check:
   path: "/api/health-status"
-  check_interval_sec: 15
-  timeout_sec: 10
-  failure_threshold: 3
-  success_threshold: 2
-  app_start_timeout_sec: 600
+  check_interval_sec: 30  # Less aggressive checking
+  timeout_sec: 15  # More time for response
+  failure_threshold: 5  # More tolerance
+  success_threshold: 1  # Faster recovery
+  app_start_timeout_sec: 900  # 15 minutes for cold starts
 
 liveness_check:
   path: "/api/health-status"
-  check_interval_sec: 30
-  timeout_sec: 10
-  failure_threshold: 3
-  success_threshold: 2
+  check_interval_sec: 60  # Less frequent checks
+  timeout_sec: 15  # More time for response
+  failure_threshold: 5  # More tolerance
+  success_threshold: 1  # Faster recovery
 
 automatic_scaling:
-  min_num_instances: 1
+  min_num_instances: 0  # Zero cost - let it scale to zero
   max_num_instances: 10
-  cool_down_period_sec: 120
+  cool_down_period_sec: 180  # 3 minutes - balanced
   cpu_utilization:
     target_utilization: 0.6
 

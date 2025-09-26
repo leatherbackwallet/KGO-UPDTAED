@@ -215,8 +215,22 @@ export class ReliableApiService {
             maxDelay: 10000,
             backoffFactor: 2,
             retryCondition: RetryManager.defaultRetryCondition,
-            onRetry: (attempt, error) => {
+            onRetry: async (attempt, error) => {
               console.log(`Retrying request ${url} (attempt ${attempt}):`, error.message);
+              
+              // If first retry and error suggests cold start, try warmup
+              if (attempt === 1 && (error.message.includes('CORS') || error.message.includes('502'))) {
+                try {
+                  console.log('🔥 Attempting instance warmup...');
+                  await fetch(`${this.axiosInstance.defaults.baseURL}/warmup`, {
+                    method: 'GET',
+                    cache: 'no-cache'
+                  });
+                  console.log('✅ Instance warmup completed');
+                } catch (warmupError) {
+                  console.log('⚠️ Warmup failed, continuing with retry');
+                }
+              }
               
               // Track retry attempts
               errorTracker.trackError({

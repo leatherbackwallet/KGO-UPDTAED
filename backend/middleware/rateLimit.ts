@@ -29,8 +29,8 @@ const getRateLimitConfig = (): RateLimitConfig => {
   return {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes default
     max: isProduction 
-      ? (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '200')) // Increased from 100 to 200
-      : (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000')), // Higher limit for development
+      ? (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000')) // Much higher for production
+      : (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '2000')), // Higher limit for development
     authMax: isProduction 
       ? parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || '10') // Increased from 5 to 10
       : parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || '50'), // Higher limit for development
@@ -71,10 +71,10 @@ export const authLimiter = rateLimit({
   legacyHeaders: config.legacyHeaders
 });
 
-// API limiter for product endpoints
+// API limiter for product endpoints - Much more generous
 export const apiLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: config.max,
+  windowMs: 5 * 60 * 1000, // 5 minutes window
+  max: 500, // 500 requests per 5 minutes (100/minute average)
   message: {
     success: false,
     error: {
