@@ -59,6 +59,7 @@ const ItemsPage: React.FC = () => {
     page?: number;
     search?: string;
     sort?: string;
+    backgroundUpdate?: boolean;
   } = {}) => {
     const { retryCount = 0, page = currentPage, search = searchTerm, sort = sortBy } = options;
     const MAX_RETRIES = 2; // Reduced from 3 to 2
