@@ -185,7 +185,7 @@ const AdminProducts: React.FC = () => {
 
   // Debug function to log current products
   const debugProducts = () => {
-    console.log('Current products in state:', products.map(p => ({ id: p._id, name: p.name })));
+    console.log('Current products in state:', products.map((p: Product) => ({ id: p._id, name: p.name })));
   };
 
   const fetchProducts = async () => {
@@ -335,7 +335,7 @@ const AdminProducts: React.FC = () => {
 
       // Phase 2: Image Validation (Sequential Flow)
       console.log('🔍 Phase 2: Validating uploaded images...');
-      const validImages = uploadedImages.filter(img => 
+      const validImages = uploadedImages.filter((img: any) => 
         img.public_id && 
         img.public_id.startsWith('keralagiftsonline/products/') &&
         img.public_id.length > 30 &&
@@ -364,9 +364,9 @@ const AdminProducts: React.FC = () => {
         name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
         description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
         // Ensure categories is an array of ObjectId strings
-        categories: editingProduct.categories?.map(cat => typeof cat === 'string' ? cat : cat._id) || [],
+        categories: editingProduct.categories?.map((cat: any) => typeof cat === 'string' ? cat : cat._id) || [],
         // Include images - use Cloudinary public_id only (already validated)
-        images: validImages.map(img => img.public_id),
+        images: validImages.map((img: any) => img.public_id),
         defaultImage: validImages[0]?.public_id || undefined,
         // Include combo-specific fields
         isCombo: editingProduct.isCombo || false,
@@ -511,7 +511,7 @@ const AdminProducts: React.FC = () => {
 
       // Phase 2: Image Validation (Enhanced)
       console.log('🔍 Phase 2: Validating uploaded images...');
-      const validImages = uploadedImages.filter(img => 
+      const validImages = uploadedImages.filter((img: any) => 
         img.public_id && 
         img.public_id.startsWith('keralagiftsonline/products/') &&
         img.public_id.length > 30 &&
@@ -534,9 +534,9 @@ const AdminProducts: React.FC = () => {
         name: typeof editingProduct.name === 'string' ? editingProduct.name : '',
         description: typeof editingProduct.description === 'string' ? editingProduct.description : '',
         // Ensure categories is an array of ObjectId strings
-        categories: editingProduct.categories?.map(cat => typeof cat === 'string' ? cat : cat._id) || [],
+        categories: editingProduct.categories?.map((cat: any) => typeof cat === 'string' ? cat : cat._id) || [],
         // Include images - use Cloudinary public_id only (already validated)
-        images: validImages.map(img => img.public_id),
+        images: validImages.map((img: any) => img.public_id),
         defaultImage: validImages[0]?.public_id || undefined,
         // Include combo-specific fields
         isCombo: editingProduct.isCombo || false,
@@ -623,16 +623,16 @@ const AdminProducts: React.FC = () => {
       setDeletingProducts(prev => new Set(prev).add(productId));
       
       // Optimistic update - remove product from state immediately
-      setProducts(prevProducts => prevProducts.filter(product => product._id !== productId));
+      setProducts((prevProducts: Product[]) => prevProducts.filter((product: Product) => product._id !== productId));
       
       await api.delete(`/products/${productId}`);
       setSuccess('Product deleted successfully!');
       setTimeout(() => setSuccess(''), 3000);
       
       // Add to recently deleted set to prevent immediate re-deletion
-      setRecentlyDeleted(prev => new Set(prev).add(productId));
+      setRecentlyDeleted((prev: Set<string>) => new Set(prev).add(productId));
       setTimeout(() => {
-        setRecentlyDeleted(prev => {
+        setRecentlyDeleted((prev: Set<string>) => {
           const newSet = new Set(prev);
           newSet.delete(productId);
           return newSet;
@@ -655,7 +655,7 @@ const AdminProducts: React.FC = () => {
         await fetchProducts();
       }
     } finally {
-      setDeletingProducts(prev => {
+      setDeletingProducts((prev: Set<string>) => {
         const newSet = new Set(prev);
         newSet.delete(productId);
         return newSet;
@@ -678,7 +678,7 @@ const AdminProducts: React.FC = () => {
       return;
     }
     
-    setUploadedImages(prev => [...prev, {
+    setUploadedImages((prev: any[]) => [...prev, {
       public_id: fileData.public_id,
       filename: fileData.filename,
       url: fileData.url,
@@ -692,14 +692,14 @@ const AdminProducts: React.FC = () => {
   };
 
   const removeImage = (index: number) => {
-    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+    setUploadedImages((prev: any[]) => prev.filter((_: any, i: number) => i !== index));
   };
 
   const getCategoryName = (category: any) => {
     if (!category) return 'No Category';
     if (typeof category === 'string') {
       // If it's a string, try to find the category name from the categories array
-      const foundCategory = categories.find(cat => cat._id === category);
+      const foundCategory = categories.find((cat: Category) => cat._id === category);
       return foundCategory ? getMultilingualText(foundCategory.name) : category;
     }
     if (category.name) {
@@ -726,14 +726,14 @@ const AdminProducts: React.FC = () => {
     if (!productOccasions || productOccasions.length === 0) return 'No Occasions';
     
     // Handle both populated objects and string IDs
-    const occasionNames = productOccasions.map(occasion => {
+    const occasionNames = productOccasions.map((occasion: any) => {
       // If it's already a populated object with a name property
       if (typeof occasion === 'object' && occasion.name) {
         return occasion.name;
       }
       // If it's a string ID, look it up in the occasions array
       if (typeof occasion === 'string') {
-        const foundOccasion = occasions.find(occ => occ._id === occasion);
+        const foundOccasion = occasions.find((occ: Occasion) => occ._id === occasion);
         return foundOccasion ? foundOccasion.name : occasion;
       }
       return null;
@@ -757,7 +757,7 @@ const AdminProducts: React.FC = () => {
     }
 
     const query = searchQuery.toLowerCase().trim();
-    return products.filter(product => {
+    return products.filter((product: Product) => {
       // Search in product name
       const name = getMultilingualText(product.name).toLowerCase();
       if (name.includes(query)) return true;
@@ -876,11 +876,11 @@ const AdminProducts: React.FC = () => {
               </label>
               <select
                 value={selectedProductId || ''}
-                onChange={(e) => setSelectedProductId(e.target.value || null)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedProductId(e.target.value || null)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Choose a product...</option>
-                {filteredProducts.map((product) => (
+                {filteredProducts.map((product: Product) => (
                   <option 
                     key={product._id} 
                     value={product._id}
@@ -894,7 +894,7 @@ const AdminProducts: React.FC = () => {
 
             {/* Selected Product Info */}
             {selectedProductId && (() => {
-              const product = filteredProducts.find(p => p._id === selectedProductId);
+              const product = filteredProducts.find((p: Product) => p._id === selectedProductId);
               if (!product) return null;
               
               return (
@@ -913,7 +913,7 @@ const AdminProducts: React.FC = () => {
             <div className="space-y-2">
               <button
                 onClick={() => {
-                  const product = filteredProducts.find(p => p._id === selectedProductId);
+                  const product = filteredProducts.find((p: Product) => p._id === selectedProductId);
                   if (product) {
                     handleEditProduct(product);
                   }
@@ -1011,7 +1011,7 @@ const AdminProducts: React.FC = () => {
                   type="text"
                   placeholder="Search products by name, description, categories, occasions, or price..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
