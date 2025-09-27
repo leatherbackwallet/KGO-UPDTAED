@@ -113,17 +113,13 @@ const ItemsPage: React.FC = () => {
         return;
       }
 
-      // Use the ReliableApiService with timeout prevention
-      const reliableApi = new ReliableApiService(process.env.NEXT_PUBLIC_API_URL, 30000);
-      const response = await reliableApi.get(apiUrl, {
-        retries: 3,
-        timeout: 30000,
-        cacheTTL: 300000, // 5 minutes cache
-        // Add timeout prevention strategies
-        adaptiveTimeout: true,
-        circuitBreaker: true,
-        requestQueuing: true
-      });
+    // Use the ReliableApiService with timeout prevention
+    const reliableApi = new ReliableApiService(process.env.NEXT_PUBLIC_API_URL, 30000);
+    const response = await reliableApi.get(apiUrl, {
+      retries: 3,
+      timeout: 30000,
+      cacheTTL: 300000 // 5 minutes cache
+    });
       
       const apiResponse = response.data as any;
       const productsData = apiResponse?.data || apiResponse || [];

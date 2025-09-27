@@ -452,3 +452,55 @@ latest: digest: sha256:a4cbde9b983d99b381d889ceccd6a3afcda471ae40291feb7ed5f2020
 DONE
 --------------------------------------------------------------------------------
 Updating service [api] (this may take several minutes)...
+........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................done.
+Deployed service [api] to [https://v20250927080913-dot-api-dot-onyourbehlf.uc.r.appspot.com]
+
+You can stream logs from the command line by running:
+  $ gcloud app logs tail -s api
+
+To view your application in the web browser run:
+  $ gcloud app browse -s api
+[0;32m[SUCCESS][0m Backend deployed successfully
+[0;34m[INFO][0m Checking Backend health at https://v20250927080913-dot-api-dot-onyourbehlf.uc.r.appspot.com/api/health-status
+[0;32m[SUCCESS][0m Backend is healthy
+[0;34m[INFO][0m Promoting backend to 100% traffic...
+Setting the following traffic allocation:
+ - onyourbehlf/api/v20250927080913: 1.0
+NOTE: Splitting traffic by ip.
+Any other versions of the specified service will receive zero traffic.
+Setting traffic split for service [api]...
+.....................................done.
+[0;32m[SUCCESS][0m Backend deployment completed successfully
+[0;34m[INFO][0m 🚀 Starting frontend deployment...
+[0;34m[INFO][0m Building frontend...
+
+> keralagiftsonline-frontend@3.0.0 build
+> NODE_ENV=production next build
+
+  ▲ Next.js 14.2.32
+  - Environments: .env.local, .env.production
+  - Experiments (use with caution):
+    · esmExternals
+
+   Linting and checking validity of types ...
+Failed to compile.
+
+./pages/items.tsx:123:9
+Type error: Object literal may only specify known properties, and 'adaptiveTimeout' does not exist in type 'RequestOptions'.
+
+[0m [90m 121 |[39m         cacheTTL[33m:[39m [35m300000[39m[33m,[39m [90m// 5 minutes cache[39m[0m
+[0m [90m 122 |[39m         [90m// Add timeout prevention strategies[39m[0m
+[0m[31m[1m>[22m[39m[90m 123 |[39m         adaptiveTimeout[33m:[39m [36mtrue[39m[33m,[39m[0m
+[0m [90m     |[39m         [31m[1m^[22m[39m[0m
+[0m [90m 124 |[39m         circuitBreaker[33m:[39m [36mtrue[39m[33m,[39m[0m
+[0m [90m 125 |[39m         requestQueuing[33m:[39m [36mtrue[39m[0m
+[0m [90m 126 |[39m       })[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path /Users/josephjames/Projects/KGO/onYourBehlf/frontend
+npm error workspace keralagiftsonline-frontend@3.0.0
+npm error location /Users/josephjames/Projects/KGO/onYourBehlf/frontend
+npm error command failed
+npm error command sh -c NODE_ENV=production next build
+[0;31m[ERROR][0m Frontend build failed

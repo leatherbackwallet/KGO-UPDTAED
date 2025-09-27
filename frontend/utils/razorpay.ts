@@ -6,14 +6,52 @@ export const loadScript = (src: string): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     // Check if script is already loaded
     if (document.querySelector(`script[src="${src}"]`)) {
+      console.log('✅ Razorpay script already loaded');
       resolve(true);
       return;
     }
 
+    // Check if Razorpay is already available
+    if (window.Razorpay) {
+      console.log('✅ Razorpay already available on window');
+      resolve(true);
+      return;
+    }
+
+    console.log('🔄 Loading Razorpay script from:', src);
+    
     const script = document.createElement('script');
     script.src = src;
-    script.onload = () => resolve(true);
-    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+    script.async = true;
+    script.defer = true;
+    script.crossOrigin = 'anonymous';
+    
+    // Add timeout to prevent hanging
+    const timeout = setTimeout(() => {
+      console.error('❌ Razorpay script load timeout');
+      reject(new Error(`Script load timeout: ${src}`));
+    }, 10000); // 10 second timeout
+    
+    script.onload = () => {
+      clearTimeout(timeout);
+      console.log('✅ Razorpay script loaded successfully');
+      
+      // Verify Razorpay is available
+      if (window.Razorpay) {
+        console.log('✅ Razorpay SDK is available');
+        resolve(true);
+      } else {
+        console.error('❌ Razorpay SDK not available after script load');
+        reject(new Error('Razorpay SDK not available after script load'));
+      }
+    };
+    
+    script.onerror = (error) => {
+      clearTimeout(timeout);
+      console.error('❌ Failed to load Razorpay script:', error);
+      reject(new Error(`Failed to load script: ${src}`));
+    };
+    
     document.head.appendChild(script);
   });
 };
