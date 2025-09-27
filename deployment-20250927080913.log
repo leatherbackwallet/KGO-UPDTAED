@@ -1,0 +1,16 @@
+==========================================
+ OnYourBehlf Bulletproof Deployment
+==========================================
+Deployment ID: 20250927080913
+Project: onyourbehlf
+Log File: deployment-20250927080913.log
+==========================================
+
+[0;34m[INFO][0m Validating prerequisites...
+[0;32m[SUCCESS][0m Prerequisites validated
+[0;34m[INFO][0m Creating deployment backup...
+[0;32m[SUCCESS][0m Backup created in deployment-backups/20250927080913
+[0;34m[INFO][0m Cleaning up problematic files...
+[0;32m[SUCCESS][0m Problematic files cleaned up
+[0;34m[INFO][0m 🚀 Starting backend deployment...
+[0;34m[INFO][0m Building backend...
