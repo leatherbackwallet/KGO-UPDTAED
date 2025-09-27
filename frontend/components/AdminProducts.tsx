@@ -620,7 +620,7 @@ const AdminProducts: React.FC = () => {
 
     try {
       setError(''); // Clear any previous errors
-      setDeletingProducts(prev => new Set(prev).add(productId));
+      setDeletingProducts((prev: Set<string>) => new Set(prev).add(productId));
       
       // Optimistic update - remove product from state immediately
       setProducts((prevProducts: Product[]) => prevProducts.filter((product: Product) => product._id !== productId));
@@ -977,11 +977,11 @@ const AdminProducts: React.FC = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Featured:</span>
-                <span className="font-medium">{products.filter(p => p.isFeatured).length}</span>
+                <span className="font-medium">{products.filter((p: Product) => p.isFeatured).length}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">In Stock:</span>
-                <span className="font-medium">{products.filter(p => (p.stock || 0) > 0).length}</span>
+                <span className="font-medium">{products.filter((p: Product) => (p.stock || 0) > 0).length}</span>
               </div>
             </div>
           </div>
@@ -1095,7 +1095,7 @@ const AdminProducts: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts && filteredProducts.length > 0 ? filteredProducts.map((product) => {
+              {filteredProducts && filteredProducts.length > 0 ? filteredProducts.map((product: Product) => {
                 // Use cached image for each product
                 const imageUrl = getCachedImageUrl(product);
 
@@ -1209,7 +1209,7 @@ const AdminProducts: React.FC = () => {
                 <input
                   type="text"
                   value={typeof editingProduct.name === 'string' ? editingProduct.name : ''}
-                  onChange={(e) => setEditingProduct({
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingProduct({
                     ...editingProduct,
                     name: e.target.value
                   })}
@@ -1225,7 +1225,7 @@ const AdminProducts: React.FC = () => {
                 </label>
                 <textarea
                   value={typeof editingProduct.description === 'string' ? editingProduct.description : ''}
-                  onChange={(e) => setEditingProduct({
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditingProduct({
                     ...editingProduct,
                     description: e.target.value
                   })}
@@ -1246,7 +1246,7 @@ const AdminProducts: React.FC = () => {
                     step="1"
                     min="0"
                     value={editingProduct.price || ''}
-                    onChange={(e) => setEditingProduct({
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingProduct({
                       ...editingProduct,
                       price: parseInt(e.target.value) || 0
                     })}
@@ -1261,7 +1261,7 @@ const AdminProducts: React.FC = () => {
                   <input
                     type="number"
                     value={editingProduct.stock || 200}
-                    onChange={(e) => setEditingProduct({
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingProduct({
                       ...editingProduct,
                       stock: parseInt(e.target.value) || 0
                     })}

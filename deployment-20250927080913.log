@@ -438,3 +438,17 @@ fddb0c9d0c8f: Waiting
 d420983cf63f: Pushed
 c602a8e04ca0: Pushed
 1db0ccfa7040: Pushed
+c134d3426515: Pushed
+3fd47649a00d: Pushed
+00d0857b2a16: Layer already exists
+fddb0c9d0c8f: Layer already exists
+0f23a6ce9399: Pushed
+689195d1c9ad: Layer already exists
+418dccb7d85a: Layer already exists
+28397c5694fc: Pushed
+e303f8f5b38f: Pushed
+f72301a320f5: Pushed
+latest: digest: sha256:a4cbde9b983d99b381d889ceccd6a3afcda471ae40291feb7ed5f202001046df size: 3042
+DONE
+--------------------------------------------------------------------------------
+Updating service [api] (this may take several minutes)...
