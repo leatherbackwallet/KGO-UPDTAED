@@ -21,7 +21,7 @@ const nextConfig = {
   
   // Disable static optimization for pages that use client-side features
   trailingSlash: false,
-  output: 'standalone',
+  // output: 'standalone', // Disabled to fix deployment crash
   
   // Environment variables for build time
   env: {
@@ -91,7 +91,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://api-dot-onyourbehlf.uc.r.appspot.com; frame-src 'self' https://checkout.razorpay.com;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com https://api-dot-onyourbehlf.uc.r.appspot.com; frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com; object-src 'none'; base-uri 'self';",
           },
           {
             key: 'Strict-Transport-Security',
