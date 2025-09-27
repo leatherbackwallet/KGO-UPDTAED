@@ -113,12 +113,16 @@ const ItemsPage: React.FC = () => {
         return;
       }
 
-      // Use the ReliableApiService for better error handling
-      const reliableApi = new ReliableApiService(process.env.NEXT_PUBLIC_API_URL, 15000);
+      // Use the ReliableApiService with timeout prevention
+      const reliableApi = new ReliableApiService(process.env.NEXT_PUBLIC_API_URL, 30000);
       const response = await reliableApi.get(apiUrl, {
         retries: 3,
-        timeout: 15000,
-        cacheTTL: 300000 // 5 minutes cache
+        timeout: 30000,
+        cacheTTL: 300000, // 5 minutes cache
+        // Add timeout prevention strategies
+        adaptiveTimeout: true,
+        circuitBreaker: true,
+        requestQueuing: true
       });
       
       const apiResponse = response.data as any;

@@ -8,6 +8,7 @@ import { hashPassword } from './utils/hash';
 import { ensureProductImagesDir } from './utils/fileUpload';
 import { connectToDatabase } from './utils/database';
 import { generalLimiter, authLimiter, apiLimiter, userAwareLimiter } from './middleware/rateLimit';
+import { connectionPoolOptimizer } from './services/ConnectionPoolOptimizer';
 import { logger, errorLogger } from './middleware/logger';
 
 // Load environment variables
@@ -376,6 +377,22 @@ app.use((err: any, req: any, res: any, next: any) => {
 app.use(errorLogger);
 
 // Start server
+// Connect to MongoDB with connection pool optimization
+connectToDatabase().then(async () => {
+  console.log('✅ Database connected successfully');
+  
+  // Optimize connection pool to prevent timeouts
+  try {
+    await connectionPoolOptimizer.optimizeConnectionPool();
+    console.log('✅ Connection pool optimized for timeout prevention');
+  } catch (error) {
+    console.error('⚠️ Connection pool optimization failed:', error);
+  }
+}).catch((error) => {
+  console.error('❌ Database connection failed:', error);
+  process.exit(1);
+});
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

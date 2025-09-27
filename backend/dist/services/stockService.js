@@ -17,21 +17,25 @@ class StockService {
         const results = [];
         const unavailableItems = [];
         for (const item of items) {
+            console.log(`🔍 [Stock Service] Checking product: ${item.productId}, quantity: ${item.quantity}`);
             const product = await products_model_1.Product.findById(item.productId).session(session || null);
             if (!product) {
+                console.error(`❌ [Stock Service] Product not found: ${item.productId}`);
                 results.push({
                     available: false,
                     currentStock: 0,
                     requestedQuantity: item.quantity,
-                    productName: 'Unknown Product'
+                    productName: `Unknown Product (ID: ${item.productId})`
                 });
                 unavailableItems.push(item.productId);
                 continue;
             }
+            console.log(`✅ [Stock Service] Product found: ${product.name} (ID: ${item.productId}), current stock: ${product.stock}`);
             // Check current stock minus any active reservations
             const reservedQuantity = this.getReservedQuantity(item.productId);
             const availableStock = Math.max(0, product.stock - reservedQuantity);
             const isAvailable = availableStock >= item.quantity;
+            console.log(`📊 [Stock Service] ${product.name}: Total stock: ${product.stock}, Reserved: ${reservedQuantity}, Available: ${availableStock}, Requested: ${item.quantity}, Available: ${isAvailable}`);
             results.push({
                 available: isAvailable,
                 currentStock: product.stock,
@@ -39,6 +43,7 @@ class StockService {
                 productName: product.name
             });
             if (!isAvailable) {
+                console.warn(`⚠️ [Stock Service] Insufficient stock for ${product.name}: ${availableStock} available, ${item.quantity} requested`);
                 unavailableItems.push(item.productId);
             }
         }

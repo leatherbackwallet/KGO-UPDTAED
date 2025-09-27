@@ -58,8 +58,22 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
             const userId = req.user.id;
             console.log('🔍 [Payment Route] User ID:', userId);
             console.log('🔍 [Payment Route] Products:', products);
+            // Transform products data for stock service (frontend sends 'product', stock service expects 'productId')
+            const transformedProducts = products.map((item) => ({
+                productId: item.product, // Transform 'product' field to 'productId'
+                quantity: item.quantity
+            }));
+            console.log('🔍 [Payment Route] Transformed products for stock service:', transformedProducts);
+            // Validate that all products exist before stock check
+            for (const item of transformedProducts) {
+                const product = await index_1.Product.findById(item.productId).session(session);
+                if (!product) {
+                    throw new Error(`PRODUCT_NOT_FOUND:${item.productId}`);
+                }
+                console.log(`✅ [Payment Route] Product found: ${product.name} (ID: ${item.productId})`);
+            }
             // Check stock availability using stock service
-            const stockCheck = await stockService_1.default.checkStockAvailability(products, session);
+            const stockCheck = await stockService_1.default.checkStockAvailability(transformedProducts, session);
             if (!stockCheck.available) {
                 const errorMessage = stockCheck.results
                     .filter(r => !r.available)
@@ -69,7 +83,7 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
             }
             // Reserve stock for this order
             const sessionId = `payment_${Date.now()}_${userId}`;
-            const reservationResult = await stockService_1.default.reserveStock(products, userId, sessionId, session);
+            const reservationResult = await stockService_1.default.reserveStock(transformedProducts, userId, sessionId, session);
             if (!reservationResult.success) {
                 throw new Error(`STOCK_RESERVATION_FAILED:${reservationResult.errors.join('; ')}`);
             }
@@ -197,7 +211,7 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
             res.status(400).json({
                 success: false,
                 error: {
-                    message: `Insufficient stock: ${stockMessage}`,
+                    message: `Insufficient stock: ${stockMessage}. Please reduce quantity or remove items from cart.`,
                     code: 'INSUFFICIENT_STOCK'
                 }
             });
@@ -219,7 +233,7 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
             res.status(400).json({
                 success: false,
                 error: {
-                    message: `Product with ID ${productId} not found`,
+                    message: `Product not found (ID: ${productId}). Please refresh the page and try again.`,
                     code: 'PRODUCT_NOT_FOUND'
                 }
             });

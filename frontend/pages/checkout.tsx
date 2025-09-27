@@ -623,8 +623,15 @@ export default function Checkout() {
       // Merge guest data with existing cart/wishlist
       await mergeGuestData(guestTokens.accessToken);
 
-      // Handle COD payment
-      if (guestData.paymentMethod === 'cod-test' || guestData.paymentMethod === 'cod') {
+      // Reject COD payment in production
+      if ((guestData.paymentMethod === 'cod-test' || guestData.paymentMethod === 'cod') && process.env.NODE_ENV !== 'development') {
+        setError('COD payment method is only available in development environment');
+        setLoading(false);
+        return;
+      }
+
+      // Handle COD payment (development only)
+      if ((guestData.paymentMethod === 'cod-test' || guestData.paymentMethod === 'cod') && process.env.NODE_ENV === 'development') {
 
         // Create COD order directly
         const codOrderResponse = await api.post('/orders', {
@@ -1501,9 +1508,11 @@ export default function Checkout() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="razorpay">Razorpay (Credit/Debit Card)</option>
-                        <option value="cod">Cash on Delivery (COD)</option>
                         {process.env.NODE_ENV === 'development' && (
-                          <option value="cod-test">COD-TEST (Development Only)</option>
+                          <>
+                            <option value="cod">Cash on Delivery (COD)</option>
+                            <option value="cod-test">COD-TEST (Development Only)</option>
+                          </>
                         )}
                       </select>
                     </div>

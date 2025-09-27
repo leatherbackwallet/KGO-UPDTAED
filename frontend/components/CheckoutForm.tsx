@@ -131,7 +131,7 @@ export default function CheckoutForm({ guestData, isGuest = false }: CheckoutFor
 
     try {
       // Handle COD payment (development only)
-      if (paymentMethod === 'cod-test') {
+      if (paymentMethod === 'cod-test' || paymentMethod === 'cod') {
         if (process.env.NODE_ENV !== 'development') {
           setError('COD payment is only available in development environment');
           setLoading(false);
@@ -156,7 +156,7 @@ export default function CheckoutForm({ guestData, isGuest = false }: CheckoutFor
             address: selectedRecipientAddress.address,
             additionalInstructions: selectedRecipientAddress.additionalInstructions
           },
-          paymentMethod: 'cod-test'
+          paymentMethod: paymentMethod
         }, {
           headers: { Authorization: `Bearer ${tokens?.accessToken}` }
         });
@@ -521,20 +521,37 @@ export default function CheckoutForm({ guestData, isGuest = false }: CheckoutFor
             </label>
             
             {process.env.NODE_ENV === 'development' && (
-              <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="cod-test"
-                  checked={paymentMethod === 'cod-test'}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="text-blue-600 focus:ring-blue-500"
-                />
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900">COD-TEST (Development Only)</div>
-                  <div className="text-sm text-gray-500">Cash on Delivery - Payment collected on delivery</div>
-                </div>
-              </label>
+              <>
+                <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="cod"
+                    checked={paymentMethod === 'cod'}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="text-blue-600 focus:ring-blue-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">Cash on Delivery (COD)</div>
+                    <div className="text-sm text-gray-500">Payment collected on delivery</div>
+                  </div>
+                </label>
+                
+                <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="cod-test"
+                    checked={paymentMethod === 'cod-test'}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="text-blue-600 focus:ring-blue-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">COD-TEST (Development Only)</div>
+                    <div className="text-sm text-gray-500">Cash on Delivery - Payment collected on delivery</div>
+                  </div>
+                </label>
+              </>
             )}
           </div>
         </div>

@@ -44,18 +44,18 @@ env_variables:
 # Add health check configuration
 readiness_check:
   path: "/api/health-status"
-  check_interval_sec: 30  # Less aggressive checking
-  timeout_sec: 15  # More time for response
-  failure_threshold: 5  # More tolerance
-  success_threshold: 1  # Faster recovery
-  app_start_timeout_sec: 900  # 15 minutes for cold starts
+  check_interval_sec: 45  # Less aggressive checking
+  timeout_sec: 45  # Increased timeout for stability
+  failure_threshold: 3  # Reduced threshold for faster detection
+  success_threshold: 2  # Require 2 successes for stability
+  app_start_timeout_sec: 1200  # 20 minutes for cold starts
 
 liveness_check:
   path: "/api/health-status"
-  check_interval_sec: 60  # Less frequent checks
-  timeout_sec: 15  # More time for response
-  failure_threshold: 5  # More tolerance
-  success_threshold: 1  # Faster recovery
+  check_interval_sec: 90  # Much less frequent checks
+  timeout_sec: 45  # Increased timeout for stability
+  failure_threshold: 3  # Reduced threshold for faster detection
+  success_threshold: 2  # Require 2 successes for stability
 
 automatic_scaling:
   min_num_instances: 1  # Minimum required by App Engine
