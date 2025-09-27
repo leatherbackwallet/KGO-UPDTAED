@@ -46,6 +46,7 @@ const hash_1 = require("./utils/hash");
 const fileUpload_1 = require("./utils/fileUpload");
 const database_1 = require("./utils/database");
 const rateLimit_1 = require("./middleware/rateLimit");
+const ConnectionPoolOptimizer_1 = require("./services/ConnectionPoolOptimizer");
 const logger_1 = require("./middleware/logger");
 // Load environment variables
 dotenv_1.default.config();
@@ -380,6 +381,21 @@ app.use((err, req, res, next) => {
 // Error logging middleware
 app.use(logger_1.errorLogger);
 // Start server
+// Connect to MongoDB with connection pool optimization
+(0, database_1.connectToDatabase)().then(async () => {
+    console.log('✅ Database connected successfully');
+    // Optimize connection pool to prevent timeouts
+    try {
+        await ConnectionPoolOptimizer_1.connectionPoolOptimizer.optimizeConnectionPool();
+        console.log('✅ Connection pool optimized for timeout prevention');
+    }
+    catch (error) {
+        console.error('⚠️ Connection pool optimization failed:', error);
+    }
+}).catch((error) => {
+    console.error('❌ Database connection failed:', error);
+    process.exit(1);
+});
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);

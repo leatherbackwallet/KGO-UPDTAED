@@ -14,3 +14,24 @@ Log File: deployment-20250927080913.log
 [0;32m[SUCCESS][0m Problematic files cleaned up
 [0;34m[INFO][0m 🚀 Starting backend deployment...
 [0;34m[INFO][0m Building backend...
+
+> keralagiftsonline-backend@3.0.0 build
+> tsc
+
+[0;32m[SUCCESS][0m Backend build completed
+[0;34m[INFO][0m Deploying backend to Google Cloud...
+Services to deploy:
+
+descriptor:                  [/Users/josephjames/Projects/KGO/onYourBehlf/app.yaml]
+source:                      [/Users/josephjames/Projects/KGO/onYourBehlf]
+target project:              [onyourbehlf]
+target service:              [api]
+target version:              [v20250927080913]
+target url:                  [https://v20250927080913-dot-api-dot-onyourbehlf.uc.r.appspot.com]
+target service account:      [onyourbehlf@appspot.gserviceaccount.com]
+
+
+     (add --promote if you also want to make this service available from
+     [https://api-dot-onyourbehlf.uc.r.appspot.com])
+
+Beginning deployment of service [api]...

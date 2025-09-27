@@ -105,8 +105,18 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
             for (const update of productUpdates) {
                 await index_1.Product.findByIdAndUpdate(update.productId, { $inc: { stock: -update.quantity } }, { session });
             }
-            // Handle COD payment method
-            if (paymentMethod === 'cod-test' || paymentMethod === 'cod') {
+            // Reject COD payment method in production
+            if ((paymentMethod === 'cod-test' || paymentMethod === 'cod') && process.env.NODE_ENV !== 'development') {
+                return res.status(400).json({
+                    success: false,
+                    error: {
+                        message: 'COD payment method is only available in development environment',
+                        code: 'COD_NOT_AVAILABLE'
+                    }
+                });
+            }
+            // Handle COD payment method (development only)
+            if ((paymentMethod === 'cod-test' || paymentMethod === 'cod') && process.env.NODE_ENV === 'development') {
                 // Create COD order with specific status and payment details
                 const order = await index_1.Order.create([{
                         userId: req.user.id,
