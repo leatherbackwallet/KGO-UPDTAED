@@ -1,0 +1,128 @@
+==========================================
+ OnYourBehlf Bulletproof Deployment
+==========================================
+Deployment ID: 20250927083800
+Project: onyourbehlf
+Log File: deployment-20250927083800.log
+==========================================
+
+[0;34m[INFO][0m Validating prerequisites...
+[0;32m[SUCCESS][0m Prerequisites validated
+[0;34m[INFO][0m Creating deployment backup...
+[0;32m[SUCCESS][0m Backup created in deployment-backups/20250927083800
+[0;34m[INFO][0m Cleaning up problematic files...
+[0;32m[SUCCESS][0m Problematic files cleaned up
+[0;34m[INFO][0m 🚀 Starting backend deployment...
+[0;34m[INFO][0m Building backend...
+
+> keralagiftsonline-backend@3.0.0 build
+> tsc
+
+[0;32m[SUCCESS][0m Backend build completed
+[0;34m[INFO][0m Deploying backend to Google Cloud...
+Services to deploy:
+
+descriptor:                  [/Users/josephjames/Projects/KGO/onYourBehlf/app.yaml]
+source:                      [/Users/josephjames/Projects/KGO/onYourBehlf]
+target project:              [onyourbehlf]
+target service:              [api]
+target version:              [v20250927083800]
+target url:                  [https://v20250927083800-dot-api-dot-onyourbehlf.uc.r.appspot.com]
+target service account:      [onyourbehlf@appspot.gserviceaccount.com]
+
+
+     (add --promote if you also want to make this service available from
+     [https://api-dot-onyourbehlf.uc.r.appspot.com])
+
+Beginning deployment of service [api]...
+╔════════════════════════════════════════════════════════════╗
+╠═ Uploading 6 files to Google Cloud Storage                ═╣
+╚════════════════════════════════════════════════════════════╝
+File upload done.
+Updating service [api] (this may take several minutes)...
+....................................done.
+Waiting for build to complete. Polling interval: 1 second(s).
+----------------------------- REMOTE BUILD OUTPUT ------------------------------
+starting build "68c3db1a-6207-419c-8ac6-2c308eb4e963"
+
+FETCHSOURCE
+BUILD
+Starting Step #0 - "fetcher"
+Step #0 - "fetcher": Already have image (with digest): gcr.io/cloud-builders/gcs-fetcher
+Step #0 - "fetcher": Fetching manifest gs://staging.onyourbehlf.appspot.com/ae/9453a7a6-9d87-4305-8c17-fbe79d2cc10c/manifest.json.
+Step #0 - "fetcher": Processing 391 files.
+Step #0 - "fetcher": ******************************************************
+Step #0 - "fetcher": Status:                      SUCCESS
+Step #0 - "fetcher": Started:                     2025-09-27T06:38:29Z
+Step #0 - "fetcher": Completed:                   2025-09-27T06:38:29Z
+Step #0 - "fetcher": Requested workers:    200
+Step #0 - "fetcher": Actual workers:       200
+Step #0 - "fetcher": Total files:          391
+Step #0 - "fetcher": Total retries:          0
+Step #0 - "fetcher": GCS timeouts:           0
+Step #0 - "fetcher": MiB downloaded:         6.94 MiB
+Step #0 - "fetcher": MiB/s throughput:      10.82 MiB/s
+Step #0 - "fetcher": Time for manifest:    124.86 ms
+Step #0 - "fetcher": Total time:             0.78 s
+Step #0 - "fetcher": ******************************************************
+Finished Step #0 - "fetcher"
+Starting Step #1
+Step #1: Already have image (with digest): gcr.io/cloud-builders/docker
+Step #1: Sending build context to Docker daemon  7.455MB
+Step #1: Step 1/21 : FROM node:20-alpine AS builder
+Step #1: 20-alpine: Pulling from library/node
+Step #1: 9824c27679d3: Already exists
+Step #1: c88300f8759a: Pulling fs layer
+Step #1: fd345d7e43c5: Pulling fs layer
+Step #1: 0de821d16564: Pulling fs layer
+Step #1: fd345d7e43c5: Verifying Checksum
+Step #1: fd345d7e43c5: Download complete
+Step #1: 0de821d16564: Verifying Checksum
+Step #1: 0de821d16564: Download complete
+Step #1: c88300f8759a: Download complete
+Step #1: c88300f8759a: Pull complete
+Step #1: fd345d7e43c5: Pull complete
+Step #1: 0de821d16564: Pull complete
+Step #1: Digest: sha256:eabac870db94f7342d6c33560d6613f188bbcf4bbe1f4eb47d5e2a08e1a37722
+Step #1: Status: Downloaded newer image for node:20-alpine
+Step #1:  ---> 6c47bbfd232e
+Step #1: Step 2/21 : WORKDIR /app
+Step #1:  ---> Running in 87e3719d66cb
+Step #1: Removing intermediate container 87e3719d66cb
+Step #1:  ---> da57f054b2f9
+Step #1: Step 3/21 : COPY backend/package*.json ./
+Step #1:  ---> 12711fccdf1f
+Step #1: Step 4/21 : RUN npm install
+Step #1:  ---> Running in 791617dd7d02
+Step #1: [91mnpm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+Step #1: [0m[91mnpm warn deprecated are-we-there-yet@2.0.0: This package is no longer supported.
+Step #1: [0m[91mnpm warn deprecated gauge@3.0.2: This package is no longer supported.
+Step #1: [0m[91mnpm warn deprecated npmlog@5.0.1: This package is no longer supported.
+Step #1: [0m[91mnpm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+Step #1: [0m[91mnpm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+Step #1: [0m[91mnpm warn deprecated q@1.5.1: You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+Step #1: npm warn deprecated
+Step #1: npm warn deprecated (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
+Step #1: [0m[91mnpm warn deprecated multer@1.4.5-lts.2: Multer 1.x is impacted by a number of vulnerabilities, which have been patched in 2.x. You should upgrade to the latest 2.x version.
+Step #1: [0m
+Step #1: added 401 packages, and audited 402 packages in 27s
+Step #1: 
+Step #1: 30 packages are looking for funding
+Step #1:   run `npm fund` for details
+Step #1: 
+Step #1: found 0 vulnerabilities
+Step #1: [91mnpm notice
+Step #1: npm notice New major version of npm available! 10.8.2 -> 11.6.1
+Step #1: npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.1
+Step #1: npm notice To update run: npm install -g npm@11.6.1
+Step #1: npm notice
+Step #1: [0mRemoving intermediate container 791617dd7d02
+Step #1:  ---> eac7f000f950
+Step #1: Step 5/21 : COPY backend/ ./
+Step #1:  ---> 2f3ca98d3de7
+Step #1: Step 6/21 : RUN npm run build
+Step #1:  ---> Running in f3a8aec46988
+Step #1: 
+Step #1: > keralagiftsonline-backend@3.0.0 build
+Step #1: > tsc
+Step #1:
