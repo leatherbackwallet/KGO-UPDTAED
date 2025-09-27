@@ -335,3 +335,26 @@ Step #1: Executing gtk-update-icon-cache-3.24.50-r0.trigger
 Step #1: Executing gtk+3.0-3.24.50-r0.trigger
 Step #1: Executing eudev-3.2.14-r5.trigger
 Step #1: OK: 787 MiB in 208 packages
+Step #1: Removing intermediate container 022653c2414c
+Step #1:  ---> fb5adafd01e8
+Step #1: Step 9/21 : ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser     CHROME_BIN=/usr/bin/chromium-browser
+Step #1:  ---> Running in c11a3337b196
+Step #1: Removing intermediate container c11a3337b196
+Step #1:  ---> 51f307a408dc
+Step #1: Step 10/21 : RUN addgroup -g 1001 -S nodejs
+Step #1:  ---> Running in f4d3b4132b05
+Step #1: Removing intermediate container f4d3b4132b05
+Step #1:  ---> c5d694476bb4
+Step #1: Step 11/21 : RUN adduser -S nodejs -u 1001
+Step #1:  ---> Running in 7c892c0c5797
+Step #1: Removing intermediate container 7c892c0c5797
+Step #1:  ---> cbf15c6f4b14
+Step #1: Step 12/21 : WORKDIR /app
+Step #1:  ---> Running in 0b9947155609
+Step #1: Removing intermediate container 0b9947155609
+Step #1:  ---> c49f6737db5e
+Step #1: Step 13/21 : COPY backend/package*.json ./
+Step #1:  ---> c5e6513953c7
+Step #1: Step 14/21 : RUN npm install --only=production && npm cache clean --force
+Step #1:  ---> Running in 032c083f3777
+Step #1: [91mnpm warn config only Use `--omit=dev` to omit dev dependencies from the install.
