@@ -52,6 +52,10 @@ export default function Document() {
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         
+        {/* Permissions Policy for UPI QR scanning */}
+        <meta httpEquiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />
+        <meta httpEquiv="Feature-Policy" content="camera 'self'; microphone 'self'; payment 'self'" />
+        
         {/* Geo Tags */}
         <meta name="geo.region" content="IN-KL" />
         <meta name="geo.placename" content="Kerala, India" />

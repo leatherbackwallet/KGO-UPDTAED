@@ -4,17 +4,28 @@
 
 export const loadScript = (src: string): Promise<boolean> => {
   return new Promise((resolve, reject) => {
-    // Check if script is already loaded
-    if (document.querySelector(`script[src="${src}"]`)) {
-      console.log('✅ Razorpay script already loaded');
-      resolve(true);
-      return;
-    }
-
     // Check if Razorpay is already available
     if (window.Razorpay) {
       console.log('✅ Razorpay already available on window');
       resolve(true);
+      return;
+    }
+
+    // Check if script is already loaded
+    const existingScript = document.querySelector(`script[src="${src}"]`);
+    if (existingScript) {
+      console.log('✅ Razorpay script already loaded, waiting for SDK...');
+      
+      // Wait a bit for the script to initialize
+      const checkRazorpay = () => {
+        if (window.Razorpay) {
+          console.log('✅ Razorpay SDK is now available');
+          resolve(true);
+        } else {
+          setTimeout(checkRazorpay, 100);
+        }
+      };
+      checkRazorpay();
       return;
     }
 
@@ -30,20 +41,22 @@ export const loadScript = (src: string): Promise<boolean> => {
     const timeout = setTimeout(() => {
       console.error('❌ Razorpay script load timeout');
       reject(new Error(`Script load timeout: ${src}`));
-    }, 10000); // 10 second timeout
+    }, 15000); // Increased to 15 second timeout
     
     script.onload = () => {
       clearTimeout(timeout);
       console.log('✅ Razorpay script loaded successfully');
       
-      // Verify Razorpay is available
-      if (window.Razorpay) {
-        console.log('✅ Razorpay SDK is available');
-        resolve(true);
-      } else {
-        console.error('❌ Razorpay SDK not available after script load');
-        reject(new Error('Razorpay SDK not available after script load'));
-      }
+      // Wait a bit for Razorpay to initialize
+      setTimeout(() => {
+        if (window.Razorpay) {
+          console.log('✅ Razorpay SDK is available');
+          resolve(true);
+        } else {
+          console.error('❌ Razorpay SDK not available after script load');
+          reject(new Error('Razorpay SDK not available after script load'));
+        }
+      }, 500); // Give it 500ms to initialize
     };
     
     script.onerror = (error) => {

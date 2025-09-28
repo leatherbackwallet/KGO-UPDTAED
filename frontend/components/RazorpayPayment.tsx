@@ -46,7 +46,7 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
         console.log('Initializing Razorpay with order data:', orderData);
         console.log('Customer data:', customerData);
         
-        // Load Razorpay script with retry logic
+        // Load Razorpay script with improved retry logic
         let retryCount = 0;
         const maxRetries = 3;
         let scriptLoaded = false;
@@ -55,15 +55,21 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
           try {
             console.log(`🔄 Attempting to load Razorpay script (attempt ${retryCount + 1}/${maxRetries})`);
             await loadScript('https://checkout.razorpay.com/v1/checkout.js');
-            scriptLoaded = true;
-            console.log('✅ Razorpay script loaded successfully');
+            
+            // Double-check that Razorpay is available
+            if (window.Razorpay) {
+              scriptLoaded = true;
+              console.log('✅ Razorpay script loaded successfully');
+            } else {
+              throw new Error('Razorpay SDK not available after script load');
+            }
           } catch (error) {
             retryCount++;
             console.warn(`⚠️ Razorpay script load failed (attempt ${retryCount}/${maxRetries}):`, error);
             
             if (retryCount < maxRetries) {
-              console.log(`🔄 Retrying in ${retryCount * 1000}ms...`);
-              await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
+              console.log(`🔄 Retrying in ${retryCount * 2000}ms...`);
+              await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
             }
           }
         }
