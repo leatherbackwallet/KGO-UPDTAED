@@ -17,13 +17,8 @@
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "cd backend && npm run build",
     "build:frontend": "cd frontend && npm run build",
-    "deploy": "chmod +x deploy-single.sh && ./deploy-single.sh",
-    "deploy:single": "gcloud builds submit --config=build-config.yaml .",
-    "deploy:check": "gcloud builds list --limit=5",
-    "deploy:stop": "gcloud builds list --ongoing --format='value(id)' | xargs -I {} gcloud builds cancel {}",
-    "cleanup:versions": "./cleanup-versions.sh",
-    "cleanup:versions:dry-run": "./cleanup-versions.sh --dry-run",
-    "cleanup:versions:status": "./cleanup-versions.sh --status"
+    "deploy": "./deploy-production.sh",
+    "deploy:help": "./deploy-production.sh --help"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

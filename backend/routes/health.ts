@@ -1,5 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import fs from 'fs';
+import path from 'path';
 import { healthCheckMiddleware, keepAliveMiddleware } from '../utils/keepAlive';
 
 const router = express.Router();
@@ -87,5 +89,44 @@ router.get('/health-status', healthCheckMiddleware);
  * Keep-alive endpoint to prevent service sleep
  */
 router.get('/keep-alive', keepAliveMiddleware);
+
+// Debug endpoint to check file system
+router.get('/debug-files', (req, res) => {
+  try {
+    const cwd = process.cwd();
+    const productsPath = path.join(cwd, 'Products');
+    const productsFile = path.join(productsPath, 'keralagiftsonline.products.json');
+    const categoriesFile = path.join(productsPath, 'keralagiftsonline.categories.json');
+    const occasionsFile = path.join(productsPath, 'keralagiftsonline.occasions.json');
+
+    // Check if files exist and get their stats
+    const files = {
+      cwd,
+      productsPath,
+      productsFile,
+      categoriesFile,
+      occasionsFile,
+      productsExists: fs.existsSync(productsFile),
+      categoriesExists: fs.existsSync(categoriesFile),
+      occasionsExists: fs.existsSync(occasionsFile),
+      productsDirExists: fs.existsSync(productsPath),
+      productsDirContents: fs.existsSync(productsPath) ? fs.readdirSync(productsPath) : [],
+      // Get file stats if they exist
+      productsFileStats: fs.existsSync(productsFile) ? fs.statSync(productsFile) : null,
+      categoriesFileStats: fs.existsSync(categoriesFile) ? fs.statSync(categoriesFile) : null,
+      occasionsFileStats: fs.existsSync(occasionsFile) ? fs.statSync(occasionsFile) : null,
+      // Check parent directories
+      appDirContents: fs.existsSync('/app') ? fs.readdirSync('/app') : [],
+      workingDirContents: fs.readdirSync(cwd)
+    };
+
+    res.status(200).json(files);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
 
 export default router;

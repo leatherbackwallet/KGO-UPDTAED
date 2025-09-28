@@ -37,7 +37,16 @@ export function getProductImage(imagePath?: string, slug?: string): string {
       // Use optimized Cloudinary URL with proper transformations
       // Remove any existing transformations to avoid conflicts
       const cleanPublicId = imagePath.replace(/^keralagiftsonline\/products\//, '');
-      return `https://res.cloudinary.com/deojqbepy/image/upload/w_400,h_400,c_fill,q_auto,f_auto/keralagiftsonline/products/${cleanPublicId}`;
+      
+      // Add cache busting and proper error handling
+      const cloudinaryUrl = `https://res.cloudinary.com/deojqbepy/image/upload/w_400,h_400,c_fill,q_auto,f_auto/keralagiftsonline/products/${cleanPublicId}`;
+      
+      // Add timestamp for cache busting in development
+      if (process.env.NODE_ENV === 'development') {
+        return `${cloudinaryUrl}?t=${Date.now()}`;
+      }
+      
+      return cloudinaryUrl;
     } else {
       // Invalid Cloudinary public_id format, use default image
       return DEFAULT_PRODUCT_IMAGE;
@@ -163,7 +172,14 @@ export function getOptimizedImagePath(publicId: string, size: 'thumb' | 'small' 
     const sizeConfig = PRODUCT_IMAGE_SIZES[size];
     const transformations = `w_${sizeConfig.width},h_${sizeConfig.height},c_fill,q_auto,f_auto`;
     
-    return `https://res.cloudinary.com/deojqbepy/image/upload/${transformations}/${publicId}`;
+    const cloudinaryUrl = `https://res.cloudinary.com/deojqbepy/image/upload/${transformations}/${publicId}`;
+    
+    // Add cache busting in development
+    if (process.env.NODE_ENV === 'development') {
+      return `${cloudinaryUrl}?t=${Date.now()}`;
+    }
+    
+    return cloudinaryUrl;
   }
   
   // Invalid public_id, return default
@@ -302,4 +318,44 @@ export function preloadProductImages(products: any[], currentPage: number, produ
       preloadImages(nextBatchImages, 'low');
     }, 1000); // Delay to not block current page rendering
   }
+}
+
+/**
+ * Clear image cache and force reload
+ * Useful for debugging image loading issues
+ */
+export function clearImageCache(): void {
+  if (typeof window !== 'undefined') {
+    // Clear localStorage cache
+    localStorage.removeItem('smart-image-cache');
+    
+    // Force reload of all images on the page
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+      const src = img.src;
+      img.src = '';
+      img.src = src + (src.includes('?') ? '&' : '?') + 't=' + Date.now();
+    });
+  }
+}
+
+/**
+ * Get image loading strategy based on position and priority
+ */
+export function getImageLoadingStrategy(index: number, isVisible: boolean = false): {
+  loading: 'eager' | 'lazy';
+  fetchpriority?: 'high' | 'low' | 'auto';
+} {
+  // Load first 3 images eagerly, rest lazily
+  if (index < 3 || isVisible) {
+    return {
+      loading: 'eager',
+      fetchpriority: 'high'
+    };
+  }
+  
+  return {
+    loading: 'lazy',
+    fetchpriority: 'low'
+  };
 } 

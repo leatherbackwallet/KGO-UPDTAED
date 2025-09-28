@@ -13,6 +13,13 @@ RUN npm ci
 # Copy source code
 COPY backend/ ./
 
+# Debug: List files to verify Products folder is copied
+RUN echo "=== Builder stage debug ===" && \
+    ls -la /app/ && \
+    echo "Products folder contents:" && \
+    ls -la /app/Products/ || echo "Products folder not found" && \
+    echo "=== End debug ==="
+
 # Build the application
 RUN npm run build
 
@@ -52,6 +59,15 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/Products ./Products
+
+# Debug: Verify files are copied correctly
+RUN echo "Production stage - checking files:" && \
+    ls -la /app/ && \
+    echo "Products folder contents:" && \
+    ls -la /app/Products/ && \
+    echo "JSON files check:" && \
+    ls -la /app/Products/*.json || echo "JSON files not found"
 
 # Change ownership to nodejs user
 RUN chown -R nodejs:nodejs /app
