@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import Head from 'next/head';
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
@@ -254,8 +254,8 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
   );
 };
 
-// Static generation - fetch data at build time
-export const getStaticProps: GetStaticProps<ProductsPageProps> = async () => {
+// Server-side rendering - fetch data on each request
+export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async () => {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
     
@@ -293,9 +293,7 @@ export const getStaticProps: GetStaticProps<ProductsPageProps> = async () => {
         products,
         categories,
         occasions
-      },
-      // Regenerate the page at most once every hour
-      revalidate: 3600
+      }
     };
   } catch (error) {
     console.error('Error fetching data for products page:', error);
@@ -306,8 +304,7 @@ export const getStaticProps: GetStaticProps<ProductsPageProps> = async () => {
         products: [],
         categories: [],
         occasions: []
-      },
-      revalidate: 60 // Retry in 1 minute
+      }
     };
   }
 };
