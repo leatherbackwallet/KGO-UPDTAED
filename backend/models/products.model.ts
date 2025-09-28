@@ -25,6 +25,7 @@ export interface IProduct extends Document {
   occasions?: mongoose.Types.ObjectId[]; // Array of occasion references
   vendors?: mongoose.Types.ObjectId[]; // Multiple vendors
   isFeatured: boolean;
+  isActive: boolean;
   isDeleted: boolean;
   // Combo product fields
   isCombo: boolean;
@@ -122,6 +123,10 @@ const productSchema = new Schema<IProduct>({
   isFeatured: {
     type: Boolean,
     default: false
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   },
   isDeleted: {
     type: Boolean,

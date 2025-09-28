@@ -64,7 +64,7 @@ router.post('/register', sanitizeInput, validate(schemas.register), ensureDataba
     }
 
     // Password complexity validation
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         success: false,

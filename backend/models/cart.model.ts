@@ -37,6 +37,10 @@ export interface ICart extends Document {
   updatedAt: Date;
 }
 
+export interface ICartModel extends mongoose.Model<ICart> {
+  findOrCreateCart(userId: string, isGuest?: boolean, sessionId?: string): Promise<ICart>;
+}
+
 const comboItemConfigurationSchema = new Schema({
   name: {
     type: String,
@@ -239,4 +243,4 @@ cartSchema.methods.mergeCart = function(otherCart: ICart) {
   return this.save();
 };
 
-export const Cart = mongoose.model<ICart>('Cart', cartSchema);
+export const Cart = mongoose.model<ICart, ICartModel>('Cart', cartSchema);

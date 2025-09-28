@@ -42,7 +42,13 @@ export default function Login() {
         
         // Use setTimeout to ensure state updates before navigation
         setTimeout(() => {
-          router.push('/');
+          // Check for return URL parameter
+          const returnUrl = router.query.returnUrl as string;
+          if (returnUrl) {
+            router.push(decodeURIComponent(returnUrl));
+          } else {
+            router.push('/');
+          }
         }, 100);
       } else {
         setError('Login failed - invalid response from server');

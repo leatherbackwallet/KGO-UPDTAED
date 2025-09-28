@@ -39,41 +39,7 @@ interface GuestFormData {
   paymentMethod: string;
 }
 
-interface LoginFormData {
-  email: string;
-  password: string;
-}
-
-interface RegisterFormData {
-  // User Account Information
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword?: string;
-  phone: string;
-  // User's Address (for billing/account purposes)
-  userAddress: {
-    street: string;
-    houseNumber?: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  // Recipient Information (Person receiving the gift)
-  recipientName: string;
-  recipientPhone: string;
-  deliveryAddress: {
-    street: string;
-    houseNumber?: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  specialInstructions?: string;
-}
+// Removed LoginFormData and RegisterFormData - now using dedicated pages
 
 interface RecipientAddress {
   name: string;
@@ -109,11 +75,9 @@ export default function Checkout() {
   const { wishlist } = useWishlist();
   
   const [activeTab, setActiveTab] = useState<TabType>('login');
-  const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [selectedRecipientAddress, setSelectedRecipientAddress] = useState<RecipientAddress | null>(null);
   const [previousOrderRecipients, setPreviousOrderRecipients] = useState<OrderRecipient[]>([]);
   const [showPreviousRecipients, setShowPreviousRecipients] = useState(false);
@@ -188,37 +152,7 @@ export default function Checkout() {
     paymentMethod: 'razorpay'
   });
 
-  const [loginData, setLoginData] = useState<LoginFormData>({
-    email: '',
-    password: ''
-  });
-
-  const [registerData, setRegisterData] = useState<RegisterFormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    phone: '',
-    userAddress: {
-      street: '',
-      houseNumber: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      country: 'India'
-    },
-    recipientName: '',
-    recipientPhone: '',
-    deliveryAddress: {
-      street: '',
-      houseNumber: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      country: 'India'
-    },
-    specialInstructions: ''
-  });
+  // Removed loginData and registerData - now using dedicated pages
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -1551,10 +1485,25 @@ export default function Checkout() {
                   
                   <div className="space-y-3">
                     <button
-                      onClick={() => setShowAuthModal(true)}
+                      onClick={() => {
+                        // Redirect to login page with return URL
+                        const returnUrl = encodeURIComponent('/checkout');
+                        router.push(`/login?returnUrl=${returnUrl}`);
+                      }}
                       className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                      Login / Register
+                      Login
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        // Redirect to register page with return URL
+                        const returnUrl = encodeURIComponent('/checkout');
+                        router.push(`/register?returnUrl=${returnUrl}`);
+                      }}
+                      className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors"
+                    >
+                      Create Account
                     </button>
                     
                     <button
@@ -1570,420 +1519,6 @@ export default function Checkout() {
           </div>
         </div>
 
-        {/* Authentication Modal */}
-        {showAuthModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Login / Register</h2>
-                <button
-                  onClick={() => setShowAuthModal(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Tab Navigation */}
-              <div className="mb-4">
-                <AdminTabs
-                  tabs={['Login', 'Register']}
-                  activeTab={isRegistering ? 'Register' : 'Login'}
-                  onTabChange={(tab) => setIsRegistering(tab === 'Register')}
-                />
-              </div>
-
-              {!isRegistering ? (
-                <form onSubmit={handleLogin}>
-                  <div className="space-y-4 max-w-md mx-auto">
-                    {error && (
-                      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                        {error}
-                      </div>
-                    )}
-                    {success && (
-                      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                        {success}
-                      </div>
-                    )}
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Email</label>
-                      <input
-                        type="email"
-                        value={loginData.email}
-                        onChange={(e) => setLoginData({...loginData, email: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Password</label>
-                      <input
-                        type="password"
-                        value={loginData.password}
-                        onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                      />
-                      <PasswordRequirements password={loginData.password} />
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-                    >
-                      {loading ? 'Logging in...' : 'Login & Continue'}
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <form onSubmit={handleRegister}>
-                  <div className="space-y-6">
-                    {error && (
-                      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                        {error}
-                      </div>
-                    )}
-                    {success && (
-                      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                        {success}
-                      </div>
-                    )}
-                    {/* Personal Information */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Personal Information</h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-1">First Name</label>
-                          <input
-                            type="text"
-                            value={registerData.firstName}
-                            onChange={(e) => setRegisterData({...registerData, firstName: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Last Name</label>
-                          <input
-                            type="text"
-                            value={registerData.lastName}
-                            onChange={(e) => setRegisterData({...registerData, lastName: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Email</label>
-                        <input
-                          type="email"
-                          value={registerData.email}
-                          onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Phone</label>
-                        <input
-                          type="tel"
-                          value={registerData.phone}
-                          onChange={(e) => setRegisterData({...registerData, phone: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Password</label>
-                        <input
-                          type="password"
-                          value={registerData.password}
-                          onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
-                        />
-                        <PasswordRequirements password={registerData.password} />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Confirm Password</label>
-                        <input
-                          type="password"
-                          value={registerData.confirmPassword || ''}
-                          onChange={(e) => setRegisterData({...registerData, confirmPassword: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    {/* User Address Section */}
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="text-md font-semibold mb-3 text-blue-800">Your Address (for billing/account)</h4>
-                      <p className="text-sm text-blue-600 mb-4">This is your personal address for account purposes.</p>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-1">Street Address *</label>
-                            <input
-                              type="text"
-                              value={registerData.userAddress.street}
-                              onChange={(e) => {
-                                setRegisterData({
-                                  ...registerData,
-                                  userAddress: {
-                                    ...registerData.userAddress,
-                                    street: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="Your street address"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">House/Flat Number</label>
-                            <input
-                              type="text"
-                              value={registerData.userAddress.houseNumber}
-                              onChange={(e) => {
-                                setRegisterData({
-                                  ...registerData,
-                                  userAddress: {
-                                    ...registerData.userAddress,
-                                    houseNumber: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="Your house/flat number (optional)"
-                            />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-1">City *</label>
-                            <input
-                              type="text"
-                              value={registerData.userAddress.city}
-                              onChange={(e) => {
-                                setRegisterData({
-                                  ...registerData,
-                                  userAddress: {
-                                    ...registerData.userAddress,
-                                    city: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="Your city"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">State *</label>
-                            <input
-                              type="text"
-                              value={registerData.userAddress.state}
-                              onChange={(e) => {
-                                setRegisterData({
-                                  ...registerData,
-                                  userAddress: {
-                                    ...registerData.userAddress,
-                                    state: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="Your state"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">ZIP Code *</label>
-                            <input
-                              type="text"
-                              value={registerData.userAddress.zipCode}
-                              onChange={(e) => {
-                                setRegisterData({
-                                  ...registerData,
-                                  userAddress: {
-                                    ...registerData.userAddress,
-                                    zipCode: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="Your ZIP code"
-                              required
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Recipient Information Section */}
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <h4 className="text-md font-semibold mb-3 text-green-800">Recipient Information</h4>
-                      <p className="text-sm text-green-600 mb-4">Who will receive this gift? This is where we'll deliver the items.</p>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Recipient's Full Name *</label>
-                          <input
-                            type="text"
-                            value={registerData.recipientName}
-                            onChange={(e) => setRegisterData({...registerData, recipientName: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Recipient's Phone Number *</label>
-                          <input
-                            type="tel"
-                            value={registerData.recipientPhone}
-                            onChange={(e) => setRegisterData({...registerData, recipientPhone: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Delivery Address Section */}
-                    <div className="bg-orange-50 p-4 rounded-lg">
-                      <h4 className="text-md font-semibold mb-3 text-orange-800">Delivery Address</h4>
-                      <p className="text-sm text-orange-600 mb-4">Where should we deliver the gift?</p>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-1">Street Address *</label>
-                            <input
-                              type="text"
-                              value={registerData.deliveryAddress.street}
-                              onChange={(e) => {
-                                setRegisterData({
-                                  ...registerData,
-                                  deliveryAddress: {
-                                    ...registerData.deliveryAddress,
-                                    street: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="Delivery street address"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">House/Flat Number</label>
-                            <input
-                              type="text"
-                              value={registerData.deliveryAddress.houseNumber}
-                              onChange={(e) => {
-                                setRegisterData({
-                                  ...registerData,
-                                  deliveryAddress: {
-                                    ...registerData.deliveryAddress,
-                                    houseNumber: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="Delivery house/flat number (optional)"
-                            />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-1">City *</label>
-                            <input
-                              type="text"
-                              value={registerData.deliveryAddress.city}
-                              onChange={(e) => {
-                                setRegisterData({
-                                  ...registerData,
-                                  deliveryAddress: {
-                                    ...registerData.deliveryAddress,
-                                    city: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="Delivery city"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">State *</label>
-                            <input
-                              type="text"
-                              value={registerData.deliveryAddress.state}
-                              onChange={(e) => {
-                                setRegisterData({
-                                  ...registerData,
-                                  deliveryAddress: {
-                                    ...registerData.deliveryAddress,
-                                    state: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="Delivery state"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">ZIP Code *</label>
-                            <input
-                              type="text"
-                              value={registerData.deliveryAddress.zipCode}
-                              onChange={(e) => {
-                                setRegisterData({
-                                  ...registerData,
-                                  deliveryAddress: {
-                                    ...registerData.deliveryAddress,
-                                    zipCode: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="Delivery ZIP code"
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Special Instructions (Optional)</label>
-                          <textarea
-                            value={registerData.specialInstructions || ''}
-                            onChange={(e) => setRegisterData({...registerData, specialInstructions: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                            placeholder="Any special delivery instructions..."
-                            rows={3}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-                      onClick={(e) => {
-                        console.log('Button clicked!', { loading, registerData });
-                        e.preventDefault();
-                        handleRegister(e);
-                      }}
-                    >
-                      {loading ? 'Creating Account...' : 'Create Account & Continue'}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Razorpay Payment Component */}
         {showPayment && paymentData && (

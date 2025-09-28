@@ -4,8 +4,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-// Temporarily disable recharts to fix runtime errors
-// import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 interface MonitoringMetrics {
   timestamp: Date;

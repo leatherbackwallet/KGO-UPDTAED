@@ -8,8 +8,21 @@ import api from '../utils/api';
 interface AuthResponse {
   success: boolean;
   data: {
-    tokens: any;
-    user: any;
+    tokens: {
+      accessToken: string;
+      refreshToken: string;
+      accessTokenExpiry: number;
+      refreshTokenExpiry: number;
+    };
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone: string;
+      roleId: string;
+      roleName: string;
+    };
   };
 }
 
@@ -73,7 +86,7 @@ export default function Register() {
     }
     
     // Password complexity validation
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
     if (!passwordRegex.test(password)) {
       setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
       return false;
@@ -111,12 +124,26 @@ export default function Register() {
       if (res.data.success && res.data.data.tokens) {
         setSuccess('Registration successful! Redirecting...');
         
+        // Reset form fields
+        setFirstName('');
+        setLastName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setPhone('');
+        
         // Login the user
         login(res.data.data.tokens, res.data.data.user);
         
         // Redirect after a short delay
         setTimeout(() => {
-          router.push('/');
+          // Check for return URL parameter
+          const returnUrl = router.query.returnUrl as string;
+          if (returnUrl) {
+            router.push(decodeURIComponent(returnUrl));
+          } else {
+            router.push('/');
+          }
         }, 1500);
       } else {
         setError('Registration failed - invalid response from server');
@@ -131,6 +158,11 @@ export default function Register() {
                            err.response.data?.message || 
                            'Registration failed - server error';
         setError(errorMessage);
+        
+        // If email already exists, suggest login
+        if (err.response.data?.error?.code === 'EMAIL_EXISTS') {
+          setError('Email already in use. Please use a different email or try logging in.');
+        }
       } else if (err.request) {
         // Network error
         setError('Network error - please check your connection and try again');
@@ -146,6 +178,7 @@ export default function Register() {
   const handleInputChange = (field: string, value: string) => {
     // Clear error when user starts typing
     if (error) setError('');
+    if (success) setSuccess('');
     
     switch (field) {
       case 'firstName':

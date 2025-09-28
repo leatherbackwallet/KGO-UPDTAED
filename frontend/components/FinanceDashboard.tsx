@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { format, subDays, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
-// Temporarily disable recharts to fix the runtime error
-// import {
-//   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-//   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
-// } from 'recharts';
 import api from '../utils/api';
 import AdminTabs from './AdminTabs';
 
