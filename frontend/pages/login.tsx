@@ -47,7 +47,13 @@ export default function Login() {
           if (returnUrl) {
             router.push(decodeURIComponent(returnUrl));
           } else {
-            router.push('/');
+            // Check if user is admin and redirect accordingly
+            const userRole = data.data.user.roleName;
+            if (userRole === 'admin') {
+              router.push('/admin/dashboard');
+            } else {
+              router.push('/');
+            }
           }
         }, 100);
       } else {

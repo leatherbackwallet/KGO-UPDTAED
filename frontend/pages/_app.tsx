@@ -57,8 +57,13 @@ function AppContent({ Component, pageProps }: AppProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Check if current route is an admin page
+  // Completely exclude admin pages from main app layout
   const isAdminPage = router.pathname.startsWith('/admin');
+  
+  if (isAdminPage) {
+    // Admin pages are handled by their own _app.tsx
+    return <Component {...pageProps} />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -71,7 +76,7 @@ function AppContent({ Component, pageProps }: AppProps) {
       </div>
       {/* Render WhatsApp Button with smooth transition */}
       <div className={`transition-opacity duration-300 ${showComponents ? 'opacity-100' : 'opacity-0'}`}>
-        {isClient && <WhatsAppButton hideOnAdminPages={isAdminPage} />}
+        {isClient && <WhatsAppButton />}
       </div>
     </div>
   );

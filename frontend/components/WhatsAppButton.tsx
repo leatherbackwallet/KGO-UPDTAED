@@ -4,28 +4,24 @@ interface WhatsAppButtonProps {
   phoneNumber?: string;
   message?: string;
   className?: string;
-  hideOnAdminPages?: boolean;
 }
 
 const WhatsAppButton: React.FC<WhatsAppButtonProps> = React.memo(({
   phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+918075030919',
   message = "Hi, I'm interested in your products. Can you help me?",
-  className = '',
-  hideOnAdminPages = false
+  className = ''
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Smooth mounting animation
   useEffect(() => {
-    if (!hideOnAdminPages) {
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-      }, 200); // Delay to prevent flashing during initial render
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 200); // Delay to prevent flashing during initial render
 
-      return () => clearTimeout(timer);
-    }
-  }, [hideOnAdminPages]);
+    return () => clearTimeout(timer);
+  }, []);
   const handleWhatsAppClick = async () => {
     if (isLoading) return; // Prevent multiple clicks
     
@@ -60,10 +56,6 @@ const WhatsAppButton: React.FC<WhatsAppButtonProps> = React.memo(({
     }
   };
 
-  // Don't render the button if hideOnAdminPages is true
-  if (hideOnAdminPages) {
-    return null;
-  }
 
   return (
     <div

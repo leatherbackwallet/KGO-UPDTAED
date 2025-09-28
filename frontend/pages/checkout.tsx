@@ -703,7 +703,12 @@ export default function Checkout() {
       // Refresh cart to ensure it's up to date
       refreshCart();
       
-      // Stay on checkout page - no redirect needed
+      // Check if user is admin and redirect accordingly
+      const userRole = data.data.user.roleName;
+      if (userRole === 'admin') {
+        router.push('/admin/dashboard');
+      }
+      // For non-admin users, stay on checkout page - no redirect needed
     } catch (err: any) {
       setError(err.response?.data?.error?.message || 'Login failed');
     } finally {

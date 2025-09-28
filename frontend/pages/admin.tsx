@@ -1,84 +1,37 @@
-import React, { useState } from 'react';
-import Navbar from '../components/Navbar';
+/**
+ * Legacy Admin Page - Redirects to new admin dashboard
+ * This page now redirects to the new isolated admin panel
+ */
+
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
-import { useNotifications } from '../hooks/useNotifications';
-import AdminDashboard from '../components/AdminDashboard';
-import AdminProducts from '../components/AdminProducts';
-import AdminCategories from '../components/AdminCategories';
-import AdminOccasions from '../components/AdminOccasions';
-import AdminOrders from '../components/AdminOrders';
-import AdminUsers from '../components/AdminUsers';
-import FinanceDashboard from '../components/FinanceDashboard';
-import ReturnsDashboard from '../components/ReturnsDashboard';
-import AdminTabs from '../components/AdminTabs';
 
 export default function Admin() {
+  const router = useRouter();
   const { user } = useAuth();
-  const { canAccessAdmin, canAccessAdminTab } = usePermissions();
-  const { unreadCount } = useNotifications();
-  const [tab, setTab] = useState<'dashboard' | 'products' | 'categories' | 'occasions' | 'orders' | 'users' | 'finance' | 'returns'>('products');
+  const { canAccessAdmin } = usePermissions();
 
-  const tabs = [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'products', label: 'Products' },
-    { id: 'categories', label: 'Categories' },
-    { id: 'occasions', label: 'Occasions' },
-    { id: 'orders', label: 'Orders' },
-    { id: 'users', label: 'Users' },
-    { id: 'finance', label: 'Finance' },
-    { id: 'returns', label: 'Returns' }
-  ].filter(tab => canAccessAdminTab(tab.id));
+  useEffect(() => {
+    // Check authorization
+    if (!user || !canAccessAdmin()) {
+      router.push('/login');
+      return;
+    }
 
-  // Create notification badges object
-  const notificationBadges: { [key: string]: number } = {};
-  if (unreadCount > 0) {
-    notificationBadges['Orders'] = unreadCount;
-  }
+    // Redirect to new admin dashboard
+    router.push('/admin/dashboard');
+  }, [user, canAccessAdmin, router]);
 
-  // Allow access in development mode for testing
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  
-  if (!isDevelopment && (!user || !canAccessAdmin())) {
-    return (
-      <>
-        <Navbar />
-        <main className="max-w-4xl mx-auto py-8 px-4">
-          <div className="text-red-600 font-bold">Access denied. Admin privileges required.</div>
-        </main>
-      </>
-    );
-  }
-
+  // Show loading while redirecting
   return (
-    <>
-      <Navbar />
-      <main className="w-full max-w-none mx-auto py-8 px-6">
-        <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
-        
-        <div className="mb-8">
-          <AdminTabs
-            tabs={tabs.map(t => t.label)}
-            activeTab={tabs.find(t => t.id === tab)?.label || 'Dashboard'}
-            onTabChange={(tabLabel) => {
-              const tabId = tabs.find(t => t.label === tabLabel)?.id as any;
-              setTab(tabId);
-            }}
-            className="mb-6"
-            notificationBadges={notificationBadges}
-          />
-        </div>
-
-        {tab === 'dashboard' && <AdminDashboard />}
-        {tab === 'products' && <AdminProducts />}
-        {tab === 'categories' && <AdminCategories />}
-        {tab === 'occasions' && <AdminOccasions />}
-        {tab === 'orders' && <AdminOrders />}
-        {tab === 'users' && <AdminUsers />}
-        {tab === 'finance' && <FinanceDashboard />}
-        {tab === 'returns' && <ReturnsDashboard />}
-      </main>
-    </>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Redirecting to admin panel...</p>
+      </div>
+    </div>
   );
 }
 
