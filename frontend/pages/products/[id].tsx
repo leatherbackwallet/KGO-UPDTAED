@@ -7,28 +7,7 @@ import SEOHead from '../../components/SEOHead';
 import { getProductImage } from '../../utils/imageUtils';
 import { getMultilingualText } from '../../utils/api';
 import { generateKeywords } from '../../utils/seoKeywords';
-
-interface Product {
-  _id: string;
-  name: string | { en: string; de: string };
-  description: string | { en: string; de: string };
-  price?: number;
-  category: string | { _id: string; name: string | { en: string; de: string }; slug: string };
-  stock?: number;
-  images: string[];
-  slug?: string;
-  occasions?: string[];
-  isFeatured?: boolean;
-  // Combo product fields
-  isCombo?: boolean;
-  comboBasePrice?: number;
-  comboItems?: Array<{
-    name: string;
-    unitPrice: number;
-    defaultQuantity: number;
-    unit: string;
-  }>;
-}
+import { Product } from '../../types/shared';
 
 const ProductDetailPage: React.FC = () => {
   const router = useRouter();

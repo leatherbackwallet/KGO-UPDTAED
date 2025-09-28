@@ -82,13 +82,8 @@ export default function Document() {
         <link rel="dns-prefetch" href="https://api.razorpay.com" />
         <link rel="dns-prefetch" href="https://cdn.razorpay.com" />
         
-        {/* Fonts with improved loading strategy */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onLoad="this.onload=null;this.rel='stylesheet'" />
-        <noscript>
-          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
-        </noscript>
+        {/* Fonts - Using system fonts for better performance */}
+        {/* No external fonts loaded to avoid unused resource warnings */}
         
         {/* Structured Data */}
         <script

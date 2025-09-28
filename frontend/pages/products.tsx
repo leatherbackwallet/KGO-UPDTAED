@@ -4,41 +4,32 @@ import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
 import ProductSkeleton, { ProductSkeletonGrid } from '../components/ProductSkeleton';
+import { usePreloadImages } from '../hooks/useSmartImageCache';
+import { useProducts } from '../hooks/useProducts';
+import { Product, Category, Occasion } from '../types/shared';
 import api from '../utils/api';
-
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice?: number;
-  images: string[];
-  category: string;
-  occasions: string[];
-  inStock: boolean;
-  featured: boolean;
-  slug: string;
-}
-
-interface Category {
-  _id: string;
-  name: string;
-  slug: string;
-}
-
-interface Occasion {
-  _id: string;
-  name: string;
-  slug: string;
-}
 
 const ProductsPage: React.FC = () => {
   // State
-  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [occasions, setOccasions] = useState<Occasion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  
+  // Smart image caching
+  const { preloadImages, isPreloading } = usePreloadImages();
+  
+  // Centralized product loading
+  const { 
+    products, 
+    loading, 
+    error, 
+    refetch, 
+    filters, 
+    setFilters 
+  } = useProducts({
+    autoLoad: true, // Enable automatic loading
+    onError: (error) => console.error('Products loading error:', error),
+    onSuccess: (products) => console.log('Products loaded successfully:', products.length)
+  });
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -57,16 +48,27 @@ const ProductsPage: React.FC = () => {
 
   // Load data when filters change
   useEffect(() => {
-    if (categories.length > 0) { // Only run after initial data is loaded
-      loadProducts();
+    setFilters({
+      search: searchTerm,
+      category: selectedCategory,
+      occasions: selectedOccasion,
+      sort: sortBy
+    });
+  }, [searchTerm, selectedCategory, selectedOccasion, sortBy, setFilters]);
+
+  // Smart preload images when products change
+  useEffect(() => {
+    if (products.length > 0) {
+      // Preload first 12 product images with smart caching
+      const imagePaths = products.slice(0, 12).map(product => product.images?.[0] || product.defaultImage).filter(Boolean);
+      const productSlugs = products.slice(0, 12).map(product => product.slug);
+      
+      preloadImages(imagePaths, productSlugs);
     }
-  }, [searchTerm, selectedCategory, selectedOccasion, sortBy]);
+  }, [products, preloadImages]);
 
   const loadInitialData = async () => {
     try {
-      setLoading(true);
-      console.log('Loading initial data...');
-      
       // Load categories and occasions
       const [categoriesRes, occasionsRes] = await Promise.all([
         api.get('/categories'),
@@ -76,35 +78,8 @@ const ProductsPage: React.FC = () => {
       setCategories(categoriesRes.data.data || []);
       setOccasions(occasionsRes.data.data || []);
       
-      // Load products
-      await loadProducts();
-      
     } catch (error) {
       console.error('Error loading initial data:', error);
-      setError('Failed to load data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadProducts = async () => {
-    try {
-      console.log('Loading products with filters:', { searchTerm, selectedCategory, selectedOccasion, sortBy });
-      
-      const params = new URLSearchParams();
-      if (searchTerm.trim()) params.append('search', searchTerm.trim());
-      if (selectedCategory) params.append('category', selectedCategory);
-      if (selectedOccasion) params.append('occasions', selectedOccasion);
-      if (sortBy && sortBy !== 'newest') params.append('sort', sortBy);
-      
-      const response = await api.get(`/products?${params.toString()}`);
-      setProducts(response.data.data || []);
-      setError('');
-      
-    } catch (error) {
-      console.error('Error loading products:', error);
-      setError('Failed to load products');
-      setProducts([]);
     }
   };
 
@@ -236,6 +211,11 @@ const ProductsPage: React.FC = () => {
           <div className="mb-6">
             <p className="text-gray-600">
               {loading ? 'Loading...' : `Showing ${products.length} products`}
+              {isPreloading && (
+                <span className="ml-2 text-blue-600 text-sm">
+                  • Preloading images...
+                </span>
+              )}
             </p>
           </div>
 
@@ -261,6 +241,7 @@ const ProductsPage: React.FC = () => {
                 <ProductCard
                   key={product._id}
                   product={product}
+                  onQuickView={handleProductClick}
                   onClick={() => handleProductClick(product)}
                 />
               ))}
@@ -291,6 +272,7 @@ const ProductsPage: React.FC = () => {
       {showQuickView && selectedProduct && (
         <QuickViewModal
           product={selectedProduct}
+          isOpen={showQuickView}
           onClose={closeQuickView}
         />
       )}

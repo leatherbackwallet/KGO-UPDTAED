@@ -8,7 +8,7 @@ import SEOHead from '../../components/SEOHead';
 import Breadcrumb from '../../components/Breadcrumb';
 import { ProductSkeletonGrid } from '../../components/ProductSkeleton';
 import api from '../../utils/api';
-import { Product } from '../../types/product';
+import { Product } from '../../types/shared';
 
 interface Category {
   _id: string;

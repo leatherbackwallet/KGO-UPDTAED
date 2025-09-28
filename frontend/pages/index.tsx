@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import SEOHead from '../components/SEOHead';
 
 export default function Home() {
-  const [isClient, setIsClient] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [isClient, setIsClient] = React.useState(false);
+  const [isHydrated, setIsHydrated] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setIsClient(true);
     setIsHydrated(true);
   }, []);
@@ -253,12 +253,14 @@ export default function Home() {
         </section>
       </main>
 
-      <style jsx>{`
-        .bg-pattern {
-          background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0);
-          background-size: 20px 20px;
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .bg-pattern {
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0);
+            background-size: 20px 20px;
+          }
+        `
+      }} />
     </>
   );
 }

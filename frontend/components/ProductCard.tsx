@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import WishlistButton from './WishlistButton';
-import { getProductImage, getOptimizedImagePath, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
-import { useImageCache } from '../utils/imageCache';
+import { DEFAULT_PRODUCT_IMAGE, getProductImage } from '../utils/imageUtils';
 import { getMultilingualText } from '../utils/api';
-import { Product } from '../types/product';
+import { Product } from '../types/shared';
+import { useSmartImageCache } from '../hooks/useSmartImageCache';
 
 interface ProductCardProps {
   product: Product;
@@ -16,27 +16,20 @@ interface ProductCardProps {
 export default function ProductCard({ product, onQuickView, onClick }: ProductCardProps) {
   const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Get the base image path for caching
+  // Get the base image path
   const baseImagePath = product.images?.[0] || product.defaultImage;
   
-  // Use image caching hook for optimized image loading
-  const { data: cachedImageUrl, isLoading: imageLoading, error: imageError } = useImageCache(
+  // Use smart image cache for optimized loading
+  const { imageUrl, isLoading, isCached } = useSmartImageCache(
     baseImagePath,
     product.slug,
-    {
-      staleTime: 1000 * 60 * 60 * 24, // 24 hours
-      enabled: true
-    }
+    { preload: true, priority: 'high' }
   );
-
-  // Get the final image path with fallback
-  const imagePath = cachedImageUrl || (baseImagePath ? getOptimizedImagePath(baseImagePath, 'medium') : DEFAULT_PRODUCT_IMAGE);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
-    console.error('Image failed to load:', target.src);
-    console.error('Image error details:', imageError);
     
     // Try fallback image paths
     if (target.src !== DEFAULT_PRODUCT_IMAGE) {
@@ -75,18 +68,24 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
     >
       {/* Image Container */}
       <div className="relative overflow-hidden">
-        {imageLoading ? (
+        {(!imageLoaded || isLoading) && (
           <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-kgo-red"></div>
+            <div className="animate-pulse bg-gray-300 rounded w-full h-full"></div>
+            {isCached && (
+              <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                Cached
+              </div>
+            )}
           </div>
-        ) : (
-          <img
-            src={imagePath}
-            alt={getMultilingualText(product.name)}
-            className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={handleImageError}
-          />
         )}
+        <img
+          src={imageUrl}
+          alt={getMultilingualText(product.name)}
+          className={`w-full h-64 object-cover transition-all duration-300 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute'}`}
+          onError={handleImageError}
+          onLoad={() => setImageLoaded(true)}
+          loading="lazy"
+        />
         
         {/* Overlay with only Add to Cart action */}
         <div className={`absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-300 ${

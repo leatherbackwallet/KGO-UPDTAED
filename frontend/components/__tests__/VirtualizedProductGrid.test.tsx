@@ -6,7 +6,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { VirtualizedProductGrid } from '../VirtualizedProductGrid';
-import { Product } from '../../types/product';
+import { Product } from '../../types/shared';
 
 // Mock react-window
 jest.mock('react-window', () => ({

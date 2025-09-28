@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Grid } from 'react-window';
-import { Product } from '../types/product';
+import { Product } from '../types/shared';
 import ProductCard from './ProductCard';
 import ProductSkeleton from './ProductSkeleton';
 

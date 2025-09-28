@@ -9,7 +9,7 @@ import Breadcrumb from '../../components/Breadcrumb';
 import { ProductSkeletonGrid } from '../../components/ProductSkeleton';
 import api from '../../utils/api';
 import { generateLocationSEO, KERALA_CITIES } from '../../utils/locationSEO';
-import { Product } from '../../types/product';
+import { Product } from '../../types/shared';
 
 interface LocationPageProps {
   city: any;

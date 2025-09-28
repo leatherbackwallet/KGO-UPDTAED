@@ -1,75 +1,54 @@
-
-import React, { useState, useEffect, useMemo } from 'react';
-import api from '../utils/api';
+import * as React from 'react';
 import { getMultilingualText } from '../utils/api';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useRouter } from 'next/router';
-import { Product, ComboItem } from '../types/product';
+import { useAdminProducts } from '../hooks/useProducts';
+import { productApiService } from '../services/productApiService';
+import { Product, Category, Occasion, ComboItem } from '../types/shared';
 import { getProductImage, getOptimizedImagePath, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import FileUpload from './FileUpload';
 import AdminLayout from './AdminLayout';
 
-interface Category {
-  _id: string;
-  name: string;
-  slug: string;
-}
-
-interface Occasion {
-  _id: string;
-  name: string;
-  slug: string;
-  icon?: string;
-  color?: string;
-  dateRange: {
-    startMonth: number;
-    startDay: number;
-    endMonth: number;
-    endDay: number;
-    isRecurring: boolean;
-    specificYear?: number;
-  };
-  priority: {
-    level: 'low' | 'medium' | 'high' | 'peak';
-    boostMultiplier: number;
-  };
-  seasonalFlags: {
-    isFestival: boolean;
-    isHoliday: boolean;
-    isPersonal: boolean;
-    isSeasonal: boolean;
-  };
-  isActive: boolean;
-}
+// Interfaces now imported from shared types
 
 const AdminProducts: React.FC = () => {
   const { user, tokens } = useAuth();
   const { canManageProducts } = usePermissions();
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [occasions, setOccasions] = useState<Occasion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Partial<Product>>({});
-  const [imageCache, setImageCache] = useState<Map<string, string>>(new Map());
-  const [uploadedImages, setUploadedImages] = useState<Array<{ public_id?: string; filename: string; url: string; originalName: string }>>([]);
-  const [uploadError, setUploadError] = useState<string>('');
-  const [deletingProducts, setDeletingProducts] = useState<Set<string>>(new Set());
-  const [recentlyDeleted, setRecentlyDeleted] = useState<Set<string>>(new Set());
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  
+  // Use centralized product loading
+  const { 
+    products, 
+    loading, 
+    error: productsError, 
+    refetch 
+  } = useAdminProducts({
+    onError: (error) => console.error('Admin products loading error:', error)
+  });
+  
+  const [categories, setCategories] = React.useState<Category[]>([]);
+  const [occasions, setOccasions] = React.useState<Occasion[]>([]);
+  const [success, setSuccess] = React.useState('');
+  const [saving, setSaving] = React.useState(false);
+  const [localError, setLocalError] = React.useState('');
+  const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
+  const [showModal, setShowModal] = React.useState(false);
+  const [editingProduct, setEditingProduct] = React.useState<Partial<Product>>({});
+  const [imageCache, setImageCache] = React.useState<Map<string, string>>(new Map());
+  const [uploadedImages, setUploadedImages] = React.useState<Array<{ public_id?: string; filename: string; url: string; originalName: string }>>([]);
+  const [uploadError, setUploadError] = React.useState<string>('');
+  const [deletingProducts, setDeletingProducts] = React.useState<Set<string>>(new Set());
+  const [recentlyDeleted, setRecentlyDeleted] = React.useState<Set<string>>(new Set());
+  const [selectedProductId, setSelectedProductId] = React.useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = React.useState<string>('');
   
   // Combo product state
-  const [comboItems, setComboItems] = useState<ComboItem[]>([]);
+  const [comboItems, setComboItems] = React.useState<ComboItem[]>([]);
 
-  // Preload all product images with better error handling
-  useEffect(() => {
+  // Preload all product images with better localError handling
+  React.useEffect(() => {
     const preloadImages = async () => {
       const newCache = new Map<string, string>();
       
@@ -87,7 +66,7 @@ const AdminProducts: React.FC = () => {
                 newCache.set(product._id, imageUrl);
               };
               img.onerror = () => {
-                // Silently fall back to default image without console errors
+                // Silently fall back to default image without console localErrors
                 newCache.set(product._id, DEFAULT_PRODUCT_IMAGE);
               };
               img.src = imageUrl;
@@ -95,7 +74,7 @@ const AdminProducts: React.FC = () => {
               newCache.set(product._id, DEFAULT_PRODUCT_IMAGE);
             }
           } catch (err) {
-            // Silently handle errors and use default image
+            // Silently handle localErrors and use default image
             newCache.set(product._id, DEFAULT_PRODUCT_IMAGE);
           }
         } else {
@@ -119,6 +98,8 @@ const AdminProducts: React.FC = () => {
 
   // Helper function to check if an occasion is currently active
   const isOccasionCurrentlyActive = (occasion: Occasion): boolean => {
+    if (!occasion.dateRange) return false;
+    
     const now = new Date();
     const { startMonth, startDay, endMonth, endDay, isRecurring, specificYear } = occasion.dateRange;
     
@@ -143,7 +124,7 @@ const AdminProducts: React.FC = () => {
   };
 
   // Check authentication and admin role
-  useEffect(() => {
+  React.useEffect(() => {
     if (!user || !tokens?.accessToken) {
       router.push('/login');
       return;
@@ -151,11 +132,10 @@ const AdminProducts: React.FC = () => {
     
     // Check if user can manage products
     if (!canManageProducts()) {
-      setError('Access denied. Product management privileges required.');
+      setLocalError('Access denied. Product management privileges required.');
       return;
     }
     
-    fetchProducts();
     fetchCategories();
     fetchOccasions();
   }, [user, tokens]);
@@ -174,51 +154,22 @@ const AdminProducts: React.FC = () => {
         }
       }
       
-      // Fetch fresh data
-      await fetchProducts();
-    } catch (error) {
-      console.error('Error clearing cache:', error);
+      // Fetch fresh data using centralized hook
+      await refetch();
+    } catch (localError) {
+      console.error('Error clearing cache:', localError);
       // Fallback to regular fetch
-      await fetchProducts();
+      await refetch();
     }
   };
 
   // Debug function to log current products
   const debugProducts = () => {
-    console.log('Current products in state:', products.map((p: Product) => ({ id: p._id, name: p.name })));
+    // Products loaded successfully
   };
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      setError(''); // Clear any previous errors
-      
-      // Get all products for admin without pagination limits
-      const response = await api.get('/products', {
-        params: {
-          _t: Date.now(), // Cache busting parameter
-          admin: true, // Bypass pagination limits
-          includeDeleted: false // Only get active products
-        }
-      });
-      
-      const productsData = response.data?.data || response.data || [];
-      console.log('🔍 Fetched products data:', productsData);
-      console.log('🔍 First product combo fields:', productsData[0] ? {
-        isCombo: productsData[0].isCombo,
-        comboBasePrice: productsData[0].comboBasePrice,
-        comboItems: productsData[0].comboItems
-      } : 'No products');
-      setProducts(Array.isArray(productsData) ? productsData : []);
-    } catch (err: any) {
-      console.error('Error fetching products:', err);
-      const errorMessage = err.response?.data?.error?.message || err.response?.data?.message || 'Failed to fetch products';
-      setError(errorMessage);
-      setProducts([]); // Ensure products is always an array
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Products are now loaded via the centralized hook
+  // No need for separate fetchProducts function
 
   const fetchOccasions = async () => {
     try {
@@ -228,7 +179,7 @@ const AdminProducts: React.FC = () => {
       setOccasions(response.data.data || []);
     } catch (err: any) {
       console.error('Error fetching occasions:', err);
-      // Don't set error for occasions as it's not critical
+      // Don't set localError for occasions as it's not critical
     }
   };
 
@@ -244,12 +195,7 @@ const AdminProducts: React.FC = () => {
   };
 
   const handleEditProduct = (product: Product) => {
-    console.log('🔍 Editing product:', product);
-    console.log('🔍 Combo fields:', {
-      isCombo: product.isCombo,
-      comboBasePrice: product.comboBasePrice,
-      comboItems: product.comboItems
-    });
+    // Editing product with combo fields
     
     setSelectedProduct(product);
     setEditingProduct({
@@ -270,7 +216,7 @@ const AdminProducts: React.FC = () => {
     
     // Initialize combo items state
     setComboItems(product.comboItems || []);
-    console.log('🔍 Set combo items:', product.comboItems || []);
+    // Set combo items for editing
             // Convert existing images to the upload preview format, preserving Cloudinary IDs
         const existingImages = product.images || [];
         const formattedImages = existingImages.map((path: string) => {
@@ -300,20 +246,22 @@ const AdminProducts: React.FC = () => {
   const handleAddProduct = async () => {
     try {
       setSaving(true);
-      setError('');
+      setLocalError('');
       setSuccess('');
       
-      console.log('🚀 Starting sequential product creation flow...');
+      // Starting product creation flow
       
       // Phase 1: Basic Field Validation
       const validationErrors = [];
       
       // Validate required fields
-      if (!editingProduct.name || editingProduct.name.trim() === '') {
+      const nameText = typeof editingProduct.name === 'string' ? editingProduct.name : getMultilingualText(editingProduct.name || '');
+      if (!editingProduct.name || nameText.trim() === '') {
         validationErrors.push('Product name is required');
       }
       
-      if (!editingProduct.description || editingProduct.description.trim() === '') {
+      const descText = typeof editingProduct.description === 'string' ? editingProduct.description : getMultilingualText(editingProduct.description || '');
+      if (!editingProduct.description || descText.trim() === '') {
         validationErrors.push('Product description is required');
       }
       
@@ -326,9 +274,9 @@ const AdminProducts: React.FC = () => {
         validationErrors.push('At least one category must be selected');
       }
       
-      // Show validation errors if any
+      // Show validation localErrors if any
       if (validationErrors.length > 0) {
-        setError(validationErrors.join('. '));
+        setLocalError(validationErrors.join('. '));
         setSaving(false);
         return;
       }
@@ -344,19 +292,19 @@ const AdminProducts: React.FC = () => {
       );
       
       if (uploadedImages.length > 0 && validImages.length === 0) {
-        setError('Please upload valid images. All images must be properly uploaded to Cloudinary.');
+        setLocalError('Please upload valid images. All images must be properly uploaded to Cloudinary.');
         setSaving(false);
         return;
       }
 
       // Phase 3: Skip image accessibility verification for now (simplified)
       if (validImages.length > 0) {
-        console.log('🌐 Phase 3: Images validated (accessibility check skipped)');
+        // Images validated successfully
         setSuccess('Images ready...');
       }
 
       // Phase 4: Prepare Product Data (Only After Image Validation)
-      console.log('📦 Phase 4: Preparing product data...');
+      // Preparing product data
       setSuccess('Creating product...');
       
       const validatedData = {
@@ -386,20 +334,18 @@ const AdminProducts: React.FC = () => {
       
       // Phase 5: Create Product in Database (Final Step)
       console.log('💾 Phase 5: Creating product in database...');
-      const response = await api.post('/products', validatedData);
+      const productData = await productApiService.createProduct(validatedData);
       
       // Debug: Log the actual response structure
       console.log('🔍 API Response Structure:', {
-        success: response.data?.success,
-        hasData: !!response.data?.data,
-        hasId: !!response.data?._id,
-        hasDataId: !!response.data?.data?._id,
-        fullResponse: response.data
+        hasId: !!productData?._id,
+        name: productData?.name,
+        images: productData?.images,
+        fullResponse: productData
       });
       
       // Phase 6: Validate Database Response
-      if (response.data && response.data.success !== false && (response.data._id || response.data.data?._id)) {
-        const productData = response.data.data || response.data;
+      if (productData && productData._id) {
         console.log('✅ Product created successfully in database!', {
           productId: productData._id,
           name: productData.name,
@@ -409,11 +355,11 @@ const AdminProducts: React.FC = () => {
         });
         
         // Phase 7: Success - Refresh and Cleanup
-        console.log('🔄 Phase 7: Refreshing product list and cleaning up...');
+        // Refreshing product list
         setSuccess('Product added successfully!');
         
         // Refresh the products list
-        await fetchProducts();
+        await refetch();
         
         // Clear form and close modal after successful addition
         setShowModal(false);
@@ -422,15 +368,15 @@ const AdminProducts: React.FC = () => {
         setComboItems([]);
         setUploadedImages([]);
         setUploadError('');
-        setError(''); // Clear any previous errors
+        setLocalError(''); // Clear any previous localErrors
         
         // Clear success message after 3 seconds
         setTimeout(() => setSuccess(''), 3000);
         
-        console.log('🎉 Sequential product creation completed successfully!');
+        // Product creation completed successfully
       } else {
-        console.error('❌ Product creation failed - invalid response structure:', response.data);
-        setError('Failed to add product - invalid response from server');
+        console.error('❌ Product creation failed - invalid response structure:', productData);
+        setLocalError('Failed to add product - invalid response from server');
         
         // Note: No rollback needed here as images are already validated and accessible
         // The product creation failure doesn't affect the uploaded images
@@ -439,29 +385,29 @@ const AdminProducts: React.FC = () => {
       console.error('❌ Sequential product creation failed:', err);
       console.error('Error response:', err.response?.data);
       
-      // Enhanced error handling with phase-specific messages
-      let errorMessage = 'Failed to add product';
-      let errorPhase = 'Unknown phase';
+      // Enhanced localError handling with phase-specific messages
+      let localErrorMessage = 'Failed to add product';
+      let localErrorPhase = 'Unknown phase';
       
       if (err.message && err.message.includes('Image validation failed')) {
-        errorPhase = 'Image Validation';
-        errorMessage = err.message;
+        localErrorPhase = 'Image Validation';
+        localErrorMessage = err.message;
       } else if (err.message && err.message.includes('Image')) {
-        errorPhase = 'Image Processing';
-        errorMessage = `Image processing failed: ${err.message}`;
-      } else if (err.response?.data?.error?.message) {
-        errorPhase = 'Database Creation';
-        errorMessage = `Database error: ${err.response.data.error.message}`;
+        localErrorPhase = 'Image Processing';
+        localErrorMessage = `Image processing failed: ${err.message}`;
+      } else if (err.response?.data?.localError?.message) {
+        localErrorPhase = 'Database Creation';
+        localErrorMessage = `Database localError: ${err.response.data.localError.message}`;
       } else if (err.response?.data?.message) {
-        errorPhase = 'API Response';
-        errorMessage = `API error: ${err.response.data.message}`;
+        localErrorPhase = 'API Response';
+        localErrorMessage = `API localError: ${err.response.data.message}`;
       } else if (err.message) {
-        errorPhase = 'Network/System';
-        errorMessage = `System error: ${err.message}`;
+        localErrorPhase = 'Network/System';
+        localErrorMessage = `System localError: ${err.message}`;
       }
       
-      console.error(`❌ Failure in ${errorPhase}: ${errorMessage}`);
-      setError(`${errorPhase}: ${errorMessage}`);
+      console.error(`❌ Failure in ${localErrorPhase}: ${localErrorMessage}`);
+      setLocalError(`${localErrorPhase}: ${localErrorMessage}`);
       
       // Note: No rollback needed for images as they are validated before database entry
       // Images remain accessible on Cloudinary even if product creation fails
@@ -476,7 +422,7 @@ const AdminProducts: React.FC = () => {
 
     try {
       setSaving(true);
-      setError('');
+      setLocalError('');
       setSuccess('');
       
       console.log('🚀 Starting comprehensive product update validation...');
@@ -485,11 +431,13 @@ const AdminProducts: React.FC = () => {
       const validationErrors = [];
       
       // Validate required fields
-      if (!editingProduct.name || editingProduct.name.trim() === '') {
+      const nameText = typeof editingProduct.name === 'string' ? editingProduct.name : getMultilingualText(editingProduct.name || '');
+      if (!editingProduct.name || nameText.trim() === '') {
         validationErrors.push('Product name is required');
       }
       
-      if (!editingProduct.description || editingProduct.description.trim() === '') {
+      const descText = typeof editingProduct.description === 'string' ? editingProduct.description : getMultilingualText(editingProduct.description || '');
+      if (!editingProduct.description || descText.trim() === '') {
         validationErrors.push('Product description is required');
       }
       
@@ -502,9 +450,9 @@ const AdminProducts: React.FC = () => {
         validationErrors.push('At least one category must be selected');
       }
       
-      // Show validation errors if any
+      // Show validation localErrors if any
       if (validationErrors.length > 0) {
-        setError(validationErrors.join('. '));
+        setLocalError(validationErrors.join('. '));
         setSaving(false);
         return;
       }
@@ -520,7 +468,7 @@ const AdminProducts: React.FC = () => {
       );
       
       if (uploadedImages.length > 0 && validImages.length === 0) {
-        setError('Please upload valid images. All images must be properly uploaded to Cloudinary.');
+        setLocalError('Please upload valid images. All images must be properly uploaded to Cloudinary.');
         setSaving(false);
         return;
       }
@@ -556,48 +504,46 @@ const AdminProducts: React.FC = () => {
       
       // Phase 4: Update Product in Database
       console.log('💾 Phase 4: Updating product in database...');
-      const response = await api.put(`/products/${selectedProduct._id}`, validatedData);
+      const productData = await productApiService.updateProduct(selectedProduct._id, validatedData);
       
       // Debug: Log the actual response structure
       console.log('🔍 Update Response Structure:', {
-        success: response.data?.success,
-        hasData: !!response.data?.data,
-        hasId: !!response.data?._id,
-        hasDataId: !!response.data?.data?._id,
-        fullResponse: response.data
+        hasId: !!productData?._id,
+        name: productData?.name,
+        fullResponse: productData
       });
       
       // Phase 5: Validate Database Response
-      if (response.data.success) {
+      if (productData && productData._id) {
         console.log('✅ Product updated successfully in database');
         
         // Refresh the products list
-        await fetchProducts();
+        await refetch();
         setShowModal(false);
         setSelectedProduct(null);
         setEditingProduct({});
         setComboItems([]);
         setUploadedImages([]);
-        setError(''); // Clear any previous errors
+        setLocalError(''); // Clear any previous localErrors
         setSuccess('Product updated successfully!');
         setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
       } else {
-        console.error('❌ Update failed:', response.data.error);
-        setError(response.data.error || 'Failed to update product');
+        console.error('❌ Update failed:', productData);
+        setLocalError('Failed to update product');
       }
     } catch (err: any) {
       console.error('❌ Error updating product:', err);
       console.error('Error response:', err.response?.data);
       
-      // Enhanced error handling
-      if (err.response?.data?.error) {
-        setError(err.response.data.error);
+      // Enhanced localError handling
+      if (err.response?.data?.localError) {
+        setLocalError(err.response.data.localError);
       } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
+        setLocalError(err.response.data.message);
       } else if (err.message) {
-        setError(err.message);
+        setLocalError(err.message);
       } else {
-        setError('Failed to update product. Please try again.');
+        setLocalError('Failed to update product. Please try again.');
       }
     } finally {
       setSaving(false);
@@ -614,18 +560,18 @@ const AdminProducts: React.FC = () => {
     
     // Prevent deleting recently deleted products
     if (recentlyDeleted.has(productId)) {
-      setError('This product was recently deleted. Please refresh the page.');
+      setLocalError('This product was recently deleted. Please refresh the page.');
       return;
     }
 
     try {
-      setError(''); // Clear any previous errors
-      setDeletingProducts((prev: Set<string>) => new Set(prev).add(productId));
+      setLocalError(''); // Clear any previous localErrors
+      setDeletingProducts(prev => new Set(prev).add(productId));
       
       // Optimistic update - remove product from state immediately
-      setProducts((prevProducts: Product[]) => prevProducts.filter((product: Product) => product._id !== productId));
+      // Note: Products are managed by the centralized hook, so we don't need to update local state
       
-      await api.delete(`/products/${productId}`);
+      await productApiService.deleteProduct(productId);
       setSuccess('Product deleted successfully!');
       setTimeout(() => setSuccess(''), 3000);
       
@@ -640,19 +586,19 @@ const AdminProducts: React.FC = () => {
       }, 5000); // Remove from recently deleted after 5 seconds
       
       // Fetch fresh data to ensure consistency
-      await fetchProducts();
+      await refetch();
     } catch (err: any) {
       console.error('Error deleting product:', err);
-      const errorMessage = err.response?.data?.error?.message || err.response?.data?.message || 'Failed to delete product';
-      setError(errorMessage);
+      const localErrorMessage = err.response?.data?.localError?.message || err.response?.data?.message || 'Failed to delete product';
+      setLocalError(localErrorMessage);
       
       // If the product was not found, refresh the products list to get the latest data
       if (err.response?.status === 404) {
         console.log('Product not found, refreshing products list...');
-        await fetchProducts();
+        await refetch();
       } else {
-        // If it was a different error, revert the optimistic update
-        await fetchProducts();
+        // If it was a different localError, revert the optimistic update
+        await refetch();
       }
     } finally {
       setDeletingProducts((prev: Set<string>) => {
@@ -665,7 +611,7 @@ const AdminProducts: React.FC = () => {
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
-    // Silently handle image errors without console spam
+    // Silently handle image localErrors without console spam
     if (target.src !== DEFAULT_PRODUCT_IMAGE) {
       target.src = DEFAULT_PRODUCT_IMAGE;
     }
@@ -687,8 +633,8 @@ const AdminProducts: React.FC = () => {
     setUploadError('');
   };
 
-  const handleImageUploadError = (error: string) => {
-    setUploadError(error);
+  const handleImageUploadError = (localError: string) => {
+    setUploadError(localError);
   };
 
   const removeImage = (index: number) => {
@@ -751,7 +697,7 @@ const AdminProducts: React.FC = () => {
   };
 
   // Filter products based on search query
-  const filteredProducts = useMemo(() => {
+  const filteredProducts = React.useMemo(() => {
     if (!searchQuery.trim()) {
       return products;
     }
@@ -1035,15 +981,15 @@ const AdminProducts: React.FC = () => {
           )}
         </div>
 
-      {error && (
+      {localError && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex justify-between items-start">
             <div className="flex-1">
               <p className="text-red-800 font-medium">Error</p>
-              <p className="text-red-700 mt-1">{error}</p>
+              <p className="text-red-700 mt-1">{localError}</p>
             </div>
             <button
-              onClick={() => setError('')}
+              onClick={() => setLocalError('')}
               className="text-red-500 hover:text-red-700 ml-4"
             >
               ✕
@@ -1246,7 +1192,7 @@ const AdminProducts: React.FC = () => {
                     step="1"
                     min="0"
                     value={editingProduct.price || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingProduct({
+                    onChange={(e) => setEditingProduct({
                       ...editingProduct,
                       price: parseInt(e.target.value) || 0
                     })}
@@ -1261,7 +1207,7 @@ const AdminProducts: React.FC = () => {
                   <input
                     type="number"
                     value={editingProduct.stock || 200}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingProduct({
+                    onChange={(e) => setEditingProduct({
                       ...editingProduct,
                       stock: parseInt(e.target.value) || 0
                     })}
@@ -1277,8 +1223,8 @@ const AdminProducts: React.FC = () => {
                 <div className="border border-gray-300 rounded-md p-3 max-h-48 overflow-y-auto bg-gray-50">
                   {categories && categories.length > 0 ? (
                     <div className="space-y-2">
-                      {categories.map((category) => {
-                        const isSelected = editingProduct.categories?.some(catId => 
+                      {categories.map((category: Category) => {
+                        const isSelected = editingProduct.categories?.some((catId: any) => 
                           typeof catId === 'string' ? catId === category._id : catId._id === category._id
                         );
                         
@@ -1336,9 +1282,9 @@ const AdminProducts: React.FC = () => {
                 </label>
                 <div className="border border-gray-300 rounded-md p-3 max-h-48 overflow-y-auto bg-gray-50">
                   <div className="grid grid-cols-1 gap-2">
-                    {occasions.filter(occasion => occasion.isActive).map((occasion) => {
+                    {occasions.filter((occasion: Occasion) => occasion.isActive).map((occasion: Occasion) => {
                       // Handle both string IDs and populated objects in editingProduct.occasions
-                      const isSelected = editingProduct.occasions?.some(occ => 
+                      const isSelected = editingProduct.occasions?.some((occ: any) => 
                         typeof occ === 'string' ? occ === occasion._id : (occ as any)._id === occasion._id
                       ) || false;
                       const isCurrentlyActive = isOccasionCurrentlyActive(occasion);
@@ -1350,7 +1296,7 @@ const AdminProducts: React.FC = () => {
                             checked={isSelected}
                             onChange={(e) => {
                               // Always work with string IDs, convert populated objects to IDs if needed
-                              let currentOccasionIds = (editingProduct.occasions || []).map(occ => 
+                              let currentOccasionIds = (editingProduct.occasions || []).map((occ: any) => 
                                 typeof occ === 'string' ? occ : (occ as any)._id
                               );
                               
@@ -1361,7 +1307,7 @@ const AdminProducts: React.FC = () => {
                                 }
                               } else {
                                 // Remove occasion
-                                currentOccasionIds = currentOccasionIds.filter(occ => occ !== occasion._id);
+                                currentOccasionIds = currentOccasionIds.filter((occ: any) => occ !== occasion._id);
                               }
                               
                               setEditingProduct({
@@ -1375,19 +1321,19 @@ const AdminProducts: React.FC = () => {
                             {occasion.icon && (
                               <span className="text-lg">{occasion.icon}</span>
                             )}
-                            <span className="text-sm text-gray-700">{occasion.name}</span>
+                            <span className="text-sm text-gray-700">{getMultilingualText(occasion.name)}</span>
                             {isCurrentlyActive && (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 Active Now
                               </span>
                             )}
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              occasion.priority.level === 'peak' ? 'bg-red-100 text-red-800' :
-                              occasion.priority.level === 'high' ? 'bg-orange-100 text-orange-800' :
-                              occasion.priority.level === 'medium' ? 'bg-blue-100 text-blue-800' :
+                              occasion.priority?.level === 'peak' ? 'bg-red-100 text-red-800' :
+                              occasion.priority?.level === 'high' ? 'bg-orange-100 text-orange-800' :
+                              occasion.priority?.level === 'medium' ? 'bg-blue-100 text-blue-800' :
                               'bg-gray-100 text-gray-800'
                             }`}>
-                              {occasion.priority.level}
+                              {occasion.priority?.level || 'low'}
                             </span>
                           </div>
                         </label>
@@ -1495,7 +1441,7 @@ const AdminProducts: React.FC = () => {
                         </button>
                       </div>
 
-                      {comboItems.map((item, index) => (
+                      {comboItems.map((item: ComboItem, index: number) => (
                         <div key={index} className="bg-white p-3 rounded border mb-3">
                           <div className="grid grid-cols-2 gap-3 mb-3">
                             <div>
@@ -1596,7 +1542,7 @@ const AdminProducts: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => {
-                                const newComboItems = comboItems.filter((_, i) => i !== index);
+                                const newComboItems = comboItems.filter((_: ComboItem, i: number) => i !== index);
                                 setComboItems(newComboItems);
                                 setEditingProduct({
                                   ...editingProduct,
@@ -1642,7 +1588,7 @@ const AdminProducts: React.FC = () => {
                   <div className="mt-4">
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Images:</h4>
                     <div className="grid grid-cols-3 gap-2">
-                      {uploadedImages.map((imageData, index) => (
+                      {uploadedImages.map((imageData: any, index: number) => (
                         <div key={index} className="relative">
                           <img
                             src={imageData.url}
@@ -1664,15 +1610,15 @@ const AdminProducts: React.FC = () => {
             </div>
 
             {/* Error and Success Messages */}
-            {error && (
+            {localError && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <p className="text-red-800 font-medium">Error</p>
-                    <p className="text-red-700 mt-1">{error}</p>
+                    <p className="text-red-700 mt-1">{localError}</p>
                   </div>
                   <button
-                    onClick={() => setError('')}
+                    onClick={() => setLocalError('')}
                     className="text-red-400 hover:text-red-600 ml-2"
                   >
                     ✕
@@ -1705,7 +1651,7 @@ const AdminProducts: React.FC = () => {
                   setUploadedImages([]);
                   setUploadError('');
                   setComboItems([]);
-                  setError('');
+                  setLocalError('');
                   setSuccess('');
                 }}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"

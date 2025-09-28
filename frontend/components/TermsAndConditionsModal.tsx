@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import * as React from 'react';
 
 interface TermsAndConditionsModalProps {
   isOpen: boolean;
@@ -18,12 +18,12 @@ export default function TermsAndConditionsModal({
   onClose, 
   onAccept 
 }: TermsAndConditionsModalProps) {
-  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const [hasScrolledToBottom, setHasScrolledToBottom] = React.useState(false);
+  const [scrollProgress, setScrollProgress] = React.useState(0);
+  const contentRef = React.useRef<HTMLDivElement>(null);
 
   // Check if content needs scrolling when modal opens
-  useEffect(() => {
+  React.useEffect(() => {
     if (isOpen && contentRef.current) {
       const { scrollHeight, clientHeight } = contentRef.current;
       // If content doesn't need scrolling, enable the button immediately

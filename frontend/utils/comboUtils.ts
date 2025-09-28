@@ -3,7 +3,7 @@
  * Handles combo product price calculations and configurations
  */
 
-import { ComboItem } from '../types/product';
+import { ComboItem } from '../types/shared';
 
 export interface ComboItemConfiguration {
   name: string;

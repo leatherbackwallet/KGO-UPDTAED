@@ -12,7 +12,7 @@ import { useWishlist } from '../context/WishlistContext';
 import api from '../utils/api';
 import { getMultilingualText } from '../utils/api';
 import { getProductImage } from '../utils/imageUtils';
-import { Product } from '../types/product';
+import { Product } from '../types/shared';
 
 interface WishlistItem {
   product: string;

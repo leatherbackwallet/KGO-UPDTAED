@@ -10,6 +10,23 @@ module.exports = {
       colors: {
         'kgo-red': '#DC2626', // Red-600
       },
+      fontFamily: {
+        'sans': [
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          '"Noto Sans"',
+          'sans-serif',
+          '"Apple Color Emoji"',
+          '"Segoe UI Emoji"',
+          '"Segoe UI Symbol"',
+          '"Noto Color Emoji"',
+        ],
+      },
       animation: {
         'shimmer': 'shimmer 2s infinite',
         'float': 'float 6s ease-in-out infinite',

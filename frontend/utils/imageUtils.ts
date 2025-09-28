@@ -39,7 +39,7 @@ export function getProductImage(imagePath?: string, slug?: string): string {
       const cleanPublicId = imagePath.replace(/^keralagiftsonline\/products\//, '');
       return `https://res.cloudinary.com/deojqbepy/image/upload/w_400,h_400,c_fill,q_auto,f_auto/keralagiftsonline/products/${cleanPublicId}`;
     } else {
-      console.warn('Invalid Cloudinary public_id format:', imagePath);
+      // Invalid Cloudinary public_id format, use default image
       return DEFAULT_PRODUCT_IMAGE;
     }
   }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Product, ComboItem } from '../types/product';
+import { Product, ComboItem } from '../types/shared';
 import { getMultilingualText } from '../utils/api';
 import { 
   calculateComboPrice, 

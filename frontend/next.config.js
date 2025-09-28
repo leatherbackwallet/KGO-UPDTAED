@@ -127,7 +127,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com https://cdn.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob: https://cdn.razorpay.com; connect-src 'self' http://localhost:5001 https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com https://api-dot-onyourbehlf.uc.r.appspot.com https://cdn.razorpay.com; frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com; object-src 'none'; base-uri 'self';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com https://cdn.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob: https://cdn.razorpay.com https://res.cloudinary.com; connect-src 'self' http://localhost:5001 https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com https://api-dot-onyourbehlf.uc.r.appspot.com https://cdn.razorpay.com https://res.cloudinary.com; frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com; object-src 'none'; base-uri 'self';",
           },
           {
             key: 'Access-Control-Expose-Headers',

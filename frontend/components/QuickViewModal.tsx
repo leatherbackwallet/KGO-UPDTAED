@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import { useImageCache } from '../utils/imageCache';
 import { getMultilingualText } from '../utils/api';
-import { Product } from '../types/product';
+import { Product } from '../types/shared';
 
 interface QuickViewModalProps {
   product: Product;

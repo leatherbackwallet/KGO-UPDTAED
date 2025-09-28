@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import api from '../utils/api';
 import { getMultilingualText } from '../utils/api';
-import { Product } from '../types/product';
+import { Product } from '../types/shared';
 
 interface WishlistButtonProps {
   product: Product;
