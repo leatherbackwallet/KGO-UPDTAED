@@ -18,7 +18,26 @@ exports.registerSchema = zod_1.z.object({
     lastName: zod_1.z.string().min(2, 'Last name must be at least 2 characters').trim(),
     email: emailSchema,
     password: passwordSchema,
-    phone: phoneSchema
+    phone: phoneSchema,
+    userAddress: zod_1.z.object({
+        street: zod_1.z.string().min(1, 'Street is required'),
+        houseNumber: zod_1.z.string().optional(),
+        city: zod_1.z.string().min(1, 'City is required'),
+        state: zod_1.z.string().min(1, 'State is required'),
+        zipCode: zod_1.z.string().min(1, 'ZIP code is required'),
+        country: zod_1.z.string().optional()
+    }).optional(),
+    recipientName: zod_1.z.string().optional(),
+    recipientPhone: zod_1.z.string().optional(),
+    deliveryAddress: zod_1.z.object({
+        street: zod_1.z.string().min(1, 'Street is required'),
+        houseNumber: zod_1.z.string().optional(),
+        city: zod_1.z.string().min(1, 'City is required'),
+        state: zod_1.z.string().min(1, 'State is required'),
+        zipCode: zod_1.z.string().min(1, 'ZIP code is required'),
+        country: zod_1.z.string().optional()
+    }).optional(),
+    specialInstructions: zod_1.z.string().optional()
 });
 // User login validation
 exports.loginSchema = zod_1.z.object({

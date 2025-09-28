@@ -1,3 +1,8 @@
+/**
+ * Authentication Routes
+ * Handles user registration, login, logout, and guest checkout
+ */
+
 import express from 'express';
 import { User, Role } from '../models/index';
 import { hashPassword, comparePassword } from '../utils/hash';
@@ -379,7 +384,11 @@ router.post('/logout', async (req, res) => {
   }
 });
 
-// Guest checkout - create temporary user for guest orders
+/**
+ * Guest Checkout Route
+ * Creates temporary guest user for checkout without registration
+ * Guest users can place orders but don't have persistent accounts
+ */
 router.post('/guest', sanitizeInput, ensureDatabaseConnection, async (req, res) => {
   try {
     const { fullName, email, phone, address, recipientName, recipientPhone, deliveryAddress, specialInstructions } = req.body;

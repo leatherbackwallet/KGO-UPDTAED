@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import CartItemCard from '../components/CartItemCard';
 import WhatsAppNotification from '../components/WhatsAppNotification';
+import TermsAndConditionsModal from '../components/TermsAndConditionsModal';
 import { useCart } from '../context/CartContext';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -10,11 +11,21 @@ export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
   const [showNotification, setShowNotification] = useState(true);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleProceedToCheckout = () => {
+    setShowTermsModal(true);
+  };
+
+  const handleAcceptTerms = () => {
+    setShowTermsModal(false);
     router.push('/checkout');
+  };
+
+  const handleCloseTerms = () => {
+    setShowTermsModal(false);
   };
 
   return (
@@ -136,6 +147,13 @@ export default function Cart() {
           )}
         </div>
       </main>
+
+      {/* Terms and Conditions Modal */}
+      <TermsAndConditionsModal
+        isOpen={showTermsModal}
+        onClose={handleCloseTerms}
+        onAccept={handleAcceptTerms}
+      />
     </>
   );
 }

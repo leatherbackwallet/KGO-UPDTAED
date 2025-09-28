@@ -534,7 +534,11 @@ export default function Checkout() {
     }
   };
 
-  // Handle guest checkout
+  /**
+   * Handle guest checkout
+   * Creates temporary guest user for checkout without registration
+   * Supports both COD and online payment methods
+   */
   const handleGuestCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -761,7 +765,11 @@ export default function Checkout() {
     }
   };
 
-  // Handle register
+  /**
+   * Handle user registration
+   * Validates form data and creates new user account
+   * Merges guest cart/wishlist data with new account
+   */
   const handleRegister = async (e: React.FormEvent) => {
     console.log('handleRegister called', { e, registerData });
     e.preventDefault();
@@ -801,9 +809,17 @@ export default function Checkout() {
         return;
       }
       
-      // Password complexity validation (simplified for testing)
-      if (registerData.password.length < 6) {
-        setError('Password must be at least 6 characters long');
+      // Password complexity validation
+      if (registerData.password.length < 8) {
+        setError('Password must be at least 8 characters long');
+        setLoading(false);
+        return;
+      }
+
+      // Check password complexity
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+      if (!passwordRegex.test(registerData.password)) {
+        setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
         setLoading(false);
         return;
       }

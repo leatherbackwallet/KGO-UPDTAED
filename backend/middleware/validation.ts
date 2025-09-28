@@ -20,7 +20,26 @@ export const registerSchema = z.object({
   lastName: z.string().min(2, 'Last name must be at least 2 characters').trim(),
   email: emailSchema,
   password: passwordSchema,
-  phone: phoneSchema
+  phone: phoneSchema,
+  userAddress: z.object({
+    street: z.string().min(1, 'Street is required'),
+    houseNumber: z.string().optional(),
+    city: z.string().min(1, 'City is required'),
+    state: z.string().min(1, 'State is required'),
+    zipCode: z.string().min(1, 'ZIP code is required'),
+    country: z.string().optional()
+  }).optional(),
+  recipientName: z.string().optional(),
+  recipientPhone: z.string().optional(),
+  deliveryAddress: z.object({
+    street: z.string().min(1, 'Street is required'),
+    houseNumber: z.string().optional(),
+    city: z.string().min(1, 'City is required'),
+    state: z.string().min(1, 'State is required'),
+    zipCode: z.string().min(1, 'ZIP code is required'),
+    country: z.string().optional()
+  }).optional(),
+  specialInstructions: z.string().optional()
 });
 
 // User login validation
