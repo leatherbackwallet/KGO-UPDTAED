@@ -1,36 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import Head from 'next/head';
+import { GetStaticProps } from 'next';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
-import ProductSkeleton, { ProductSkeletonGrid } from '../components/ProductSkeleton';
-import { usePreloadImages } from '../hooks/useSmartImageCache';
-import { useProducts } from '../hooks/useProducts';
 import { Product, Category, Occasion } from '../types/shared';
-import api from '../utils/api';
+import { getProductImage } from '../utils/imageUtils';
+import { getMultilingualText } from '../utils/api';
 
-const ProductsPage: React.FC = () => {
-  // State
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [occasions, setOccasions] = useState<Occasion[]>([]);
-  
-  // Smart image caching
-  const { preloadImages, isPreloading } = usePreloadImages();
-  
-  // Centralized product loading
-  const { 
-    products, 
-    loading, 
-    error, 
-    refetch, 
-    filters, 
-    setFilters 
-  } = useProducts({
-    autoLoad: true, // Enable automatic loading
-    onError: (error) => console.error('Products loading error:', error),
-    onSuccess: (products) => console.log('Products loaded successfully:', products.length)
-  });
-  
+interface ProductsPageProps {
+  products: Product[];
+  categories: Category[];
+  occasions: Occasion[];
+}
+
+const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, categories, occasions }) => {
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -41,47 +25,59 @@ const ProductsPage: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showQuickView, setShowQuickView] = useState(false);
 
-  // Load initial data
-  useEffect(() => {
-    loadInitialData();
-  }, []);
+  // Filter and sort products client-side
+  const filteredProducts = useMemo(() => {
+    let filtered = [...allProducts];
 
-  // Load data when filters change
-  useEffect(() => {
-    setFilters({
-      search: searchTerm,
-      category: selectedCategory,
-      occasions: selectedOccasion,
-      sort: sortBy
-    });
-  }, [searchTerm, selectedCategory, selectedOccasion, sortBy, setFilters]);
-
-  // Smart preload images when products change
-  useEffect(() => {
-    if (products.length > 0) {
-      // Preload first 12 product images with smart caching
-      const imagePaths = products.slice(0, 12).map(product => product.images?.[0] || product.defaultImage).filter(Boolean);
-      const productSlugs = products.slice(0, 12).map(product => product.slug);
-      
-      preloadImages(imagePaths, productSlugs);
+    // Search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(product => 
+        getMultilingualText(product.name).toLowerCase().includes(searchLower) ||
+        getMultilingualText(product.description).toLowerCase().includes(searchLower)
+      );
     }
-  }, [products, preloadImages]);
 
-  const loadInitialData = async () => {
-    try {
-      // Load categories and occasions
-      const [categoriesRes, occasionsRes] = await Promise.all([
-        api.get('/categories'),
-        api.get('/occasions')
-      ]);
-      
-      setCategories(categoriesRes.data.data || []);
-      setOccasions(occasionsRes.data.data || []);
-      
-    } catch (error) {
-      console.error('Error loading initial data:', error);
+    // Category filter
+    if (selectedCategory) {
+      filtered = filtered.filter(product => 
+        product.categories?.some(cat => {
+          const catId = typeof cat === 'string' ? cat : cat._id;
+          return catId === selectedCategory;
+        })
+      );
     }
-  };
+
+    // Occasion filter
+    if (selectedOccasion) {
+      filtered = filtered.filter(product => 
+        product.occasions?.includes(selectedOccasion)
+      );
+    }
+
+    // Sort products
+    switch (sortBy) {
+      case 'price-low':
+        filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+        break;
+      case 'name':
+        filtered.sort((a, b) => 
+          getMultilingualText(a.name).localeCompare(getMultilingualText(b.name))
+        );
+        break;
+      case 'newest':
+      default:
+        filtered.sort((a, b) => 
+          new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+        );
+        break;
+    }
+
+    return filtered;
+  }, [allProducts, searchTerm, selectedCategory, selectedOccasion, sortBy]);
 
   // Event handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,7 +159,7 @@ const ProductsPage: React.FC = () => {
                   <option value="">All Categories</option>
                   {categories.map((category) => (
                     <option key={category._id} value={category._id}>
-                      {category.name}
+                      {getMultilingualText(category.name)}
                     </option>
                   ))}
                 </select>
@@ -177,7 +173,7 @@ const ProductsPage: React.FC = () => {
                   <option value="">All Occasions</option>
                   {occasions.map((occasion) => (
                     <option key={occasion._id} value={occasion._id}>
-                      {occasion.name}
+                      {getMultilingualText(occasion.name)}
                     </option>
                   ))}
                 </select>
@@ -210,34 +206,14 @@ const ProductsPage: React.FC = () => {
           {/* Results */}
           <div className="mb-6">
             <p className="text-gray-600">
-              {loading ? 'Loading...' : `Showing ${products.length} products`}
-              {isPreloading && (
-                <span className="ml-2 text-blue-600 text-sm">
-                  • Preloading images...
-                </span>
-              )}
+              Showing {filteredProducts.length} of {allProducts.length} products
             </p>
           </div>
 
-          {/* Error State */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <p className="text-red-700">{error}</p>
-              <button
-                onClick={loadInitialData}
-                className="mt-2 px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
-
           {/* Products Grid */}
-          {loading ? (
-            <ProductSkeletonGrid count={12} />
-          ) : products.length > 0 ? (
+          {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <ProductCard
                   key={product._id}
                   product={product}
@@ -247,23 +223,21 @@ const ProductsPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            !error && (
-              <div className="text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8l-4 4-4-4m0 0l-4 4-4-4" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-                <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
-                <button
-                  onClick={clearFilters}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Clear All Filters
-                </button>
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8l-4 4-4-4m0 0l-4 4-4-4" />
+                </svg>
               </div>
-            )
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+              <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Clear All Filters
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -276,9 +250,66 @@ const ProductsPage: React.FC = () => {
           onClose={closeQuickView}
         />
       )}
-
     </>
   );
+};
+
+// Static generation - fetch data at build time
+export const getStaticProps: GetStaticProps<ProductsPageProps> = async () => {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+    
+    // Fetch all data in parallel
+    const [productsResponse, categoriesResponse, occasionsResponse] = await Promise.all([
+      fetch(`${apiUrl}/products?limit=1000`).catch(() => ({ ok: false, json: () => Promise.resolve({ data: [] }) })),
+      fetch(`${apiUrl}/categories`).catch(() => ({ ok: false, json: () => Promise.resolve({ data: [] }) })),
+      fetch(`${apiUrl}/occasions`).catch(() => ({ ok: false, json: () => Promise.resolve({ data: [] }) }))
+    ]);
+
+    let products: Product[] = [];
+    let categories: Category[] = [];
+    let occasions: Occasion[] = [];
+
+    // Parse products data
+    if (productsResponse.ok) {
+      const productsData = await productsResponse.json();
+      products = productsData.data || productsData || [];
+    }
+
+    // Parse categories data
+    if (categoriesResponse.ok) {
+      const categoriesData = await categoriesResponse.json();
+      categories = categoriesData.data || categoriesData || [];
+    }
+
+    // Parse occasions data
+    if (occasionsResponse.ok) {
+      const occasionsData = await occasionsResponse.json();
+      occasions = occasionsData.data || occasionsData || [];
+    }
+
+    return {
+      props: {
+        products,
+        categories,
+        occasions
+      },
+      // Regenerate the page at most once every hour
+      revalidate: 3600
+    };
+  } catch (error) {
+    console.error('Error fetching data for products page:', error);
+    
+    // Return empty data on error
+    return {
+      props: {
+        products: [],
+        categories: [],
+        occasions: []
+      },
+      revalidate: 60 // Retry in 1 minute
+    };
+  }
 };
 
 export default ProductsPage;

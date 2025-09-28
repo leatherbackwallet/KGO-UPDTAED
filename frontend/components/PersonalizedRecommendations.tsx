@@ -200,6 +200,7 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
                   _id: product._id,
                   name: product.name.en || product.name,
                   description: product.description.en || product.description,
+                  category: product.category || 'general',
                   categories: product.categories || [],
                   images: product.images,
                   slug: product.slug,

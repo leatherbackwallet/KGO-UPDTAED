@@ -5,50 +5,31 @@
 
 import express, { Request, Response } from 'express';
 import { auth } from '../middleware/auth';
+import { CartService } from '../services/cartService';
+import { optionalAuth } from '../middleware/optionalAuth';
 
 const router = express.Router();
 
-// Merge guest cart data with user account
-router.post('/merge', auth, async (req: Request, res: Response): Promise<void> => {
+// Get user's cart (supports both authenticated and guest users)
+router.get('/', optionalAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { items } = req.body;
+    const userId = req.user?.id || req.sessionID || 'guest';
+    const isGuest = !req.user;
+    const sessionId = req.sessionID;
+
+    const result = await CartService.getUserCart(userId, isGuest, sessionId);
     
-    if (!items || !Array.isArray(items)) {
+    if (result.success) {
+      res.json({
+        success: true,
+        data: result.data
+      });
+    } else {
       res.status(400).json({
         success: false,
-        error: { message: 'Invalid cart items', code: 'INVALID_CART_DATA' }
+        error: result.error
       });
-      return;
     }
-
-    // In a real implementation, you would merge the guest cart with the user's cart
-    // For now, we'll just return success
-    res.json({
-      success: true,
-      message: 'Cart merged successfully',
-      items: items.length
-    });
-  } catch (error) {
-    console.error('Error merging cart:', error);
-    res.status(500).json({
-      success: false,
-      error: { message: 'Failed to merge cart', code: 'MERGE_ERROR' }
-    });
-  }
-});
-
-// Get user's cart
-router.get('/', auth, async (req: Request, res: Response): Promise<void> => {
-  try {
-    // In a real implementation, you would fetch the user's cart from the database
-    res.json({
-      success: true,
-      data: {
-        items: [],
-        total: 0,
-        count: 0
-      }
-    });
   } catch (error) {
     console.error('Error fetching cart:', error);
     res.status(500).json({
@@ -58,26 +39,49 @@ router.get('/', auth, async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// Add item to cart
-router.post('/add', auth, async (req: Request, res: Response): Promise<void> => {
+// Add item to cart (supports both authenticated and guest users)
+router.post('/add', optionalAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { productId, quantity = 1 } = req.body;
+    const { productId, name, price, image, quantity, stock, isCombo, comboBasePrice, comboItemConfigurations } = req.body;
     
-    if (!productId) {
+    if (!productId || !name || typeof price !== 'number' || !quantity) {
       res.status(400).json({
         success: false,
-        error: { message: 'Product ID is required', code: 'MISSING_PRODUCT_ID' }
+        error: { message: 'Missing required fields', code: 'MISSING_FIELDS' }
       });
       return;
     }
 
-    // In a real implementation, you would add the item to the user's cart
-    res.json({
-      success: true,
-      message: 'Item added to cart successfully',
+    const userId = req.user?.id || req.sessionID || 'guest';
+    const isGuest = !req.user;
+    const sessionId = req.sessionID;
+
+    const cartItem = {
       productId,
-      quantity
-    });
+      name,
+      price,
+      image: image || '/images/products/placeholder.svg',
+      quantity: Math.max(1, quantity),
+      stock: stock || 0,
+      isCombo: isCombo || false,
+      comboBasePrice: comboBasePrice || 0,
+      comboItemConfigurations: comboItemConfigurations || []
+    };
+
+    const result = await CartService.addItemToCart(userId, cartItem, isGuest, sessionId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Item added to cart successfully',
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
   } catch (error) {
     console.error('Error adding item to cart:', error);
     res.status(500).json({
@@ -87,17 +91,37 @@ router.post('/add', auth, async (req: Request, res: Response): Promise<void> => 
   }
 });
 
-// Remove item from cart
-router.delete('/remove/:productId', auth, async (req: Request, res: Response): Promise<void> => {
+// Remove item from cart (supports both authenticated and guest users)
+router.delete('/remove/:productId', optionalAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
     
-    // In a real implementation, you would remove the item from the user's cart
-    res.json({
-      success: true,
-      message: 'Item removed from cart successfully',
-      productId
-    });
+    if (!productId) {
+      res.status(400).json({
+        success: false,
+        error: { message: 'Product ID is required', code: 'MISSING_PRODUCT_ID' }
+      });
+      return;
+    }
+
+    const userId = req.user?.id || req.sessionID || 'guest';
+    const isGuest = !req.user;
+    const sessionId = req.sessionID;
+
+    const result = await CartService.removeItemFromCart(userId, productId, isGuest, sessionId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Item removed from cart successfully',
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
   } catch (error) {
     console.error('Error removing item from cart:', error);
     res.status(500).json({
@@ -107,13 +131,21 @@ router.delete('/remove/:productId', auth, async (req: Request, res: Response): P
   }
 });
 
-// Update cart item quantity
-router.put('/update/:productId', auth, async (req: Request, res: Response): Promise<void> => {
+// Update item quantity in cart (supports both authenticated and guest users)
+router.put('/update/:productId', optionalAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
     const { quantity } = req.body;
     
-    if (!quantity || quantity < 0) {
+    if (!productId) {
+      res.status(400).json({
+        success: false,
+        error: { message: 'Product ID is required', code: 'MISSING_PRODUCT_ID' }
+      });
+      return;
+    }
+
+    if (typeof quantity !== 'number' || quantity < 0) {
       res.status(400).json({
         success: false,
         error: { message: 'Valid quantity is required', code: 'INVALID_QUANTITY' }
@@ -121,13 +153,24 @@ router.put('/update/:productId', auth, async (req: Request, res: Response): Prom
       return;
     }
 
-    // In a real implementation, you would update the item quantity in the user's cart
-    res.json({
-      success: true,
-      message: 'Cart item updated successfully',
-      productId,
-      quantity
-    });
+    const userId = req.user?.id || req.sessionID || 'guest';
+    const isGuest = !req.user;
+    const sessionId = req.sessionID;
+
+    const result = await CartService.updateItemQuantity(userId, productId, quantity, isGuest, sessionId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Cart item updated successfully',
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
   } catch (error) {
     console.error('Error updating cart item:', error);
     res.status(500).json({
@@ -137,19 +180,99 @@ router.put('/update/:productId', auth, async (req: Request, res: Response): Prom
   }
 });
 
-// Clear cart
-router.delete('/clear', auth, async (req: Request, res: Response): Promise<void> => {
+// Clear cart (supports both authenticated and guest users)
+router.delete('/clear', optionalAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    // In a real implementation, you would clear the user's cart
-    res.json({
-      success: true,
-      message: 'Cart cleared successfully'
-    });
+    const userId = req.user?.id || req.sessionID || 'guest';
+    const isGuest = !req.user;
+    const sessionId = req.sessionID;
+
+    const result = await CartService.clearCart(userId, isGuest, sessionId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Cart cleared successfully',
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
   } catch (error) {
     console.error('Error clearing cart:', error);
     res.status(500).json({
       success: false,
       error: { message: 'Failed to clear cart', code: 'CLEAR_ERROR' }
+    });
+  }
+});
+
+// Merge guest cart with user cart (authenticated users only)
+router.post('/merge', auth, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { items } = req.body;
+    const userId = req.user?.id;
+    const sessionId = req.sessionID;
+    
+    if (!items || !Array.isArray(items)) {
+      res.status(400).json({
+        success: false,
+        error: { message: 'Invalid cart items', code: 'INVALID_CART_DATA' }
+      });
+      return;
+    }
+
+    const result = await CartService.mergeGuestCart(userId, items, sessionId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Cart merged successfully',
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error('Error merging cart:', error);
+    res.status(500).json({
+      success: false,
+      error: { message: 'Failed to merge cart', code: 'MERGE_ERROR' }
+    });
+  }
+});
+
+// Get cart statistics (supports both authenticated and guest users)
+router.get('/stats', optionalAuth, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id || req.sessionID || 'guest';
+    const isGuest = !req.user;
+    const sessionId = req.sessionID;
+
+    const result = await CartService.getCartStats(userId, isGuest, sessionId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error('Error getting cart stats:', error);
+    res.status(500).json({
+      success: false,
+      error: { message: 'Failed to get cart statistics', code: 'STATS_ERROR' }
     });
   }
 });
