@@ -11,7 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import AdminTabs from '../components/AdminTabs';
 import RecipientAddresses from '../components/RecipientAddresses';
-import RazorpayPayment from '../components/RazorpayPayment';
+import RazorpayPaymentSimplified from '../components/RazorpayPaymentSimplified';
 import PasswordRequirements from '../components/PasswordRequirements';
 import api from '../utils/api';
 import { validatePaymentResponse } from '../utils/razorpay';
@@ -78,6 +78,7 @@ export default function Checkout() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [selectedRecipientAddress, setSelectedRecipientAddress] = useState<RecipientAddress | null>(null);
   const [previousOrderRecipients, setPreviousOrderRecipients] = useState<OrderRecipient[]>([]);
   const [showPreviousRecipients, setShowPreviousRecipients] = useState(false);
@@ -87,6 +88,40 @@ export default function Checkout() {
   const [retryCount, setRetryCount] = useState(0);
   const [maxRetries] = useState(3);
   const [authenticatedPaymentMethod, setAuthenticatedPaymentMethod] = useState('razorpay');
+
+  // Login and registration form data
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
+
+  const [registerData, setRegisterData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: '',
+    userAddress: {
+      street: '',
+      houseNumber: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'India'
+    },
+    recipientName: '',
+    recipientPhone: '',
+    deliveryAddress: {
+      street: '',
+      houseNumber: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'India'
+    },
+    specialInstructions: ''
+  });
 
   // Fetch previous order recipients when user is authenticated
   useEffect(() => {
@@ -169,9 +204,17 @@ export default function Checkout() {
   // Handle authenticated user order placement
   const handleAuthenticatedOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent multiple clicks
+    if (isProcessingPayment || loading) {
+      console.log('⚠️ Payment already in progress, ignoring click');
+      return;
+    }
+    
     setError('');
     setSuccess('');
     setLoading(true);
+    setIsProcessingPayment(true);
 
     if (!selectedRecipientAddress) {
       setError('Please select a recipient address');
@@ -221,26 +264,46 @@ export default function Checkout() {
         return;
       }
 
-      // Create payment order for Razorpay
-      const response = await api.post('/payments/create-order', {
-        products: cart.map(item => ({
-          product: item.product,
-          quantity: item.quantity,
-          // Include combo-specific fields if it's a combo product
-          ...(item.isCombo && {
-            isCombo: item.isCombo,
-            comboBasePrice: item.comboBasePrice,
-            comboItemConfigurations: item.comboItemConfigurations
-          })
-        })),
-        recipientAddress: createStandardRecipientAddress(selectedRecipientAddress, false)
-      }, {
-        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
-      });
+      // Create payment order for Razorpay with retry mechanism
+      let response;
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          response = await api.post('/payments/create-order', {
+            products: cart.map(item => ({
+              product: item.product,
+              quantity: item.quantity,
+              // Include combo-specific fields if it's a combo product
+              ...(item.isCombo && {
+                isCombo: item.isCombo,
+                comboBasePrice: item.comboBasePrice,
+                comboItemConfigurations: item.comboItemConfigurations
+              })
+            })),
+            recipientAddress: createStandardRecipientAddress(selectedRecipientAddress, false)
+          }, {
+            headers: { Authorization: `Bearer ${tokens?.accessToken}` }
+          });
+          break; // Success, exit retry loop
+        } catch (retryErr: any) {
+          retryCount++;
+          console.warn(`Payment order creation attempt ${retryCount} failed:`, retryErr);
+          
+          if (retryCount >= maxRetries) {
+            throw retryErr;
+          }
+          
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        }
+      }
 
       if (response.data.success) {
         setPaymentData(response.data.data);
         setShowPayment(true);
+        setError(''); // Clear any previous errors
       } else {
         setError(response.data.error?.message || 'Failed to create payment order');
       }
@@ -248,30 +311,38 @@ export default function Checkout() {
       setError(err.response?.data?.error?.message || 'Failed to create payment order');
     } finally {
       setLoading(false);
+      setIsProcessingPayment(false);
     }
   };
 
   const handlePaymentSuccess = async (paymentResponse: any) => {
     try {
       setLoading(true);
-      console.log('Payment success received:', paymentResponse);
+      setError('');
+      console.log('✅ Payment success received:', paymentResponse);
+      
+      // Validate payment response
+      if (!paymentResponse.razorpay_payment_id || !paymentResponse.razorpay_order_id || !paymentResponse.razorpay_signature) {
+        throw new Error('Invalid payment response received');
+      }
       
       // Use guest tokens if available, otherwise use authenticated user tokens
       const authToken = guestTokens?.accessToken || tokens?.accessToken;
       
       if (!authToken) {
         setError('Authentication token not found. Please try again.');
+        setLoading(false);
         return;
       }
       
-      console.log('Verifying payment with token:', authToken ? 'Present' : 'Missing');
+      console.log('🔄 Verifying payment...');
       
       // Verify payment
       const verifyResponse = await api.post('/payments/verify', paymentResponse, {
         headers: { Authorization: `Bearer ${authToken}` }
       });
 
-      console.log('Payment verification response:', verifyResponse.data);
+      console.log('✅ Payment verification response:', verifyResponse.data);
 
       if (verifyResponse.data.success) {
         const successMessage = guestTokens 
@@ -279,33 +350,41 @@ export default function Checkout() {
           : 'Payment successful! Your order has been placed and will be delivered to the selected recipient.';
         
         setSuccess(successMessage);
+        
+        // Clear cart and localStorage only after successful verification
         clearCart();
         localStorage.removeItem('cart');
         localStorage.removeItem('wishlist');
         setSelectedRecipientAddress(null);
         setShowPayment(false);
         setPaymentData(null);
-        // Don't clear guest tokens immediately - keep them for order confirmation
+        setIsProcessingPayment(false);
         
         // Redirect to order confirmation page with order ID
         const orderId = verifyResponse.data.data.orderId;
-        console.log('Redirecting to order confirmation:', orderId);
+        console.log('🔄 Redirecting to order confirmation:', orderId);
         
-        // Use window.location.href for more reliable navigation
-        window.location.href = `/order-confirmation/${orderId}`;
+        if (orderId) {
+          setTimeout(() => {
+            window.location.href = `/order-confirmation/${orderId}`;
+          }, 1000);
+        } else {
+          setError('Order ID not found. Please contact support with your payment details.');
+        }
       } else {
         setError(verifyResponse.data.error?.message || 'Payment verification failed');
       }
     } catch (err: any) {
-      console.error('Payment verification error:', err);
-      setError(err.response?.data?.error?.message || 'Payment verification failed');
+      console.error('❌ Payment verification error:', err);
+      setError(err.response?.data?.error?.message || 'Payment verification failed. Please contact support if payment was deducted.');
     } finally {
       setLoading(false);
+      setIsProcessingPayment(false);
     }
   };
 
   const handlePaymentError = (error: any) => {
-    console.error('Payment error:', error);
+    console.error('❌ Payment error:', error);
     
     let errorMessage = 'Payment failed';
     
@@ -343,16 +422,16 @@ export default function Checkout() {
     setError(errorMessage);
     setShowPayment(false);
     setPaymentData(null);
-    setGuestTokens(null); // Clear guest tokens on error
-    setLoading(false); // Ensure loading state is cleared
+    setLoading(false);
+    setIsProcessingPayment(false);
   };
 
   const handlePaymentClose = () => {
-    console.log('Payment modal closed by user');
+    console.log('🔄 Payment modal closed by user');
     setShowPayment(false);
     setPaymentData(null);
-    setGuestTokens(null); // Clear guest tokens on close
-    setLoading(false); // Ensure loading state is cleared
+    setLoading(false);
+    setIsProcessingPayment(false);
     
     // Show a friendly message for cancellation
     if (!error && !success) {
@@ -360,113 +439,7 @@ export default function Checkout() {
     }
   };
 
-  const handlePaymentStatusCheck = async (status: 'checking' | 'success' | 'failed' | 'unknown') => {
-    console.log('Payment status check triggered:', status);
-    
-    if (status === 'checking') {
-      setLoading(true);
-      setError('');
-      setSuccess('Checking payment status...');
-      return;
-    }
-    
-    if (status === 'success') {
-      // Payment was successful, proceed with verification
-      if (paymentData) {
-        await handlePaymentSuccess(paymentData);
-      }
-      return;
-    }
-    
-    if (status === 'failed') {
-      setError('Payment failed. Please try again.');
-      setLoading(false);
-      return;
-    }
-    
-    if (status === 'unknown') {
-      // Payment status is unclear, we need to check with backend
-      console.log('Payment status unknown, checking with backend...');
-      await checkPaymentStatusWithBackend();
-    }
-  };
-
-  const checkPaymentStatusWithBackend = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      setSuccess('Checking payment status...');
-      
-      // Import the payment status utility
-      const { checkPaymentStatusWithFallback } = await import('../utils/paymentStatus');
-      
-      // Get the current payment data from state
-      const currentPaymentData = paymentData || {
-        razorpay_order_id: paymentData?.razorpay_order_id,
-        razorpay_payment_id: paymentData?.razorpay_payment_id
-      };
-      
-      if (!currentPaymentData.razorpay_order_id && !currentPaymentData.razorpay_payment_id) {
-        console.error('No payment data available for status check');
-        setError('Unable to check payment status. Please contact support if payment was deducted.');
-        setLoading(false);
-        return;
-      }
-      
-      // Use guest tokens if available, otherwise use authenticated user tokens
-      const authToken = guestTokens?.accessToken || tokens?.accessToken;
-      
-      console.log('Checking payment status with data:', currentPaymentData);
-      
-      const result = await checkPaymentStatusWithFallback(
-        currentPaymentData,
-        authToken,
-        {
-          maxRetries: 3,
-          retryDelay: 1000,
-          enablePolling: true
-        }
-      );
-      
-      console.log('Payment status check result:', result);
-      
-      if (result.success) {
-        if (result.status === 'verified') {
-          // Payment is already verified, redirect to order confirmation
-          setSuccess('Payment verified! Your order has been confirmed.');
-          clearCart();
-          localStorage.removeItem('cart');
-          localStorage.removeItem('wishlist');
-          setSelectedRecipientAddress(null);
-          setShowPayment(false);
-          setPaymentData(null);
-          
-          if (result.orderId) {
-            window.location.href = `/order-confirmation/${result.orderId}`;
-          }
-        } else if (result.status === 'payment_success' && result.needsVerification) {
-          // Payment succeeded but needs verification, try to verify
-          if (currentPaymentData.razorpay_payment_id && currentPaymentData.razorpay_order_id) {
-            setSuccess('Payment successful! Verifying payment...');
-            await handlePaymentSuccess(currentPaymentData);
-          } else {
-            setError('Payment successful but verification data is missing. Please contact support.');
-          }
-        } else if (result.status === 'payment_failed') {
-          setError('Payment failed. Please try again.');
-        } else {
-          setError('Payment status is unclear. Please contact support if payment was deducted.');
-        }
-      } else {
-        setError(result.message || 'Unable to verify payment status. Please contact support if payment was deducted.');
-      }
-    } catch (error: any) {
-      console.error('Error checking payment status:', error);
-      setError('Error checking payment status. Please contact support if payment was deducted.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Simplified payment status handling - no complex status checking needed
 
   /**
    * Handle guest checkout
@@ -475,9 +448,17 @@ export default function Checkout() {
    */
   const handleGuestCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent multiple clicks
+    if (isProcessingPayment || loading) {
+      console.log('⚠️ Payment already in progress, ignoring click');
+      return;
+    }
+    
     setError('');
     setSuccess('');
     setLoading(true);
+    setIsProcessingPayment(true);
 
     try {
       // Validate guest form data
@@ -609,37 +590,57 @@ export default function Checkout() {
         return;
       }
 
-      // Create payment order for Razorpay with timeout
+      // Create payment order for Razorpay with timeout and retry mechanism
       console.log('Creating payment order for guest user...');
       console.log('Guest tokens:', guestTokens ? 'Present' : 'Missing');
       console.log('Cart items:', cart);
       
-      const paymentResponse = await Promise.race([
-        api.post('/payments/create-order', {
-          products: cart.map(item => ({
-            product: item.product,
-            quantity: item.quantity,
-            // Include combo-specific fields if it's a combo product
-            ...(item.isCombo && {
-              isCombo: item.isCombo,
-              comboBasePrice: item.comboBasePrice,
-              comboItemConfigurations: item.comboItemConfigurations
-            })
-          })),
-          recipientAddress: createStandardRecipientAddress(guestData, true)
-        }, {
-          headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
-        }),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Request timeout - please try again')), 30000)
-        )
-      ]) as any;
+      let paymentResponse;
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          paymentResponse = await Promise.race([
+            api.post('/payments/create-order', {
+              products: cart.map(item => ({
+                product: item.product,
+                quantity: item.quantity,
+                // Include combo-specific fields if it's a combo product
+                ...(item.isCombo && {
+                  isCombo: item.isCombo,
+                  comboBasePrice: item.comboBasePrice,
+                  comboItemConfigurations: item.comboItemConfigurations
+                })
+              })),
+              recipientAddress: createStandardRecipientAddress(guestData, true)
+            }, {
+              headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
+            }),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Request timeout - please try again')), 30000)
+            )
+          ]) as any;
+          break; // Success, exit retry loop
+        } catch (retryErr: any) {
+          retryCount++;
+          console.warn(`Payment order creation attempt ${retryCount} failed:`, retryErr);
+          
+          if (retryCount >= maxRetries) {
+            throw retryErr;
+          }
+          
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        }
+      }
       
       console.log('Payment order response:', paymentResponse.data);
 
       if (paymentResponse.data.success) {
         setPaymentData(paymentResponse.data.data);
         setShowPayment(true);
+        setError(''); // Clear any previous errors
       } else {
         setError(paymentResponse.data.error?.message || 'Failed to create payment order');
       }
@@ -647,26 +648,38 @@ export default function Checkout() {
       console.error('Guest checkout error:', err);
       
       let errorMessage = 'Guest checkout failed';
+      let shouldRetry = false;
       
       if (err.message === 'Request timeout - please try again') {
         errorMessage = 'Request timed out. Please check your internet connection and try again.';
+        shouldRetry = true;
       } else if (err.response?.status === 401) {
         errorMessage = 'Authentication failed. Please refresh the page and try again.';
+        shouldRetry = true;
       } else if (err.response?.status === 400) {
         errorMessage = err.response?.data?.error?.message || 'Invalid data provided. Please check your information.';
       } else if (err.response?.status === 500) {
         errorMessage = 'Server error occurred. Please try again in a few moments.';
+        shouldRetry = true;
       } else if (err.code === 'NETWORK_ERROR' || !navigator.onLine) {
         errorMessage = 'Network error. Please check your internet connection and try again.';
+        shouldRetry = true;
       } else if (err.response?.data?.error?.message) {
         errorMessage = err.response.data.error.message;
       } else if (err.message) {
         errorMessage = err.message;
+        shouldRetry = true;
       }
       
       setError(errorMessage);
+      
+      // Clear guest tokens only if it's a non-retryable error
+      if (!shouldRetry) {
+        setGuestTokens(null);
+      }
     } finally {
       setLoading(false);
+      setIsProcessingPayment(false);
     }
   };
 
@@ -686,7 +699,6 @@ export default function Checkout() {
       
       login(loginTokens, data.data.user);
       setSuccess('Login successful! Your cart and wishlist have been merged.');
-      setShowAuthModal(false);
       
       // Refresh cart to ensure it's up to date
       refreshCart();
@@ -833,7 +845,6 @@ export default function Checkout() {
       
       login(registerTokens, data.data.user);
       setSuccess('Registration successful! Your cart and wishlist have been merged.');
-      setShowAuthModal(false);
       
       // Refresh cart to ensure it's up to date
       refreshCart();
@@ -928,23 +939,34 @@ export default function Checkout() {
           <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded">
             <div className="flex justify-between items-center">
               <span>{error}</span>
-              {retryCount < maxRetries && (
+              <div className="flex space-x-2">
+                {retryCount < maxRetries && (
+                  <button
+                    onClick={() => {
+                      setError('');
+                      setRetryCount(prev => prev + 1);
+                      // Retry the last action based on authentication status
+                      if (isAuthenticated) {
+                        handleAuthenticatedOrder(new Event('click') as any);
+                      } else {
+                        handleGuestCheckout(new Event('click') as any);
+                      }
+                    }}
+                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                  >
+                    Retry ({maxRetries - retryCount} left)
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     setError('');
-                    setRetryCount(prev => prev + 1);
-                    // Retry the last action based on authentication status
-                    if (isAuthenticated) {
-                      handleAuthenticatedOrder(new Event('click') as any);
-                    } else {
-                      handleGuestCheckout(new Event('click') as any);
-                    }
+                    setRetryCount(0);
                   }}
-                  className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                  className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
                 >
-                  Retry ({maxRetries - retryCount} left)
+                  Dismiss
                 </button>
-              )}
+              </div>
             </div>
           </div>
         )}
@@ -1211,18 +1233,18 @@ export default function Checkout() {
                     
                     <button 
                       type="button" 
-                      disabled={loading || !selectedRecipientAddress}
+                      disabled={loading || isProcessingPayment || !selectedRecipientAddress}
                       onClick={(e) => {
                         e.preventDefault();
                         handleAuthenticatedOrder(e);
                       }}
                       className={`w-full py-3 rounded-lg transition-colors ${
-                        !selectedRecipientAddress 
+                        !selectedRecipientAddress || loading || isProcessingPayment
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                           : 'bg-blue-600 text-white hover:bg-blue-700'
                       }`}
                     >
-                      {loading ? 'Processing...' : 
+                      {loading || isProcessingPayment ? 'Processing...' : 
                         !selectedRecipientAddress 
                           ? '📍 Select Address First' 
                           : authenticatedPaymentMethod === 'cod' || authenticatedPaymentMethod === 'cod-test' 
@@ -1469,10 +1491,10 @@ export default function Checkout() {
 
                     <button
                       type="submit"
-                      disabled={loading}
+                      disabled={loading || isProcessingPayment}
                       className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400"
                     >
-                      {loading ? 'Processing...' : `Complete Order - ₹${total.toFixed(2)}`}
+                      {loading || isProcessingPayment ? 'Processing...' : `Complete Order - ₹${total.toFixed(2)}`}
                     </button>
                   </div>
                 </form>
@@ -1522,7 +1544,7 @@ export default function Checkout() {
 
         {/* Razorpay Payment Component */}
         {showPayment && paymentData && (
-          <RazorpayPayment
+          <RazorpayPaymentSimplified
             orderData={paymentData}
             customerData={{
               name: user ? `${user.firstName} ${user.lastName}` : guestData.senderName,
@@ -1532,7 +1554,6 @@ export default function Checkout() {
             onSuccess={handlePaymentSuccess}
             onError={handlePaymentError}
             onClose={handlePaymentClose}
-            onStatusCheck={handlePaymentStatusCheck}
           />
         )}
       </main>

@@ -31,7 +31,7 @@ export class CartService {
             const product = await Product.findById(item.productId);
             if (product) {
               return {
-                ...item.toObject(),
+                ...item,
                 product: {
                   _id: product._id,
                   name: product.name,
@@ -42,20 +42,17 @@ export class CartService {
                 }
               };
             }
-            return item.toObject();
+            return item;
           } catch (error) {
             console.error(`Error populating product ${item.productId}:`, error);
-            return item.toObject();
+            return item;
           }
         })
       );
 
       return {
         success: true,
-        data: {
-          ...cart.toObject(),
-          items: populatedItems
-        }
+        data: cart as any
       };
     } catch (error) {
       console.error('Error getting user cart:', error);
@@ -165,7 +162,8 @@ export class CartService {
   ): Promise<CartServiceResponse<ICart>> {
     try {
       const cart = await Cart.findOrCreateCart(userId, isGuest, sessionId);
-      await cart.removeItem(productId);
+      cart.items = cart.items.filter((cartItem: ICartItem) => cartItem.productId !== productId);
+      await cart.save();
 
       return {
         success: true,
@@ -230,7 +228,15 @@ export class CartService {
         }
       }
 
-      await cart.updateItemQuantity(productId, quantity);
+      const item = cart.items.find((cartItem: ICartItem) => cartItem.productId === productId);
+      if (item) {
+        if (quantity <= 0) {
+          cart.items = cart.items.filter((cartItem: ICartItem) => cartItem.productId !== productId);
+        } else {
+          item.quantity = quantity;
+        }
+        await cart.save();
+      }
 
       return {
         success: true,
@@ -258,7 +264,8 @@ export class CartService {
   ): Promise<CartServiceResponse<ICart>> {
     try {
       const cart = await Cart.findOrCreateCart(userId, isGuest, sessionId);
-      await cart.clearCart();
+      cart.items = [];
+      await cart.save();
 
       return {
         success: true,
@@ -308,13 +315,32 @@ export class CartService {
       for (const item of guestCartItems) {
         const validation = this.validateCartItem(item);
         if (validation.isValid) {
-          await userCart.addItem(item);
+          const existingItemIndex = userCart.items.findIndex(
+            (cartItem: ICartItem) => cartItem.productId === item.productId
+          );
+          
+          if (existingItemIndex >= 0) {
+            userCart.items[existingItemIndex].quantity += item.quantity;
+          } else {
+            userCart.items.push(item);
+          }
         }
       }
 
       // If guest cart exists, merge it and delete it
       if (guestCart) {
-        await userCart.mergeCart(guestCart);
+        guestCart.items.forEach((item: ICartItem) => {
+          const existingItemIndex = userCart.items.findIndex(
+            (cartItem: ICartItem) => cartItem.productId === item.productId
+          );
+          
+          if (existingItemIndex >= 0) {
+            userCart.items[existingItemIndex].quantity += item.quantity;
+          } else {
+            userCart.items.push(item);
+          }
+        });
+        await userCart.save();
         await Cart.findByIdAndDelete(guestCart._id);
       }
 

@@ -138,7 +138,7 @@ const AdminProducts: React.FC = () => {
     
     fetchCategories();
     fetchOccasions();
-  }, [user, tokens]);
+  }, [user, tokens, canManageProducts]);
 
   const clearCacheAndRefresh = async () => {
     try {

@@ -9,6 +9,7 @@ import Breadcrumb from '../../components/Breadcrumb';
 import { ProductSkeletonGrid } from '../../components/ProductSkeleton';
 import api from '../../utils/api';
 import { Product } from '../../types/shared';
+import { getMultilingualText } from '../../utils/api';
 
 interface Occasion {
   _id: string;
@@ -145,7 +146,11 @@ const OccasionPage: React.FC<OccasionPageProps> = ({
         description={seoData.description}
         url={`https://keralagiftsonline.in/occasion/${occasion.slug}`}
         structuredData={seoData.structuredData}
-        products={products}
+        products={products.map(product => ({
+          name: getMultilingualText(product.name),
+          categories: product.categories?.map(cat => ({ name: cat })) || [],
+          occasions: product.occasions?.map(occ => ({ name: occ })) || []
+        }))}
         occasions={[occasion]}
       />
       

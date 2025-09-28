@@ -96,15 +96,39 @@ export function useProducts(options: UseProductsOptions = {}): UseProductsReturn
 
   // Refetch function
   const refetch = useCallback(async () => {
-    await loadProducts();
-  }, [loadProducts]);
+    try {
+      console.log('🔄 Refetching products with filters:', filters);
+      setLoading(true);
+      setError(null);
+
+      const response = await productApiService.getProducts(filters);
+      
+      console.log('📦 Products API response:', response);
+      
+      if (response.success) {
+        setProducts(response.data || []);
+        onSuccess?.(response.data || []);
+        console.log('✅ Products refetched successfully:', response.data?.length || 0);
+      } else {
+        throw new Error(response.error?.message || 'Failed to load products');
+      }
+    } catch (err: any) {
+      console.error('❌ Products refetch error:', err);
+      const errorMessage = err.message || 'Failed to load products';
+      setError(errorMessage);
+      onError?.(errorMessage);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters, onError, onSuccess]);
 
   // Auto-load on mount and filter changes
   useEffect(() => {
     if (autoLoad) {
       loadProducts();
     }
-  }, [autoLoad, loadProducts]);
+  }, [autoLoad, filters]);
 
   return {
     products,

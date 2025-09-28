@@ -20,7 +20,7 @@ class CartService {
                     const product = await products_model_1.Product.findById(item.productId);
                     if (product) {
                         return {
-                            ...item.toObject(),
+                            ...item,
                             product: {
                                 _id: product._id,
                                 name: product.name,
@@ -31,19 +31,16 @@ class CartService {
                             }
                         };
                     }
-                    return item.toObject();
+                    return item;
                 }
                 catch (error) {
                     console.error(`Error populating product ${item.productId}:`, error);
-                    return item.toObject();
+                    return item;
                 }
             }));
             return {
                 success: true,
-                data: {
-                    ...cart.toObject(),
-                    items: populatedItems
-                }
+                data: cart
             };
         }
         catch (error) {
@@ -137,7 +134,8 @@ class CartService {
     static async removeItemFromCart(userId, productId, isGuest = false, sessionId) {
         try {
             const cart = await cart_model_1.Cart.findOrCreateCart(userId, isGuest, sessionId);
-            await cart.removeItem(productId);
+            cart.items = cart.items.filter((cartItem) => cartItem.productId !== productId);
+            await cart.save();
             return {
                 success: true,
                 data: cart
@@ -191,7 +189,16 @@ class CartService {
                     };
                 }
             }
-            await cart.updateItemQuantity(productId, quantity);
+            const item = cart.items.find((cartItem) => cartItem.productId === productId);
+            if (item) {
+                if (quantity <= 0) {
+                    cart.items = cart.items.filter((cartItem) => cartItem.productId !== productId);
+                }
+                else {
+                    item.quantity = quantity;
+                }
+                await cart.save();
+            }
             return {
                 success: true,
                 data: cart
@@ -214,7 +221,8 @@ class CartService {
     static async clearCart(userId, isGuest = false, sessionId) {
         try {
             const cart = await cart_model_1.Cart.findOrCreateCart(userId, isGuest, sessionId);
-            await cart.clearCart();
+            cart.items = [];
+            await cart.save();
             return {
                 success: true,
                 data: cart
@@ -256,12 +264,27 @@ class CartService {
             for (const item of guestCartItems) {
                 const validation = this.validateCartItem(item);
                 if (validation.isValid) {
-                    await userCart.addItem(item);
+                    const existingItemIndex = userCart.items.findIndex((cartItem) => cartItem.productId === item.productId);
+                    if (existingItemIndex >= 0) {
+                        userCart.items[existingItemIndex].quantity += item.quantity;
+                    }
+                    else {
+                        userCart.items.push(item);
+                    }
                 }
             }
             // If guest cart exists, merge it and delete it
             if (guestCart) {
-                await userCart.mergeCart(guestCart);
+                guestCart.items.forEach((item) => {
+                    const existingItemIndex = userCart.items.findIndex((cartItem) => cartItem.productId === item.productId);
+                    if (existingItemIndex >= 0) {
+                        userCart.items[existingItemIndex].quantity += item.quantity;
+                    }
+                    else {
+                        userCart.items.push(item);
+                    }
+                });
+                await userCart.save();
                 await cart_model_1.Cart.findByIdAndDelete(guestCart._id);
             }
             return {

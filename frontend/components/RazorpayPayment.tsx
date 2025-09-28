@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { loadScript } from '../utils/razorpay';
+import resourceManager from '../utils/resourceManager';
+import razorpayInstanceManager from '../utils/razorpayInstanceManager';
 
 interface RazorpayPaymentProps {
   orderData: {
-    order_id?: string; // Google's recommended field name
+    order_id?: string;
     orderId: string;
     razorpayOrderId: string;
     amount: number;
@@ -39,52 +40,151 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
   const [paymentData, setPaymentData] = useState<any>(null);
   const razorpayInstance = useRef<any>(null);
   const statusCheckTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Optimized script loader with resource management
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+      // Check if already loaded
+      if (window.Razorpay) {
+        console.log('✅ Razorpay already available');
+        resolve(true);
+        return;
+      }
+
+      // Check if script already exists
+      const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+      if (existingScript) {
+        console.log('✅ Razorpay script already loaded, waiting for SDK...');
+        const checkRazorpay = () => {
+          if (window.Razorpay) {
+            console.log('✅ Razorpay SDK is now available');
+            resolve(true);
+          } else {
+            setTimeout(checkRazorpay, 100);
+          }
+        };
+        checkRazorpay();
+        return;
+      }
+
+      console.log('🔄 Loading Razorpay script...');
+      
+      // Use resource manager to prevent resource exhaustion
+      if (!resourceManager.trackScript('https://checkout.razorpay.com/v1/checkout.js')) {
+        console.log('✅ Razorpay script already tracked, skipping duplicate load');
+        resolve(true);
+        return;
+      }
+      
+      // Clean up any existing Razorpay scripts to prevent resource exhaustion
+      const existingScripts = document.querySelectorAll('script[src*="razorpay"]');
+      existingScripts.forEach(script => script.remove());
+      
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.defer = true;
+      script.crossOrigin = 'anonymous';
+      
+      // Add resource optimization attributes
+      script.setAttribute('data-razorpay', 'true');
+      
+      const timeout = setTimeout(() => {
+        console.error('❌ Razorpay script load timeout');
+        reject(new Error('Razorpay script load timeout'));
+      }, 8000); // Reduced timeout to prevent hanging
+      
+      script.onload = () => {
+        clearTimeout(timeout);
+        console.log('✅ Razorpay script loaded');
+        
+        // Wait for Razorpay to be available with shorter intervals
+        let attempts = 0;
+        const maxAttempts = 50; // 5 seconds max wait
+        
+        const checkRazorpay = () => {
+          attempts++;
+          if (window.Razorpay) {
+            console.log('✅ Razorpay SDK is available');
+            resolve(true);
+          } else if (attempts < maxAttempts) {
+            setTimeout(checkRazorpay, 100);
+          } else {
+            console.error('❌ Razorpay SDK not available after script load');
+            reject(new Error('Razorpay SDK not available after script load'));
+          }
+        };
+        checkRazorpay();
+      };
+      
+      script.onerror = (error) => {
+        clearTimeout(timeout);
+        console.error('❌ Failed to load Razorpay script:', error);
+        reject(new Error('Failed to load Razorpay script'));
+      };
+      
+      document.head.appendChild(script);
+    });
+  };
 
   useEffect(() => {
     const initializeRazorpay = async () => {
+      // Prevent multiple initializations using global manager
+      if (razorpayInstanceManager.isCurrentlyInitializing()) {
+        console.log('⚠️ Razorpay already initializing globally, waiting...');
+        const existingInstance = await razorpayInstanceManager.waitForInitialization();
+        if (existingInstance) {
+          console.log('✅ Using existing Razorpay instance');
+          setIsInitializing(false);
+          setIsInitialized(true);
+          return;
+        }
+      }
+
+      if (isInitialized) {
+        console.log('⚠️ Razorpay already initialized, skipping...');
+        return;
+      }
+
       try {
+        setIsInitializing(true);
+        razorpayInstanceManager.setInitializing(true);
         console.log('Initializing Razorpay with order data:', orderData);
         console.log('Customer data:', customerData);
         
-        // Load Razorpay script with improved retry logic
-        let retryCount = 0;
-        const maxRetries = 3;
-        let scriptLoaded = false;
-        
-        while (retryCount < maxRetries && !scriptLoaded) {
+        // Clean up any existing Razorpay instances to prevent resource exhaustion
+        if (razorpayInstance.current) {
           try {
-            console.log(`🔄 Attempting to load Razorpay script (attempt ${retryCount + 1}/${maxRetries})`);
-            await loadScript('https://checkout.razorpay.com/v1/checkout.js');
-            
-            // Double-check that Razorpay is available
-            if (window.Razorpay) {
-              scriptLoaded = true;
-              console.log('✅ Razorpay script loaded successfully');
-            } else {
-              throw new Error('Razorpay SDK not available after script load');
-            }
-          } catch (error) {
-            retryCount++;
-            console.warn(`⚠️ Razorpay script load failed (attempt ${retryCount}/${maxRetries}):`, error);
-            
-            if (retryCount < maxRetries) {
-              console.log(`🔄 Retrying in ${retryCount * 2000}ms...`);
-              await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
-            }
+            razorpayInstance.current.close();
+          } catch (e) {
+            console.log('No existing Razorpay instance to close');
           }
+          razorpayInstance.current = null;
         }
         
-        if (!scriptLoaded || !window.Razorpay) {
-          console.error('❌ Razorpay SDK failed to load after all retries');
-          onError(new Error('Razorpay SDK failed to load after multiple attempts. Please check your internet connection and try again.'));
-          return;
+        // Check resource usage before loading
+        const stats = resourceManager.getStats();
+        console.log('📊 Resource stats:', stats);
+        
+        if (stats.totalElements > 50) {
+          console.warn('⚠️ High resource usage detected, cleaning up...');
+          resourceManager.forceCleanup();
+        }
+        
+        // Load Razorpay script
+        await loadRazorpayScript();
+        
+        if (!window.Razorpay) {
+          throw new Error('Razorpay SDK not available');
         }
         
         console.log('✅ Razorpay SDK loaded successfully');
 
         const options = {
           key: orderData.key,
-          amount: Math.round(orderData.amount * 100), // Convert to paise and ensure integer
+          amount: Math.round(orderData.amount * 100), // Convert to paise
           currency: orderData.currency,
           name: 'OnYourBehlf - Kerala Gifts Online',
           description: 'Payment for your Kerala gifts order',
@@ -113,18 +213,13 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
             source: 'OnYourBehlf - Kerala Gifts Online'
           },
           theme: {
-            color: '#059669' // Green color matching your brand
+            color: '#059669'
           },
           modal: {
             ondismiss: function() {
               console.log('Razorpay modal dismissed');
               handleModalDismiss();
             }
-          },
-          // Add retry configuration
-          retry: {
-            enabled: true,
-            max_count: 3
           }
         };
 
@@ -143,22 +238,30 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
           setPaymentStatus('processing');
         });
 
-        // Add additional event listeners for better tracking
-        razorpay.on('payment.captured', function (response: any) {
-          console.log('Razorpay payment captured:', response);
-          setPaymentStatus('success');
-        });
-
-        razorpay.on('payment.verification.failed', function (response: any) {
-          console.error('Razorpay payment verification failed:', response);
-          setPaymentStatus('failed');
-        });
-
         console.log('Opening Razorpay modal...');
         razorpay.open();
-      } catch (error) {
+        razorpayInstance.current = razorpay;
+        razorpayInstanceManager.setCurrentInstance(razorpay);
+        setIsInitializing(false);
+        setIsInitialized(true);
+        razorpayInstanceManager.setInitializing(false);
+      } catch (error: any) {
         console.error('Error initializing Razorpay:', error);
-        onError(error);
+        setIsInitializing(false);
+        razorpayInstanceManager.setInitializing(false);
+        
+        // Handle specific error types
+        if (error.message.includes('timeout')) {
+          onError(new Error('Payment gateway timeout. Please try again.'));
+        } else if (error.message.includes('ERR_INSUFFICIENT_RESOURCES')) {
+          console.warn('⚠️ Resource exhaustion detected, cleaning up...');
+          resourceManager.forceCleanup();
+          onError(new Error('System resources exhausted. Please refresh the page and try again.'));
+        } else if (error.message.includes('CORS')) {
+          onError(new Error('Network security issue. Please try again.'));
+        } else {
+          onError(error);
+        }
       }
     };
 
@@ -185,7 +288,7 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
         console.log('Status check timeout reached, treating as unknown');
         onStatusCheck?.('unknown');
         onClose();
-      }, 5000); // 5 second timeout
+      }, 5000);
       
       return;
     }
@@ -200,12 +303,26 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
     onClose();
   };
 
-  // Cleanup timeout on unmount
+  // Cleanup timeout and resources on unmount
   useEffect(() => {
     return () => {
       if (statusCheckTimeout.current) {
         clearTimeout(statusCheckTimeout.current);
       }
+      
+      // Clean up Razorpay instance using global manager
+      razorpayInstanceManager.closeCurrentInstance();
+      razorpayInstance.current = null;
+      
+      // Clean up any Razorpay scripts to prevent resource exhaustion
+      const razorpayScripts = document.querySelectorAll('script[data-razorpay="true"]');
+      razorpayScripts.forEach(script => {
+        try {
+          script.remove();
+        } catch (e) {
+          console.log('Error removing Razorpay script:', e);
+        }
+      });
     };
   }, []);
 
@@ -218,7 +335,22 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
     }
   }, [paymentStatus, onStatusCheck]);
 
-  return null; // This component doesn't render anything
+  // Show loading state while initializing
+  if (isInitializing) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mx-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Payment Gateway</h3>
+            <p className="text-gray-600">Please wait while we initialize Razorpay...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null; // This component doesn't render anything when not initializing
 };
 
 export default RazorpayPayment;
