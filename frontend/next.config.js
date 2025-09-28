@@ -18,6 +18,17 @@ const nextConfig = {
     }
     return [];
   },
+
+  // Redirects for renamed pages
+  async redirects() {
+    return [
+      {
+        source: '/items',
+        destination: '/products',
+        permanent: true,
+      },
+    ];
+  },
   
   // Disable static optimization for pages that use client-side features
   trailingSlash: false,
@@ -25,13 +36,13 @@ const nextConfig = {
   
   // Environment variables for build time
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://api-dot-onyourbehlf.uc.r.appspot.com/api',
-    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'OnYourBehlf',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api',
+    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'KeralGiftsOnline',
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || '3.0.0',
-    NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS || 'true',
-    NEXT_PUBLIC_ENABLE_DEBUG_MODE: process.env.NEXT_PUBLIC_ENABLE_DEBUG_MODE || 'false',
+    NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS || 'false',
+    NEXT_PUBLIC_ENABLE_DEBUG_MODE: process.env.NEXT_PUBLIC_ENABLE_DEBUG_MODE || 'true',
     NEXT_PUBLIC_WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+918075030919',
-    NEXT_PUBLIC_FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://onyourbehlf.uc.r.appspot.com',
+    NEXT_PUBLIC_FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000',
   },
   
   // Webpack configuration
@@ -45,6 +56,16 @@ const nextConfig = {
         crypto: false,
       };
     }
+    
+    // Fix hot reload issues in development
+    if (dev && !isServer) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+        ignored: ['**/node_modules/**', '**/.git/**'],
+      };
+    }
+    
     return config;
   },
   
@@ -52,6 +73,14 @@ const nextConfig = {
   experimental: {
     esmExternals: 'loose',
   },
+  
+  // Development optimizations to reduce flashing
+  ...(process.env.NODE_ENV === 'development' && {
+    onDemandEntries: {
+      maxInactiveAge: 25 * 1000,
+      pagesBufferLength: 2,
+    },
+  }),
   
   images: {
     domains: ['localhost', 'res.cloudinary.com', 'onyourbehlf.uc.r.appspot.com'],
@@ -87,11 +116,15 @@ const nextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
+            value: 'camera=(self "https://checkout.razorpay.com"), microphone=(), geolocation=()',
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com https://api-dot-onyourbehlf.uc.r.appspot.com; frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com; object-src 'none'; base-uri 'self';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' http://localhost:5001 https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com https://api-dot-onyourbehlf.uc.r.appspot.com; frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com; object-src 'none'; base-uri 'self';",
+          },
+          {
+            key: 'Access-Control-Expose-Headers',
+            value: 'x-rtb-fingerprint-id, x-razorpay-signature, x-razorpay-payment-id',
           },
           {
             key: 'Strict-Transport-Security',

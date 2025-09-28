@@ -29,7 +29,7 @@ export default function About() {
                 <p className="text-sm opacity-90">Billing Label: OnYourBehlf - Kerala Gifts Online</p>
               </div>
               <div className="flex justify-center space-x-4">
-                <Link href="/items" className="bg-white text-kgo-red px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                <Link href="/products" className="bg-white text-kgo-red px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                   Shop Now
                 </Link>
                 <Link href="/content" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-kgo-red transition-colors">
@@ -431,7 +431,7 @@ export default function About() {
                 </div>
 
                 <div className="mt-8">
-                  <Link href="/items" className="inline-block bg-kgo-red text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">
+                  <Link href="/products" className="inline-block bg-kgo-red text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">
                     Shop Now
                   </Link>
                 </div>

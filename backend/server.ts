@@ -217,7 +217,7 @@ import subscriptionRoutes from './routes/subscriptions';
 import contentRoutes from './routes/content';
 
 import productsRoutes from './routes/products';
-import categoriesRoutes from './routes/categories';
+import categoriesRoutes from './routes/categories_json';
 import vendorsRoutes from './routes/vendors';
 import usersRoutes from './routes/users';
 import wishlistRoutes from './routes/wishlist';
@@ -230,7 +230,7 @@ import healthRoutes from './routes/health';
 import imagesRoutes from './routes/images';
 import featureFlagsRoutes from './routes/featureFlags';
 import monitoringRoutes from './routes/monitoring';
-import occasionsRoutes from './routes/occasions';
+import occasionsRoutes from './routes/occasions_json';
 import occasionsSeedRoutes from './routes/occasions-seed';
 import paymentRoutes from './routes/payments';
 import notificationRoutes from './routes/notifications';

@@ -401,7 +401,7 @@ export default function Shipping() {
                   Experience fast and reliable delivery of authentic Kerala gifts
                 </p>
                 <Link 
-                  href="/items" 
+                  href="/products" 
                   className="inline-block bg-white text-kgo-red px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
                 >
                   Shop Now

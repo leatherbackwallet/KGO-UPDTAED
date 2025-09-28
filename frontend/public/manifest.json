@@ -40,7 +40,7 @@
       "name": "Browse Products",
       "short_name": "Products",
       "description": "Browse our collection of premium gifts",
-      "url": "/items",
+      "url": "/products",
       "icons": [
         {
           "src": "/favicon.svg",

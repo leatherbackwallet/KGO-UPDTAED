@@ -82,7 +82,7 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/items" className="nav-link font-semibold">
+            <Link href="/products" className="nav-link font-semibold">
               Products
             </Link>
             <Link href="/categories" className="nav-link" onClick={handleCategoriesClick}>
@@ -201,7 +201,7 @@ export default function Navbar() {
             <div className="border-t border-gray-200 py-4">
               <div className="flex flex-col space-y-4">
                 {/* Main Navigation Links */}
-                <Link href="/items" className="text-gray-700 hover:text-purple-600 transition-colors font-semibold">
+                <Link href="/products" className="text-gray-700 hover:text-purple-600 transition-colors font-semibold">
                   Products
                 </Link>
                 <Link href="/content" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">

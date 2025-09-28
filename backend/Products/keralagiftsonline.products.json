@@ -1,0 +1,3380 @@
+[{
+  "_id": {
+    "$oid": "68c179af35b94b5cc6eca922"
+  },
+  "name": "Belgium Chocolate Cake with Fresh Red Rose bouquet and Chocolates",
+  "description": "Belgium Chocolate Cake with 1 Kg, Fresh Red Rose bouquet, Chocolates, and customized greetings.",
+  "slug": "belgium-chocolate-cake-with-fresh-red-rose-bouquet-and-chocolates",
+  "categories": [],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757510057072-529518125"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757510057072-529518125",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "ANNIVERSARY",
+    "FATHERS DAY",
+    "ONAM",
+    "WEDDING"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-10T13:14:23.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T07:52:31.746Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c17b5235b94b5cc6eca998"
+  },
+  "name": "Birth Day Combo with Customized Greetings",
+  "description": "Birth Day Combo with customized Greetings\nCream Cake- Black Forest  or White Forest- 1kg\nBirthday Balloons\nToy-Teddy\nRed Rose Bouquet\nChocolates-DairyMilks OR Ferrero Rocher-16 pcs",
+  "slug": "birth-day-combo-with-customized-greetings",
+  "categories": [],
+  "price": 5950,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757510481912-560350487.jpg"
+  ],
+  "occasions": [
+    "MISS YOU",
+    "BIRTHDAY"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-10T13:21:22.554Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:31:14.988Z"
+  },
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1757510481912-560350487.jpg",
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c17e7135b94b5cc6ecaa39"
+  },
+  "name": "Black forest with Mixed Fresh Rose Bouquets",
+  "description": "1 KG Black Forest with Mixed Fresh Roses with Customised greetings",
+  "slug": "black-forest-with-mixed-fresh-rose-bouquets",
+  "categories": [],
+  "price": 4800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757511277079-221041821"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757511277079-221041821",
+  "occasions": [
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "MISS YOU",
+    "FATHERS DAY",
+    "ANNIVERSARY"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-10T13:34:41.445Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-10T13:34:41.445Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c17f5835b94b5cc6ecaa46"
+  },
+  "name": "Pineapple Cake with Red Rose bouquet and Chocolates",
+  "description": "1 Kg Pineapple cake with fresh Red rose bouquet and Chocolates, customised greetings",
+  "slug": "pineapple-cake-with-red-rose-bouquet-and-chocolates",
+  "categories": [],
+  "price": 5300,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757511512576-21505677.jpg"
+  ],
+  "occasions": [
+    "DIWALI",
+    "CONGRATULATION",
+    "BIRTHDAY",
+    "FATHERS DAY",
+    "CONDOLENCES",
+    "WEDDING",
+    "THANK YOU"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-10T13:38:32.655Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:16:15.222Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "defaultImage": "keralagiftsonline/products/product-1757511512576-21505677.jpg",
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c230e235b94b5cc6ecab82"
+  },
+  "name": "Mixed-Rose bouquet large size with Greetings",
+  "description": "100 mixed fresh roses bouquet with customized greetings.",
+  "slug": "mixed-rose-bouquet-large-size-with-greetings",
+  "categories": [],
+  "price": 7800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757556957503-937427738"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757556957503-937427738",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "ANNIVERSARY",
+    "FATHERS DAY",
+    "HOUSE WARMING",
+    "MISS YOU",
+    "WEDDING",
+    "THANK YOU"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:16:02.157Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T02:16:02.157Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c2319335b94b5cc6ecab8d"
+  },
+  "name": "Fresh Red Roses Basket Bouquet with Special greeting",
+  "description": "100 Red_rose_basket type bouquet with special greetings",
+  "slug": "fresh-red-roses-basket-bouquet-with-special-greeting",
+  "categories": [],
+  "price": 8900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757557132796-193808420"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757557132796-193808420",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "HOUSE WARMING",
+    "FATHERS DAY",
+    "ANNIVERSARY",
+    "WEDDING"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:18:59.429Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T07:51:43.351Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c2329d35b94b5cc6ecab98"
+  },
+  "name": "Assorted Indian Sweets hamper -2 Kg with Customized greetings",
+  "description": "Assorted Indian Sweets hamper-2 Kg premium products only with Customized greetings.",
+  "slug": "assorted-indian-sweets-hamper-2-kg-with-customized-greetings",
+  "categories": [],
+  "price": 5100,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757557307119-78175758"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757557307119-78175758",
+  "occasions": [
+    "DIWALI",
+    "GET WELL SOON",
+    "FATHERS DAY",
+    "TRADITIONAL"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:23:25.699Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:28:34.097Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c2331635b94b5cc6ecaba3"
+  },
+  "name": "Assorted Indian-Kerala Sweet hamper with Customized greetings",
+  "description": "Assorted Indian-Kerala Sweets hamper-2 Kg featuring premium quality products, customized with Personalized greetings.",
+  "slug": "assorted-indian-kerala-sweet-hamper-with-customized-greetings",
+  "categories": [],
+  "price": 5100,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757557520754-182824140"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757557520754-182824140",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "FATHERS DAY",
+    "HOUSE WARMING",
+    "ANNIVERSARY",
+    "ONAM",
+    "TRADITIONAL"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:25:26.725Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:28:03.972Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c2340735b94b5cc6ecabae"
+  },
+  "name": "Black Forest Cake with Fresh Red Roses Bouquet and Chocolates",
+  "description": "Black Forest Cake-1 Kg with Fresh Red Roses Bouquet and Chocolates.",
+  "slug": "black-forest-cake-with-red-roses-bouquet-and-chocolates",
+  "categories": [],
+  "price": 5100,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757557762462-725631298"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757557762462-725631298",
+  "occasions": [
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "MISS YOU",
+    "ANNIVERSARY",
+    "WEDDING"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:29:27.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:18:14.844Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c2347735b94b5cc6ecabb9"
+  },
+  "name": "Black Forest Cake, Indian-Kerala Sweets, Ferrero Rocher Chocolates",
+  "description": "Black Forest Cake 1 Kg, Indian-Kerala Sweets, Ferrero Rocher chocolates 16 Pcs",
+  "slug": "black-forest-cake-indian-kerala-sweets-ferrero-rocher-chocolates",
+  "categories": [],
+  "price": 5800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757557873906-982742837"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757557873906-982742837",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "MISS YOU",
+    "ANNIVERSARY",
+    "WEDDING",
+    "NEW BORN"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:31:19.162Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T02:31:19.162Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c234c335b94b5cc6ecabc4"
+  },
+  "name": "Black Forest Cake with Teddy and a fresh Rose bouquet",
+  "description": "Black Forest Cake with Teddy and a fresh Rose bouquet",
+  "slug": "black-forest-cake-with-teddy-and-a-fresh-rose-bouquet",
+  "categories": [],
+  "price": 5100,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757557950234-166294981"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757557950234-166294981",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:32:35.189Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T07:01:10.601Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c2353935b94b5cc6ecabcf"
+  },
+  "name": "Butter Scotch Cake with Fresh Red Roses Bouquet and Chocolates",
+  "description": "Butter Scotch Cake 1 Kg with Fresh Red Roses Bouquet and Chocolates",
+  "slug": "butter-scotch-cake-with-fresh-red-roses-bouquet-and-chocolates",
+  "categories": [],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757558065285-440169529"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757558065285-440169529",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "MISS YOU",
+    "ANNIVERSARY",
+    "FATHERS DAY",
+    "WEDDING"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:34:33.477Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:19:04.869Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c2359535b94b5cc6ecabda"
+  },
+  "name": "Chocolate Cake 1 Kg with Red Rose Bouquet and Greetings",
+  "description": "Chocolate Cake 1 Kg with Red Rose bouquet and Greetings.",
+  "slug": "chocolate-cake-1-kg-with-red-rose-bouquet-and-greetings",
+  "categories": [],
+  "price": 5300,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757558158024-865248266"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757558158024-865248266",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "FATHERS DAY",
+    "ANNIVERSARY"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:36:05.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:27:18.070Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c2360635b94b5cc6ecabe5"
+  },
+  "name": "Chocolate Cake with Ferrero Rocher and Rose bouquet",
+  "description": "Chocolate Cake 1 Kg with Ferrero Rocher 16 pcs and a fresh Rose bouquet with greetings.",
+  "slug": "chocolate-cake-with-ferrero-rocher-and-rose-bouquet",
+  "categories": [
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
+    }
+  ],
+  "price": 5500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757558258838-909203443"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757558258838-909203443",
+  "occasions": [
+    "BIRTHDAY",
+    "FATHERS DAY",
+    "CONDOLENCES",
+    "WEDDING",
+    "NEW BORN"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:37:58.709Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:19:48.465Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c2367d35b94b5cc6ecabf0"
+  },
+  "name": "Chocolate Truffle Cake 1 Kg with Fresh Red Roses and Chocolates",
+  "description": "Chocolate Truffle Cake 1 Kg with fresh Red Roses Bouquet and Chocolates",
+  "slug": "chocolate-truffle-cake-1-kg-with-fresh-red-roses-and-chocolates",
+  "categories": [],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757558369158-421443030"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757558369158-421443030",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "MISS YOU",
+    "ANNIVERSARY",
+    "FATHERS DAY",
+    "THANK YOU",
+    "WEDDING",
+    "NEW BORN"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:39:57.286Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:21:58.120Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c236c735b94b5cc6ecabfb"
+  },
+  "name": "Chocolate Truffle Cake 1 Kg with fresh Red Roses Bouquet and Chocolates",
+  "description": "Chocolate Truffle Cake 1 Kg with fresh Red Roses Bouquet and Chocolates",
+  "slug": "chocolate-truffle-cake-1-kg-with-fresh-red-roses-bouquet-and-chocolates",
+  "categories": [],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757558467133-123327805"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757558467133-123327805",
+  "occasions": [
+    "BIRTHDAY",
+    "MISS YOU",
+    "FATHERS DAY",
+    "ANNIVERSARY",
+    "WEDDING"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:41:11.749Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-20T01:29:26.992Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c237e435b94b5cc6ecac06"
+  },
+  "name": "Assorted Chocolates with Dry nuts- fruits in a Basket with Ferrero Rocher",
+  "description": "Assorted premium Chocolates with dry nuts and dry fruits( 1.5 Kg) in a Basket with Ferrero Rocher 16 pcs",
+  "slug": "assorted-chocolates-with-dry-nuts-fruits-in-a-basket-with-ferrero-rocher",
+  "categories": [],
+  "price": 7200,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757558601447-811662404"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757558601447-811662404",
+  "occasions": [
+    "GET WELL SOON",
+    "NEW BORN",
+    "WEDDING",
+    "ONAM",
+    "FATHERS DAY",
+    "ANNIVERSARY"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:45:56.603Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T02:45:56.603Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c2385f35b94b5cc6ecac11"
+  },
+  "name": "Designer Chocolate Cake  with Fresh Red Roses Bouquet and Chocolates with Greetings",
+  "description": "Designer Chocolate Cake 1 Kg with Fresh Red Roses Bouquet and Chocolates with Greetings",
+  "slug": "designer-chocolate-cake-with-fresh-red-roses-bouquet-and-chocolates-with-greetings",
+  "categories": [],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757558875489-402145590"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757558875489-402145590",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "MISS YOU",
+    "FATHERS DAY",
+    "ANNIVERSARY",
+    "WEDDING"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:47:59.472Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T02:47:59.472Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c238d535b94b5cc6ecac1c"
+  },
+  "name": "Dried Fruits-Nuts (premium quality) Gift Crate with Greetings",
+  "description": "Dried Fruits-Nuts (premium quality) Gift Crate 2 Kg with Greetings",
+  "slug": "dried-fruits-nuts-premium-quality-gift-crate-with-greetings",
+  "categories": [],
+  "price": 8900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757558972399-997629802"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757558972399-997629802",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "FATHERS DAY",
+    "ANNIVERSARY",
+    "MISS YOU",
+    "WEDDING",
+    "TRADITIONAL"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:49:57.068Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T07:51:08.200Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c2396f35b94b5cc6ecac27"
+  },
+  "name": "A Basket of Dry Fruits and Nuts ( Premium Quality) with Chocolates and Greetings",
+  "description": "A Basket of Dry Fruits and Nuts ( Premium Quality) 1Kg   with Chocolates and Greetings",
+  "slug": "a-basket-of-dry-fruits-and-nuts-premium-quality-with-chocolates-and-greetings",
+  "categories": [],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757559139144-589519627"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757559139144-589519627",
+  "occasions": [
+    "BIRTHDAY",
+    "FATHERS DAY",
+    "ANNIVERSARY",
+    "TRADITIONAL",
+    "WEDDING",
+    "THANK YOU"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:52:31.805Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T02:52:31.805Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c23a6735b94b5cc6ecac32"
+  },
+  "name": "Two hampers of Dry Fruits (1 Kg) and Nuts (1 Kg) each  with Chocolates, a Fresh Rose Bouquet, and greetings.",
+  "description": "Two hampers of Dry Fruits (1 Kg) and Nuts (1 Kg) each  (Premium Quality)  with Chocolates, a Fresh Rose Bouquet, and Greetings.",
+  "slug": "two-hampers-of-dry-fruits-1-kg-and-nuts-1-kg-each-with-chocolates-a-fresh-rose-bouquet-and-greetings",
+  "categories": [],
+  "price": 8900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757559391502-964696005"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757559391502-964696005",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "JUST BECAUSE",
+    "FATHERS DAY",
+    "ANNIVERSARY",
+    "HOUSE WARMING",
+    "MISS YOU",
+    "ONAM",
+    "THANK YOU",
+    "WEDDING",
+    "TRADITIONAL",
+    "NEW BORN"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:56:39.789Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-18T11:52:51.481Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c23b1935b94b5cc6ecac3d"
+  },
+  "name": "Premium Nuts- Dry fruits Hamper (1.5 Kg), a Fresh Red Rose Bouquet with Ferrero Rocher 16 Pcs, and Greetings.",
+  "description": "Premium Nuts- Dry fruits Hamper (1.5 Kg), a Fresh Red Rose Bouquet with Ferrero Rocher 16 Pcs, and Greetings.",
+  "slug": "premium-nuts-dry-fruits-hamper-1-5-kg-a-fresh-red-rose-bouquet-with-ferrero-rocher-16-pcs-and-greetings",
+  "categories": [],
+  "price": 6900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757559569189-641693564"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757559569189-641693564",
+  "occasions": [
+    "BIRTHDAY",
+    "DIWALI",
+    "GET WELL SOON",
+    "MISS YOU",
+    "FATHERS DAY",
+    "ANNIVERSARY",
+    "TRADITIONAL",
+    "WEDDING"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T02:59:37.653Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T07:50:53.967Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c23b9e35b94b5cc6ecac48"
+  },
+  "name": "A Basket of Fresh Fruits (2 Kg) with a Fresh Rose Bouquet with Greetings.",
+  "description": "A Basket of Fresh Fruits (2 Kg) with a Fresh Rose Bouquet with Greetings.",
+  "slug": "a-basket-of-fresh-fruits-2-kg-with-a-fresh-rose-bouquet-with-greetings",
+  "categories": [],
+  "price": 4800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757559703044-868418163"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757559703044-868418163",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "MISS YOU",
+    "FATHERS DAY"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:01:50.936Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T03:01:50.936Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c23c0735b94b5cc6ecac53"
+  },
+  "name": "Gerebra with Mixed Fresh fruit ( 2 Kg) in a Basket and Greetings",
+  "description": "Gerebra with Mixed Fresh fruit ( 2 Kg) in a Basket and Greetings",
+  "slug": "gerebra-with-mixed-fresh-fruit-2-kg-in-a-basket-and-greetings",
+  "categories": [],
+  "price": 4800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757559810518-290552043"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757559810518-290552043",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "HOUSE WARMING",
+    "ANNIVERSARY",
+    "FATHERS DAY"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:03:35.576Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T03:03:35.576Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c23c8735b94b5cc6ecac5f"
+  },
+  "name": "German Chocolate Cake with Fresh Red-Roses and Chocolates with Greetings",
+  "description": "German Chocolate Cake 1 Kg with Fresh Red-Roses and Chocolates with Greetings",
+  "slug": "german-chocolate-cake-with-fresh-red-roses-and-chocolates-with-greetings",
+  "categories": [],
+  "price": 5500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757559939685-138683762"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757559939685-138683762",
+  "occasions": [
+    "CONGRATULATION",
+    "BIRTHDAY",
+    "GET WELL SOON",
+    "ANNIVERSARY",
+    "THANK YOU"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:05:43.996Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T07:59:34.566Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c23cf135b94b5cc6ecac6a"
+  },
+  "name": "German Chocolate Cake with Fresh Red Roses Bouquet, Chocolates, and Greetings",
+  "description": "German Chocolate Cake 1 Kg with Fresh Red Roses Bouquet, Chocolates, and Greetings",
+  "slug": "german-chocolate-cake-with-fresh-red-roses-bouquet-chocolates-and-greetings",
+  "categories": [],
+  "price": 5300,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757560045685-965221360"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757560045685-965221360",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "HOUSE WARMING",
+    "ANNIVERSARY",
+    "JUST BECAUSE",
+    "THANK YOU",
+    "WEDDING"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:07:29.953Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T03:07:29.953Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c23db035b94b5cc6ecac75"
+  },
+  "name": "Premium Dry Fruits- Nuts Gift Hamper (1Kg) with Greetings",
+  "description": "Premium Dry Fruits- Nuts Gift Hamper (1Kg) with Greetings",
+  "slug": "premium-dry-fruits-nuts-gift-hamper-1kg-with-greetings",
+  "categories": [],
+  "price": 5300,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757560181973-211733566"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757560181973-211733566",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "FATHERS DAY",
+    "GET WELL SOON",
+    "THANK YOU",
+    "TRADITIONAL"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:10:40.981Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T03:10:40.981Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c23e5735b94b5cc6ecac80"
+  },
+  "name": "Kitkat -Gems Cake  with a Fresh Red Roses Bouquet, Chocolates with Greetings",
+  "description": "Kitkat -Gems Cake 1 Kg with a Fresh Red Roses Bouquet, Chocolates with Greetings",
+  "slug": "kitkat-gems-cake-with-a-fresh-red-roses-bouquet-chocolates-with-greetings",
+  "categories": [],
+  "price": 5300,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757560403241-692829304"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757560403241-692829304",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "MISS YOU",
+    "ANNIVERSARY"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:13:27.806Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T03:13:27.806Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c23ed735b94b5cc6ecac8b"
+  },
+  "name": "Lucky Bamboo with Ferrero Rocher Chocolates and Greetings",
+  "description": "Lucky Bamboo with Ferrero Rocher Box 16 Pcs and Greetings",
+  "slug": "lucky-bamboo-with-ferrero-rocher-chocolates-and-greetings",
+  "categories": [],
+  "price": 3900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757560527764-914636782"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757560527764-914636782",
+  "occasions": [
+    "TRADITIONAL"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:15:35.493Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T04:02:24.859Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c23f6135b94b5cc6ecac96"
+  },
+  "name": "Red Velvet 1 Kg and a Fresh Red Rose Bouquet, Teddy, Photo-Printed Mug with Customized wish",
+  "description": "Red Velvet 1 Kg and a Fresh Red Rose Bouquet, Teddy, Photo-Printed Mug with Customized wish",
+  "slug": "red-velvet-1-kg-and-a-fresh-red-rose-bouquet-teddy-photo-printed-mug-with-customized-wish",
+  "categories": [],
+  "price": 5750,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757560664570-281450758"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757560664570-281450758",
+  "occasions": [
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "ANNIVERSARY",
+    "MISS YOU",
+    "WEDDING"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:17:53.760Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:35:23.483Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c23fcb35b94b5cc6ecaca1"
+  },
+  "name": "Red Velvet Cake 1 Kg with a Fresh Red Roses Bouquet, Chocolates, and Greetings",
+  "description": "Red Velvet Cake 1 Kg with a Fresh Red Roses Bouquet, Chocolates, and Greetings",
+  "slug": "red-velvet-cake-1-kg-with-a-fresh-red-roses-bouquet-chocolates-and-greetings",
+  "categories": [],
+  "price": 5300,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757560773038-375166745"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757560773038-375166745",
+  "occasions": [
+    "MISS YOU",
+    "BIRTHDAY",
+    "CONGRATULATION"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:19:39.202Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T03:19:39.202Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c240c335b94b5cc6ecacef"
+  },
+  "name": "Special Plum Cake 1 Kg with Red Roses, Photo printed Mug with Framed Photo",
+  "description": "Special Plum Cake 1 Kg with Red Roses, Photo printed Mug with Framed Photo",
+  "slug": "special-plum-cake-1-kg-with-red-roses-photo-printed-mug-with-framed-photo",
+  "categories": [],
+  "price": 5200,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757561022843-615023843"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757561022843-615023843",
+  "occasions": [
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "MISS YOU",
+    "FATHERS DAY",
+    "ANNIVERSARY",
+    "THANK YOU",
+    "WEDDING",
+    "TRADITIONAL"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:23:47.348Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:34:22.827Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c2414d35b94b5cc6ecad05"
+  },
+  "name": "Special Plum Cake 1 Kg with a Fresh Red Roses Bouquet and Ferrero Rocher",
+  "description": "Special Plum Cake 1 Kg with a Fresh Red Roses Bouquet and Ferrero Rocher",
+  "slug": "special-plum-cake-1-kg-with-a-fresh-red-roses-bouquet-and-ferrero-rocher",
+  "categories": [],
+  "price": 5100,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757561158986-957100502"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757561158986-957100502",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "ANNIVERSARY",
+    "MISS YOU",
+    "FATHERS DAY"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:26:05.038Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T03:26:05.038Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c241e735b94b5cc6ecad10"
+  },
+  "name": "Sympathy Flower/ Wreath -Large Size",
+  "description": "Sympathy Flower/ Wreath",
+  "slug": "sympathy-flower-wreath-large-size",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 5800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757561288188-108754331"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757561288188-108754331",
+  "occasions": [
+    "CONDOLENCES",
+    "SYMPATHY"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:28:39.872Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T12:19:05.632Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c2425a35b94b5cc6ecad31"
+  },
+  "name": "Sympathy Flower/ Wreath Mixed flower",
+  "description": "Sympathy Flower/ Wreath Mixed flower",
+  "slug": "sympathy-flower-wreath-mixed-flower",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757561424126-98678212"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757561424126-98678212",
+  "occasions": [
+    "SYMPATHY",
+    "CONDOLENCES"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:30:34.012Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T12:19:05.632Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c242c635b94b5cc6ecad3c"
+  },
+  "name": "Sympathy Flower/ Wreath",
+  "description": "Sympathy Flower/ Wreath Medium Size",
+  "slug": "sympathy-flower-wreath",
+  "categories": [],
+  "price": 4400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757561538161-23060892"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757561538161-23060892",
+  "occasions": [
+    "SYMPATHY",
+    "CONDOLENCES"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:32:22.626Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T04:04:07.094Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c242fd35b94b5cc6ecad47"
+  },
+  "name": "Sympathy Flower/ Wreath Medium size",
+  "description": "Sympathy Flower/ Wreath Medium size",
+  "slug": "sympathy-flower-wreath-medium-size",
+  "categories": [],
+  "price": 4400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757561586324-797997810"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757561586324-797997810",
+  "occasions": [
+    "SYMPATHY",
+    "CONDOLENCES"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:33:17.806Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T04:03:05.994Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c2451b35b94b5cc6ecad54"
+  },
+  "name": "White Rose Basket Wreath/Sympathy Flower",
+  "description": "White Rose Basket Wreath/Sympathy Flower - Large Size",
+  "slug": "white-rose-basket-wreath-sympathy-flower",
+  "categories": [],
+  "price": 6500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757562135019-951174048"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757562135019-951174048",
+  "occasions": [
+    "SYMPATHY",
+    "CONDOLENCES"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:42:19.121Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T03:42:19.121Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c2462735b94b5cc6ecad5f"
+  },
+  "name": "White Rose Dome Wreath /Sympathy Flower",
+  "description": "White Rose Dome Wreath /Sympathy Flower Thick size",
+  "slug": "white-rose-dome-wreath-sympathy-flower",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 6500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757562399959-499292284"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757562399959-499292284",
+  "occasions": [
+    "CONDOLENCES"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:46:47.890Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T12:19:05.632Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c247d835b94b5cc6ecad6a"
+  },
+  "name": "Special Fresh Red Rose Bouquet- Large Size with Greetings",
+  "description": "Special Fresh Red Rose Bouquet- 80 Roses with Greetings",
+  "slug": "special-fresh-red-rose-bouquet-large-size-with-greetings",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 7200,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757562836090-496277565"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757562836090-496277565",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:54:00.422Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-26T17:30:33.834Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c2493335b94b5cc6ecad75"
+  },
+  "name": "Fresh Red Rose- Gypsophila with Glass-Wase",
+  "description": "Fresh Red Rose- Gypsophila with Glass-Wase",
+  "slug": "fresh-red-rose-gypsophila-with-glass-wase",
+  "categories": [],
+  "price": 4900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757563179189-66781410"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757563179189-66781410",
+  "occasions": [
+    "NEW BORN",
+    "GET WELL SOON",
+    "THANK YOU",
+    "HOUSE WARMING"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T03:59:47.443Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T03:59:47.443Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c2498235b94b5cc6ecad80"
+  },
+  "name": "Fresh Red Rose with Glass-Wase",
+  "description": "Fresh Red Rose(50 Roses) with Glass-Wase",
+  "slug": "fresh-red-rose-with-glass-wase",
+  "categories": [],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757563262401-19565513"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757563262401-19565513",
+  "occasions": [
+    "HOUSE WARMING",
+    "ANNIVERSARY",
+    "TRADITIONAL"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T04:01:06.987Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-11T04:01:06.987Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c24f9e35b94b5cc6ecad9f"
+  },
+  "name": "New Born Baby Hamper Basket",
+  "description": "Onesies, socks, gloves. musical toys, cuddly teddy bears, skin and bathing care items, and other items, according to the customer's choice.",
+  "slug": "new-born-baby-hamper-basket",
+  "categories": [],
+  "price": 6400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757564408341-156178260"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757564408341-156178260",
+  "occasions": [
+    "NEW BORN"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-11T04:27:10.342Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T07:50:01.236Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c7ba3e35b94b5cc6ecafe1"
+  },
+  "name": "Teddy with Red Rose bouquet in Basket",
+  "description": "Teddy with a Fresh Red Rose bouquet in a Basket and your greetings. Medium-size basket.",
+  "slug": "teddy-with-red-rose-bouquet-in-basket",
+  "categories": [],
+  "price": 3900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757919797320-825443380"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757919797320-825443380",
+  "occasions": [
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "MISS YOU",
+    "HOUSE WARMING",
+    "ANNIVERSARY",
+    "THANK YOU",
+    "TRADITIONAL"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T07:03:27.001Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-15T07:03:27.001Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c7baeb35b94b5cc6ecafec"
+  },
+  "name": "Teddy with Red Roses and Ferrero Rocher Box",
+  "description": "Teddy- Medium size ( 1ft)  with a Fresh Red Rose bouquet and Ferrero Rocher 16 pcs box with your greetings.",
+  "slug": "teddy-with-red-roses-and-ferrero-rocher-box",
+  "categories": [],
+  "price": 4800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757919973804-982136376"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757919973804-982136376",
+  "occasions": [
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "MISS YOU",
+    "THANK YOU",
+    "WEDDING",
+    "TRADITIONAL",
+    "NEW BORN"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T07:06:19.265Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-15T07:06:19.265Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c7bb9235b94b5cc6ecaff7"
+  },
+  "name": "Teddies, Ferrero Rocher, Fresh Rose Bouquet and Greeting Card",
+  "description": "Teddies-2 nos( Small size- 20 cm tall ), Ferrero Rocher-24pcs large box, Fresh Rose Bouquet and Greeting Card",
+  "slug": "teddies-ferrero-rocher-fresh-rose-bouquet-and-greeting-card",
+  "categories": [],
+  "price": 5450,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757920142535-93995951"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757920142535-93995951",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "MISS YOU",
+    "ANNIVERSARY",
+    "WEDDING",
+    "THANK YOU"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T07:09:06.995Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:33:06.170Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c7bc3435b94b5cc6ecb004"
+  },
+  "name": "Vancho Cake  with Red rose bouquet and Chocolates",
+  "description": "Vancho Cake 1 Kg with a Fresh Red Rose bouquet and Chocolates",
+  "slug": "vancho-cake-with-red-rose-bouquet-and-chocolates",
+  "categories": [
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
+    }
+  ],
+  "price": 5300,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757920291426-178133703"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757920291426-178133703",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T07:11:48.831Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T13:28:33.882Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c7bc7635b94b5cc6ecb00f"
+  },
+  "name": "White Forest with Ferrero Rocher and Rose Bouquet",
+  "description": "White Forest 1Kg with Ferrero Rocher 16 pcs box and a Fresh Rose Bouquet",
+  "slug": "white-forest-with-ferrero-rocher-and-rose-bouquet",
+  "categories": [],
+  "price": 5300,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757920369253-602217279"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757920369253-602217279",
+  "occasions": [
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "MISS YOU",
+    "ANNIVERSARY",
+    "FATHERS DAY",
+    "THANK YOU",
+    "WEDDING",
+    "TRADITIONAL"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T07:12:54.035Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-15T07:12:54.035Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68c7bcde35b94b5cc6ecb01a"
+  },
+  "name": "White forest Cake with a Fresh Red Rose Bouquet and Chocolates",
+  "description": "White forest Cake 1 Kg with a Fresh Red Rose Bouquet and Chocolates",
+  "slug": "white-forest-cake-with-a-fresh-red-rose-bouquet-and-chocolates",
+  "categories": [],
+  "price": 5100,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757920472934-180721474"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757920472934-180721474",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "MISS YOU",
+    "ANNIVERSARY",
+    "FATHERS DAY",
+    "WEDDING",
+    "NEW BORN"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T07:14:38.201Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:37:11.470Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c7c69035b94b5cc6ecb02c"
+  },
+  "name": "Kasvu Mund and Set, Fresh Rose Bouquet, Photo Mug, Red Velvet Cake",
+  "description": "Kasvu Mund and Set Tissue Fabric or Cotton with Designs, Fresh Rose Bouquet, Photo Mug, Red Velvet Cake 1 Kg and Greetings",
+  "slug": "kasvu-mund-and-set-fresh-rose-bouquet-photo-mug-red-velvet-cake",
+  "categories": [],
+  "price": 8400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757922956123-933242840"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757922956123-933242840",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "TRADITIONAL",
+    "WEDDING",
+    "ANNIVERSARY"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T07:56:00.064Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T07:49:23.652Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c7cbfa35b94b5cc6ecb03d"
+  },
+  "name": "Kasvu Mund with Aranmula Vaalkannadi 2.5 inch mirror",
+  "description": "Kasvu Mund with Aranmula Vaalkannadi with 2.5 inch mirror",
+  "slug": "kasvu-mund-with-aranmula-vaalkannadi",
+  "categories": [
+    {
+      "$oid": "68d531c6620b280affb68783"
+    },
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    }
+  ],
+  "price": 13900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757924323865-292241280"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757924323865-292241280",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T08:19:06.950Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T03:22:38.202Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c7cc6135b94b5cc6ecb048"
+  },
+  "name": "Kasavu Mund with Fresh Rose bouquet",
+  "description": "Kasavu Mund with a Fresh Rose bouquet. High- quality fabric and Customized wish",
+  "slug": "kasvu-mund-with-fresh-rose-bouquet",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68d531c6620b280affb68783"
+    }
+  ],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757924408970-717123041"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757924408970-717123041",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T08:20:49.756Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-26T17:31:31.494Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c7cca035b94b5cc6ecb053"
+  },
+  "name": "Kasavu Saree, Aranmula Vaal Kannadi with mirror 3.5 inch and  Fresh Rose Bouquet",
+  "description": "Kasavu Saree ,Aranmula Vaal Kannadi with mirror 3.5 inch and  Fresh Rose Bouquet",
+  "slug": "kasvu-saree-with-aranmula-kannadi-and-fresh-rose-bouquet",
+  "categories": [
+    {
+      "$oid": "68d531c6620b280affb68783"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 18500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757924508121-25934217"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757924508121-25934217",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T08:21:52.982Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T03:07:00.187Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c7cd9335b94b5cc6ecb060"
+  },
+  "name": "Kasvu Saree, Photo Frame, Ferrero Rocher, Red-velvet Cake and Fresh Rose Bouquet",
+  "description": "Kasvu Saree, Photo Frame, Ferrero Rocher 16 pcs, Red-velvet Cake 1 Kg, and Fresh Rose Bouquet with Greetings",
+  "slug": "kasvu-saree-photo-frame-ferrero-rocher-red-velvet-cake-and-fresh-rose-bouquet",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 8700,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757924741095-278884287"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757924741095-278884287",
+  "occasions": [
+    "DIWALI",
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "TRADITIONAL",
+    "WEDDING",
+    "THANK YOU",
+    "ONAM",
+    "ANNIVERSARY"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T08:25:55.181Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T12:36:37.017Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c7cde135b94b5cc6ecb06d"
+  },
+  "name": "Aranmula Vaal Kannadi with mirror 3.5 inch and  Fresh Rose Bouquet",
+  "description": "Aranmula Vaal Kannadi with mirror 3.5 inch and  Fresh Rose Bouquet",
+  "slug": "aranmula-kannadi-with-fresh-rose-bouquet",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 16500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757924823395-249426781"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757924823395-249426781",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T08:27:13.024Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T03:04:01.223Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68c7ce4635b94b5cc6ecb078"
+  },
+  "name": "Boys’ Shirt and Velcro Mundu ( Age: 3 Year -10 Year old), Black Forest Cake and Fererro Rocher",
+  "description": "Boys’ Shirt and Velcro Mundu- Cotton Fabric ( Age 3 year - 10 year),Black Forest Cake 1 Kg and Fererro Rocher 16 pcs with Greetings",
+  "slug": "boys-shirt-and-velcro-mundu-black-forest-cake-and-fererro-rocher",
+  "categories": [],
+  "price": 5900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1757924929905-413708456"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1757924929905-413708456",
+  "occasions": [
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "MISS YOU",
+    "TRADITIONAL"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-15T08:28:54.600Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T14:15:24.531Z"
+  },
+  "__v": 0,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "isCombo": false
+},
+{
+  "_id": {
+    "$oid": "68cabf3d772149b879316572"
+  },
+  "name": "Sympathy Flower/Wreath Large Size- White Rose",
+  "description": "Wreath Large Size- White Rose",
+  "slug": "wreath-large-size-white-rose",
+  "categories": [],
+  "price": 5800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758117685312-415839164"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758117685312-415839164",
+  "occasions": [
+    "SYMPATHY"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-17T14:01:33.828Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-17T14:12:31.687Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cac04a772149b87931657e"
+  },
+  "name": "Sympathy Flower/Wreath Medium Size- Mixed Rose",
+  "description": "Wreath Medium Size- Mixed Rose",
+  "slug": "wreath-medium-size-mixed-rose",
+  "categories": [],
+  "price": 4500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758117953437-287573585"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758117953437-287573585",
+  "occasions": [
+    "SYMPATHY"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-17T14:06:02.708Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-17T14:11:28.745Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cac2bb772149b879316598"
+  },
+  "name": "Black-Forest Cake- 2 Kg with Teddy and Fresh Rose Bouquet",
+  "description": "Black-Forest Cake- 2 Kg with Teddy-medium size and Fresh Rose Bouquet with your special greetings.",
+  "slug": "black-forest-cake-2-kg-with-teddy-and-fresh-rose-bouquet",
+  "categories": [],
+  "price": 6400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758118576261-219814671"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758118576261-219814671",
+  "occasions": [
+    "ANNIVERSARY",
+    "GET WELL SOON",
+    "CONGRATULATION",
+    "BIRTHDAY",
+    "NEW BORN",
+    "MISS YOU",
+    "WEDDING",
+    "THANK YOU"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-17T14:16:27.396Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-18T04:24:08.484Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cac5ca772149b8793165c1"
+  },
+  "name": "White Forest-2 Kg with Ferrero Rocher 16 PCS Box and a Fresh Rose Bouquet",
+  "description": "White Forest-2 Kg with Ferrero Rocher 16 PCS Box and a Fresh Rose Bouquet",
+  "slug": "white-forest-2-kg-with-ferrero-rocher-16-pcs-box-and-a-fresh-rose-bouquet",
+  "categories": [],
+  "price": 6400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758119364183-500249984"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758119364183-500249984",
+  "occasions": [
+    "BIRTHDAY",
+    "CONGRATULATION",
+    "GET WELL SOON",
+    "HOUSE WARMING",
+    "ANNIVERSARY",
+    "THANK YOU",
+    "WEDDING"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-17T14:29:30.957Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-18T04:23:30.635Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cace71772149b879316638"
+  },
+  "name": "Birthday Combo with Customized Greetings",
+  "description": "1 Kg Chocolate Cake, Fresh Rose Bouquet, Teddy, Birthday Designer Balloons, Ferrero Rocher 16 Pcs",
+  "slug": "birthday-combo-with-customized-greetings",
+  "categories": [],
+  "price": 6400,
+  "costPrice": 0,
+  "stock": 199,
+  "images": [
+    "keralagiftsonline/products/product-1758121534971-459722195"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758121534971-459722195",
+  "occasions": [
+    "BIRTHDAY"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-17T15:06:25.606Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-26T08:40:18.491Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cad0b8772149b879316644"
+  },
+  "name": "Baby Gift Basket with Ferrero Rocher 16 Pcs Box",
+  "description": "Baby gift basket( 1 Basket) with the Massage oil 150ml, Extra soft cream 400 ml , Body wash 400ml, Baby shoes, and Ferrero Rocher 16 pcs Box",
+  "slug": "baby-gift-basket-with-ferrero-rocher-16-pcs-box",
+  "categories": [],
+  "price": 7500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758122161372-885625612"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758122161372-885625612",
+  "occasions": [
+    "BIRTHDAY",
+    "NEW BORN"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-17T15:16:08.204Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-18T11:25:47.532Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cad4d9772149b879316658"
+  },
+  "name": "Wedding Gift Basket Hamper",
+  "description": "Cane Basket hamper filled with a Photo-printed Mug, a Ferrero Rocher 16 pcs Box, a Photo with Frame, a premium perfume, and a Fresh Red Rose Bouquet with Greetings.",
+  "slug": "wedding-gift-basket-hamper",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 8300,
+  "costPrice": 0,
+  "stock": 192,
+  "images": [
+    "keralagiftsonline/products/product-1758123197080-259580950"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758123197080-259580950",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-17T15:33:45.759Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T16:48:09.858Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cad924772149b879316668"
+  },
+  "name": "Valentines Day Gift Basket Hamper",
+  "description": "Valentines Day Gift Basket Hamper- 04 Dairy Milks, Ferrerro Rocher 16 Pcs, Fresh Rose Bouquet, Love Heart, Photo Mug, and a Teddy with greetings",
+  "slug": "valentines-day-gift-basket-hamper",
+  "categories": [],
+  "price": 6700,
+  "costPrice": 0,
+  "stock": 192,
+  "images": [
+    "keralagiftsonline/products/product-1758124285712-374162673"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758124285712-374162673",
+  "occasions": [
+    "MISS YOU",
+    "JUST BECAUSE"
+  ],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-17T15:52:04.760Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-26T09:25:31.750Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cd27fbeb951964a234fec1"
+  },
+  "name": "Soan Papdy 2 Packets with a Basket of 1 Kg Dry-Nuts",
+  "description": "Soan Papdy 2 Packets(500gm) with a Basket of 1 Kg Dry-Nuts( Half Kg each Cashew and Badam) and your customized greetings",
+  "categories": [],
+  "price": 4900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758275561803-149555314"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758275561803-149555314",
+  "occasions": [
+    "DIWALI",
+    "GET WELL SOON",
+    "ANNIVERSARY",
+    "FATHERS DAY",
+    "TRADITIONAL"
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-19T09:52:59.697Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T09:52:59.697Z"
+  },
+  "slug": "soan-papdy-2-packets-with-a-basket-of-1-kg-dry-nuts",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d4eb7d05b34e5ab12cb775"
+  },
+  "name": "Engagement/Marriage fixation Special-Hamper for Bride",
+  "description": "Redvelvet 1 Kg, Fresh Rose Bouquet, Photo Printed Mug, Ferrero Rocher 16 Pcs Box, Bella vita Perfume (woman)  arranged in a basket/Hamper  and customized greetings",
+  "categories": [],
+  "price": 8800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758784705242-665064345"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T07:13:01.574Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T07:34:20.726Z"
+  },
+  "slug": "engagement-marriage-fixation-special-hamper-for-bride",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1758784705242-665064345"
+},
+{
+  "_id": {
+    "$oid": "68d4eff390ef417734c55426"
+  },
+  "name": "Engagement -Marriage Fixation Hamper for Groom",
+  "description": "Redvelvet 1 Kg, Fresh Rose Bouquet, Photo Printed Mug, Ferrero Rocher 16 Pcs Box, Bella vita Perfume (man)  arranged in a basket/Hamper  and customized greetings",
+  "categories": [],
+  "price": 8800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758789392689-112537491"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T07:32:03.333Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T08:36:42.250Z"
+  },
+  "slug": "engagement-special-hamper-for-groom-1",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1758789392689-112537491"
+},
+{
+  "_id": {
+    "$oid": "68d5002735bee765cf034178"
+  },
+  "name": "Engagement Special-Hamper Prime for Bride",
+  "description": "Redvelvet 1 KG , Fresh Rose Bouquet, Ferrero Rocher Box, Bella Vita (Woman)Perfume(100 ml) with Kasavu Saree(1 Nos),Photo Mug and Greetings",
+  "categories": [],
+  "price": 10500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758789622719-824374145"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758789622719-824374145",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T08:41:11.731Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T08:41:11.731Z"
+  },
+  "slug": "engagement-special-hamper-prime-for-bride",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d500d735bee765cf03418c"
+  },
+  "name": "Engagement Special-Hamper-prime for Groom",
+  "description": "Redvelvet 1 KG and Fresh Rose Bouquet, Ferrero Rocher Box, Bella vita (Men )Perfume(100 ml) with Allen Solly T -Shirt(1 Nos),Photo Mug",
+  "categories": [],
+  "price": 9800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758789878858-853744286"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T08:44:07.808Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T08:44:45.086Z"
+  },
+  "slug": "engagement-special-hamper-prime-for-groom",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1758789878858-853744286"
+},
+{
+  "_id": {
+    "$oid": "68d500db35bee765cf034190"
+  },
+  "name": "Engagement Special-Hamper-prime for Groom",
+  "description": "Redvelvet 1 KG and Fresh Rose Bouquet, Ferrero Rocher Box, Bella vita (Men )Perfume(100 ml) with Allen Solly T -Shirt(1 Nos),Photo Mug",
+  "categories": [],
+  "price": 9800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758789845551-185685992"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758789845551-185685992",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T08:44:11.948Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T08:44:11.948Z"
+  },
+  "slug": "engagement-special-hamper-prime-for-groom-1",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d501b535bee765cf0341a9"
+  },
+  "name": "Fresh Cream Cake with Photo frame and Rose Bouquet",
+  "description": "Fresh Cream Cake ( Any 1 Kg Cake as of Customer Choice) \nwith Photo frame and\nA fresh Rose Bouquet",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
+    }
+  ],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758790051240-989353541"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758790051240-989353541",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T08:47:49.154Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T12:38:07.479Z"
+  },
+  "slug": "fresh-cream-cake-with-photo-frame-and-rose-bouquet",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d5039c6f68516559629b55"
+  },
+  "name": "Fresh Cream Cake with Photo frame, Cadbury Celebration and Rose bouquet",
+  "description": "Fresh Cream Cake ( Any 1 Kg Cake as of Customer Choice)\nPhoto frame, \nCadburys Celebration size packet\nRose bouquet",
+  "categories": [
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 5800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758803059219-492330712"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T08:55:56.835Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T12:32:17.881Z"
+  },
+  "slug": "fresh-cream-cake-with-photo-frame-cadbury-celebration-medium-and-rose-bouquet",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1758803059219-492330712"
+},
+{
+  "_id": {
+    "$oid": "68d537fc9e46ae12c19d68ed"
+  },
+  "name": "Fresh Cream Cake with Photo Mug and Rose bouquet",
+  "description": "Fresh Cream Cake ( Any fresh cream Cake 1 Kg as of customers Choice)\nPhoto Mug \nRose bouquet",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
+    }
+  ],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758803958714-596901844"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758803958714-596901844",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T12:39:24.049Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T13:55:14.655Z"
+  },
+  "slug": "fresh-cream-cake-with-photo-mug-and-rose-bouquet",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d5397e9e46ae12c19d695a"
+  },
+  "name": "Half Kg Cake Fresh Cream Cake  and Chocolate Box",
+  "description": "Half Kg Cake( Any Fresh Cream Cake Half Kg as of Customer's Choice) \nFresh Red Roses Bouquet- (6-10 Nos),\nMixed Chocolates in a Box \nGreeting Card",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
+    },
+    {
+      "$oid": "68d531c6620b280affb68783"
+    }
+  ],
+  "price": 4300,
+  "costPrice": 0,
+  "stock": 194,
+  "images": [
+    "keralagiftsonline/products/product-1758804303315-645605043"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758804303315-645605043",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T12:45:50.556Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-28T06:46:46.290Z"
+  },
+  "slug": "half-kg-cake-fresh-cream-cake-and-chocolate-box",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d53c0f5b792545c670d10c"
+  },
+  "name": "Gift for Father's Special Day: Birth Day/Father's day",
+  "description": "Louis Philippe Formal shirt\nWallet\nFresh Rose Bouquet\nGreeting",
+  "categories": [
+    {
+      "$oid": "68d531c6620b280affb68783"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 7900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758804998786-13044572"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758804998786-13044572",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T12:56:47.953Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T12:56:47.953Z"
+  },
+  "slug": "gift-for-father-s-special-day-birth-day-father-s-day",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d53e364a3494651f736dd8"
+  },
+  "name": "Gift Box Father's special Day: Birth Day / Father's Day",
+  "description": "Hamper Filled with Ferrero Rocher 16 pcs, Diary, Pen with pen Holder, a pack of premium cashew, Red Rose Bouquet, and Greetings.",
+  "categories": [
+    {
+      "$oid": "68d531c6620b280affb68783"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 5800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758805553283-87224397"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758805553283-87224397",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T13:05:58.077Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T13:05:58.077Z"
+  },
+  "slug": "gift-box-father-s-special-day-birth-day-father-s-day",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d53ea94a3494651f736de4"
+  },
+  "name": "Sympathy Flower with Stand1",
+  "description": "Sympathy Flower with Stand Arrangement",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68d6ce8146f0d9c2debf9317"
+    }
+  ],
+  "price": 8500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758805653191-306198856"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758805653191-306198856",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T13:07:53.616Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-26T17:40:34.290Z"
+  },
+  "slug": "sympathy-flower-with-stand1",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d53ece4a3494651f736df0"
+  },
+  "name": "Sympathy Flower with Stand2",
+  "description": "Sympathy Flower with Stand Arrangement",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68d6ce8146f0d9c2debf9317"
+    }
+  ],
+  "price": 8500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758805723308-124337216"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T13:08:30.268Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-26T17:40:19.714Z"
+  },
+  "slug": "sympathy-flower-with-stand2",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1758805723308-124337216"
+},
+{
+  "_id": {
+    "$oid": "68d540354a3494651f736e0a"
+  },
+  "name": "Sympathy Flower with Stand3: with Mixed Roses",
+  "description": "Sympathy Flower with Stand Arrangement: Mixed Rose",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68d6ce8146f0d9c2debf9317"
+    }
+  ],
+  "price": 8800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758806065922-713925665"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758806065922-713925665",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T13:14:29.880Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-26T17:40:02.195Z"
+  },
+  "slug": "sympathy-flower-with-stand3-with-mixed-roses",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d5421682921e395c98085e"
+  },
+  "name": "Teddy with Red Rose bouquet in Basket and Cadburry Celebrations",
+  "description": "Teddy with Red Rose Bouquet arranged in a Basket with Cadbury Celebrations medium pkt and Greetings",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68d531c6620b280affb68783"
+    }
+  ],
+  "price": 4400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758806546428-747965932"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758806546428-747965932",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T13:22:30.692Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T13:22:30.692Z"
+  },
+  "slug": "teddy-with-red-rose-bouquet-in-basket-and-cadburry-celebrations",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d542c882921e395c980875"
+  },
+  "name": "Valentines Day special Gift",
+  "description": "Teddy, Love Heart, and Rose bouquet in a basket with a tier of 30 Mixed Chocolates",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68d531c6620b280affb68783"
+    }
+  ],
+  "price": 4800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758806725058-681066458"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758806725058-681066458",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T13:25:28.644Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T07:11:38.090Z"
+  },
+  "slug": "valentines-day-special-gift",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d54609458a66f9fa82e348"
+  },
+  "name": "Wedding Gift Hamper - Gifts for Couple",
+  "description": "Couple Perfume  for Men and Women (02 Nos) and Photo Frame arranged in a Basket and a Fresh Rose Bouquet with Greeting",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68d531c6620b280affb68783"
+    }
+  ],
+  "price": 6500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758807315268-784558312"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758807315268-784558312",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T13:39:21.552Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T13:39:21.552Z"
+  },
+  "slug": "wedding-gift-hamper-gifts-for-couple",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d557bb7194870541d6b791"
+  },
+  "name": "Test Product Flower",
+  "description": "Cakes",
+  "categories": [
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 1,
+  "costPrice": 0,
+  "stock": 197,
+  "images": [
+    "keralagiftsonline/products/product-1758812112621-458892893"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-25T14:54:51.182Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T17:22:46.039Z"
+  },
+  "slug": "test-product-flower",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1758812112621-458892893"
+},
+{
+  "_id": {
+    "$oid": "68d7589b46f0d9c2debf94b4"
+  },
+  "name": "Aranmula kanandi  with Back stand - 2.75 inch mirror",
+  "description": "Aranmula kanandi  with Back stand - 2.75 inch mirror",
+  "categories": [
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    }
+  ],
+  "price": 12000,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758943383618-618171820",
+    "keralagiftsonline/products/product-1758943777377-662919814"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758943383618-618171820",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T03:23:07.754Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T03:29:40.829Z"
+  },
+  "slug": "aranmula-kanandi-with-back-stand-2-75-inch-mirror",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d75f0046f0d9c2debf950e"
+  },
+  "name": "Brass Peacock Lamp (Nilavilakk)–  10 inch.",
+  "description": "Brass Peacock Lamp (Nilavilakk)–  Decorative Lamp for Pooja, Temple & Home Decor - 10 inch. weight Approx: 1 Kg. Design may subjected to availability. Premium quality only.",
+  "categories": [
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    }
+  ],
+  "price": 6900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758945017541-681986960"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758945017541-681986960",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T03:50:24.190Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T03:50:24.190Z"
+  },
+  "slug": "brass-peacock-lamp-nilavilakk-10-inch",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d75f7646f0d9c2debf951a"
+  },
+  "name": "Brass Oil Lamp (Nilavilakk) with Cross –   Home Decor - 10 inch",
+  "description": "Brass Oil Lamp (Nilavilakk) with Cross –   Home Decor - 10 inch. weight Approx: 1 Kg.\nDesign may subjected to availability. \nPremium quality only.",
+  "categories": [
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    }
+  ],
+  "price": 6900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758945136991-56246166"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758945136991-56246166",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T03:52:22.240Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T03:52:22.240Z"
+  },
+  "slug": "brass-oil-lamp-nilavilakk-with-cross-home-decor-10-inch",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d7615746f0d9c2debf9540"
+  },
+  "name": "Brass Hanging Lamp 6 inch- Thookku Vilakk with 1m chain",
+  "description": "Brass Hanging Lamp 6 inch- Thookku Vilakk with 1m chain.\nPremium Quality",
+  "categories": [
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    }
+  ],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758945616098-114484875"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758945616098-114484875",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T04:00:23.621Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T04:24:52.081Z"
+  },
+  "slug": "brass-hanging-lamp-6-inch-thookku-vilakk-with-1m-chain",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d7620646f0d9c2debf9554"
+  },
+  "name": "Brass Hanging Lamp 4 inch- Thookku Vilakk with 1m chain",
+  "description": "Brass Hanging Lamp 4 inch- Thookku Vilakk with 1m Chain.\nPremium Quality.",
+  "categories": [
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    }
+  ],
+  "price": 4000,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758945776539-37193430"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758945776539-37193430",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T04:03:18.325Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T04:24:15.524Z"
+  },
+  "slug": "brass-hanging-lamp-4-inch-thookku-vilakk-with-1m-chain",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d7667046f0d9c2debf9573"
+  },
+  "name": "Nilavilakku - Traditional Brass Lamp",
+  "description": "Nilavilakku - Traditional Brass Lamp for Festivals, Rituals, and Home Decor \nHeight - 10 Inch. weight Aprx: 1KG\nPremium Quality",
+  "categories": [
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    }
+  ],
+  "price": 4950,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758946856959-691722221",
+    "keralagiftsonline/products/product-1758946957388-281622506"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758946856959-691722221",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T04:22:08.333Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T04:22:47.540Z"
+  },
+  "slug": "nilavilakku-traditional-brass-lamp",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d7689246f0d9c2debf95ad"
+  },
+  "name": "Brass Oil lamp/ Nilavilakku With Sleeba Cross",
+  "description": "Brass Oil Lamp/ Nilavilakku With Sleeba Cross \nSize: 12 Inch\nPremium Quality",
+  "categories": [
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    }
+  ],
+  "price": 6200,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758947448143-404306366"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758947448143-404306366",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T04:31:14.121Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T04:31:14.121Z"
+  },
+  "slug": "brass-oil-lamp-nilavilakku-with-sleeba-cross",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d76eb146f0d9c2debf95ef"
+  },
+  "name": "Home Decor Brass Combo.( Para- , Kindi-, Nillavilakk-, Chain & Bell-, Vaarppu/Uruli-)",
+  "description": "Home Decor Brass Combo.( Para- 2.5 inch , Kindi-5 Inch, Nillavilakk-5 inch, Chain & Bell-5 inch, Vaarppu/Uruli-5 inch)\nPremium Quality Brass Items. 05 Item Combo.",
+  "categories": [
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    },
+    {
+      "$oid": "68d7694e46f0d9c2debf95c3"
+    }
+  ],
+  "price": 6900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758948994986-563620895"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758948994986-563620895",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T04:57:21.814Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T04:58:10.310Z"
+  },
+  "slug": "home-decor-brass-combo-para-kindi-nillavilakk-chain-bell-vaarppu-uruli",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d8104b565cfbcb9ced9ef0"
+  },
+  "name": "Engagement Hamper- Choco Heart Ferrero Rocher  with Red Rose Bouquet",
+  "description": "Engagement Hamper- Choco Heart hamper filled with Ferrero Rocher and Red Rose Bouquet",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 7000,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758990388645-562605652"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758990388645-562605652",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T16:26:51.815Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T16:29:22.996Z"
+  },
+  "slug": "engagement-hamper-choco-heart-ferrero-rocher-with-red-rose-bouquet",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d810c1565cfbcb9ced9efc"
+  },
+  "name": "Engagement Hamper- Choco Heart Ferrero with Fresh white Rose Bouquet",
+  "description": "Engagement Hamper- Choco Heart with Fresh Rose Bouquet",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 6750,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758990525881-244259866"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758990525881-244259866",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T16:28:49.998Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T16:28:49.998Z"
+  },
+  "slug": "engagement-hamper-choco-heart-ferrero-with-fresh-white-rose-bouquet",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d813f0565cfbcb9ced9f34"
+  },
+  "name": "Wedding- Engagement Hamper- Choco Pile 3 layer  and Mixed Rose Bouqet",
+  "description": "Wedding- Engagement Hamper- Choco Pile 3 layer  (Kit kat, 5 stars, Dairy Milk ) with Fresh Mixed Rose Bouquet, Dry-Nuts-Fruits( Premium-Cashew, Badam, Pista, Apricot, Kiwi  and Ferrero Rocher 16 pcs Box.",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 8200,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758991363044-759713911"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T16:42:24.602Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T16:46:18.623Z"
+  },
+  "slug": "wedding-engagement-hamper-choco-pile-3-layer-and-mixed-rose-bouqet",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1758991363044-759713911"
+},
+{
+  "_id": {
+    "$oid": "68d81457565cfbcb9ced9f46"
+  },
+  "name": "Wedding- Engagement Hamper- Choco Pile 3 layer  with Fresh Red Rose Bouquet",
+  "description": "Wedding- Engagement Hamper- Choco Pile 3 layer  (Kit kat, 5 stars, Dairy Milk ) with Fresh Red Rose Bouquet, Dry-Nuts-Fruits( Premium-Cashew, Badam, Pista, Apricot, Kiwi  and Ferrero Rocher 16 pcs Box.",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 8600,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758991438373-311719090"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758991438373-311719090",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T16:44:07.179Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T16:46:47.257Z"
+  },
+  "slug": "wedding-engagement-hamper-choco-pile-3-layer-kit-kat-5-stars-dairy-milk-with-fresh-red-rose-bouquet",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d814ac565cfbcb9ced9f51"
+  },
+  "name": "Wedding- Engagement Hamper- Choco Pile 3 layer with Fresh White Rose Bouquet",
+  "description": "Wedding- Engagement Hamper- Choco Pile 3 layer  (Kit kat, 5 stars, Dairy Milk ) with Fresh White Rose Bouquet, Dry-Nuts-Fruits( Premium-Cashew, Badam, Pista, Apricot, Kiwi  and Ferrero Rocher 16 pcs Box.",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 8100,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1758991513672-629228851"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1758991513672-629228851",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-27T16:45:32.699Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T16:47:31.087Z"
+  },
+  "slug": "wedding-engagement-hamper-choco-pile-3-layer-kit-kat-5-stars-dairy-milk-with-fresh-white-rose-bouquet",
+  "__v": 0
+}]

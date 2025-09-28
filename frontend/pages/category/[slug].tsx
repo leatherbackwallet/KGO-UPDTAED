@@ -115,7 +115,7 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Category Not Found</h1>
             <p className="text-gray-600 mb-6">The category you are looking for does not exist.</p>
             <a 
-              href="/items" 
+              href="/products" 
               className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
             >
               Browse All Products
@@ -210,7 +210,7 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
                 We're currently updating our {category.name.toLowerCase()} collection. Check back soon!
               </p>
               <a 
-                href="/items" 
+                href="/products" 
                 className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
               >
                 Browse All Products

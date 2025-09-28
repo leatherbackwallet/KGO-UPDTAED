@@ -2,6 +2,10 @@
 /**
  * Products Routes - Product management and catalog operations
  * Handles product CRUD, search, filtering, and inventory management
+ *
+ * MIGRATION STRATEGY:
+ * - Admin requests (admin=true) → MongoDB (existing functionality)
+ * - Public requests (items page) → JSON files (no MongoDB dependency)
  */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -50,11 +54,98 @@ const role_1 = require("../middleware/role");
 const cache_1 = require("../middleware/cache");
 const database_1 = require("../middleware/database");
 const productValidation_1 = require("../utils/productValidation");
+const jsonDataService_1 = require("../services/jsonDataService");
 const router = express_1.default.Router();
-// Get all products with SMART caching (re-enabled with proper invalidation)
-router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnection, async (req, res) => {
+// Get all products - Route to JSON for public, MongoDB for admin
+router.get('/', async (req, res) => {
     try {
         const { category, min, max, search, featured, occasions, page = 1, limit = 24, includeDeleted = false, admin = false, sort = 'newest' } = req.query;
+        // ROUTE DETECTION: Admin vs Public requests
+        if (admin === 'true') {
+            // ADMIN REQUEST → Use MongoDB (existing functionality)
+            console.log('🔧 Admin request detected - using MongoDB');
+            return await handleAdminProductsRequest(req, res);
+        }
+        else {
+            // PUBLIC REQUEST → Use JSON files (no MongoDB dependency)
+            console.log('📄 Public request detected - using JSON files');
+            return await handlePublicProductsRequest(req, res);
+        }
+    }
+    catch (error) {
+        console.error('❌ Error in products route:', error);
+        res.status(500).json({
+            success: false,
+            error: {
+                message: 'Failed to fetch products',
+                code: 'PRODUCTS_FETCH_ERROR'
+            }
+        });
+    }
+});
+/**
+ * Handle public products requests using JSON files (items page)
+ * NO MongoDB dependency
+ */
+async function handlePublicProductsRequest(req, res) {
+    const { category, min, max, search, featured, occasions, page = 1, limit = 24, sort = 'newest' } = req.query;
+    try {
+        const result = await jsonDataService_1.jsonDataService.getProducts({
+            category: category,
+            occasions: occasions,
+            search: search,
+            featured: featured === 'true',
+            min: min ? Number(min) : undefined,
+            max: max ? Number(max) : undefined,
+            page: Number(page),
+            limit: Number(limit),
+            sort: sort,
+            includeDeleted: false // Public requests never include deleted products
+        });
+        res.json({
+            success: true,
+            data: result.products,
+            count: result.products.length,
+            total: result.total,
+            pages: result.pages,
+            currentPage: result.currentPage
+        });
+    }
+    catch (error) {
+        console.error('❌ Error fetching products from JSON:', error);
+        res.status(500).json({
+            success: false,
+            error: {
+                message: 'Failed to fetch products',
+                code: 'JSON_PRODUCTS_ERROR'
+            }
+        });
+    }
+}
+/**
+ * Handle admin products requests using MongoDB (admin panel)
+ * Preserves existing MongoDB functionality
+ */
+async function handleAdminProductsRequest(req, res) {
+    // Apply caching and database connection for admin requests
+    await new Promise((resolve, reject) => {
+        cache_1.cacheConfigs.products(req, res, (err) => {
+            if (err)
+                reject(err);
+            else
+                resolve();
+        });
+    });
+    await new Promise((resolve, reject) => {
+        (0, database_1.ensureDatabaseConnection)(req, res, (err) => {
+            if (err)
+                reject(err);
+            else
+                resolve();
+        });
+    });
+    const { category, min, max, search, featured, occasions, page = 1, limit = 24, includeDeleted = false, admin = false, sort = 'newest' } = req.query;
+    try {
         // For admin requests, use a high limit to get all products
         const effectiveLimit = admin === 'true' ? 1000 : Number(limit);
         let filter = includeDeleted === 'true' ? {} : { isDeleted: { $ne: true } };
@@ -84,7 +175,7 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
             filter.price.$lte = Number(max);
         if (occasions) {
             // Handle both ObjectId and name-based filtering
-            const occasionArray = occasions.split(',').map(o => o.trim());
+            const occasionArray = occasions.split(',').map((o) => o.trim());
             const occasionIds = [];
             const occasionNames = [];
             for (const occasion of occasionArray) {
@@ -104,7 +195,7 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
                         isActive: true,
                         isDeleted: false
                     }).select('_id');
-                    const allOccasionIds = [...occasionIds, ...occasionsByName.map(o => o._id)];
+                    const allOccasionIds = [...occasionIds, ...occasionsByName.map((o) => o._id)];
                     if (allOccasionIds.length > 0) {
                         filter.occasions = { $in: allOccasionIds };
                     }
@@ -197,9 +288,71 @@ router.get('/', cache_1.cacheConfigs.products, database_1.ensureDatabaseConnecti
         console.error('Error fetching products:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch products' });
     }
+}
+// Get single product by ID - Route to JSON for public, MongoDB for admin
+router.get('/:id', async (req, res) => {
+    try {
+        const { admin } = req.query;
+        if (admin === 'true') {
+            // ADMIN REQUEST → Use MongoDB (existing functionality)
+            console.log('🔧 Admin single product request - using MongoDB');
+            return await handleAdminSingleProductRequest(req, res);
+        }
+        else {
+            // PUBLIC REQUEST → Use JSON files (no MongoDB dependency)
+            console.log('📄 Public single product request - using JSON files');
+            return await handlePublicSingleProductRequest(req, res);
+        }
+    }
+    catch (error) {
+        console.error('❌ Error in single product route:', error);
+        res.status(500).json({
+            success: false,
+            error: {
+                message: 'Failed to fetch product',
+                code: 'PRODUCT_FETCH_ERROR'
+            }
+        });
+    }
 });
-// Get single product by ID
-router.get('/:id', database_1.ensureDatabaseConnection, async (req, res) => {
+/**
+ * Handle public single product requests using JSON files
+ * NO MongoDB dependency
+ */
+async function handlePublicSingleProductRequest(req, res) {
+    try {
+        const product = await jsonDataService_1.jsonDataService.getProductById(req.params.id);
+        if (!product) {
+            res.status(404).json({ success: false, error: 'Product not found' });
+            return;
+        }
+        res.json({ success: true, data: product });
+    }
+    catch (error) {
+        console.error('❌ Error fetching product from JSON:', error);
+        res.status(500).json({
+            success: false,
+            error: {
+                message: 'Failed to fetch product',
+                code: 'JSON_PRODUCT_ERROR'
+            }
+        });
+    }
+}
+/**
+ * Handle admin single product requests using MongoDB
+ * Preserves existing MongoDB functionality
+ */
+async function handleAdminSingleProductRequest(req, res) {
+    // Apply database connection for admin requests
+    await new Promise((resolve, reject) => {
+        (0, database_1.ensureDatabaseConnection)(req, res, (err) => {
+            if (err)
+                reject(err);
+            else
+                resolve();
+        });
+    });
     try {
         const product = await products_model_1.Product.findById(req.params.id)
             .populate({
@@ -226,10 +379,10 @@ router.get('/:id', database_1.ensureDatabaseConnection, async (req, res) => {
         res.json({ success: true, data: product });
     }
     catch (error) {
-        console.error('Error fetching product:', error);
+        console.error('Error fetching product from MongoDB:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch product' });
     }
-});
+}
 // Create new product (admin only)
 router.post('/', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensureDatabaseConnection, async (req, res) => {
     try {

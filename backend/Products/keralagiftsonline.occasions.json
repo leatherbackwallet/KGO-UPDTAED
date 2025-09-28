@@ -1,0 +1,74 @@
+[{
+  "_id": {
+    "$oid": "68cd4f097bfc22eb85a2f917"
+  },
+  "name": "Christmas",
+  "slug": "christmas",
+  "description": "",
+  "icon": "",
+  "color": "#f91515",
+  "dateRange": {
+    "startMonth": 12,
+    "startDay": 1,
+    "endMonth": 11,
+    "endDay": 28,
+    "isRecurring": true
+  },
+  "priority": {
+    "level": "medium",
+    "boostMultiplier": 1.5
+  },
+  "seasonalFlags": {
+    "isFestival": true,
+    "isHoliday": true,
+    "isPersonal": false,
+    "isSeasonal": false
+  },
+  "isActive": true,
+  "sortOrder": 0,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-19T12:39:37.661Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T12:39:37.661Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d6514211a233954c608213"
+  },
+  "name": "New Year",
+  "slug": "new-year",
+  "description": "",
+  "icon": "",
+  "color": "#3B82F6",
+  "dateRange": {
+    "startMonth": 12,
+    "startDay": 26,
+    "endMonth": 1,
+    "endDay": 10,
+    "isRecurring": true
+  },
+  "priority": {
+    "level": "medium",
+    "boostMultiplier": 1.5
+  },
+  "seasonalFlags": {
+    "isFestival": true,
+    "isHoliday": true,
+    "isPersonal": false,
+    "isSeasonal": true
+  },
+  "isActive": true,
+  "sortOrder": 1,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-26T08:39:30.422Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-26T08:39:30.422Z"
+  },
+  "__v": 0
+}]

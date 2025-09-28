@@ -210,7 +210,7 @@ export default function Contact() {
                   Browse our collection of authentic Kerala gifts and traditional products
                 </p>
                 <Link 
-                  href="/items" 
+                  href="/products" 
                   className="inline-block bg-white text-kgo-red px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
                 >
                   Shop Now
