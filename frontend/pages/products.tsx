@@ -4,7 +4,6 @@ import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
 import ProductSkeleton, { ProductSkeletonGrid } from '../components/ProductSkeleton';
-import Footer from '../components/Footer';
 import api from '../utils/api';
 
 interface Product {
@@ -296,7 +295,6 @@ const ProductsPage: React.FC = () => {
         />
       )}
 
-      <Footer />
     </>
   );
 };

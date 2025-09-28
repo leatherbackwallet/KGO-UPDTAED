@@ -74,9 +74,21 @@ export default function Document() {
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         
-        {/* Fonts */}
+        {/* Razorpay preconnect for faster payment loading */}
+        <link rel="preconnect" href="https://checkout.razorpay.com" />
+        <link rel="preconnect" href="https://api.razorpay.com" />
+        <link rel="preconnect" href="https://cdn.razorpay.com" />
+        <link rel="dns-prefetch" href="https://checkout.razorpay.com" />
+        <link rel="dns-prefetch" href="https://api.razorpay.com" />
+        <link rel="dns-prefetch" href="https://cdn.razorpay.com" />
+        
+        {/* Fonts with improved loading strategy */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onLoad="this.onload=null;this.rel='stylesheet'" />
+        <noscript>
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+        </noscript>
         
         {/* Structured Data */}
         <script

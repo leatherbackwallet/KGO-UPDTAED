@@ -2,6 +2,8 @@
  * Razorpay utility functions
  */
 
+import resourceManager from './resourceManager';
+
 export const loadScript = (src: string): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     // Check if Razorpay is already available
@@ -31,11 +33,20 @@ export const loadScript = (src: string): Promise<boolean> => {
 
     console.log('🔄 Loading Razorpay script from:', src);
     
+    // Track script to prevent duplicates
+    if (!resourceManager.trackScript(src)) {
+      console.log('✅ Script already tracked, skipping duplicate load');
+      resolve(true);
+      return;
+    }
+    
     const script = document.createElement('script');
     script.src = src;
     script.async = true;
     script.defer = true;
     script.crossOrigin = 'anonymous';
+    script.integrity = ''; // Add integrity check if available
+    script.referrerPolicy = 'strict-origin-when-cross-origin';
     
     // Add timeout to prevent hanging
     const timeout = setTimeout(() => {

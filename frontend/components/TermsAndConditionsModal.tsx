@@ -33,15 +33,6 @@ export default function TermsAndConditionsModal({
     }
   }, [isOpen]);
 
-  // Fallback: Enable button after 3 seconds if user has been scrolling
-  useEffect(() => {
-    if (isOpen && scrollProgress > 50) {
-      const timer = setTimeout(() => {
-        setHasScrolledToBottom(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, scrollProgress]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
@@ -52,15 +43,6 @@ export default function TermsAndConditionsModal({
     // Calculate scroll progress for the progress bar
     const progress = Math.min(100, ((scrollTop + clientHeight) / scrollHeight) * 100);
     setScrollProgress(progress);
-    
-    // Debug logging
-    console.log('Scroll Debug:', {
-      scrollTop,
-      scrollHeight,
-      clientHeight,
-      isAtBottom,
-      progress: progress.toFixed(1) + '%'
-    });
   };
 
   if (!isOpen) return null;

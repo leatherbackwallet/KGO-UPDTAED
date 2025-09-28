@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * Authentication Routes
+ * Handles user registration, login, logout, and guest checkout
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -345,7 +349,11 @@ router.post('/logout', async (req, res) => {
         });
     }
 });
-// Guest checkout - create temporary user for guest orders
+/**
+ * Guest Checkout Route
+ * Creates temporary guest user for checkout without registration
+ * Guest users can place orders but don't have persistent accounts
+ */
 router.post('/guest', validation_1.sanitizeInput, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { fullName, email, phone, address, recipientName, recipientPhone, deliveryAddress, specialInstructions } = req.body;
