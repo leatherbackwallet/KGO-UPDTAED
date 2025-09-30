@@ -197,7 +197,7 @@ export const validateIndianPhone = (phone: string): ValidationResult => {
   };
 };
 
-// Indian ZIP code validation
+// Indian ZIP code validation - simplified to be more lenient
 export const validateIndianZipCode = (zipCode: string): ValidationResult => {
   if (!zipCode || zipCode.trim() === '') {
     return {
@@ -209,29 +209,19 @@ export const validateIndianZipCode = (zipCode: string): ValidationResult => {
 
   const cleanZipCode = zipCode.trim();
   
-  // Check if it's exactly 6 digits
-  const zipRegex = /^\d{6}$/;
+  // Only check for basic format (digits only, reasonable length)
+  const zipRegex = /^\d{4,8}$/;
   if (!zipRegex.test(cleanZipCode)) {
     return {
       isValid: false,
-      message: 'ZIP code must be exactly 6 digits (e.g., 110001)',
-      type: 'error'
-    };
-  }
-
-  // Check for valid Indian postal code ranges
-  const firstDigit = parseInt(cleanZipCode[0]);
-  if (firstDigit < 1 || firstDigit > 9) {
-    return {
-      isValid: false,
-      message: 'Please enter a valid Indian postal code',
+      message: 'ZIP code must contain 4-8 digits',
       type: 'error'
     };
   }
 
   return {
     isValid: true,
-    message: 'Valid Indian postal code',
+    message: 'Valid postal code',
     type: 'success'
   };
 };
@@ -283,7 +273,7 @@ export const validateAddress = (address: string, fieldName: string = 'Address'):
   };
 };
 
-// City validation
+// City validation - simplified to be more lenient
 export const validateCity = (city: string): ValidationResult => {
   if (!city || city.trim() === '') {
     return {
@@ -295,28 +285,11 @@ export const validateCity = (city: string): ValidationResult => {
 
   const trimmedCity = city.trim();
   
-  if (trimmedCity.length < 2) {
+  // Only check for minimum length, be more lenient
+  if (trimmedCity.length < 1) {
     return {
       isValid: false,
-      message: 'City name must be at least 2 characters long',
-      type: 'error'
-    };
-  }
-
-  if (trimmedCity.length > 50) {
-    return {
-      isValid: false,
-      message: 'City name must be less than 50 characters',
-      type: 'error'
-    };
-  }
-
-  // Check for valid characters (letters, spaces, hyphens)
-  const cityRegex = /^[a-zA-Z\s\-]+$/;
-  if (!cityRegex.test(trimmedCity)) {
-    return {
-      isValid: false,
-      message: 'City name can only contain letters, spaces, and hyphens',
+      message: 'City is required',
       type: 'error'
     };
   }
@@ -328,7 +301,7 @@ export const validateCity = (city: string): ValidationResult => {
   };
 };
 
-// State validation
+// State validation - simplified to be more lenient
 export const validateState = (state: string): ValidationResult => {
   if (!state || state.trim() === '') {
     return {
@@ -340,28 +313,11 @@ export const validateState = (state: string): ValidationResult => {
 
   const trimmedState = state.trim();
   
-  if (trimmedState.length < 2) {
+  // Only check for minimum length, be more lenient
+  if (trimmedState.length < 1) {
     return {
       isValid: false,
-      message: 'State name must be at least 2 characters long',
-      type: 'error'
-    };
-  }
-
-  if (trimmedState.length > 50) {
-    return {
-      isValid: false,
-      message: 'State name must be less than 50 characters',
-      type: 'error'
-    };
-  }
-
-  // Check for valid characters (letters, spaces, hyphens)
-  const stateRegex = /^[a-zA-Z\s\-]+$/;
-  if (!stateRegex.test(trimmedState)) {
-    return {
-      isValid: false,
-      message: 'State name can only contain letters, spaces, and hyphens',
+      message: 'State is required',
       type: 'error'
     };
   }

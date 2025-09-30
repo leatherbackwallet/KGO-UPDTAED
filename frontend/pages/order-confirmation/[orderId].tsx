@@ -250,19 +250,19 @@ const OrderConfirmationPage: React.FC = () => {
                     <div className="flex-shrink-0">
                       <img
                         src={item.productId.images[0] || '/images/products/placeholder.svg'}
-                        alt={item.productId?.name || 'Product'}
+                        alt={typeof item.productId?.name === 'string' ? item.productId.name : item.productId?.name?.en || 'Product'}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-medium text-gray-900">
-                        {item.productId?.name || 'Unknown Product'}
+                        {typeof item.productId?.name === 'string' ? item.productId.name : item.productId?.name?.en || 'Unknown Product'}
                       </h4>
                       <p className="text-sm text-gray-500">
                         {item.productId.categories?.[0]?.name?.en || 'General'}
                       </p>
                       <p className="text-sm text-gray-600 line-clamp-2">
-                        {item.productId.description || 'No description available'}
+                        {typeof item.productId.description === 'string' ? item.productId.description : item.productId.description?.en || 'No description available'}
                       </p>
                     </div>
                     <div className="flex-shrink-0 text-right">

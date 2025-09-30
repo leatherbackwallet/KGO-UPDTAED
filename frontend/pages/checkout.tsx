@@ -197,13 +197,13 @@ export default function Checkout() {
   // Validation handlers
   const handleFieldChange = (fieldName: string, value: string) => {
     // Update guest data
-    if (fieldName.startsWith('deliveryAddress.')) {
-      const addressField = fieldName.split('.')[1];
+    // Handle delivery address fields
+    if (['street', 'houseNumber', 'city', 'state', 'zipCode'].includes(fieldName)) {
       setGuestData(prev => ({
         ...prev,
         deliveryAddress: {
           ...prev.deliveryAddress,
-          [addressField]: value
+          [fieldName]: value
         }
       }));
     } else {
@@ -213,12 +213,17 @@ export default function Checkout() {
       }));
     }
 
-    // Validate the field
-    validateField(fieldName, value);
+    // Only validate non-delivery address fields
+    if (!['street', 'houseNumber', 'city', 'state', 'zipCode'].includes(fieldName)) {
+      validateField(fieldName, value);
+    }
   };
 
   const handleFieldBlur = (fieldName: string) => {
-    touchField(fieldName);
+    // Only touch non-delivery address fields
+    if (!['street', 'houseNumber', 'city', 'state', 'zipCode'].includes(fieldName)) {
+      touchField(fieldName);
+    }
   };
 
   // Reset validation when switching tabs
@@ -1422,80 +1427,103 @@ export default function Checkout() {
                       <p className="text-sm text-orange-600 mb-4">Where should we deliver the gift?</p>
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <ValidationInput
-                            type="text"
-                            name="deliveryAddress.street"
-                            value={guestData.deliveryAddress.street}
-                            onChange={(value) => handleFieldChange('street', value)}
-                            onBlur={() => handleFieldBlur('street')}
-                            placeholder="Street address, area, landmark"
-                            label="Street Address"
-                            required
-                            validationState={getFieldState('street')}
-                            autoComplete="street-address"
-                          />
-                          <ValidationInput
-                            type="text"
-                            name="deliveryAddress.houseNumber"
-                            value={guestData.deliveryAddress.houseNumber}
-                            onChange={(value) => handleFieldChange('houseNumber', value)}
-                            onBlur={() => handleFieldBlur('houseNumber')}
-                            placeholder="House/Flat number (optional)"
-                            label="House/Flat Number"
-                            validationState={getFieldState('houseNumber')}
-                            autoComplete="address-line2"
-                          />
+                          <div className="space-y-1">
+                            <label htmlFor="street" className="block text-sm font-medium text-gray-700">
+                              Street Address
+                              <span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              id="street"
+                              type="text"
+                              name="deliveryAddress.street"
+                              value={guestData.deliveryAddress.street}
+                              onChange={(e) => handleFieldChange('street', e.target.value)}
+                              placeholder="Street address, area, landmark"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              autoComplete="street-address"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label htmlFor="houseNumber" className="block text-sm font-medium text-gray-700">
+                              House/Flat Number
+                            </label>
+                            <input
+                              id="houseNumber"
+                              type="text"
+                              name="deliveryAddress.houseNumber"
+                              value={guestData.deliveryAddress.houseNumber}
+                              onChange={(e) => handleFieldChange('houseNumber', e.target.value)}
+                              placeholder="House/Flat number (optional)"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              autoComplete="address-line2"
+                            />
+                          </div>
                         </div>
                         <div className="grid grid-cols-3 gap-4">
-                          <ValidationInput
-                            type="text"
-                            name="deliveryAddress.city"
-                            value={guestData.deliveryAddress.city}
-                            onChange={(value) => handleFieldChange('city', value)}
-                            onBlur={() => handleFieldBlur('city')}
-                            placeholder="City"
-                            label="City"
-                            required
-                            validationState={getFieldState('city')}
-                            autoComplete="address-level2"
-                          />
-                          <ValidationInput
-                            type="text"
-                            name="deliveryAddress.state"
-                            value={guestData.deliveryAddress.state}
-                            onChange={(value) => handleFieldChange('state', value)}
-                            onBlur={() => handleFieldBlur('state')}
-                            placeholder="State"
-                            label="State"
-                            required
-                            validationState={getFieldState('state')}
-                            autoComplete="address-level1"
-                          />
-                          <ValidationInput
-                            type="text"
-                            name="deliveryAddress.zipCode"
-                            value={guestData.deliveryAddress.zipCode}
-                            onChange={(value) => handleFieldChange('zipCode', value)}
-                            onBlur={() => handleFieldBlur('zipCode')}
-                            placeholder="6-digit postal code"
-                            label="ZIP Code"
-                            required
-                            validationState={getFieldState('zipCode')}
-                            autoComplete="postal-code"
+                          <div className="space-y-1">
+                            <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                              City
+                              <span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              id="city"
+                              type="text"
+                              name="deliveryAddress.city"
+                              value={guestData.deliveryAddress.city}
+                              onChange={(e) => handleFieldChange('city', e.target.value)}
+                              placeholder="City"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              autoComplete="address-level2"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label htmlFor="state" className="block text-sm font-medium text-gray-700">
+                              State
+                              <span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              id="state"
+                              type="text"
+                              name="deliveryAddress.state"
+                              value={guestData.deliveryAddress.state}
+                              onChange={(e) => handleFieldChange('state', e.target.value)}
+                              placeholder="State"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              autoComplete="address-level1"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700">
+                              ZIP Code
+                              <span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              id="zipCode"
+                              type="text"
+                              name="deliveryAddress.zipCode"
+                              value={guestData.deliveryAddress.zipCode}
+                              onChange={(e) => handleFieldChange('zipCode', e.target.value)}
+                              placeholder="6-digit postal code"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              autoComplete="postal-code"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label htmlFor="specialInstructions" className="block text-sm font-medium text-gray-700">
+                            Special Instructions (Optional)
+                          </label>
+                          <textarea
+                            id="specialInstructions"
+                            name="specialInstructions"
+                            value={guestData.specialInstructions || ''}
+                            onChange={(e) => handleFieldChange('specialInstructions', e.target.value)}
+                            placeholder="Any special delivery instructions..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={3}
+                            maxLength={500}
                           />
                         </div>
-                        <ValidationInput
-                          type="textarea"
-                          name="specialInstructions"
-                          value={guestData.specialInstructions || ''}
-                          onChange={(value) => handleFieldChange('specialInstructions', value)}
-                          onBlur={() => handleFieldBlur('specialInstructions')}
-                          placeholder="Any special delivery instructions..."
-                          label="Special Instructions (Optional)"
-                          validationState={getFieldState('specialInstructions')}
-                          maxLength={500}
-                          rows={3}
-                        />
                       </div>
                     </div>
 

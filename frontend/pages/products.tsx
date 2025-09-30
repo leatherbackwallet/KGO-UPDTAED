@@ -165,13 +165,8 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
           
           {/* Header */}
           <div className="text-center mb-8">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="w-full max-w-xl mx-auto px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Our Products</h1>
+            <p className="text-lg text-gray-600">Discover authentic Kerala gifts and traditional products</p>
           </div>
 
           {/* Search and Filters */}

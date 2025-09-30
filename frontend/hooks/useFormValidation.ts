@@ -36,11 +36,6 @@ const validationFunctions = {
   senderPhone: validateIndianPhone,
   recipientName: validateFullName,
   recipientPhone: validateIndianPhone,
-  street: (value: string) => validateAddress(value, 'Street address'),
-  houseNumber: (value: string) => value.trim() ? { isValid: true, message: 'Valid', type: 'success' as const } : { isValid: true, message: 'Optional field', type: 'success' as const },
-  city: validateCity,
-  state: validateState,
-  zipCode: validateIndianZipCode,
   specialInstructions: validateSpecialInstructions
 };
 
@@ -99,8 +94,7 @@ export const useFormValidation = (): UseFormValidationReturn => {
   const isFormValid = useMemo(() => {
     const requiredFields = [
       'senderName', 'senderEmail', 'senderPhone', 
-      'recipientName', 'recipientPhone', 
-      'street', 'city', 'state', 'zipCode'
+      'recipientName', 'recipientPhone'
     ];
 
     return requiredFields.every(fieldName => {

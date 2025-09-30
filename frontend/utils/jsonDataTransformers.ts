@@ -61,11 +61,7 @@ export const transformJsonCategory = (jsonCategory: any): Category => {
     name: jsonCategory.name || '',
     slug: jsonCategory.slug || '',
     description: jsonCategory.description || '',
-    sortOrder: jsonCategory.sortOrder || 0,
-    isActive: jsonCategory.isActive !== false,
-    isDeleted: jsonCategory.isDeleted || false,
-    createdAt: jsonCategory.createdAt?.$date || jsonCategory.createdAt || '',
-    updatedAt: jsonCategory.updatedAt?.$date || jsonCategory.updatedAt || ''
+    isActive: jsonCategory.isActive !== false
   };
 };
 
@@ -91,10 +87,7 @@ export const transformJsonOccasion = (jsonOccasion: any): Occasion => {
       level: 'medium',
       boostMultiplier: 1.0
     },
-    isActive: jsonOccasion.isActive !== false,
-    isDeleted: jsonOccasion.isDeleted || false,
-    createdAt: jsonOccasion.createdAt?.$date || jsonOccasion.createdAt || '',
-    updatedAt: jsonOccasion.updatedAt?.$date || jsonOccasion.updatedAt || ''
+    isActive: jsonOccasion.isActive !== false
   };
 };
 

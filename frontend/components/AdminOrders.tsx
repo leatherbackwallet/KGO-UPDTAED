@@ -182,6 +182,12 @@ const AdminOrders: React.FC = () => {
 
   // Filter and sort orders
   useEffect(() => {
+    // Ensure orders is an array before processing
+    if (!Array.isArray(orders)) {
+      setFilteredOrders([]);
+      return;
+    }
+    
     let filtered = [...orders];
 
     // Search filter
@@ -248,10 +254,14 @@ const AdminOrders: React.FC = () => {
       setLoading(true);
       const response = await api.get('/orders');
       console.log('Orders response:', response.data);
-      setOrders(response.data || []);
+      // Ensure we always set an array, even if the response is not an array
+      const ordersData = Array.isArray(response.data) ? response.data : [];
+      setOrders(ordersData);
     } catch (err: any) {
       console.error('Error fetching orders:', err);
       setError(err.response?.data?.error?.message || 'Failed to fetch orders');
+      // Set empty array on error to prevent filter errors
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -380,30 +390,30 @@ const AdminOrders: React.FC = () => {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Total Orders:</span>
-                <span className="font-medium text-gray-900">{orders.length}</span>
+                <span className="font-medium text-gray-900">{Array.isArray(orders) ? orders.length : 0}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Pending:</span>
                 <span className="font-medium text-yellow-600">
-                  {orders.filter(o => o.orderStatus === 'pending').length}
+                  {Array.isArray(orders) ? orders.filter(o => o.orderStatus === 'pending').length : 0}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Delivered:</span>
                 <span className="font-medium text-green-600">
-                  {orders.filter(o => o.orderStatus === 'delivered').length}
+                  {Array.isArray(orders) ? orders.filter(o => o.orderStatus === 'delivered').length : 0}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Cancelled:</span>
                 <span className="font-medium text-red-600">
-                  {orders.filter(o => o.orderStatus === 'cancelled').length}
+                  {Array.isArray(orders) ? orders.filter(o => o.orderStatus === 'cancelled').length : 0}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Total Revenue:</span>
                 <span className="font-medium text-green-600">
-                  ₹{orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0).toFixed(2)}
+                  ₹{Array.isArray(orders) ? orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0).toFixed(2) : '0.00'}
                 </span>
               </div>
             </div>
@@ -741,7 +751,7 @@ const AdminOrders: React.FC = () => {
                           <div className="flex-shrink-0 h-6 w-6">
                             <ProductImage
                               src={item.productId?.images?.[0]}
-                              alt={item.productId?.name || 'Product'}
+                              alt={typeof item.productId?.name === 'string' ? item.productId.name : item.productId?.name?.en || 'Product'}
                               productSlug={item.productId?.slug}
                               size="thumb"
                               className="h-6 w-6 rounded object-cover"
@@ -749,7 +759,7 @@ const AdminOrders: React.FC = () => {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-xs font-medium text-gray-900 truncate">
-                              {item.productId?.name || 'Unknown Product'}
+                              {typeof item.productId?.name === 'string' ? item.productId.name : item.productId?.name?.en || 'Unknown Product'}
                             </div>
                             <div className="text-xs text-gray-500">
                               {item.quantity || 0} × ₹{(item.price || 0).toFixed(2)}
@@ -830,7 +840,7 @@ const AdminOrders: React.FC = () => {
                       <div className="flex-shrink-0 h-16 w-16">
                         <ProductImage
                           src={item.productId?.images?.[0]}
-                          alt={item.productId?.name || 'Product'}
+                          alt={typeof item.productId?.name === 'string' ? item.productId.name : item.productId?.name?.en || 'Product'}
                           productSlug={item.productId?.slug}
                           size="small"
                           className="h-16 w-16 rounded object-cover"
@@ -838,10 +848,10 @@ const AdminOrders: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-gray-900">
-                          {item.productId?.name || 'Unknown Product'}
+                          {typeof item.productId?.name === 'string' ? item.productId.name : item.productId?.name?.en || 'Unknown Product'}
                         </div>
                         <div className="text-sm text-gray-500 mt-1">
-                          {item.productId?.description || 'No description available'}
+                          {typeof item.productId?.description === 'string' ? item.productId.description : item.productId?.description?.en || 'No description available'}
                         </div>
                         <div className="text-sm text-gray-600 mt-2">
                           Quantity: {item.quantity || 0} × ₹{(item.price || 0).toFixed(2)} = ₹{((item.quantity || 0) * (item.price || 0)).toFixed(2)}
