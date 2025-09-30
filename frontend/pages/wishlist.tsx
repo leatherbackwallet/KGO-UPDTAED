@@ -154,7 +154,7 @@ const WishlistPage: React.FC = () => {
               </a>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {serverWishlist.map((product) => (
                 <div key={product._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                   <div className="relative">

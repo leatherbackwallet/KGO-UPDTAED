@@ -76,7 +76,7 @@ export const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
   loading = false,
   onQuickView,
   className = '',
-  itemsPerRow = 4,
+  itemsPerRow = 5,
   itemHeight = 400,
   itemWidth = 300,
   gap = 24,
@@ -154,7 +154,7 @@ export const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
 
   return (
     <div ref={containerRef} className={`w-full ${className}`}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {products.map((product, index) => (
           <ProductCard
             key={product._id}
@@ -174,7 +174,7 @@ export const useVirtualizedGrid = (
   products: Product[],
   containerWidth: number = 1200
 ) => {
-  const [itemsPerRow, setItemsPerRow] = useState(4);
+  const [itemsPerRow, setItemsPerRow] = useState(5);
   const [itemHeight, setItemHeight] = useState(400);
 
   // Update items per row based on container width
@@ -183,7 +183,7 @@ export const useVirtualizedGrid = (
     const gap = 24;
     const availableWidth = containerWidth - gap;
     const maxItems = Math.floor(availableWidth / (minItemWidth + gap));
-    setItemsPerRow(Math.max(1, Math.min(4, maxItems)));
+    setItemsPerRow(Math.max(1, Math.min(5, maxItems)));
   }, [containerWidth]);
 
   // Adjust item height based on content and screen size

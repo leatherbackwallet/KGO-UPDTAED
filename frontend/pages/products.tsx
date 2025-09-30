@@ -165,8 +165,13 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
           
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Products</h1>
-            <p className="text-xl text-gray-600">Discover our premium collection of traditional Kerala gifts</p>
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full max-w-xl mx-auto px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
 
           {/* Search and Filters */}
@@ -249,7 +254,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
 
           {/* Products Grid */}
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {filteredProducts.map((product) => (
                 <ProductCard
                   key={product._id}
