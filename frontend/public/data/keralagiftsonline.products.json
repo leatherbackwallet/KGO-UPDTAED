@@ -2896,43 +2896,6 @@
 },
 {
   "_id": {
-    "$oid": "68d557bb7194870541d6b791"
-  },
-  "name": "Test Product Flower",
-  "description": "Cakes",
-  "categories": [
-    {
-      "$oid": "68cd4a04d03e43bd6d816d72"
-    },
-    {
-      "$oid": "68cd4960d03e43bd6d816d5c"
-    }
-  ],
-  "price": 1,
-  "costPrice": 0,
-  "stock": 197,
-  "images": [
-    "keralagiftsonline/products/product-1758812112621-458892893"
-  ],
-  "occasions": [],
-  "vendors": [],
-  "isFeatured": false,
-  "isDeleted": false,
-  "isCombo": false,
-  "comboBasePrice": 0,
-  "comboItems": [],
-  "createdAt": {
-    "$date": "2025-09-25T14:54:51.182Z"
-  },
-  "updatedAt": {
-    "$date": "2025-09-27T17:22:46.039Z"
-  },
-  "slug": "test-product-flower",
-  "__v": 0,
-  "defaultImage": "keralagiftsonline/products/product-1758812112621-458892893"
-},
-{
-  "_id": {
     "$oid": "68d7589b46f0d9c2debf94b4"
   },
   "name": "Aranmula kanandi  with Back stand - 2.75 inch mirror",
@@ -3357,7 +3320,7 @@
   ],
   "price": 8100,
   "costPrice": 0,
-  "stock": 199,
+  "stock": 198,
   "images": [
     "keralagiftsonline/products/product-1758991513672-629228851"
   ],
@@ -3373,7 +3336,7 @@
     "$date": "2025-09-27T16:45:32.699Z"
   },
   "updatedAt": {
-    "$date": "2025-09-28T16:34:03.410Z"
+    "$date": "2025-09-30T08:05:11.495Z"
   },
   "slug": "wedding-engagement-hamper-choco-pile-3-layer-kit-kat-5-stars-dairy-milk-with-fresh-white-rose-bouquet",
   "__v": 0
@@ -3395,7 +3358,7 @@
       "$oid": "68d531c6620b280affb68783"
     }
   ],
-  "price": 7800,
+  "price": 7900,
   "costPrice": 0,
   "stock": 200,
   "images": [
@@ -3414,8 +3377,151 @@
     "$date": "2025-09-29T10:38:53.352Z"
   },
   "updatedAt": {
-    "$date": "2025-09-29T10:39:13.791Z"
+    "$date": "2025-09-30T07:34:11.460Z"
   },
   "slug": "christening-baptism-celebration-gift-hamper-1-2-year-old-boy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68db6b136b0fb6c82a4d0eef"
+  },
+  "name": "Baptism-Christening-Photo Candle-Chocos and Greetings Hamper.",
+  "description": "A Cane Basket hamper wrapped with puff ribbon filled with Photo Mug, Ferrero Rocher 2 Box (16 pcs each, Galaxy and Dairy Milks, Photo Printed candle 6 inch, Fresh White rose bouquet with Greetings",
+  "categories": [
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    }
+  ],
+  "price": 8400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1759210251768-321451969"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1759210251768-321451969",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-30T05:30:59.862Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-30T05:30:59.862Z"
+  },
+  "slug": "baptism-christening-photo-candle-chocos-and-greetings-hamper",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68db6b906b0fb6c82a4d0f06"
+  },
+  "name": "Baptism-Christening-Candle and Greetings Hamper.",
+  "description": "A Cane Basket hamper wrapped with puff ribbon filled with Photo Mug, Ferrero Rocher 2 Box (16 pcs each, Galaxy and Dairy Milks, Baptism Candle 6 inch, Fresh White Rose bouquet with Greetings",
+  "categories": [
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    }
+  ],
+  "price": 8000,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1759210343625-671156758"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1759210343625-671156758",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-30T05:33:04.353Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-30T05:33:04.353Z"
+  },
+  "slug": "baptism-christening-candle-and-greetings-hamper",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68db6cdf6b0fb6c82a4d0f1c"
+  },
+  "name": "Birth Day -Baptism-Christening Celebration-Hamper.",
+  "description": "A Cane Basket hamper wrapped with puff ribbon filled with Photo Mug, Ferrero Rocher 2 Box (16 pcs each, Galaxy and Dairy Milks,  Fresh White Rose Bouquet with Greetings",
+  "categories": [
+    {
+      "$oid": "68d7573046f0d9c2debf949a"
+    }
+  ],
+  "price": 6800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1759210452831-425037241"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1759210452831-425037241",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-30T05:38:39.321Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-30T05:38:39.321Z"
+  },
+  "slug": "birth-day-baptism-christening-celebration-hamper",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68db998b6b0fb6c82a4d0f8c"
+  },
+  "name": "Product",
+  "description": "Product Flower",
+  "categories": [
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68d531c6620b280affb68783"
+    }
+  ],
+  "price": 1,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1759222151842-338891053"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1759222151842-338891053",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-09-30T08:49:15.782Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-30T08:49:15.782Z"
+  },
+  "slug": "product",
   "__v": 0
 }]
