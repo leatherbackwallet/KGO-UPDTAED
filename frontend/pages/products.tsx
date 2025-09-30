@@ -44,8 +44,8 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(product => 
-        product.name.toLowerCase().includes(searchLower) ||
-        product.description.toLowerCase().includes(searchLower)
+        (product.name || '').toLowerCase().includes(searchLower) ||
+        (product.description || '').toLowerCase().includes(searchLower)
       );
     }
 
@@ -54,48 +54,42 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
       const selectedCategoryObj = categories.find(cat => cat._id === selectedCategory);
       if (selectedCategoryObj) {
         const selectedCategoryName = selectedCategoryObj.name.toLowerCase();
-        console.log(`🔍 Filtering by category: "${selectedCategoryName}"`);
         
         filtered = filtered.filter(product => {
           // Since JSON products have empty categories arrays, we need to match by category name
           // Check if product name or description contains the category name
-          const productName = product.name.toLowerCase();
-          const productDescription = product.description.toLowerCase();
+          const productName = (product.name || '').toLowerCase();
+          const productDescription = (product.description || '').toLowerCase();
           
-          const matches = productName.includes(selectedCategoryName) || 
-                         productDescription.includes(selectedCategoryName);
-          
-          if (matches) {
-            console.log(`✅ Product matches category: "${product.name}"`);
-          }
-          
-          return matches;
+          return productName.includes(selectedCategoryName) || 
+                 productDescription.includes(selectedCategoryName);
         });
       }
     }
 
     // Occasion filter
     if (selectedOccasion) {
-      filtered = filtered.filter(product => {
-        // Handle occasions array (JSON data has string arrays like ["DIWALI", "BIRTHDAY"])
-        if (!product.occasions || product.occasions.length === 0) {
-          return false;
-        }
-        
-        // Find the selected occasion name from the occasions list
-        const selectedOccasionObj = occasions.find(occ => occ._id === selectedOccasion);
-        if (!selectedOccasionObj) return false;
-        
+      const selectedOccasionObj = occasions.find(occ => occ._id === selectedOccasion);
+      if (selectedOccasionObj) {
         const selectedOccasionName = selectedOccasionObj.name.toUpperCase();
         
-        // Check if any product occasion matches the selected occasion name
-        return product.occasions.some(occasion => {
-          if (typeof occasion === 'string') {
-            return occasion.toUpperCase() === selectedOccasionName;
+        filtered = filtered.filter(product => {
+          // Handle occasions array (JSON data has string arrays like ["DIWALI", "BIRTHDAY"])
+          if (!product.occasions || product.occasions.length === 0) {
+            return false;
           }
-          return occasion._id === selectedOccasion;
+          
+          // Check if any product occasion matches the selected occasion name
+          return product.occasions.some(occasion => {
+            if (typeof occasion === 'string') {
+              return occasion.toUpperCase() === selectedOccasionName;
+            }
+            // Handle object case (though JSON data uses strings)
+            return typeof occasion === 'object' && occasion && '_id' in occasion && 
+                   (occasion as any)._id === selectedOccasion;
+          });
         });
-      });
+      }
     }
 
     // Sort products
