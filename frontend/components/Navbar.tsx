@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import api from '../utils/api';
 
 // Cart Icon Component - Clean SVG
 const CartIcon = () => {
@@ -13,50 +12,16 @@ const CartIcon = () => {
   );
 };
 
-interface Category {
-  _id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  parentCategory?: {
-    _id: string;
-    name: string;
-    slug: string;
-  };
-  isActive: boolean;
-  sortOrder: number;
-}
 
 export default function Navbar() {
   const { user, logout, isLoading } = useAuth();
   const { cart } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
-    // Remove automatic categories fetch - will be loaded on demand
   }, []);
-
-  const fetchCategories = async () => {
-    if (categories.length > 0) return; // Already loaded
-    
-    try {
-      setCategoriesLoading(true);
-      const response = await api.get('/categories');
-      setCategories(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    } finally {
-      setCategoriesLoading(false);
-    }
-  };
-
-  const handleCategoriesClick = () => {
-    fetchCategories();
-  };
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
@@ -82,12 +47,6 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             <Link href="/products" className="nav-link font-semibold">
               Products
-            </Link>
-            <Link href="/categories" className="nav-link" onClick={handleCategoriesClick}>
-              Categories
-            </Link>
-            <Link href="/content" className="nav-link">
-              Cultural Content
             </Link>
             <Link href="/about" className="nav-link">
               About
@@ -192,43 +151,9 @@ export default function Navbar() {
                 <Link href="/products" className="text-gray-700 hover:text-purple-600 transition-colors font-semibold">
                   Products
                 </Link>
-                <Link href="/content" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">
-                  Cultural Content
-                </Link>
                 <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">
                   About
                 </Link>
-                
-                {/* Categories Section */}
-                <div className="border-t border-gray-200 pt-4 mt-4">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">
-                    Categories
-                  </h3>
-                  {categoriesLoading ? (
-                    <div className="flex items-center justify-center py-4">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {categories.map((category) => (
-                        <Link
-                          key={category._id}
-                          href={`/items?category=${category._id}`}
-                          className="block text-gray-600 hover:text-purple-600 transition-colors py-1 pl-4 border-l-2 border-transparent hover:border-purple-300"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          {category.parentCategory 
-                            ? `${category.parentCategory.name} > ${category.name}`
-                            : category.name
-                          }
-                        </Link>
-                      ))}
-                      {categories.length === 0 && !categoriesLoading && (
-                        <p className="text-gray-500 text-sm py-2">No categories available</p>
-                      )}
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
           )}

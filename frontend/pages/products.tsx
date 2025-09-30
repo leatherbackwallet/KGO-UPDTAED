@@ -5,7 +5,6 @@ import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
 import { Product, Category, Occasion } from '../types/shared';
-import { getProductImage } from '../utils/imageUtils';
 import { getMultilingualText } from '../utils/api';
 import { loadProductsFromJSON, loadCategoriesFromJSON, loadOccasionsFromJSON } from '../utils/jsonDataTransformers';
 
@@ -41,19 +40,38 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
 
     // Category filter
     if (selectedCategory) {
-      filtered = filtered.filter(product => 
-        product.categories?.some(cat => {
-          const catId = typeof cat === 'string' ? cat : cat._id;
-          return catId === selectedCategory;
-        })
-      );
+      filtered = filtered.filter(product => {
+        // Handle empty categories array (JSON data has empty arrays)
+        if (!product.categories || product.categories.length === 0) {
+          return false;
+        }
+        
+        return product.categories.some(cat => {
+          if (typeof cat === 'string') {
+            return cat === selectedCategory;
+          }
+          return cat._id === selectedCategory;
+        });
+      });
     }
 
     // Occasion filter
     if (selectedOccasion) {
-      filtered = filtered.filter(product => 
-        product.occasions?.includes(selectedOccasion)
-      );
+      filtered = filtered.filter(product => {
+        // Handle occasions array (JSON data has string arrays like ["DIWALI", "BIRTHDAY"])
+        if (!product.occasions || product.occasions.length === 0) {
+          return false;
+        }
+        
+        // Check if any occasion matches the selected occasion ID or name
+        return product.occasions.some(occasion => {
+          if (typeof occasion === 'string') {
+            // For string occasions, we need to find the matching occasion by name
+            return occasion === selectedOccasion;
+          }
+          return occasion._id === selectedOccasion;
+        });
+      });
     }
 
     // Sort products
@@ -219,7 +237,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                   key={product._id}
                   product={product}
                   onQuickView={handleProductClick}
-                  onClick={() => handleProductClick(product)}
+                  onClick={handleProductClick}
                 />
               ))}
             </div>
@@ -260,12 +278,28 @@ export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async (
   try {
     console.log('📦 Loading products data from JSON files...');
     
-    // Load all data from JSON files in parallel
-    const [products, categories, occasions] = await Promise.all([
+    // Load all data from JSON files in parallel with individual error handling
+    const [productsResult, categoriesResult, occasionsResult] = await Promise.allSettled([
       loadProductsFromJSON(),
       loadCategoriesFromJSON(),
       loadOccasionsFromJSON()
     ]);
+
+    // Extract results with fallbacks
+    const products = productsResult.status === 'fulfilled' ? productsResult.value : [];
+    const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value : [];
+    const occasions = occasionsResult.status === 'fulfilled' ? occasionsResult.value : [];
+
+    // Log individual results
+    if (productsResult.status === 'rejected') {
+      console.error('❌ Failed to load products:', productsResult.reason);
+    }
+    if (categoriesResult.status === 'rejected') {
+      console.error('❌ Failed to load categories:', categoriesResult.reason);
+    }
+    if (occasionsResult.status === 'rejected') {
+      console.error('❌ Failed to load occasions:', occasionsResult.reason);
+    }
 
     console.log(`✅ Loaded ${products.length} products, ${categories.length} categories, ${occasions.length} occasions from JSON`);
 
@@ -277,9 +311,9 @@ export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async (
       }
     };
   } catch (error) {
-    console.error('❌ Error loading data from JSON files:', error);
+    console.error('❌ Critical error loading data from JSON files:', error);
     
-    // Return empty data on error
+    // Return empty data on critical error
     return {
       props: {
         products: [],
