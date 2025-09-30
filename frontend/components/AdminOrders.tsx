@@ -3,7 +3,6 @@ import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../hooks/useNotifications';
 import AdminOrderStatusManager from './AdminOrderStatusManager';
-import { getMultilingualText } from '../utils/api';
 import { ProductImage } from './ProgressiveImage';
 
 interface ShippingDetails {
@@ -742,7 +741,7 @@ const AdminOrders: React.FC = () => {
                           <div className="flex-shrink-0 h-6 w-6">
                             <ProductImage
                               src={item.productId?.images?.[0]}
-                              alt={getMultilingualText(item.productId?.name) || 'Product'}
+                              alt={item.productId?.name || 'Product'}
                               productSlug={item.productId?.slug}
                               size="thumb"
                               className="h-6 w-6 rounded object-cover"
@@ -750,7 +749,7 @@ const AdminOrders: React.FC = () => {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-xs font-medium text-gray-900 truncate">
-                              {getMultilingualText(item.productId?.name) || 'Unknown Product'}
+                              {item.productId?.name || 'Unknown Product'}
                             </div>
                             <div className="text-xs text-gray-500">
                               {item.quantity || 0} × ₹{(item.price || 0).toFixed(2)}
@@ -831,7 +830,7 @@ const AdminOrders: React.FC = () => {
                       <div className="flex-shrink-0 h-16 w-16">
                         <ProductImage
                           src={item.productId?.images?.[0]}
-                          alt={getMultilingualText(item.productId?.name) || 'Product'}
+                          alt={item.productId?.name || 'Product'}
                           productSlug={item.productId?.slug}
                           size="small"
                           className="h-16 w-16 rounded object-cover"
@@ -839,10 +838,10 @@ const AdminOrders: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-gray-900">
-                          {getMultilingualText(item.productId?.name) || 'Unknown Product'}
+                          {item.productId?.name || 'Unknown Product'}
                         </div>
                         <div className="text-sm text-gray-500 mt-1">
-                          {getMultilingualText(item.productId?.description) || 'No description available'}
+                          {item.productId?.description || 'No description available'}
                         </div>
                         <div className="text-sm text-gray-600 mt-2">
                           Quantity: {item.quantity || 0} × ₹{(item.price || 0).toFixed(2)} = ₹{((item.quantity || 0) * (item.price || 0)).toFixed(2)}

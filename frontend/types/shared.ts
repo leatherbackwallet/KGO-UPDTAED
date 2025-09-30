@@ -6,12 +6,12 @@
 // Base Product Interface
 export interface Product {
   _id: string;
-  name: string | { en: string; de: string };
-  description: string | { en: string; de: string };
+  name: string;
+  description: string;
   price?: number;
   originalPrice?: number;
-  category: string | { _id: string; name: string | { en: string; de: string }; slug: string };
-  categories?: (string | { _id: string; name: string | { en: string; de: string }; slug: string })[];
+  category: string | { _id: string; name: string; slug: string };
+  categories?: (string | { _id: string; name: string; slug: string })[];
   stock?: number;
   images: string[];
   slug?: string;
@@ -45,9 +45,9 @@ export interface ComboItem {
 // Category Interface
 export interface Category {
   _id: string;
-  name: string | { en: string; de: string };
+  name: string;
   slug: string;
-  description?: string | { en: string; de: string };
+  description?: string;
   image?: string;
   isActive?: boolean;
   isSeasonal?: boolean;
@@ -56,9 +56,9 @@ export interface Category {
 // Occasion Interface
 export interface Occasion {
   _id: string;
-  name: string | { en: string; de: string };
+  name: string;
   slug: string;
-  description?: string | { en: string; de: string };
+  description?: string;
   image?: string;
   icon?: string;
   color?: string;

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { getProductImage, getOptimizedImagePath, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import { useImageCache } from '../utils/imageCache';
-import { getMultilingualText } from '../utils/api';
 
 interface CartItem {
   product: string;

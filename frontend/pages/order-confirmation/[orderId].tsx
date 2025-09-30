@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import Navbar from '../../components/Navbar';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
-import { getMultilingualText } from '../../utils/api';
 
 interface OrderItem {
   _id: string;
@@ -251,19 +250,19 @@ const OrderConfirmationPage: React.FC = () => {
                     <div className="flex-shrink-0">
                       <img
                         src={item.productId.images[0] || '/images/products/placeholder.svg'}
-                        alt={getMultilingualText(item.productId?.name) || 'Product'}
+                        alt={item.productId?.name || 'Product'}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-medium text-gray-900">
-                        {getMultilingualText(item.productId?.name) || 'Unknown Product'}
+                        {item.productId?.name || 'Unknown Product'}
                       </h4>
                       <p className="text-sm text-gray-500">
                         {item.productId.categories?.[0]?.name?.en || 'General'}
                       </p>
                       <p className="text-sm text-gray-600 line-clamp-2">
-                        {getMultilingualText(item.productId.description) || 'No description available'}
+                        {item.productId.description || 'No description available'}
                       </p>
                     </div>
                     <div className="flex-shrink-0 text-right">

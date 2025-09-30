@@ -10,7 +10,6 @@ import ProductCard from '../components/ProductCard';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import api from '../utils/api';
-import { getMultilingualText } from '../utils/api';
 import { getProductImage } from '../utils/imageUtils';
 import { Product } from '../types/shared';
 
@@ -161,7 +160,7 @@ const WishlistPage: React.FC = () => {
                   <div className="relative">
                     <img
                       src={getProductImage(product.images?.[0] || product.defaultImage, product.slug)}
-                      alt={getMultilingualText(product.name)}
+                      alt={product.name}
                       className="w-full h-48 object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
@@ -181,7 +180,7 @@ const WishlistPage: React.FC = () => {
                   </div>
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                      {getMultilingualText(product.name)}
+                      {product.name}
                     </h3>
                     <p className="text-xl font-bold text-kgo-red mb-3">
                       ₹{(product.price || 0).toFixed(2)}

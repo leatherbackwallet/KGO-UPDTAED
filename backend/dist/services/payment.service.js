@@ -14,9 +14,14 @@ class PaymentService {
         console.log('🔍 [Payment Service] Initializing Razorpay...');
         console.log('🔍 [Payment Service] Key ID:', process.env.RAZORPAY_KEY_ID);
         console.log('🔍 [Payment Service] Key Secret:', process.env.RAZORPAY_KEY_SECRET ? 'SET' : 'NOT SET');
+        console.log('🔍 [Payment Service] Webhook Secret:', process.env.RAZORPAY_WEBHOOK_SECRET ? 'SET' : 'NOT SET');
         if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
             console.error('❌ [Payment Service] Missing Razorpay credentials');
             throw new Error('Razorpay credentials not configured');
+        }
+        if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+            console.warn('⚠️  [Payment Service] RAZORPAY_WEBHOOK_SECRET not set - webhook signature verification will fail!');
+            console.warn('⚠️  [Payment Service] Please set RAZORPAY_WEBHOOK_SECRET environment variable for production use');
         }
         this.razorpay = new razorpay_1.default({
             key_id: process.env.RAZORPAY_KEY_ID,

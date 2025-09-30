@@ -15,16 +15,16 @@ export default function Shipping() {
 
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-red-50">
         {/* Hero Section */}
-        <section className="relative py-20 bg-gradient-to-r from-kgo-green to-kgo-red text-white">
+        <section className="relative py-20 bg-gradient-to-r from-green-600 to-red-600 text-white shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
                 Shipping & Delivery Policy
               </h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-white drop-shadow-md">
                 Fast, reliable delivery of authentic Kerala gifts worldwide
               </p>
-              <p className="text-sm opacity-90">
+              <p className="text-sm text-white opacity-95 drop-shadow-sm">
                 Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>

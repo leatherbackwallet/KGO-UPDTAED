@@ -9,7 +9,6 @@ import Breadcrumb from '../../components/Breadcrumb';
 import { ProductSkeletonGrid } from '../../components/ProductSkeleton';
 import api from '../../utils/api';
 import { Product } from '../../types/shared';
-import { getMultilingualText } from '../../utils/api';
 
 interface Category {
   _id: string;
@@ -137,7 +136,7 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
         url={`https://keralagiftsonline.in/category/${category.slug}`}
         structuredData={seoData.structuredData}
         products={products.map(product => ({
-          name: getMultilingualText(product.name),
+          name: product.name,
           categories: product.categories?.map(cat => ({ name: cat })) || [],
           occasions: product.occasions?.map(occ => ({ name: occ })) || []
         }))}

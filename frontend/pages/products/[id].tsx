@@ -5,7 +5,6 @@ import api from '../../utils/api';
 import Navbar from '../../components/Navbar';
 import SEOHead from '../../components/SEOHead';
 import { getProductImage } from '../../utils/imageUtils';
-import { getMultilingualText } from '../../utils/api';
 import { generateKeywords } from '../../utils/seoKeywords';
 import { Product } from '../../types/shared';
 
@@ -60,15 +59,15 @@ const ProductDetailPage: React.FC = () => {
     if (!product.category) return 'Uncategorized';
     if (typeof product.category === 'string') return product.category;
     if (product.category.name) {
-      return getMultilingualText(product.category.name);
+      return product.category.name;
     }
     return 'Uncategorized';
   };
 
   // Generate comprehensive product SEO data
   const generateProductSEO = () => {
-    const productName = getMultilingualText(product.name);
-    const productDescription = getMultilingualText(product.description);
+    const productName = product.name;
+    const productDescription = product.description;
     const categoryName = getCategoryName();
     
     const title = `${productName} - Premium Kerala Gift | KeralGiftsOnline`;
@@ -155,7 +154,7 @@ const ProductDetailPage: React.FC = () => {
         url={`https://keralagiftsonline.in/product/${product._id}`}
         structuredData={productSEO.structuredData}
         products={[{
-          name: getMultilingualText(product.name),
+          name: product.name,
           categories: product.category ? [{ name: getCategoryName() }] : [],
           occasions: product.occasions?.map(occ => ({ name: occ })) || []
         }]}
@@ -170,7 +169,7 @@ const ProductDetailPage: React.FC = () => {
                 <div className="aspect-w-1 aspect-h-1 w-full">
                   <img
                     src={getProductImage(product.images[selectedImage], product.slug)}
-                    alt={getMultilingualText(product.name)}
+                    alt={product.name}
                     className="w-full h-96 object-cover rounded-lg"
                   />
                 </div>
@@ -188,7 +187,7 @@ const ProductDetailPage: React.FC = () => {
                       >
                         <img
                           src={getProductImage(image, product.slug)}
-                          alt={`${getMultilingualText(product.name)} ${index + 1}`}
+                          alt={`${product.name} ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
                       </button>
@@ -201,7 +200,7 @@ const ProductDetailPage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    {getMultilingualText(product.name)}
+                    {product.name}
                   </h1>
                   <p className="text-sm text-gray-500 mb-4">
                     Category: {getCategoryName()}
@@ -221,7 +220,7 @@ const ProductDetailPage: React.FC = () => {
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-2">Description</h2>
                   <p className="text-gray-600 leading-relaxed">
-                    {getMultilingualText(product.description)}
+                    {product.description}
                   </p>
                 </div>
 

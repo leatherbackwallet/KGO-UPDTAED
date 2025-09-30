@@ -113,24 +113,20 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
         specialInstructions: address.additionalInstructions || address.specialInstructions || ''
       };
       
+      // Validate payment method BEFORE deducting stock
+      // Reject COD payment method in production
+      if ((paymentMethod === 'cod-test' || paymentMethod === 'cod') && process.env.NODE_ENV !== 'development') {
+        throw new Error('COD_NOT_AVAILABLE');
+      }
+      
       // Update product stock atomically within transaction
+      // Only deduct stock AFTER payment method validation to ensure proper rollback
       for (const update of productUpdates) {
         await Product.findByIdAndUpdate(
           update.productId,
           { $inc: { stock: -update.quantity } },
           { session }
         );
-      }
-      
-      // Reject COD payment method in production
-      if ((paymentMethod === 'cod-test' || paymentMethod === 'cod') && process.env.NODE_ENV !== 'development') {
-        return res.status(400).json({
-          success: false,
-          error: {
-            message: 'COD payment method is only available in development environment',
-            code: 'COD_NOT_AVAILABLE'
-          }
-        });
       }
       
       // Handle COD payment method (development only)
@@ -274,6 +270,16 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
         error: {
           message: `Combo base price mismatch for product ${productName}`,
           code: 'COMBO_PRICE_MISMATCH'
+        }
+      });
+    }
+    
+    if (err.message === 'COD_NOT_AVAILABLE') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: 'COD payment method is only available in development environment',
+          code: 'COD_NOT_AVAILABLE'
         }
       });
     }

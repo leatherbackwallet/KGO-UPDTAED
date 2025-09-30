@@ -101,6 +101,43 @@ const nextConfig = {
   
   // Enhanced security headers and SEO optimizations
   async headers() {
+    // Build CSP connect-src based on environment
+    const connectSrc = [
+      "'self'",
+      // Razorpay domains
+      "https://api.razorpay.com",
+      "https://*.razorpay.com",
+      "https://checkout.razorpay.com",
+      "https://lumberjack.razorpay.com",
+      "https://cdn.razorpay.com",
+      // Cloudinary
+      "https://res.cloudinary.com",
+      // Production API
+      "https://api-dot-onyourbehlf.uc.r.appspot.com",
+    ];
+
+    // Add localhost in development
+    if (process.env.NODE_ENV === 'development') {
+      connectSrc.push(
+        "http://localhost:5001",
+        "http://localhost:3000",
+        "ws://localhost:3000", // For hot reload
+        "ws://localhost:5001"
+      );
+    }
+
+    const cspValue = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com https://cdn.razorpay.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: https: blob: https://cdn.razorpay.com https://res.cloudinary.com",
+      `connect-src ${connectSrc.join(' ')}`,
+      "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com",
+      "object-src 'none'",
+      "base-uri 'self'"
+    ].join('; ');
+
     return [
       {
         source: '/(.*)',
@@ -127,7 +164,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com https://cdn.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob: https://cdn.razorpay.com https://res.cloudinary.com; connect-src 'self' http://localhost:5001 https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com https://api-dot-onyourbehlf.uc.r.appspot.com https://cdn.razorpay.com https://res.cloudinary.com; frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com; object-src 'none'; base-uri 'self';",
+            value: cspValue,
           },
           {
             key: 'Access-Control-Expose-Headers',

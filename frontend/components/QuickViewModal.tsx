@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from '../utils/imageUtils';
 import { useImageCache } from '../utils/imageCache';
-import { getMultilingualText } from '../utils/api';
 import { Product } from '../types/shared';
 
 interface QuickViewModalProps {
@@ -37,7 +36,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   const handleAddToCart = () => {
     addToCart({
       product: product._id,
-      name: getMultilingualText(product.name),
+      name: product.name,
       price: product.price || 0,
       image: imagePath,
       quantity,
@@ -51,7 +50,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
     const category = product.categories[0];
     if (typeof category === 'string') return category;
     if (category.name) {
-      return getMultilingualText(category.name);
+      return category.name;
     }
     return 'Uncategorized';
   };
@@ -73,7 +72,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
-                {getMultilingualText(product.name)}
+                {product.name}
               </h3>
               <button
                 onClick={onClose}
@@ -96,7 +95,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                   ) : (
                     <img
                       src={imagePath}
-                      alt={getMultilingualText(product.name)}
+                      alt={product.name}
                       className="w-full h-96 object-cover rounded-lg"
                       onError={handleImageError}
                     />
@@ -111,7 +110,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                         key={index}
                         image={image}
                         productSlug={product.slug}
-                        productName={getMultilingualText(product.name)}
+                        productName={product.name}
                         isSelected={selectedImage === index}
                         onClick={() => setSelectedImage(index)}
                         onError={handleImageError}
@@ -125,10 +124,10 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
               <div className="space-y-6">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    {getMultilingualText(product.name)}
+                    {product.name}
                   </h2>
                   <p className="text-gray-600 mb-4">
-                    {getMultilingualText(product.description)}
+                    {product.description}
                   </p>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-3xl font-bold text-gray-900">

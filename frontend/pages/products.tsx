@@ -1,3 +1,15 @@
+/**
+ * Products Page - JSON Data Only
+ * 
+ * This page loads ALL data from JSON files only.
+ * NO DATABASE CONNECTIONS - NO API CALLS - JSON FILES ONLY
+ * 
+ * Data Sources:
+ * - Products: /public/data/keralagiftsonline.products.json
+ * - Categories: /public/data/keralagiftsonline.categories.json  
+ * - Occasions: /public/data/keralagiftsonline.occasions.json
+ */
+
 import React, { useState, useMemo } from 'react';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
@@ -5,7 +17,6 @@ import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
 import { Product, Category, Occasion } from '../types/shared';
-import { getMultilingualText } from '../utils/api';
 import { loadProductsFromJSON, loadCategoriesFromJSON, loadOccasionsFromJSON } from '../utils/jsonDataTransformers';
 
 interface ProductsPageProps {
@@ -33,26 +44,34 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(product => 
-        getMultilingualText(product.name).toLowerCase().includes(searchLower) ||
-        getMultilingualText(product.description).toLowerCase().includes(searchLower)
+        product.name.toLowerCase().includes(searchLower) ||
+        product.description.toLowerCase().includes(searchLower)
       );
     }
 
     // Category filter
     if (selectedCategory) {
-      filtered = filtered.filter(product => {
-        // Handle empty categories array (JSON data has empty arrays)
-        if (!product.categories || product.categories.length === 0) {
-          return false;
-        }
+      const selectedCategoryObj = categories.find(cat => cat._id === selectedCategory);
+      if (selectedCategoryObj) {
+        const selectedCategoryName = selectedCategoryObj.name.toLowerCase();
+        console.log(`🔍 Filtering by category: "${selectedCategoryName}"`);
         
-        return product.categories.some(cat => {
-          if (typeof cat === 'string') {
-            return cat === selectedCategory;
+        filtered = filtered.filter(product => {
+          // Since JSON products have empty categories arrays, we need to match by category name
+          // Check if product name or description contains the category name
+          const productName = product.name.toLowerCase();
+          const productDescription = product.description.toLowerCase();
+          
+          const matches = productName.includes(selectedCategoryName) || 
+                         productDescription.includes(selectedCategoryName);
+          
+          if (matches) {
+            console.log(`✅ Product matches category: "${product.name}"`);
           }
-          return cat._id === selectedCategory;
+          
+          return matches;
         });
-      });
+      }
     }
 
     // Occasion filter
@@ -63,11 +82,16 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
           return false;
         }
         
-        // Check if any occasion matches the selected occasion ID or name
+        // Find the selected occasion name from the occasions list
+        const selectedOccasionObj = occasions.find(occ => occ._id === selectedOccasion);
+        if (!selectedOccasionObj) return false;
+        
+        const selectedOccasionName = selectedOccasionObj.name.toUpperCase();
+        
+        // Check if any product occasion matches the selected occasion name
         return product.occasions.some(occasion => {
           if (typeof occasion === 'string') {
-            // For string occasions, we need to find the matching occasion by name
-            return occasion === selectedOccasion;
+            return occasion.toUpperCase() === selectedOccasionName;
           }
           return occasion._id === selectedOccasion;
         });
@@ -84,7 +108,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
         break;
       case 'name':
         filtered.sort((a, b) => 
-          getMultilingualText(a.name).localeCompare(getMultilingualText(b.name))
+          a.name.localeCompare(b.name)
         );
         break;
       case 'newest':
@@ -96,7 +120,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
     }
 
     return filtered;
-  }, [allProducts, searchTerm, selectedCategory, selectedOccasion, sortBy]);
+  }, [allProducts, searchTerm, selectedCategory, selectedOccasion, sortBy, categories, occasions]);
 
   // Event handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,7 +202,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                   <option value="">All Categories</option>
                   {categories.map((category) => (
                     <option key={category._id} value={category._id}>
-                      {getMultilingualText(category.name)}
+                      {category.name}
                     </option>
                   ))}
                 </select>
@@ -192,7 +216,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                   <option value="">All Occasions</option>
                   {occasions.map((occasion) => (
                     <option key={occasion._id} value={occasion._id}>
-                      {getMultilingualText(occasion.name)}
+                      {occasion.name}
                     </option>
                   ))}
                 </select>
@@ -273,10 +297,11 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
   );
 };
 
-// Server-side rendering - load data from JSON files
+// Server-side rendering - load data from JSON files ONLY
+// NO DATABASE CONNECTIONS - JSON FILES ONLY
 export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async () => {
   try {
-    console.log('📦 Loading products data from JSON files...');
+    console.log('📦 Loading products data from JSON files ONLY (no database connections)...');
     
     // Load all data from JSON files in parallel with individual error handling
     const [productsResult, categoriesResult, occasionsResult] = await Promise.allSettled([

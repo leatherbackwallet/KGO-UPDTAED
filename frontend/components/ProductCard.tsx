@@ -3,7 +3,6 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import WishlistButton from './WishlistButton';
 import { DEFAULT_PRODUCT_IMAGE, getProductImage } from '../utils/imageUtils';
-import { getMultilingualText } from '../utils/api';
 import { Product } from '../types/shared';
 import { useSmartImageCache } from '../hooks/useSmartImageCache';
 
@@ -46,7 +45,7 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
     
     addToCart({
       product: product._id,
-      name: getMultilingualText(product.name),
+      name: product.name,
       price: product.price || 0,
       image: getProductImage(product.images?.[0], product.slug),
       quantity: 1,
@@ -80,7 +79,7 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
         )}
         <img
           src={imageUrl}
-          alt={getMultilingualText(product.name)}
+          alt={product.name}
           className={`w-full h-64 object-cover transition-all duration-300 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute'}`}
           onError={handleImageError}
           onLoad={() => setImageLoaded(true)}
@@ -132,10 +131,10 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
       {/* Product Info */}
       <div className="p-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-          {getMultilingualText(product.name)}
+          {product.name}
         </h3>
         <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-          {getMultilingualText(product.description)}
+          {product.description}
         </p>
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold text-gray-900">

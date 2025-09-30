@@ -10,7 +10,6 @@ import { ProductSkeletonGrid } from '../../components/ProductSkeleton';
 import api from '../../utils/api';
 import { generateLocationSEO, KERALA_CITIES } from '../../utils/locationSEO';
 import { Product } from '../../types/shared';
-import { getMultilingualText } from '../../utils/api';
 
 interface LocationPageProps {
   city: any;
@@ -63,7 +62,7 @@ const LocationDeliveryPage: React.FC<LocationPageProps> = ({
         url={`https://keralagiftsonline.in/delivery/${city.slug}`}
         structuredData={seoData.structuredData}
         products={products.map(product => ({
-          name: getMultilingualText(product.name),
+          name: product.name,
           categories: product.categories?.map(cat => ({ name: cat })) || [],
           occasions: product.occasions?.map(occ => ({ name: occ })) || []
         }))}

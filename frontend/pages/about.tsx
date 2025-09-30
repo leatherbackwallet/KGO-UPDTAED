@@ -14,25 +14,25 @@ export default function About() {
 
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-red-50">
         {/* Hero Section */}
-        <section className="relative py-20 bg-gradient-to-r from-kgo-green to-kgo-red text-white">
+        <section className="relative py-20 bg-gradient-to-r from-green-600 to-red-600 text-white shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
                 About OnYourBehlf
               </h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-white drop-shadow-md">
                 Bringing the authentic taste and culture of Kerala to the global diaspora through carefully curated gifts and traditional products
               </p>
-              <div className="bg-white bg-opacity-20 rounded-lg p-4 mb-8">
-                <p className="text-lg font-semibold mb-2">Business Information</p>
-                <p className="text-sm opacity-90">Business Name: OnYourBehlf (Kerala Gifts Online)</p>
-                <p className="text-sm opacity-90">Billing Label: OnYourBehlf - Kerala Gifts Online</p>
+              <div className="bg-white bg-opacity-20 rounded-lg p-4 mb-8 backdrop-blur-sm">
+                <p className="text-lg font-semibold mb-2 text-white">Business Information</p>
+                <p className="text-sm text-white opacity-95">Business Name: OnYourBehlf (Kerala Gifts Online)</p>
+                <p className="text-sm text-white opacity-95">Billing Label: OnYourBehlf - Kerala Gifts Online</p>
               </div>
               <div className="flex justify-center space-x-4">
-                <Link href="/products" className="bg-white text-kgo-red px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                <Link href="/products" className="bg-white text-red-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                   Shop Now
                 </Link>
-                <Link href="/content" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-kgo-red transition-colors">
+                <Link href="/content" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-red-600 transition-colors">
                   Cultural Content
                 </Link>
               </div>

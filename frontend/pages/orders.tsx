@@ -3,7 +3,6 @@ import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import OrderStatusTimeline from '../components/OrderStatusTimeline';
 import api from '../utils/api';
-import { getMultilingualText } from '../utils/api';
 
 interface RecipientAddress {
   name: string;
@@ -177,13 +176,13 @@ const OrdersPage: React.FC = () => {
                           <div className="flex-shrink-0">
                             <img
                               src={item.productId.images[0] || '/images/products/placeholder.svg'}
-                              alt={getMultilingualText(item.productId?.name) || 'Product'}
+                              alt={item.productId?.name || 'Product'}
                               className="w-16 h-16 object-cover rounded-lg"
                             />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="text-sm font-medium text-gray-900 truncate">
-                              {getMultilingualText(item.productId?.name) || 'Unknown Product'}
+                              {item.productId?.name || 'Unknown Product'}
                             </h4>
                             <p className="text-sm text-gray-500">
                               📂 {(() => {
@@ -191,13 +190,13 @@ const OrdersPage: React.FC = () => {
                                 const category = item.productId.categories[0];
                                 if (typeof category === 'string') return category;
                                 if (category.name) {
-                                  return getMultilingualText(category.name);
+                                  return category.name;
                                 }
                                 return 'Uncategorized';
                               })()}
                             </p>
                             <p className="text-sm text-gray-600 line-clamp-2">
-                              {getMultilingualText(item.productId.description) || 'No description available'}
+                              {item.productId.description || 'No description available'}
                             </p>
                           </div>
                           <div className="flex-shrink-0 text-right">

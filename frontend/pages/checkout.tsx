@@ -13,6 +13,8 @@ import AdminTabs from '../components/AdminTabs';
 import RecipientAddresses from '../components/RecipientAddresses';
 import RazorpayPaymentSimplified from '../components/RazorpayPaymentSimplified';
 import PasswordRequirements from '../components/PasswordRequirements';
+import ValidationInput from '../components/ValidationInput';
+import { useFormValidation } from '../hooks/useFormValidation';
 import api from '../utils/api';
 import { validatePaymentResponse } from '../utils/razorpay';
 import { createStandardRecipientAddress } from '../utils/addressMapping';
@@ -73,6 +75,9 @@ export default function Checkout() {
   const { cart, clearCart, refreshCart } = useCart();
   const { user, login, tokens, isLoading, isAuthenticated } = useAuth();
   const { wishlist } = useWishlist();
+  
+  // Form validation hook
+  const { validationState, validateField, touchField, isFormValid, getFieldState, resetValidation } = useFormValidation();
   
   const [activeTab, setActiveTab] = useState<TabType>('login');
   const [error, setError] = useState('');
@@ -188,6 +193,40 @@ export default function Checkout() {
   });
 
   // Removed loginData and registerData - now using dedicated pages
+
+  // Validation handlers
+  const handleFieldChange = (fieldName: string, value: string) => {
+    // Update guest data
+    if (fieldName.startsWith('deliveryAddress.')) {
+      const addressField = fieldName.split('.')[1];
+      setGuestData(prev => ({
+        ...prev,
+        deliveryAddress: {
+          ...prev.deliveryAddress,
+          [addressField]: value
+        }
+      }));
+    } else {
+      setGuestData(prev => ({
+        ...prev,
+        [fieldName]: value
+      }));
+    }
+
+    // Validate the field
+    validateField(fieldName, value);
+  };
+
+  const handleFieldBlur = (fieldName: string) => {
+    touchField(fieldName);
+  };
+
+  // Reset validation when switching tabs
+  useEffect(() => {
+    if (activeTab === 'guest') {
+      resetValidation();
+    }
+  }, [activeTab, resetValidation]);
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -461,41 +500,47 @@ export default function Checkout() {
     setIsProcessingPayment(true);
 
     try {
-      // Validate guest form data
+      // Validate all fields using the validation system
+      if (!isFormValid) {
+        setError('Please fix all validation errors before proceeding');
+        setLoading(false);
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      // Additional validation for required fields
       if (!guestData.senderName.trim()) {
         setError('Your name is required');
         setLoading(false);
+        setIsProcessingPayment(false);
         return;
       }
 
       if (!guestData.senderEmail.trim()) {
         setError('Your email is required');
         setLoading(false);
-        return;
-      }
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(guestData.senderEmail)) {
-        setError('Please enter a valid email address');
-        setLoading(false);
+        setIsProcessingPayment(false);
         return;
       }
 
       if (!guestData.senderPhone.trim()) {
         setError('Your phone number is required');
         setLoading(false);
+        setIsProcessingPayment(false);
         return;
       }
 
       if (!guestData.recipientName.trim()) {
         setError('Recipient name is required');
         setLoading(false);
+        setIsProcessingPayment(false);
         return;
       }
 
       if (!guestData.recipientPhone.trim()) {
         setError('Recipient phone number is required');
         setLoading(false);
+        setIsProcessingPayment(false);
         return;
       }
 
@@ -504,6 +549,7 @@ export default function Checkout() {
           !guestData.deliveryAddress.zipCode.trim()) {
         setError('Delivery address information is required');
         setLoading(false);
+        setIsProcessingPayment(false);
         return;
       }
       // Create guest user - transform data to match backend expectations
@@ -1299,36 +1345,42 @@ export default function Checkout() {
                       <h4 className="text-md font-semibold mb-3 text-blue-800">Your Information (Sender)</h4>
                       <p className="text-sm text-blue-600 mb-4">This is your contact information for order updates and billing.</p>
                       <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Your Full Name *</label>
-                          <input
-                            type="text"
-                            value={guestData.senderName}
-                            onChange={(e) => setGuestData({...guestData, senderName: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Your Email *</label>
-                          <input
-                            type="email"
-                            value={guestData.senderEmail}
-                            onChange={(e) => setGuestData({...guestData, senderEmail: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Your Phone Number *</label>
-                          <input
-                            type="tel"
-                            value={guestData.senderPhone}
-                            onChange={(e) => setGuestData({...guestData, senderPhone: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                          />
-                        </div>
+                        <ValidationInput
+                          type="text"
+                          name="senderName"
+                          value={guestData.senderName}
+                          onChange={(value) => handleFieldChange('senderName', value)}
+                          onBlur={() => handleFieldBlur('senderName')}
+                          placeholder="Enter your full name"
+                          label="Your Full Name"
+                          required
+                          validationState={getFieldState('senderName')}
+                          autoComplete="name"
+                        />
+                        <ValidationInput
+                          type="email"
+                          name="senderEmail"
+                          value={guestData.senderEmail}
+                          onChange={(value) => handleFieldChange('senderEmail', value)}
+                          onBlur={() => handleFieldBlur('senderEmail')}
+                          placeholder="Enter your email address"
+                          label="Your Email"
+                          required
+                          validationState={getFieldState('senderEmail')}
+                          autoComplete="email"
+                        />
+                        <ValidationInput
+                          type="tel"
+                          name="senderPhone"
+                          value={guestData.senderPhone}
+                          onChange={(value) => handleFieldChange('senderPhone', value)}
+                          onBlur={() => handleFieldBlur('senderPhone')}
+                          placeholder="Enter your 10-digit mobile number"
+                          label="Your Phone Number"
+                          required
+                          validationState={getFieldState('senderPhone')}
+                          autoComplete="tel"
+                        />
                       </div>
                     </div>
 
@@ -1337,26 +1389,30 @@ export default function Checkout() {
                       <h4 className="text-md font-semibold mb-3 text-green-800">Recipient Information</h4>
                       <p className="text-sm text-green-600 mb-4">Who will receive this gift? This is where we'll deliver the items.</p>
                       <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Recipient's Full Name *</label>
-                          <input
-                            type="text"
-                            value={guestData.recipientName}
-                            onChange={(e) => setGuestData({...guestData, recipientName: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Recipient's Phone Number *</label>
-                          <input
-                            type="tel"
-                            value={guestData.recipientPhone}
-                            onChange={(e) => setGuestData({...guestData, recipientPhone: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                            required
-                          />
-                        </div>
+                        <ValidationInput
+                          type="text"
+                          name="recipientName"
+                          value={guestData.recipientName}
+                          onChange={(value) => handleFieldChange('recipientName', value)}
+                          onBlur={() => handleFieldBlur('recipientName')}
+                          placeholder="Enter recipient's full name"
+                          label="Recipient's Full Name"
+                          required
+                          validationState={getFieldState('recipientName')}
+                          autoComplete="name"
+                        />
+                        <ValidationInput
+                          type="tel"
+                          name="recipientPhone"
+                          value={guestData.recipientPhone}
+                          onChange={(value) => handleFieldChange('recipientPhone', value)}
+                          onBlur={() => handleFieldBlur('recipientPhone')}
+                          placeholder="Enter recipient's 10-digit mobile number"
+                          label="Recipient's Phone Number"
+                          required
+                          validationState={getFieldState('recipientPhone')}
+                          autoComplete="tel"
+                        />
                       </div>
                     </div>
 
@@ -1366,113 +1422,80 @@ export default function Checkout() {
                       <p className="text-sm text-orange-600 mb-4">Where should we deliver the gift?</p>
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-1">Street Address *</label>
-                            <input
-                              type="text"
-                              value={guestData.deliveryAddress.street}
-                              onChange={(e) => {
-                                setGuestData({
-                                  ...guestData,
-                                  deliveryAddress: {
-                                    ...guestData.deliveryAddress,
-                                    street: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="Street address"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">House/Flat Number</label>
-                            <input
-                              type="text"
-                              value={guestData.deliveryAddress.houseNumber}
-                              onChange={(e) => {
-                                setGuestData({
-                                  ...guestData,
-                                  deliveryAddress: {
-                                    ...guestData.deliveryAddress,
-                                    houseNumber: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="House/Flat number (optional)"
-                            />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-1">City *</label>
-                            <input
-                              type="text"
-                              value={guestData.deliveryAddress.city}
-                              onChange={(e) => {
-                                setGuestData({
-                                  ...guestData,
-                                  deliveryAddress: {
-                                    ...guestData.deliveryAddress,
-                                    city: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="City"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">State *</label>
-                            <input
-                              type="text"
-                              value={guestData.deliveryAddress.state}
-                              onChange={(e) => {
-                                setGuestData({
-                                  ...guestData,
-                                  deliveryAddress: {
-                                    ...guestData.deliveryAddress,
-                                    state: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="State"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">ZIP Code *</label>
-                            <input
-                              type="text"
-                              value={guestData.deliveryAddress.zipCode}
-                              onChange={(e) => {
-                                setGuestData({
-                                  ...guestData,
-                                  deliveryAddress: {
-                                    ...guestData.deliveryAddress,
-                                    zipCode: e.target.value
-                                  }
-                                });
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="ZIP Code"
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Special Instructions (Optional)</label>
-                          <textarea
-                            value={guestData.specialInstructions || ''}
-                            onChange={(e) => setGuestData({...guestData, specialInstructions: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                            placeholder="Any special delivery instructions..."
-                            rows={3}
+                          <ValidationInput
+                            type="text"
+                            name="deliveryAddress.street"
+                            value={guestData.deliveryAddress.street}
+                            onChange={(value) => handleFieldChange('street', value)}
+                            onBlur={() => handleFieldBlur('street')}
+                            placeholder="Street address, area, landmark"
+                            label="Street Address"
+                            required
+                            validationState={getFieldState('street')}
+                            autoComplete="street-address"
+                          />
+                          <ValidationInput
+                            type="text"
+                            name="deliveryAddress.houseNumber"
+                            value={guestData.deliveryAddress.houseNumber}
+                            onChange={(value) => handleFieldChange('houseNumber', value)}
+                            onBlur={() => handleFieldBlur('houseNumber')}
+                            placeholder="House/Flat number (optional)"
+                            label="House/Flat Number"
+                            validationState={getFieldState('houseNumber')}
+                            autoComplete="address-line2"
                           />
                         </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <ValidationInput
+                            type="text"
+                            name="deliveryAddress.city"
+                            value={guestData.deliveryAddress.city}
+                            onChange={(value) => handleFieldChange('city', value)}
+                            onBlur={() => handleFieldBlur('city')}
+                            placeholder="City"
+                            label="City"
+                            required
+                            validationState={getFieldState('city')}
+                            autoComplete="address-level2"
+                          />
+                          <ValidationInput
+                            type="text"
+                            name="deliveryAddress.state"
+                            value={guestData.deliveryAddress.state}
+                            onChange={(value) => handleFieldChange('state', value)}
+                            onBlur={() => handleFieldBlur('state')}
+                            placeholder="State"
+                            label="State"
+                            required
+                            validationState={getFieldState('state')}
+                            autoComplete="address-level1"
+                          />
+                          <ValidationInput
+                            type="text"
+                            name="deliveryAddress.zipCode"
+                            value={guestData.deliveryAddress.zipCode}
+                            onChange={(value) => handleFieldChange('zipCode', value)}
+                            onBlur={() => handleFieldBlur('zipCode')}
+                            placeholder="6-digit postal code"
+                            label="ZIP Code"
+                            required
+                            validationState={getFieldState('zipCode')}
+                            autoComplete="postal-code"
+                          />
+                        </div>
+                        <ValidationInput
+                          type="textarea"
+                          name="specialInstructions"
+                          value={guestData.specialInstructions || ''}
+                          onChange={(value) => handleFieldChange('specialInstructions', value)}
+                          onBlur={() => handleFieldBlur('specialInstructions')}
+                          placeholder="Any special delivery instructions..."
+                          label="Special Instructions (Optional)"
+                          validationState={getFieldState('specialInstructions')}
+                          maxLength={500}
+                          rows={3}
+                        />
                       </div>
                     </div>
 
@@ -1494,12 +1517,43 @@ export default function Checkout() {
                       </select>
                     </div>
 
+                    {/* Form validation status */}
+                    {!isFormValid && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-yellow-600">⚠️</span>
+                          <span className="text-yellow-800 text-sm">
+                            Please complete all required fields with valid information to proceed
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     <button
                       type="submit"
-                      disabled={loading || isProcessingPayment}
-                      className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400"
+                      disabled={loading || isProcessingPayment || !isFormValid}
+                      className={`w-full py-3 rounded-lg transition-colors font-medium ${
+                        !isFormValid 
+                          ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                          : 'bg-green-600 text-white hover:bg-green-700'
+                      } ${loading || isProcessingPayment ? 'bg-gray-400' : ''}`}
                     >
-                      {loading || isProcessingPayment ? 'Processing...' : `Complete Order - ₹${total.toFixed(2)}`}
+                      {loading || isProcessingPayment ? (
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          <span>Processing...</span>
+                        </div>
+                      ) : !isFormValid ? (
+                        <div className="flex items-center justify-center space-x-2">
+                          <span>❌</span>
+                          <span>Complete Form to Proceed</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center space-x-2">
+                          <span>✅</span>
+                          <span>Complete Order - ₹{total.toFixed(2)}</span>
+                        </div>
+                      )}
                     </button>
                   </div>
                 </form>

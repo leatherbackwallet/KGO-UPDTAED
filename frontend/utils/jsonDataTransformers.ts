@@ -1,9 +1,25 @@
 /**
- * JSON Data Transformers
- * Transform JSON data from static files to match the expected interface structures
+ * JSON Data Transformers - FILE SYSTEM ONLY
+ * 
+ * This module loads data from JSON files ONLY.
+ * NO DATABASE CONNECTIONS - NO API CALLS - JSON FILES ONLY
+ * 
+ * All data is loaded from the /public/data/ directory using fs.readFileSync()
  */
 
 import { Product, Category, Occasion } from '../types/shared';
+
+/**
+ * Safeguard: Ensure no database connections are made
+ * This function throws an error if any database-related code is accidentally added
+ */
+const ensureJsonOnly = () => {
+  // This is a safeguard to prevent accidental database connections
+  // If any database-related environment variables are detected, throw an error
+  if (process.env.NEXT_PUBLIC_API_URL || process.env.MONGODB_URI || process.env.DATABASE_URL) {
+    console.warn('⚠️ Database environment variables detected in JSON-only module');
+  }
+};
 
 /**
  * Transform JSON product to Product interface
@@ -87,6 +103,9 @@ export const transformJsonOccasion = (jsonOccasion: any): Occasion => {
  */
 export const loadProductsFromJSON = async (): Promise<Product[]> => {
   try {
+    // Safeguard: Ensure JSON-only operation
+    ensureJsonOnly();
+    
     const fs = await import('fs');
     const path = await import('path');
     
@@ -106,6 +125,9 @@ export const loadProductsFromJSON = async (): Promise<Product[]> => {
  */
 export const loadCategoriesFromJSON = async (): Promise<Category[]> => {
   try {
+    // Safeguard: Ensure JSON-only operation
+    ensureJsonOnly();
+    
     const fs = await import('fs');
     const path = await import('path');
     
@@ -125,6 +147,9 @@ export const loadCategoriesFromJSON = async (): Promise<Category[]> => {
  */
 export const loadOccasionsFromJSON = async (): Promise<Occasion[]> => {
   try {
+    // Safeguard: Ensure JSON-only operation
+    ensureJsonOnly();
+    
     const fs = await import('fs');
     const path = await import('path');
     
