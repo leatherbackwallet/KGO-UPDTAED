@@ -43,12 +43,12 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
   const [isInitializing, setIsInitializing] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Optimized script loader with resource management
+  // Optimized script loader with resource management and improved error handling
   const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve, reject) => {
       // Check if already loaded
       if (window.Razorpay) {
-        console.log('✅ Razorpay already available');
+        console.log('✅ Razorpay SDK already available');
         resolve(true);
         return;
       }
@@ -56,64 +56,80 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
       // Check if script already exists
       const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
       if (existingScript) {
-        console.log('✅ Razorpay script already loaded, waiting for SDK...');
+        console.log('🔄 Razorpay script already exists, waiting for SDK initialization...');
+        let attempts = 0;
+        const maxAttempts = 30; // 3 seconds max wait
+        
         const checkRazorpay = () => {
+          attempts++;
           if (window.Razorpay) {
-            console.log('✅ Razorpay SDK is now available');
+            console.log('✅ Razorpay SDK initialized successfully');
             resolve(true);
-          } else {
+          } else if (attempts < maxAttempts) {
             setTimeout(checkRazorpay, 100);
+          } else {
+            console.warn('⚠️ Razorpay SDK initialization timeout, removing stale script...');
+            existingScript.remove();
+            // Retry loading
+            setTimeout(() => loadRazorpayScript().then(resolve).catch(reject), 500);
           }
         };
         checkRazorpay();
         return;
       }
 
-      console.log('🔄 Loading Razorpay script...');
+      console.log('🔄 Loading Razorpay SDK script...');
       
       // Use resource manager to prevent resource exhaustion
       if (!resourceManager.trackScript('https://checkout.razorpay.com/v1/checkout.js')) {
-        console.log('✅ Razorpay script already tracked, skipping duplicate load');
-        resolve(true);
+        console.log('✅ Razorpay script already tracked');
+        // Still try to resolve after a delay to allow initialization
+        setTimeout(() => {
+          if (window.Razorpay) {
+            resolve(true);
+          } else {
+            // Force retry by removing from tracking
+            resourceManager.forceCleanup();
+            loadRazorpayScript().then(resolve).catch(reject);
+          }
+        }, 500);
         return;
       }
-      
-      // Clean up any existing Razorpay scripts to prevent resource exhaustion
-      const existingScripts = document.querySelectorAll('script[src*="razorpay"]');
-      existingScripts.forEach(script => script.remove());
       
       const script = document.createElement('script');
       script.src = 'https://checkout.razorpay.com/v1/checkout.js';
       script.async = true;
-      script.defer = true;
+      script.defer = false; // Changed to false for immediate execution
       script.crossOrigin = 'anonymous';
       
       // Add resource optimization attributes
       script.setAttribute('data-razorpay', 'true');
       
       const timeout = setTimeout(() => {
-        console.error('❌ Razorpay script load timeout');
-        reject(new Error('Razorpay script load timeout'));
-      }, 8000); // Reduced timeout to prevent hanging
+        console.error('❌ Razorpay script load timeout (10s)');
+        script.remove();
+        reject(new Error('Razorpay SDK failed to load: Network timeout. Please check your connection and try again.'));
+      }, 10000); // Increased timeout for slower connections
       
       script.onload = () => {
         clearTimeout(timeout);
-        console.log('✅ Razorpay script loaded');
+        console.log('✅ Razorpay script loaded, initializing SDK...');
         
-        // Wait for Razorpay to be available with shorter intervals
+        // Wait for Razorpay to be available with progressive backoff
         let attempts = 0;
-        const maxAttempts = 50; // 5 seconds max wait
+        const maxAttempts = 30; // 3 seconds max wait after script load
         
         const checkRazorpay = () => {
           attempts++;
           if (window.Razorpay) {
-            console.log('✅ Razorpay SDK is available');
+            console.log('✅ Razorpay SDK ready');
             resolve(true);
           } else if (attempts < maxAttempts) {
             setTimeout(checkRazorpay, 100);
           } else {
-            console.error('❌ Razorpay SDK not available after script load');
-            reject(new Error('Razorpay SDK not available after script load'));
+            console.error('❌ Razorpay SDK object not found after script loaded');
+            script.remove();
+            reject(new Error('Razorpay SDK failed to initialize. Please refresh the page and try again.'));
           }
         };
         checkRazorpay();
@@ -122,7 +138,8 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
       script.onerror = (error) => {
         clearTimeout(timeout);
         console.error('❌ Failed to load Razorpay script:', error);
-        reject(new Error('Failed to load Razorpay script'));
+        script.remove();
+        reject(new Error('Razorpay SDK failed to load: Network error. Please check your connection and try again.'));
       };
       
       document.head.appendChild(script);
@@ -151,36 +168,37 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
       try {
         setIsInitializing(true);
         razorpayInstanceManager.setInitializing(true);
-        console.log('Initializing Razorpay with order data:', orderData);
-        console.log('Customer data:', customerData);
+        console.log('🔄 Initializing Razorpay payment gateway...');
+        console.log('Order amount:', orderData.amount, orderData.currency);
         
         // Clean up any existing Razorpay instances to prevent resource exhaustion
         if (razorpayInstance.current) {
           try {
             razorpayInstance.current.close();
           } catch (e) {
-            console.log('No existing Razorpay instance to close');
+            // Silently handle - no instance to close
           }
           razorpayInstance.current = null;
         }
         
         // Check resource usage before loading
         const stats = resourceManager.getStats();
-        console.log('📊 Resource stats:', stats);
-        
         if (stats.totalElements > 50) {
-          console.warn('⚠️ High resource usage detected, cleaning up...');
+          console.warn('⚠️ High resource usage detected, performing cleanup...');
           resourceManager.forceCleanup();
         }
         
-        // Load Razorpay script
-        await loadRazorpayScript();
-        
-        if (!window.Razorpay) {
-          throw new Error('Razorpay SDK not available');
+        // Load Razorpay script with better error handling
+        try {
+          await loadRazorpayScript();
+        } catch (loadError: any) {
+          // Provide user-friendly error message
+          throw new Error(loadError.message || 'Failed to load payment gateway. Please check your internet connection.');
         }
         
-        console.log('✅ Razorpay SDK loaded successfully');
+        if (!window.Razorpay) {
+          throw new Error('Payment gateway not available. Please refresh the page and try again.');
+        }
 
         const options = {
           key: orderData.key,
@@ -223,45 +241,49 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
           }
         };
 
-        console.log('Creating Razorpay instance with options:', options);
+        console.log('✅ Creating Razorpay payment instance...');
         const razorpay = new window.Razorpay(options);
         razorpayInstance.current = razorpay;
         
         razorpay.on('payment.failed', function (response: any) {
-          console.error('Razorpay payment failed:', response);
+          console.error('❌ Payment failed:', response.error?.description || 'Unknown error');
           setPaymentStatus('failed');
           onError(response.error);
         });
         
         razorpay.on('payment.authorized', function (response: any) {
-          console.log('Razorpay payment authorized:', response);
+          console.log('✅ Payment authorized, processing...');
           setPaymentStatus('processing');
         });
 
-        console.log('Opening Razorpay modal...');
+        console.log('🔄 Opening payment modal...');
         razorpay.open();
-        razorpayInstance.current = razorpay;
         razorpayInstanceManager.setCurrentInstance(razorpay);
         setIsInitializing(false);
         setIsInitialized(true);
         razorpayInstanceManager.setInitializing(false);
+        console.log('✅ Payment gateway ready');
       } catch (error: any) {
-        console.error('Error initializing Razorpay:', error);
+        console.error('❌ Payment gateway initialization failed:', error.message);
         setIsInitializing(false);
         razorpayInstanceManager.setInitializing(false);
         
-        // Handle specific error types
-        if (error.message.includes('timeout')) {
-          onError(new Error('Payment gateway timeout. Please try again.'));
+        // Handle specific error types with user-friendly messages
+        let errorMessage = 'Payment gateway error. Please try again.';
+        
+        if (error.message.includes('timeout') || error.message.includes('Network timeout')) {
+          errorMessage = 'Payment gateway took too long to load. Please check your internet connection and try again.';
         } else if (error.message.includes('ERR_INSUFFICIENT_RESOURCES')) {
-          console.warn('⚠️ Resource exhaustion detected, cleaning up...');
+          console.warn('⚠️ Resource exhaustion detected, performing cleanup...');
           resourceManager.forceCleanup();
-          onError(new Error('System resources exhausted. Please refresh the page and try again.'));
-        } else if (error.message.includes('CORS')) {
-          onError(new Error('Network security issue. Please try again.'));
-        } else {
-          onError(error);
+          errorMessage = 'System resources exhausted. Please refresh the page and try again.';
+        } else if (error.message.includes('CORS') || error.message.includes('Network error')) {
+          errorMessage = 'Network security issue. Please check your connection and try again.';
+        } else if (error.message.includes('failed to load') || error.message.includes('not available')) {
+          errorMessage = error.message;
         }
+        
+        onError(new Error(errorMessage));
       }
     };
 

@@ -7,6 +7,7 @@ import QuickViewModal from '../components/QuickViewModal';
 import { Product, Category, Occasion } from '../types/shared';
 import { getProductImage } from '../utils/imageUtils';
 import { getMultilingualText } from '../utils/api';
+import { loadProductsFromJSON, loadCategoriesFromJSON, loadOccasionsFromJSON } from '../utils/jsonDataTransformers';
 
 interface ProductsPageProps {
   products: Product[];
@@ -254,39 +255,19 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
   );
 };
 
-// Server-side rendering - fetch data on each request
+// Server-side rendering - load data from JSON files
 export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async () => {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+    console.log('📦 Loading products data from JSON files...');
     
-    // Fetch all data in parallel
-    const [productsResponse, categoriesResponse, occasionsResponse] = await Promise.all([
-      fetch(`${apiUrl}/products?limit=1000`).catch(() => ({ ok: false, json: () => Promise.resolve({ data: [] }) })),
-      fetch(`${apiUrl}/categories`).catch(() => ({ ok: false, json: () => Promise.resolve({ data: [] }) })),
-      fetch(`${apiUrl}/occasions`).catch(() => ({ ok: false, json: () => Promise.resolve({ data: [] }) }))
+    // Load all data from JSON files in parallel
+    const [products, categories, occasions] = await Promise.all([
+      loadProductsFromJSON(),
+      loadCategoriesFromJSON(),
+      loadOccasionsFromJSON()
     ]);
 
-    let products: Product[] = [];
-    let categories: Category[] = [];
-    let occasions: Occasion[] = [];
-
-    // Parse products data
-    if (productsResponse.ok) {
-      const productsData = await productsResponse.json();
-      products = productsData.data || productsData || [];
-    }
-
-    // Parse categories data
-    if (categoriesResponse.ok) {
-      const categoriesData = await categoriesResponse.json();
-      categories = categoriesData.data || categoriesData || [];
-    }
-
-    // Parse occasions data
-    if (occasionsResponse.ok) {
-      const occasionsData = await occasionsResponse.json();
-      occasions = occasionsData.data || occasionsData || [];
-    }
+    console.log(`✅ Loaded ${products.length} products, ${categories.length} categories, ${occasions.length} occasions from JSON`);
 
     return {
       props: {
@@ -296,7 +277,7 @@ export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async (
       }
     };
   } catch (error) {
-    console.error('Error fetching data for products page:', error);
+    console.error('❌ Error loading data from JSON files:', error);
     
     // Return empty data on error
     return {

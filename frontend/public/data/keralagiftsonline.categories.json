@@ -1,0 +1,189 @@
+[{
+  "_id": {
+    "$oid": "68cd4960d03e43bd6d816d5c"
+  },
+  "name": "Flowers",
+  "slug": "flowers",
+  "description": "Beautiful flowers for all occasions",
+  "sortOrder": 1,
+  "isActive": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-19T12:15:28.132Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T12:15:28.132Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cd4968d03e43bd6d816d62"
+  },
+  "name": "Electronics",
+  "slug": "electronics",
+  "description": "Electronic gadgets and devices",
+  "sortOrder": 2,
+  "isActive": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-19T12:15:36.275Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T12:15:36.275Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cd497ed03e43bd6d816d6a"
+  },
+  "name": "Roses",
+  "slug": "roses",
+  "description": "Beautiful rose flowers",
+  "parentCategory": {
+    "$oid": "68cd4960d03e43bd6d816d5c"
+  },
+  "sortOrder": 1,
+  "isActive": false,
+  "isDeleted": true,
+  "createdAt": {
+    "$date": "2025-09-19T12:15:58.575Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-26T17:34:15.823Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cd4a04d03e43bd6d816d72"
+  },
+  "name": "Cakes",
+  "slug": "cakes",
+  "description": "Cakes",
+  "sortOrder": 1,
+  "isActive": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-19T12:18:12.151Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T12:18:12.151Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68cd4c26d03e43bd6d816d87"
+  },
+  "name": "Test123883",
+  "slug": "test123883",
+  "description": "0iosdvpio",
+  "parentCategory": {
+    "$oid": "68cd4960d03e43bd6d816d5c"
+  },
+  "sortOrder": 0,
+  "isActive": false,
+  "isDeleted": true,
+  "createdAt": {
+    "$date": "2025-09-19T12:27:18.066Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-19T12:27:32.221Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d531c6620b280affb68783"
+  },
+  "name": "Combo",
+  "slug": "combo",
+  "description": "Combo Gifts",
+  "sortOrder": 1,
+  "isActive": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-25T12:12:54.205Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-25T12:12:54.205Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d6ce8146f0d9c2debf9317"
+  },
+  "name": "Obituary",
+  "slug": "obituary",
+  "description": "Sympathy Flowers and Stand. Wreath.",
+  "parentCategory": {
+    "$oid": "68cd4960d03e43bd6d816d5c"
+  },
+  "sortOrder": 0,
+  "isActive": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-26T17:33:53.913Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-26T17:33:53.913Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d7573046f0d9c2debf949a"
+  },
+  "name": "Traditions and Rituals",
+  "slug": "traditions-and-rituals",
+  "description": "Traditional Gifts",
+  "sortOrder": 0,
+  "isActive": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-27T03:17:04.710Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T03:17:04.710Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d7694e46f0d9c2debf95c3"
+  },
+  "name": "Home Decor",
+  "slug": "home-decor",
+  "description": "Brass Item",
+  "sortOrder": 0,
+  "isActive": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-27T04:34:22.645Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T04:34:22.645Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d81a6d565cfbcb9ceda0ba"
+  },
+  "name": "Wedding/Engagement",
+  "slug": "wedding-engagement",
+  "description": "Wedding/ Marriage gift hampers",
+  "sortOrder": 0,
+  "isActive": true,
+  "isDeleted": false,
+  "createdAt": {
+    "$date": "2025-09-27T17:10:05.951Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-27T17:10:05.951Z"
+  },
+  "__v": 0
+}]
