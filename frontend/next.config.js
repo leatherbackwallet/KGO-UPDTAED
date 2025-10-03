@@ -36,13 +36,13 @@ const nextConfig = {
   
   // Environment variables for build time
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://api-dot-onyourbehlf.uc.r.appspot.com/api' : 'http://localhost:5001/api'),
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'KeralGiftsOnline',
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || '3.0.0',
     NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS || 'false',
     NEXT_PUBLIC_ENABLE_DEBUG_MODE: process.env.NEXT_PUBLIC_ENABLE_DEBUG_MODE || 'true',
     NEXT_PUBLIC_WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+918075030919',
-    NEXT_PUBLIC_FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000',
+    NEXT_PUBLIC_FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'https://www.keralagiftsonline.in' : 'http://localhost:3000'),
   },
   
   // Webpack configuration
@@ -114,6 +114,9 @@ const nextConfig = {
       "https://res.cloudinary.com",
       // Production API
       "https://api-dot-onyourbehlf.uc.r.appspot.com",
+      // Additional domains for production
+      "https://onyourbehlf.uc.r.appspot.com",
+      "https://*.uc.r.appspot.com",
     ];
 
     // Add localhost in development
