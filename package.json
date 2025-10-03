@@ -17,8 +17,11 @@
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "cd backend && npm run build",
     "build:frontend": "cd frontend && npm run build",
-    "deploy": "./deploy-production.sh",
-    "deploy:help": "./deploy-production.sh --help"
+    "deploy": "./deploy-full-stack.sh",
+    "deploy:backend": "./deploy-full-stack.sh --backend-only",
+    "deploy:frontend": "./deploy-full-stack.sh --frontend-only",
+    "deploy:legacy": "./deploy-production.sh",
+    "deploy:help": "./deploy-full-stack.sh --help"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
