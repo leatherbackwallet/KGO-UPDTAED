@@ -7,7 +7,10 @@ export default function About() {
     <>
       <Head>
         <title>About Us - OnYourBehlf | Kerala Gifts Online</title>
-        <meta name="description" content="Learn about OnYourBehlf (Kerala Gifts Online) - Your trusted source for authentic Kerala gifts and traditional products delivered  to  the recepients in  Kerala" />
+        <meta
+          name="description"
+          content="Learn about KGO GROUP (Kerala Gifts Online) - Your trusted source for authentic Kerala gifts and traditional products delivered  to  the recepients in  Kerala"
+        />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
@@ -18,15 +21,15 @@ export default function About() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
-                About OnYourBehlf
+                About KGO Group
               </h1>
               <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-white drop-shadow-md">
                 Bringing the authentic taste and culture of Kerala to the global diaspora through carefully curated gifts and traditional products
               </p>
               <div className="bg-white bg-opacity-20 rounded-lg p-4 mb-8 backdrop-blur-sm">
                 <p className="text-lg font-semibold mb-2 text-white">Business Information</p>
-                <p className="text-sm text-white opacity-95">Business Name: OnYourBehlf (Kerala Gifts Online)</p>
-                <p className="text-sm text-white opacity-95">Billing Label: OnYourBehlf - Kerala Gifts Online</p>
+                <p className="text-sm text-white opacity-95">Business Name: KGO (Kerala Gifts Online)</p>
+                <p className="text-sm text-white opacity-95">Billing Label: KGO - Kerala Gifts Online</p>
               </div>
               <div className="flex justify-center space-x-4">
                 <Link href="/products" className="bg-white text-red-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
@@ -49,7 +52,7 @@ export default function About() {
                   Our Story
                 </h2>
                 <p className="text-lg text-gray-600 mb-6">
-                  Founded with a passion for sharing Kerala's rich cultural heritage, OnYourBehlf (Kerala Gifts Online) was born from the desire to connect the global Malayali diaspora with authentic products from their homeland.
+                  Founded with a passion for sharing Kerala's rich cultural heritage, KGO (Kerala Gifts Online) was born from the desire to connect the global Malayali diaspora with authentic products from their homeland.
                 </p>
                 <p className="text-lg text-gray-600 mb-6">
                   What started as a small initiative to bring traditional Kerala snacks and gifts to friends and family has grown into a trusted platform serving the global Malayali diaspora under the brand name OnYourBehlf.
@@ -254,106 +257,115 @@ export default function About() {
           </div>
         </section>
 
-        {/* Our Policies Section */}
+        {/* Terms & Conditions Section */}
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Our Policies
+                Terms & Conditions
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Transparent guidelines that ensure the best experience for our valued customers
+                Please read our terms and conditions carefully before placing your order.
               </p>
             </div>
-
             <div className="max-w-4xl mx-auto">
               <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
-                <div className="space-y-8">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-green rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">1</span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Product Quality & Freshness</h3>
-                      <p className="text-gray-600 leading-relaxed">
-                        Items displayed and delivered may have slight changes according to availability of the item in that location to preserve the freshness, premium quality and food safety.
-                      </p>
-                    </div>
+                <div className="space-y-8 text-gray-700">
+                  {/* 1. Order Processing */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Order Processing</h3>
+                    <p className="mb-2">
+                      By placing an order, you agree to provide accurate and complete information. We reserve the right to cancel or refuse any order at our discretion.
+                    </p>
+                    <p className="mb-2">
+                      Orders are processed within 1-2 business days. You will receive a confirmation email once your order is confirmed. For same day orders an emergency charge of <span className="font-semibold text-kgo-red">Rs:750/-</span> is applicable as extra.
+                    </p>
+                    <p className="mb-2">
+                      If you want to remove any item from the pre-set gift combo and want to add your own, the choice is yours and any item of your choice can be added and delivered by paying additional cost incurred if any by making a direct call or WhatsApp to us at <a href="tel:+919400436424" className="text-kgo-green font-semibold underline">+91 9400 436 424</a> or <a href="tel:+12817238520" className="text-kgo-green font-semibold underline">+1 (281) 723-8520</a>.
+                    </p>
                   </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-red rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">2</span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Pricing & Delivery</h3>
-                      <p className="text-gray-600 leading-relaxed">
-                        Prices shown includes product cost, Tax, purchase, service and one to one personal delivery anywhere in Kerala.
-                      </p>
-                    </div>
+                  {/* 2. Payment Terms */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">2. Payment Terms</h3>
+                    <p className="mb-2">
+                      Payment is required at the time of order placement. We accept various payment methods including credit cards, debit cards, and digital wallets.
+                    </p>
+                    <p>
+                      All prices are in Indian Rupees (₹), including premium quality product cost, customization and personal delivery charge and applicable taxes unless otherwise stated.
+                    </p>
                   </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-green rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">3</span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Standard Delivery Time</h3>
-                      <p className="text-gray-600 leading-relaxed">
-                        All orders take minimum 24 hours unless emergency option is not opted.
-                      </p>
-                    </div>
+                  {/* 3. Delivery and Shipping */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">3. Delivery and Shipping</h3>
+                    <p className="mb-2">
+                      We customize, make fresh purchases and do one-on-one personal premium delivery of your gifts across Kerala. Delivery time and design of the items may vary based on location and product availability without compromising quality, quantity and timeliness of the occasion.
+                    </p>
+                    <p className="mb-2">
+                      We undertake that we will try our level best to keep the surprise elements as of your choice and photos of your gifts will be shared without any fail. Videos and photos of delivery are subject to the privacy and permission of the receiver.
+                    </p>
+                    <p>
+                      We are not responsible for delays caused by weather, natural disasters, or other circumstances beyond our control.
+                    </p>
                   </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-red rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">4</span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Same Day Delivery</h3>
-                      <p className="text-gray-600 leading-relaxed">
-                        Same day delivery can also be possible through direct call and is subjected to conditions such as distance, product availability and emergency delivery charge of <span className="font-semibold text-kgo-red">Rs. 500</span>.
-                      </p>
-                    </div>
+                  {/* 4. Returns and Refunds */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">4. Returns and Refunds</h3>
+                    <p className="mb-2">
+                      Since most of the items in the gift combos are customized with fresh items or perishable items as of customer’s choice and are not eligible for returns. Refunds will be processed within 5-7 business days in case of any technical errors after your payment is deducted but not reflected in our end.
+                    </p>
                   </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-green rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">5</span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Quality Assurance & Communication</h3>
-                      <p className="text-gray-600 leading-relaxed">
-                        Items selected by you will be delivered with utmost care, quality, and timelines without any compromise to your desired delivery location personally. Updates of the same will be communicated without fail. Videos and photos of delivery are optional and subjected to the interest of the person who receives the product due to their privacy and safety values.
-                      </p>
-                    </div>
+                  {/* 5. Privacy and Data Protection */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">5. Privacy and Data Protection</h3>
+                    <p className="mb-2">
+                      We collect and process your personal information in accordance with our Privacy Policy. Your data is used solely for order processing and customer service.
+                    </p>
+                    <p>
+                      We do not sell or share your personal information with third parties without your consent.
+                    </p>
                   </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-kgo-red rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">6</span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Feedback & Support</h3>
-                      <p className="text-gray-600 leading-relaxed">
-                        You can leave your reviews, suggestions, or grievances at{' '}
-                        <a href="mailto:sales@keralagiftsonline.com" className="text-kgo-red hover:text-red-700 font-semibold underline">
-                          sales@keralagiftsonline.com
-                        </a>
-                      </p>
-                    </div>
+                  {/* 6. Limitation of Liability */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">6. Limitation of Liability</h3>
+                    <p>
+                      Our liability is limited to the purchase and delivery of the products. We are not liable for any indirect, incidental, or consequential damages at users end. We don’t offer any guarantees or warranty unless the original product manufacturer provides so.
+                    </p>
                   </div>
-                </div>
-
-                <div className="mt-12 pt-8 border-t border-gray-200">
-                  <div className="bg-gradient-to-r from-kgo-green to-kgo-red p-6 rounded-xl text-white text-center">
-                    <h4 className="text-xl font-bold mb-2">Our Commitment to You</h4>
-                    <p className="text-lg opacity-90">
-                      We are dedicated to providing exceptional service and maintaining the highest standards of quality in every aspect of our business.
+                  {/* 7. Contact Information */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">7. Contact Information</h3>
+                    <p className="mb-2">
+                      For any questions regarding these terms, shipping and delivery please contact us at:
+                    </p>
+                    <ul className="list-disc list-inside text-gray-700 mb-2">
+                      <li>
+                        <span className="font-semibold">Email:</span> <a href="mailto:support@keralagiftsonline.com" className="text-kgo-red underline">support@keralagiftsonline.com</a>
+                      </li>
+                      <li>
+                        <span className="font-semibold">Phone:</span> <a href="tel:+918075030919" className="text-kgo-green underline">+91-8075 030 919</a>, <a href="tel:+12817238520" className="text-kgo-green underline">+1 (281) 723-8520</a>
+                      </li>
+                      <li>
+                        <span className="font-semibold">WhatsApp:</span> <a href="https://wa.me/919400436424" className="text-kgo-green underline">+91-9400 436 424</a>
+                      </li>
+                    </ul>
+                    <p className="text-sm text-gray-500 mt-2">
+                      <span className="font-semibold">Note:</span> By accepting these terms, you acknowledge that you have read, understood, and agree to be bound by these terms and conditions.
                     </p>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Commitment Section */}
+        <section>
+          <div className="mt-12 pt-8 border-t border-gray-200">
+            <div className="bg-gradient-to-r from-kgo-green to-kgo-red p-6 rounded-xl text-white text-center">
+              <h4 className="text-xl font-bold mb-2">Our Commitment to You</h4>
+              <p className="text-lg opacity-90">
+                We are dedicated to providing exceptional service and maintaining the highest standards of quality in every aspect of our business.
+              </p>
             </div>
           </div>
         </section>

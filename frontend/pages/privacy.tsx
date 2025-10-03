@@ -40,11 +40,11 @@ export default function Privacy() {
               <div className="mb-12">
                 <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Introduction</h2>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  OnYourBehlf (Kerala Gifts Online) ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.
+                KGO (Kerala Gifts Online) ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.
                 </p>
                 <p className="text-gray-600 leading-relaxed">
                   <strong>Business Information:</strong><br />
-                  Business Name: OnYourBehlf (Kerala Gifts Online)<br />
+                  Business Name: KGO (Kerala Gifts Online)<br />
                   Contact: sales@keralagiftsonline.com<br />
                   Phone: +91 8075030919
                 </p>

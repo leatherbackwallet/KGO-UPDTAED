@@ -40,11 +40,11 @@ export default function Refund() {
               <div className="mb-12">
                 <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Introduction</h2>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  At OnYourBehlf (Kerala Gifts Online), we specialize in premium, customized, and perishable gift items. Due to the nature of our products, we have a strict no-return policy for all items. This Refund Policy outlines the limited circumstances under which refunds may be processed.
+                  At KGO (Kerala Gifts Online), we specialize in premium, customized, and perishable gift items. Due to the nature of our products, we have a strict no-return policy for all items. This Refund Policy outlines the limited circumstances under which refunds may be processed.
                 </p>
                 <p className="text-gray-600 leading-relaxed">
                   <strong>Business Information:</strong><br />
-                  Business Name: OnYourBehlf (Kerala Gifts Online)<br />
+                  Business Name: KGO (Kerala Gifts Online)<br />
                   Contact: sales@keralagiftsonline.com<br />
                   Phone: +91 9400 436 424 OR +1 (281) 723-8520
                 </p>

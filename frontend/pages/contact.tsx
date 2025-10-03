@@ -126,11 +126,11 @@ export default function Contact() {
                   <div className="space-y-4">
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2">Business Name</h4>
-                      <p className="text-gray-600">OnYourBehlf (Kerala Gifts Online)</p>
+                      <p className="text-gray-600">KGO (Kerala Gifts Online)</p>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2">Billing Label</h4>
-                      <p className="text-gray-600">OnYourBehlf - Kerala Gifts Online</p>
+                      <p className="text-gray-600">KGO - Kerala Gifts Online</p>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2">Business Type</h4>

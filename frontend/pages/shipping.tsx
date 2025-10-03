@@ -40,11 +40,11 @@ export default function Shipping() {
               <div className="mb-12">
                 <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Introduction</h2>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  At OnYourBehlf (Kerala Gifts Online), we are committed to delivering your authentic Kerala gifts safely and on time. This Shipping & Delivery Policy outlines our delivery processes, timelines, and terms.
+                  At KGO (Kerala Gifts Online), we are committed to delivering your authentic Kerala gifts safely and on time. This Shipping & Delivery Policy outlines our delivery processes, timelines, and terms.
                 </p>
                 <p className="text-gray-600 leading-relaxed">
                   <strong>Business Information:</strong><br />
-                  Business Name: OnYourBehlf (Kerala Gifts Online)<br />
+                  Business Name: KGO (Kerala Gifts Online)<br />
                   Contact: sales@keralagiftsonline.com<br />
                   Phone: +91 8075030919
                 </p>

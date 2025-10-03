@@ -44,8 +44,8 @@ export default function Terms() {
                 </p>
                 <p className="text-gray-600 leading-relaxed">
                   <strong>Business Information:</strong><br />
-                  Business Name: OnYourBehlf (Kerala Gifts Online)<br />
-                  Billing Label: OnYourBehlf - Kerala Gifts Online<br />
+                  Business Name: KGO (Kerala Gifts Online)<br />
+                  Billing Label: KGO - Kerala Gifts Online<br />
                   Contact: sales@keralagiftsonline.com<br />
                   Phone: +91 9400 436 424 OR +1 (281) 723-8520
                 </p>
