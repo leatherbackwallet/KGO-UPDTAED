@@ -3486,42 +3486,4 @@
   },
   "slug": "birth-day-baptism-christening-celebration-hamper",
   "__v": 0
-},
-{
-  "_id": {
-    "$oid": "68db998b6b0fb6c82a4d0f8c"
-  },
-  "name": "Product",
-  "description": "Product Flower",
-  "categories": [
-    {
-      "$oid": "68cd4960d03e43bd6d816d5c"
-    },
-    {
-      "$oid": "68d531c6620b280affb68783"
-    }
-  ],
-  "price": 1,
-  "costPrice": 0,
-  "stock": 200,
-  "images": [
-    "keralagiftsonline/products/product-1759222151842-338891053"
-  ],
-  "defaultImage": "keralagiftsonline/products/product-1759222151842-338891053",
-  "occasions": [],
-  "vendors": [],
-  "isFeatured": false,
-  "isActive": true,
-  "isDeleted": false,
-  "isCombo": false,
-  "comboBasePrice": 0,
-  "comboItems": [],
-  "createdAt": {
-    "$date": "2025-09-30T08:49:15.782Z"
-  },
-  "updatedAt": {
-    "$date": "2025-09-30T08:49:15.782Z"
-  },
-  "slug": "product",
-  "__v": 0
 }]
