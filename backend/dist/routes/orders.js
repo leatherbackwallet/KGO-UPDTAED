@@ -290,7 +290,10 @@ router.get('/my', auth_1.auth, async (req, res) => {
             }
         })
             .sort({ createdAt: -1 });
-        return res.json(orders || []);
+        return res.json({
+            success: true,
+            data: orders || []
+        });
     }
     catch (err) {
         console.error('Error fetching orders:', err);
@@ -380,7 +383,10 @@ router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensure
             }
         })
             .sort({ createdAt: -1 });
-        return res.json(orders || []);
+        return res.json({
+            success: true,
+            data: orders || []
+        });
     }
     catch (err) {
         console.error('Error fetching orders:', err);
