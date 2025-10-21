@@ -321,11 +321,7 @@ router.get('/my', auth, async (req: any, res) => {
         }
       })
       .sort({ createdAt: -1 });
-    
-    return res.json({
-      success: true,
-      data: orders || []
-    });
+    return res.json(orders || []);
   } catch (err) {
     console.error('Error fetching orders:', err);
     return res.status(500).json({ message: 'Server error' });
@@ -420,11 +416,7 @@ router.get('/', auth, requireRole('admin'), ensureDatabaseConnection, async (req
         }
       })
       .sort({ createdAt: -1 });
-    
-    return res.json({
-      success: true,
-      data: orders || []
-    });
+    return res.json(orders || []);
   } catch (err) {
     console.error('Error fetching orders:', err);
     return res.status(500).json({ message: 'Server error' });

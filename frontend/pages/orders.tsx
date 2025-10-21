@@ -19,7 +19,7 @@ interface RecipientAddress {
 
 interface OrderItem {
   _id: string;
-  productId?: {
+  productId: {
     _id: string;
     name: { en: string; de: string };
     description?: { en: string; de: string };
@@ -34,23 +34,13 @@ interface OrderItem {
 
 interface Order {
   _id: string;
-  orderId: string;
-  userId: string;
-  orderItems: OrderItem[];
-  totalPrice: number;
-  orderStatus?: string;
+  orderNumber: string;
+  user: string;
+  items: OrderItem[];
+  totalAmount: number;
+  status: string;
   paymentMethod?: string;
-  shippingDetails: {
-    recipientName: string;
-    recipientPhone: string;
-    address: {
-      streetName: string;
-      houseNumber?: string;
-      postalCode: string;
-      city: string;
-      countryCode: string;
-    };
-  };
+  recipientAddress: RecipientAddress;
   statusHistory?: Array<{
     status: string;
     timestamp: Date;
@@ -76,12 +66,7 @@ const OrdersPage: React.FC = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      let response;
-      if (user?.roleName === 'admin') {
-        response = await api.get('/orders');
-      } else {
-        response = await api.get('/orders/my');
-      }
+      const response = await api.get('/orders/my');
       setOrders(response.data.data || []);
     } catch (err: any) {
       console.error('Error fetching orders:', err);
@@ -98,11 +83,7 @@ const OrdersPage: React.FC = () => {
     window.print();
   };
 
-  const getStatusColor = (status: string | undefined | null) => {
-    if (!status) {
-      return 'bg-gray-100 text-gray-800';
-    }
-    
+  const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
@@ -173,15 +154,15 @@ const OrdersPage: React.FC = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">
-                          Order #{order.orderId}
+                          Order #{order.orderNumber}
                         </h3>
                         <p className="text-sm text-gray-600">
                           Placed on {new Date(order.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="mt-2 sm:mt-0">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus)}`}>
-                          {order.orderStatus || 'Unknown'}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                          {order.status}
                         </span>
                       </div>
                     </div>
@@ -190,11 +171,11 @@ const OrdersPage: React.FC = () => {
                   {/* Order Items */}
                   <div className="px-6 py-4">
                     <div className="space-y-4">
-                      {order.orderItems.map((item) => (
+                      {order.items.map((item) => (
                         <div key={item._id} className="flex items-center space-x-4">
                           <div className="flex-shrink-0">
                             <img
-                              src={item.productId?.images?.[0] || '/images/products/placeholder.svg'}
+                              src={item.productId.images[0] || '/images/products/placeholder.svg'}
                               alt={typeof item.productId?.name === 'string' ? item.productId.name : item.productId?.name?.en || 'Product'}
                               className="w-16 h-16 object-cover rounded-lg"
                             />
@@ -205,7 +186,7 @@ const OrdersPage: React.FC = () => {
                             </h4>
                             <p className="text-sm text-gray-500">
                               📂 {(() => {
-                                if (!item.productId?.categories || !item.productId.categories[0]) return 'Uncategorized';
+                                if (!item.productId.categories || !item.productId.categories[0]) return 'Uncategorized';
                                 const category = item.productId.categories[0];
                                 if (typeof category === 'string') return category;
                                 if (category.name) {
@@ -215,7 +196,7 @@ const OrdersPage: React.FC = () => {
                               })()}
                             </p>
                             <p className="text-sm text-gray-600 line-clamp-2">
-                              {typeof item.productId?.description === 'string' ? item.productId.description : item.productId?.description?.en || 'No description available'}
+                              {typeof item.productId.description === 'string' ? item.productId.description : item.productId.description?.en || 'No description available'}
                             </p>
                           </div>
                           <div className="flex-shrink-0 text-right">
@@ -237,19 +218,24 @@ const OrdersPage: React.FC = () => {
                       <div className="mb-4 sm:mb-0">
                         <h4 className="text-sm font-medium text-gray-900 mb-2">Recipient Address</h4>
                         <div className="text-sm text-gray-600">
-                          <p><strong>{order.shippingDetails.recipientName}</strong></p>
-                          <p>{order.shippingDetails.recipientPhone}</p>
+                          <p><strong>{order.recipientAddress.name}</strong></p>
+                          <p>{order.recipientAddress.phone}</p>
                           <p>
-                            {order.shippingDetails.address.streetName} {order.shippingDetails.address.houseNumber}
+                            {order.recipientAddress.address.streetName} {order.recipientAddress.address.houseNumber}
                           </p>
                           <p>
-                            {order.shippingDetails.address.postalCode} {order.shippingDetails.address.city}
+                            {order.recipientAddress.address.postalCode} {order.recipientAddress.address.city}
                           </p>
+                          {order.recipientAddress.additionalInstructions && (
+                            <p className="mt-2 text-gray-500">
+                              <strong>Instructions:</strong> {order.recipientAddress.additionalInstructions}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-semibold text-gray-900">
-                          Total: ₹{order.totalPrice.toFixed(2)}
+                          Total: ₹{order.totalAmount.toFixed(2)}
                         </p>
                         {order.paymentMethod && (
                           <p className="text-sm text-gray-600 mt-1">
@@ -267,7 +253,7 @@ const OrdersPage: React.FC = () => {
                             Print Receipt
                           </button>
                         </div>
-                        <OrderStatusTimeline currentStatus={order.orderStatus || 'pending'} statusHistory={order.statusHistory || []} />
+                        <OrderStatusTimeline currentStatus={order.status} statusHistory={order.statusHistory || []} />
                       </div>
                     </div>
                   </div>
