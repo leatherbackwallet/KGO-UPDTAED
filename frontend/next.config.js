@@ -119,15 +119,18 @@ const nextConfig = {
       "https://*.uc.r.appspot.com",
     ];
 
-    // Add localhost in development
-    if (process.env.NODE_ENV === 'development') {
-      connectSrc.push(
-        "http://localhost:5001",
-        "http://localhost:3000",
-        "ws://localhost:3000", // For hot reload
-        "ws://localhost:5001"
-      );
-    }
+    // Add localhost in development - Always include for development
+    connectSrc.push(
+      "http://localhost:5001",
+      "http://localhost:3000",
+      "http://127.0.0.1:5001",
+      "http://127.0.0.1:3000",
+      "ws://localhost:3000", // For hot reload
+      "ws://localhost:5001",
+      "wss://localhost:5001", // WebSocket secure
+      "ws://127.0.0.1:3000",
+      "ws://127.0.0.1:5001"
+    );
 
     const cspValue = [
       "default-src 'self'",

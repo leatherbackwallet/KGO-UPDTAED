@@ -255,7 +255,7 @@ const AdminOrders: React.FC = () => {
       const response = await api.get('/orders');
       console.log('Orders response:', response.data);
       // Ensure we always set an array, even if the response is not an array
-      const ordersData = Array.isArray(response.data) ? response.data : [];
+      const ordersData = Array.isArray(response.data.data) ? response.data.data : [];
       setOrders(ordersData);
     } catch (err: any) {
       console.error('Error fetching orders:', err);
