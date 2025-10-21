@@ -339,7 +339,7 @@ export default function About() {
                     </p>
                     <ul className="list-disc list-inside text-gray-700 mb-2">
                       <li>
-                        <span className="font-semibold">Email:</span> <a href="mailto:support@keralagiftsonline.com" className="text-kgo-red underline">support@keralagiftsonline.com</a>
+                        <span className="font-semibold">Email:</span> <a href="mailto:sales@keralagiftsonline.com" className="text-kgo-red underline">sales@keralagiftsonline.com</a>
                       </li>
                       <li>
                         <span className="font-semibold">Phone:</span> <a href="tel:+918075030919" className="text-kgo-green underline">+91-8075 030 919</a>, <a href="tel:+12817238520" className="text-kgo-green underline">+1 (281) 723-8520</a>
