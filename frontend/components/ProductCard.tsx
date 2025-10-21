@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import WishlistButton from './WishlistButton';
-import { DEFAULT_PRODUCT_IMAGE, getProductImage } from '../utils/imageUtils';
+import { DEFAULT_PRODUCT_IMAGE, getProductImage, getOriginalImagePath } from '../utils/imageUtils';
 import { Product } from '../types/shared';
 import { useSmartImageCache } from '../hooks/useSmartImageCache';
 
@@ -68,8 +68,8 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
       {/* Image Container */}
       <div className="relative overflow-hidden">
         {(!imageLoaded || isLoading) && (
-          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-            <div className="animate-pulse bg-gray-300 rounded w-full h-full"></div>
+          <div className="w-full max-h-48 bg-gray-200 flex items-center justify-center">
+            <div className="animate-pulse bg-gray-300 rounded w-full h-48"></div>
             {isCached && (
               <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
                 Cached
@@ -80,7 +80,7 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
         <img
           src={imageUrl}
           alt={product.name}
-          className={`w-full h-48 object-cover transition-all duration-300 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute'}`}
+          className={`w-full max-h-48 object-contain transition-all duration-300 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute'}`}
           onError={handleImageError}
           onLoad={() => setImageLoaded(true)}
           loading="lazy"

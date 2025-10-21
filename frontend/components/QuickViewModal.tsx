@@ -87,7 +87,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Image Gallery */}
               <div className="space-y-4">
-                <div className="aspect-w-1 aspect-h-1 w-full">
+                <div className="w-full">
                   {mainImageLoading ? (
                     <div className="w-full h-96 bg-gray-200 flex items-center justify-center rounded-lg">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-kgo-red"></div>
@@ -96,7 +96,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                     <img
                       src={imagePath}
                       alt={product.name}
-                      className="w-full h-96 object-cover rounded-lg"
+                      className="w-full max-h-96 object-contain rounded-lg"
                       onError={handleImageError}
                     />
                   )}
@@ -234,7 +234,7 @@ function ThumbnailImage({ image, productSlug, productName, isSelected, onClick, 
         <img
           src={imagePath}
           alt={`${productName} thumbnail`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           onError={onError}
         />
       )}

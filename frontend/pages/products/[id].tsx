@@ -166,11 +166,11 @@ const ProductDetailPage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
               {/* Product Images */}
               <div className="space-y-4">
-                <div className="aspect-w-1 aspect-h-1 w-full">
+                <div className="w-full">
                   <img
                     src={getProductImage(product.images[selectedImage], product.slug)}
                     alt={product.name}
-                    className="w-full h-96 object-cover rounded-lg"
+                    className="w-full max-h-96 object-contain rounded-lg"
                   />
                 </div>
                 
@@ -188,7 +188,7 @@ const ProductDetailPage: React.FC = () => {
                         <img
                           src={getProductImage(image, product.slug)}
                           alt={`${product.name} ${index + 1}`}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                         />
                       </button>
                     ))}
