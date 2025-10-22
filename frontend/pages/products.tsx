@@ -16,20 +16,18 @@ import { GetServerSideProps } from 'next';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
-import { Product, Category, Occasion } from '../types/shared';
-import { loadProductsFromJSON, loadCategoriesFromJSON, loadOccasionsFromJSON } from '../utils/jsonDataTransformers';
+import { Product, Category } from '../types/shared';
+import { loadProductsFromJSON, loadCategoriesFromJSON } from '../utils/jsonDataTransformers';
 
 interface ProductsPageProps {
   products: Product[];
   categories: Category[];
-  occasions: Occasion[];
 }
 
-const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, categories, occasions }) => {
+const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, categories }) => {
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedOccasion, setSelectedOccasion] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   
   // Modal state
@@ -67,30 +65,6 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
       }
     }
 
-    // Occasion filter
-    if (selectedOccasion) {
-      const selectedOccasionObj = occasions.find(occ => occ._id === selectedOccasion);
-      if (selectedOccasionObj) {
-        const selectedOccasionName = selectedOccasionObj.name.toUpperCase();
-        
-        filtered = filtered.filter(product => {
-          // Handle occasions array (JSON data has string arrays like ["DIWALI", "BIRTHDAY"])
-          if (!product.occasions || product.occasions.length === 0) {
-            return false;
-          }
-          
-          // Check if any product occasion matches the selected occasion name
-          return product.occasions.some(occasion => {
-            if (typeof occasion === 'string') {
-              return occasion.toUpperCase() === selectedOccasionName;
-            }
-            // Handle object case (though JSON data uses strings)
-            return typeof occasion === 'object' && occasion && '_id' in occasion && 
-                   (occasion as any)._id === selectedOccasion;
-          });
-        });
-      }
-    }
 
     // Sort products
     switch (sortBy) {
@@ -114,7 +88,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
     }
 
     return filtered;
-  }, [allProducts, searchTerm, selectedCategory, selectedOccasion, sortBy, categories, occasions]);
+  }, [allProducts, searchTerm, selectedCategory, sortBy, categories]);
 
   // Event handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,9 +99,6 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
     setSelectedCategory(e.target.value);
   };
 
-  const handleOccasionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedOccasion(e.target.value);
-  };
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSortBy(e.target.value);
@@ -136,7 +107,6 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('');
-    setSelectedOccasion('');
     setSortBy('newest');
   };
 
@@ -165,28 +135,62 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
           
 
           {/* Search and Filters */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+            <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
               
               {/* Search */}
-              <div className="w-full lg:w-1/3">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+              <div className="w-full lg:w-1/3 relative">
+                <div className="relative">
+                  {/* Search Icon */}
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  
+                  {/* Search Input */}
+                  <input
+                    type="text"
+                    placeholder="Search products, categories, or descriptions..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm hover:shadow-md"
+                  />
+                  
+                  {/* Clear Search Button */}
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center hover:bg-gray-100 rounded-r-lg transition-colors"
+                      aria-label="Clear search"
+                    >
+                      <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                
+                {/* Search Results Count */}
+                {searchTerm && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    {filteredProducts.length === allProducts.length ? (
+                      <span>Showing all {allProducts.length} products</span>
+                    ) : (
+                      <span>Found {filteredProducts.length} of {allProducts.length} products</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Filters */}
-              <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex flex-wrap gap-3 items-center">
                 
                 {/* Category Filter */}
                 <select
                   value={selectedCategory}
                   onChange={handleCategoryChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]"
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm hover:shadow-md min-w-[160px]"
                 >
                   <option value="">All Categories</option>
                   {categories.map((category) => (
@@ -196,25 +200,12 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                   ))}
                 </select>
 
-                {/* Occasion Filter */}
-                <select
-                  value={selectedOccasion}
-                  onChange={handleOccasionChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]"
-                >
-                  <option value="">All Occasions</option>
-                  {occasions.map((occasion) => (
-                    <option key={occasion._id} value={occasion._id}>
-                      {occasion.name}
-                    </option>
-                  ))}
-                </select>
 
                 {/* Sort */}
                 <select
                   value={sortBy}
                   onChange={handleSortChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[160px]"
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm hover:shadow-md min-w-[180px]"
                 >
                   <option value="newest">Newest First</option>
                   <option value="name">Name A-Z</option>
@@ -223,11 +214,14 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                 </select>
 
                 {/* Clear Filters */}
-                {(searchTerm || selectedCategory || selectedOccasion || sortBy !== 'newest') && (
+                {(searchTerm || selectedCategory || sortBy !== 'newest') && (
                   <button
                     onClick={clearFilters}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium shadow-sm hover:shadow-md flex items-center gap-2"
                   >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                     Clear Filters
                   </button>
                 )}
@@ -293,16 +287,14 @@ export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async (
     console.log('📦 Loading products data from JSON files ONLY (no database connections)...');
     
     // Load all data from JSON files in parallel with individual error handling
-    const [productsResult, categoriesResult, occasionsResult] = await Promise.allSettled([
+    const [productsResult, categoriesResult] = await Promise.allSettled([
       loadProductsFromJSON(),
-      loadCategoriesFromJSON(),
-      loadOccasionsFromJSON()
+      loadCategoriesFromJSON()
     ]);
 
     // Extract results with fallbacks
     const products = productsResult.status === 'fulfilled' ? productsResult.value : [];
     const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value : [];
-    const occasions = occasionsResult.status === 'fulfilled' ? occasionsResult.value : [];
 
     // Log individual results
     if (productsResult.status === 'rejected') {
@@ -311,17 +303,13 @@ export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async (
     if (categoriesResult.status === 'rejected') {
       console.error('❌ Failed to load categories:', categoriesResult.reason);
     }
-    if (occasionsResult.status === 'rejected') {
-      console.error('❌ Failed to load occasions:', occasionsResult.reason);
-    }
 
-    console.log(`✅ Loaded ${products.length} products, ${categories.length} categories, ${occasions.length} occasions from JSON`);
+    console.log(`✅ Loaded ${products.length} products, ${categories.length} categories from JSON`);
 
     return {
       props: {
         products,
-        categories,
-        occasions
+        categories
       }
     };
   } catch (error) {
@@ -331,8 +319,7 @@ export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async (
     return {
       props: {
         products: [],
-        categories: [],
-        occasions: []
+        categories: []
       }
     };
   }
