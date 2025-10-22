@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import PasswordRequirements from '../components/PasswordRequirements';
@@ -344,9 +345,9 @@ export default function Register() {
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
-              <a href="/login" className="text-kgo-red hover:text-red-700 underline">
+              <Link href="/login" className="text-kgo-red hover:text-red-700 underline">
                 Login here
-              </a>
+              </Link>
             </p>
           </div>
         </form>

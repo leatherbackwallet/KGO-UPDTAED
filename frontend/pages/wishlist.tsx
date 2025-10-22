@@ -5,6 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { useAuth } from '../context/AuthContext';
@@ -100,7 +101,7 @@ const WishlistPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view your wishlist</h2>
-          <a href="/login" className="text-blue-600 hover:text-blue-800">Go to Login</a>
+          <Link href="/login" className="text-blue-600 hover:text-blue-800">Go to Login</Link>
         </div>
       </div>
     );
@@ -149,9 +150,9 @@ const WishlistPage: React.FC = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Your wishlist is empty</h3>
               <p className="text-gray-600 mb-4">Start adding items to your wishlist while browsing our products.</p>
-              <a href="/products" className="btn-primary">
+              <Link href="/products" className="btn-primary">
                 Browse Products
-              </a>
+              </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
+import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import ProductCard from '../../components/ProductCard';
 import SEOHead from '../../components/SEOHead';
@@ -124,12 +125,12 @@ const OccasionPage: React.FC<OccasionPageProps> = ({
           <div className="text-center">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Occasion Not Found</h1>
             <p className="text-gray-600 mb-6">The occasion you are looking for does not exist.</p>
-            <a 
+            <Link 
               href="/products" 
               className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
             >
               Browse All Products
-            </a>
+            </Link>
           </div>
         </div>
       </>
@@ -255,12 +256,12 @@ const OccasionPage: React.FC<OccasionPageProps> = ({
               <p className="text-gray-600 mb-6">
                 We're curating the perfect {occasion.name.toLowerCase()} gift collection for you. Check back soon!
               </p>
-              <a 
+              <Link 
                 href="/products" 
                 className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
               >
                 Browse All Products
-              </a>
+              </Link>
             </div>
           )}
 

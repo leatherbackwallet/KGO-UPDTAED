@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
@@ -162,7 +163,7 @@ const OrderConfirmationPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Please log in to view order details</h2>
-          <a href="/login" className="text-blue-600 hover:text-blue-800">Go to Login</a>
+          <Link href="/login" className="text-blue-600 hover:text-blue-800">Go to Login</Link>
         </div>
       </div>
     );
@@ -187,9 +188,9 @@ const OrderConfirmationPage: React.FC = () => {
           <p className="text-gray-600 mb-4">{error || 'The order you are looking for does not exist.'}</p>
           <div className="space-x-4">
             {user ? (
-              <a href="/orders" className="text-blue-600 hover:text-blue-800">View All Orders</a>
+              <Link href="/orders" className="text-blue-600 hover:text-blue-800">View All Orders</Link>
             ) : (
-              <a href="/" className="text-blue-600 hover:text-blue-800">Go Home</a>
+              <Link href="/" className="text-blue-600 hover:text-blue-800">Go Home</Link>
             )}
           </div>
         </div>
@@ -372,7 +373,7 @@ const OrderConfirmationPage: React.FC = () => {
               </svg>
               Print Receipt
             </button>
-            <a
+            <Link
               href="/orders"
               className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
@@ -380,8 +381,8 @@ const OrderConfirmationPage: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
               View All Orders
-            </a>
-            <a
+            </Link>
+            <Link
               href="/products"
               className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
@@ -389,7 +390,7 @@ const OrderConfirmationPage: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               Continue Shopping
-            </a>
+            </Link>
           </div>
 
           {/* Next Steps */}

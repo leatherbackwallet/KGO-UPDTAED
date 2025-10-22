@@ -6,6 +6,12 @@ const nextConfig = {
   poweredByHeader: false,
   generateEtags: false,
   
+  // Allow warnings during build
+  eslint: {
+    ignoreDuringBuilds: false,
+    dirs: ['pages', 'components', 'utils', 'context', 'hooks', 'types'],
+  },
+  
   // API proxy configuration - only for development
   async rewrites() {
     if (process.env.NODE_ENV === 'development') {

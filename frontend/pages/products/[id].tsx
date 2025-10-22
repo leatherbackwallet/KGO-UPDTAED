@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import Link from 'next/link';
 import api from '../../utils/api';
 import Navbar from '../../components/Navbar';
 import SEOHead from '../../components/SEOHead';
@@ -49,7 +50,7 @@ const ProductDetailPage: React.FC = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h2>
           <p className="text-gray-600 mb-4">{error || 'The product you are looking for does not exist.'}</p>
-          <a href="/products" className="text-blue-600 hover:text-blue-800">Back to Products</a>
+          <Link href="/products" className="text-blue-600 hover:text-blue-800">Back to Products</Link>
         </div>
       </div>
     );
