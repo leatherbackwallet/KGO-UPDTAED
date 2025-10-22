@@ -60,7 +60,7 @@ export default function Home() {
           </div>
           
           {/* Subtle overlay for glassmorphic effect */}
-          <div className="absolute inset-0 bg-black bg-opacity-20 z-10"></div>
+          <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
           
           <div className="text-center text-white px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto relative z-20">
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
