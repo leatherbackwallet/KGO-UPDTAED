@@ -47,7 +47,7 @@ export default function Terms() {
                   Business Name: KGO (Kerala Gifts Online)<br />
                   Billing Label: KGO - Kerala Gifts Online<br />
                   Contact: sales@keralagiftsonline.com<br />
-                  Phone: +91 9400 436 424 OR +1 (281) 723-8520
+                  Phone: +91 8075030919 OR +1 (281) 723-8520
                 </p>
               </div>
 
@@ -68,7 +68,7 @@ export default function Terms() {
                     If you want to remove any item from the pre-set gift combo and want to add your 
                     own then choice is yours and any item of your choice can be added and delivered 
                     by paying additional cost incurred if any by making a direct call or WhatsApp to 
-                    us at +91 9400 436 424 OR +1 (281) 723-8520
+                    us at +91 8075030919 OR +1 (281) 723-8520
                   </p>
                 </div>
               </div>
@@ -159,9 +159,9 @@ export default function Terms() {
                     For any questions regarding these terms, please contact us:
                   </p>
                   <div className="space-y-2 text-gray-600">
-                    <p><strong>Phone:</strong> +91 9400 436 424</p>
+                    <p><strong>Phone:</strong> +91 8075030919</p>
                     <p><strong>International:</strong> +1 (281) 723-8520</p>
-                    <p><strong>WhatsApp:</strong> +91 9400 436 424</p>
+                    <p><strong>WhatsApp:</strong> +91 8075030919</p>
                     <p><strong>Email:</strong> sales@keralagiftsonline.com</p>
                   </div>
                 </div>
