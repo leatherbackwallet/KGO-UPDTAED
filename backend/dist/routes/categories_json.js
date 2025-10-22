@@ -40,7 +40,9 @@ const assignProductsSchema = zod_1.z.object({
 router.get('/', async (req, res) => {
     try {
         const { admin } = req.query;
-        if (admin === 'true') {
+        const authHeader = req.headers.authorization;
+        // Check if this is an admin request (either admin=true param or has auth header)
+        if (admin === 'true' || authHeader) {
             // ADMIN REQUEST → Use MongoDB (existing functionality)
             console.log('🔧 Admin categories request - using MongoDB');
             return await handleAdminCategoriesRequest(req, res);
@@ -93,7 +95,7 @@ async function handlePublicCategoriesRequest(req, res) {
  * Preserves existing MongoDB functionality
  */
 async function handleAdminCategoriesRequest(req, res) {
-    // Apply middleware for admin requests
+    // Apply middleware for admin requests (skip caching for fresh data)
     await new Promise((resolve, reject) => {
         (0, requestBatching_1.deduplicateRequests)()(req, res, (err) => {
             if (err)
@@ -102,14 +104,13 @@ async function handleAdminCategoriesRequest(req, res) {
                 resolve();
         });
     });
-    await new Promise((resolve, reject) => {
-        cache_1.cacheConfigs.categories(req, res, (err) => {
-            if (err)
-                reject(err);
-            else
-                resolve();
-        });
-    });
+    // Skip caching for admin requests to ensure fresh database data
+    // await new Promise<void>((resolve, reject) => {
+    //   cacheConfigs.categories(req, res, (err) => {
+    //     if (err) reject(err);
+    //     else resolve();
+    //   });
+    // });
     await new Promise((resolve, reject) => {
         (0, database_1.ensureDatabaseConnection)(req, res, (err) => {
             if (err)
@@ -121,9 +122,11 @@ async function handleAdminCategoriesRequest(req, res) {
     try {
         const { includeInactive = false } = req.query;
         const filter = includeInactive === 'true' ? { isDeleted: false } : { isActive: true, isDeleted: false };
+        console.log('🔍 Fetching categories with filter:', filter);
         const categories = await categories_model_1.Category.find(filter)
             .populate('parentCategory', 'name slug')
             .sort('sortOrder');
+        console.log('📋 Found categories:', categories.length, 'categories');
         res.json({
             success: true,
             data: categories
@@ -252,8 +255,11 @@ router.post('/', auth_1.auth, (0, role_1.requireRole)('admin'), (0, validation_1
             slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
         });
         await category.save();
-        // Invalidate cache
+        console.log('✅ Category saved successfully:', category);
+        // Invalidate cache for all users and query parameters
+        await (0, cache_1.invalidateCache)('/api/categories');
         await (0, cache_1.invalidateCache)('categories');
+        console.log('✅ Categories cache invalidated after creation');
         res.status(201).json({
             success: true,
             data: category,
@@ -321,8 +327,10 @@ router.put('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), (0, validation
             res.status(404).json({ success: false, error: 'Category not found' });
             return;
         }
-        // Invalidate cache
+        // Invalidate cache for all users and query parameters
+        await (0, cache_1.invalidateCache)('/api/categories');
         await (0, cache_1.invalidateCache)('categories');
+        console.log('Categories cache invalidated after update');
         res.json({
             success: true,
             data: category,
@@ -366,8 +374,10 @@ router.delete('/:id', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.
             res.status(404).json({ success: false, error: 'Category not found' });
             return;
         }
-        // Invalidate cache
+        // Invalidate cache for all users and query parameters
+        await (0, cache_1.invalidateCache)('/api/categories');
         await (0, cache_1.invalidateCache)('categories');
+        console.log('Categories cache invalidated after deletion');
         res.json({
             success: true,
             message: 'Category deleted successfully'

@@ -72,7 +72,7 @@ export default function AdminCategories() {
       setLoading(true);
       setError(null);
       // Add cache busting parameter to ensure fresh data
-      const response = await api.get(`/categories?includeInactive=true&_t=${Date.now()}`, {
+      const response = await api.get(`/categories?admin=true&includeInactive=true&_t=${Date.now()}`, {
         headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
       console.log('🔍 Fetched categories data:', response.data);
@@ -132,7 +132,7 @@ export default function AdminCategories() {
       setLoading(true);
       setError(null);
       // Add multiple cache busting parameters to force fresh data
-      const response = await api.get(`/categories?includeInactive=true&_t=${Date.now()}&_refresh=${Math.random()}`, {
+      const response = await api.get(`/categories?admin=true&includeInactive=true&_t=${Date.now()}&_refresh=${Math.random()}`, {
         headers: { 
           Authorization: `Bearer ${tokens?.accessToken}`
         }
