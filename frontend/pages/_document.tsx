@@ -52,9 +52,12 @@ export default function Document() {
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         
-        {/* Permissions Policy for UPI QR scanning */}
-        <meta httpEquiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />
-        <meta httpEquiv="Feature-Policy" content="camera 'self'; microphone 'self'; payment 'self'" />
+        {/* Permissions Policy - Allow camera for Razorpay UPI QR scanning */}
+        <meta httpEquiv="Permissions-Policy" content="camera=(self https://checkout.razorpay.com https://*.razorpay.com), microphone=(), geolocation=(), payment=(self https://checkout.razorpay.com https://*.razorpay.com)" />
+        <meta httpEquiv="Feature-Policy" content="camera 'self' https://checkout.razorpay.com https://*.razorpay.com; microphone 'none'; payment 'self' https://checkout.razorpay.com https://*.razorpay.com" />
+        
+        {/* Content Security Policy - Allow Razorpay and its dependencies */}
+        <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://*.razorpay.com https://browser.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://*.razorpay.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.razorpay.com https://*.razorpay.com https://browser.sentry-cdn.com https://api-dot-onyourbehlf.uc.r.appspot.com https://onyourbehlf.uc.r.appspot.com https://*.uc.r.appspot.com https://res.cloudinary.com http://localhost:5001 http://localhost:3000 http://127.0.0.1:5001 http://127.0.0.1:3000 ws://localhost:3000 ws://localhost:5001 wss://localhost:5001 ws://127.0.0.1:3000 ws://127.0.0.1:5001 wss://*; frame-src 'self' https://api.razorpay.com https://*.razorpay.com; font-src 'self' data:;" />
         
         {/* Geo Tags */}
         <meta name="geo.region" content="IN-KL" />

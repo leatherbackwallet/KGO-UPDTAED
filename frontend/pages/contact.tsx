@@ -15,13 +15,13 @@ export default function Contact() {
 
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-red-50">
         {/* Hero Section */}
-        <section className="relative py-20 bg-gradient-to-r from-kgo-green to-kgo-red text-white">
+        <section className="relative py-20 bg-gradient-to-r from-green-600 to-red-600 text-white shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
                 Contact Us
               </h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-white drop-shadow-md">
                 We're here to help! Get in touch with our team for any questions, support, or inquiries about our Kerala gifts and traditional products.
               </p>
             </div>
@@ -126,11 +126,11 @@ export default function Contact() {
                   <div className="space-y-4">
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2">Business Name</h4>
-                      <p className="text-gray-600">OnYourBehlf (Kerala Gifts Online)</p>
+                      <p className="text-gray-600">KGO (Kerala Gifts Online)</p>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2">Billing Label</h4>
-                      <p className="text-gray-600">OnYourBehlf - Kerala Gifts Online</p>
+                      <p className="text-gray-600">KGO - Kerala Gifts Online</p>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2">Business Type</h4>
@@ -138,7 +138,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2">Service Area</h4>
-                      <p className="text-gray-600">Worldwide Delivery</p>
+                      <p className="text-gray-600">Only in Kerala .</p>
                     </div>
                   </div>
                 </div>
@@ -147,17 +147,9 @@ export default function Contact() {
                   <h3 className="text-2xl font-bold text-gray-900 mb-6">Business Hours</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                      <span className="text-gray-600">Monday - Friday</span>
-                      <span className="font-semibold text-gray-900">9:00 AM - 6:00 PM IST</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                      <span className="text-gray-600">Saturday</span>
-                      <span className="font-semibold text-gray-900">10:00 AM - 4:00 PM IST</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                      <span className="text-gray-600">Sunday</span>
-                      <span className="font-semibold text-gray-900">Closed</span>
-                    </div>
+                      <span className="text-gray-600">Sunday - Saturday </span>
+                      <span className="font-semibold text-gray-900">24/7 </span>
+                    </div>         
                     <div className="flex justify-between items-center py-2">
                       <span className="text-gray-600">Emergency Support</span>
                       <span className="font-semibold text-gray-900">24/7 via WhatsApp</span>
@@ -182,7 +174,7 @@ export default function Contact() {
                   </div>
                   <div className="bg-white p-6 rounded-lg shadow-md">
                     <h4 className="font-semibold text-gray-900 mb-2">Do you deliver internationally?</h4>
-                    <p className="text-gray-600">Yes, we deliver authentic Kerala products worldwide to serve the global Malayali diaspora.</p>
+                    <p className="text-gray-600">NO, We deliver gifts on your beahlf to recepients located in.</p>
                   </div>
                 </div>
                 <div className="space-y-6">

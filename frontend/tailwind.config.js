@@ -9,6 +9,7 @@ module.exports = {
     extend: {
       colors: {
         'kgo-red': '#DC2626', // Red-600
+        'kgo-green': '#059669', // Green-600
       },
       fontFamily: {
         'sans': [

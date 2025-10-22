@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { getMultilingualText } from '../utils/api';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
@@ -255,12 +254,12 @@ const AdminProducts: React.FC = () => {
       const validationErrors = [];
       
       // Validate required fields
-      const nameText = typeof editingProduct.name === 'string' ? editingProduct.name : getMultilingualText(editingProduct.name || '');
+      const nameText = editingProduct.name || '';
       if (!editingProduct.name || nameText.trim() === '') {
         validationErrors.push('Product name is required');
       }
       
-      const descText = typeof editingProduct.description === 'string' ? editingProduct.description : getMultilingualText(editingProduct.description || '');
+      const descText = editingProduct.description || '';
       if (!editingProduct.description || descText.trim() === '') {
         validationErrors.push('Product description is required');
       }
@@ -431,12 +430,12 @@ const AdminProducts: React.FC = () => {
       const validationErrors = [];
       
       // Validate required fields
-      const nameText = typeof editingProduct.name === 'string' ? editingProduct.name : getMultilingualText(editingProduct.name || '');
+      const nameText = editingProduct.name || '';
       if (!editingProduct.name || nameText.trim() === '') {
         validationErrors.push('Product name is required');
       }
       
-      const descText = typeof editingProduct.description === 'string' ? editingProduct.description : getMultilingualText(editingProduct.description || '');
+      const descText = editingProduct.description || '';
       if (!editingProduct.description || descText.trim() === '') {
         validationErrors.push('Product description is required');
       }
@@ -646,10 +645,10 @@ const AdminProducts: React.FC = () => {
     if (typeof category === 'string') {
       // If it's a string, try to find the category name from the categories array
       const foundCategory = categories.find((cat: Category) => cat._id === category);
-      return foundCategory ? getMultilingualText(foundCategory.name) : category;
+      return foundCategory ? foundCategory.name : category;
     }
     if (category.name) {
-      return getMultilingualText(category.name);
+      return category.name;
     }
     return 'Unknown Category';
   };
@@ -705,11 +704,11 @@ const AdminProducts: React.FC = () => {
     const query = searchQuery.toLowerCase().trim();
     return products.filter((product: Product) => {
       // Search in product name
-      const name = getMultilingualText(product.name).toLowerCase();
+      const name = product.name.toLowerCase();
       if (name.includes(query)) return true;
 
       // Search in product description
-      const description = getMultilingualText(product.description).toLowerCase();
+      const description = product.description.toLowerCase();
       if (description.includes(query)) return true;
 
       // Search in categories (handle products with no categories)
@@ -832,7 +831,7 @@ const AdminProducts: React.FC = () => {
                     value={product._id}
                     disabled={deletingProducts.has(product._id) || recentlyDeleted.has(product._id)}
                   >
-                    {getMultilingualText(product.name)} - ₹{product.price?.toFixed(2) || '0.00'}
+                    {product.name} - ₹{product.price?.toFixed(2) || '0.00'}
                   </option>
                 ))}
               </select>
@@ -846,7 +845,7 @@ const AdminProducts: React.FC = () => {
               return (
                 <div className="bg-blue-50 rounded-lg p-3 mb-4 border border-blue-200">
                   <div className="text-sm font-medium text-gray-900 mb-1">
-                    {getMultilingualText(product.name)}
+                    {product.name}
                   </div>
                   <div className="text-xs text-gray-600">
                     ₹{product.price?.toFixed(2) || '0.00'} • Stock: {product.stock || 0} • {product.isFeatured ? 'Featured' : 'Regular'}
@@ -1071,17 +1070,17 @@ const AdminProducts: React.FC = () => {
                           <img
                             className="h-10 w-10 rounded-lg object-cover"
                             src={imageUrl}
-                            alt={getMultilingualText(product.name)}
+                            alt={product.name}
                             onError={handleImageError}
                             style={{ opacity: 1 }} // No opacity change needed for preloaded images
                           />
                         </div>
                         <div className="ml-3 min-w-0 flex-1">
                           <div className="text-sm font-medium text-gray-900 mb-1 truncate">
-                            {getMultilingualText(product.name)}
+                            {product.name}
                           </div>
                           <div className="text-xs text-gray-500 break-words whitespace-normal leading-relaxed max-w-xs">
-                            {getMultilingualText(product.description)}
+                            {product.description}
                           </div>
                         </div>
                       </div>
@@ -1259,7 +1258,7 @@ const AdminProducts: React.FC = () => {
                               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
                             <span className="text-sm text-gray-700">
-                              {getMultilingualText(category.name)}
+                              {category.name}
                             </span>
                           </label>
                         );
@@ -1321,7 +1320,7 @@ const AdminProducts: React.FC = () => {
                             {occasion.icon && (
                               <span className="text-lg">{occasion.icon}</span>
                             )}
-                            <span className="text-sm text-gray-700">{getMultilingualText(occasion.name)}</span>
+                            <span className="text-sm text-gray-700">{occasion.name}</span>
                             {isCurrentlyActive && (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 Active Now

@@ -7,7 +7,7 @@ import express, { Request, Response } from 'express';
 import { Category } from '../models/categories.model';
 import { Product } from '../models/products.model';
 import { ensureDatabaseConnection } from '../middleware/database';
-import { cacheConfigs, invalidateCache } from '../middleware/cache';
+import { cacheConfigs, invalidateCache, clearCache } from '../middleware/cache';
 import { deduplicateRequests } from '../middleware/requestBatching';
 import { auth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
@@ -41,8 +41,10 @@ const assignProductsSchema = z.object({
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const { admin } = req.query;
+    const authHeader = req.headers.authorization;
     
-    if (admin === 'true') {
+    // Check if this is an admin request (either admin=true param or has auth header)
+    if (admin === 'true' || authHeader) {
       // ADMIN REQUEST → Use MongoDB (existing functionality)
       console.log('🔧 Admin categories request - using MongoDB');
       return await handleAdminCategoriesRequest(req, res);
@@ -96,7 +98,7 @@ async function handlePublicCategoriesRequest(req: Request, res: Response): Promi
  * Preserves existing MongoDB functionality
  */
 async function handleAdminCategoriesRequest(req: Request, res: Response): Promise<void> {
-  // Apply middleware for admin requests
+  // Apply middleware for admin requests (skip caching for fresh data)
   await new Promise<void>((resolve, reject) => {
     deduplicateRequests()(req, res, (err) => {
       if (err) reject(err);
@@ -104,12 +106,13 @@ async function handleAdminCategoriesRequest(req: Request, res: Response): Promis
     });
   });
   
-  await new Promise<void>((resolve, reject) => {
-    cacheConfigs.categories(req, res, (err) => {
-      if (err) reject(err);
-      else resolve();
-    });
-  });
+  // Skip caching for admin requests to ensure fresh database data
+  // await new Promise<void>((resolve, reject) => {
+  //   cacheConfigs.categories(req, res, (err) => {
+  //     if (err) reject(err);
+  //     else resolve();
+  //   });
+  // });
   
   await new Promise<void>((resolve, reject) => {
     ensureDatabaseConnection(req, res, (err) => {
@@ -122,10 +125,12 @@ async function handleAdminCategoriesRequest(req: Request, res: Response): Promis
     const { includeInactive = false } = req.query;
     const filter = includeInactive === 'true' ? { isDeleted: false } : { isActive: true, isDeleted: false };
     
+    console.log('🔍 Fetching categories with filter:', filter);
     const categories = await Category.find(filter)
       .populate('parentCategory', 'name slug')
       .sort('sortOrder');
     
+    console.log('📋 Found categories:', categories.length, 'categories');
     res.json({
       success: true,
       data: categories
@@ -263,9 +268,12 @@ router.post('/', auth, requireRole('admin'), validate(createCategorySchema), ens
     });
 
     await category.save();
+    console.log('✅ Category saved successfully:', category);
     
-    // Invalidate cache
+    // Invalidate cache for all users and query parameters
+    await invalidateCache('/api/categories');
     await invalidateCache('categories');
+    console.log('✅ Categories cache invalidated after creation');
 
     res.status(201).json({ 
       success: true, 
@@ -342,8 +350,10 @@ router.put('/:id', auth, requireRole('admin'), validate(updateCategorySchema), e
       return;
     }
 
-    // Invalidate cache
+    // Invalidate cache for all users and query parameters
+    await invalidateCache('/api/categories');
     await invalidateCache('categories');
+    console.log('Categories cache invalidated after update');
 
     res.json({ 
       success: true, 
@@ -398,12 +408,14 @@ router.delete('/:id', auth, requireRole('admin'), ensureDatabaseConnection, asyn
       return;
     }
 
-    // Invalidate cache
+    // Invalidate cache for all users and query parameters
+    await invalidateCache('/api/categories');
     await invalidateCache('categories');
+    console.log('Categories cache invalidated after deletion');
 
     res.json({ 
       success: true, 
-      message: 'Category deleted successfully' 
+      message: 'Category deleted successfully'
     });
   } catch (error) {
     console.error('Error deleting category:', error);

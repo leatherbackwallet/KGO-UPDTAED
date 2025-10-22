@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import api from '../utils/api';
-import { getMultilingualText } from '../utils/api';
 import { Product } from '../types/shared';
 
 interface WishlistButtonProps {
@@ -46,7 +45,7 @@ export default function WishlistButton({ product, className = '' }: WishlistButt
         // Add to local context
         addToWishlist({
           product: product._id,
-          name: getMultilingualText(product.name),
+          name: product.name,
           price: product.price || 0,
           image: product.images?.[0] || product.defaultImage || '/images/products/placeholder.svg'
         });

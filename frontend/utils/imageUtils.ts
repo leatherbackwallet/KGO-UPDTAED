@@ -34,12 +34,8 @@ export function getProductImage(imagePath?: string, slug?: string): string {
   if (imagePath && imagePath.startsWith('keralagiftsonline/products/')) {
     // Validate the public_id format before creating URL
     if (imagePath.length > 30 && !imagePath.includes('..') && !imagePath.includes(' ')) {
-      // Use optimized Cloudinary URL with proper transformations
-      // Remove any existing transformations to avoid conflicts
-      const cleanPublicId = imagePath.replace(/^keralagiftsonline\/products\//, '');
-      
-      // Add cache busting and proper error handling
-      const cloudinaryUrl = `https://res.cloudinary.com/deojqbepy/image/upload/w_400,h_400,c_fill,q_auto,f_auto/keralagiftsonline/products/${cleanPublicId}`;
+      // Use original Cloudinary URL without any transformations
+      const cloudinaryUrl = `https://res.cloudinary.com/deojqbepy/image/upload/${imagePath}`;
       
       // Add timestamp for cache busting in development
       if (process.env.NODE_ENV === 'development') {
@@ -173,6 +169,34 @@ export function getOptimizedImagePath(publicId: string, size: 'thumb' | 'small' 
     const transformations = `w_${sizeConfig.width},h_${sizeConfig.height},c_fill,q_auto,f_auto`;
     
     const cloudinaryUrl = `https://res.cloudinary.com/deojqbepy/image/upload/${transformations}/${publicId}`;
+    
+    // Add cache busting in development
+    if (process.env.NODE_ENV === 'development') {
+      return `${cloudinaryUrl}?t=${Date.now()}`;
+    }
+    
+    return cloudinaryUrl;
+  }
+  
+  // Invalid public_id, return default
+  return DEFAULT_PRODUCT_IMAGE;
+}
+
+/**
+ * Get original Cloudinary image URL without any transformations
+ * @param publicId - Cloudinary public ID
+ * @returns Original Cloudinary URL
+ */
+export function getOriginalImagePath(publicId: string): string {
+  // If it's not a Cloudinary public ID, use the main image function
+  if (!publicId.startsWith('keralagiftsonline/products/')) {
+    return getProductImage(publicId);
+  }
+  
+  // Validate the public_id format before creating URL
+  if (publicId.length > 30 && !publicId.includes('..')) {
+    // Use original Cloudinary URL without any transformations
+    const cloudinaryUrl = `https://res.cloudinary.com/deojqbepy/image/upload/${publicId}`;
     
     // Add cache busting in development
     if (process.env.NODE_ENV === 'development') {

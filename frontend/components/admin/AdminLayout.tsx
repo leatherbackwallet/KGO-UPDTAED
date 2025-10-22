@@ -152,7 +152,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
               {/* User menu */}
               <div className="flex items-center space-x-3">
                 <div className="text-sm">
-                  <p className="font-medium text-gray-900">{user.name || user.email}</p>
+                  <p className="font-medium text-gray-900">{user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email}</p>
                   <p className="text-gray-500">Administrator</p>
                 </div>
                 <button

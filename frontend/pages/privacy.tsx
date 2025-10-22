@@ -15,16 +15,16 @@ export default function Privacy() {
 
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-red-50">
         {/* Hero Section */}
-        <section className="relative py-20 bg-gradient-to-r from-kgo-green to-kgo-red text-white">
+        <section className="relative py-20 bg-gradient-to-r from-green-600 to-red-600 text-white shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
                 Privacy Policy
               </h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-white drop-shadow-md">
                 Your privacy is important to us. Learn how we protect and use your information.
               </p>
-              <p className="text-sm opacity-90">
+              <p className="text-sm text-white opacity-95 drop-shadow-sm">
                 Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
@@ -40,11 +40,11 @@ export default function Privacy() {
               <div className="mb-12">
                 <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Introduction</h2>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  OnYourBehlf (Kerala Gifts Online) ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.
+                KGO (Kerala Gifts Online) ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.
                 </p>
                 <p className="text-gray-600 leading-relaxed">
                   <strong>Business Information:</strong><br />
-                  Business Name: OnYourBehlf (Kerala Gifts Online)<br />
+                  Business Name: KGO (Kerala Gifts Online)<br />
                   Contact: sales@keralagiftsonline.com<br />
                   Phone: +91 8075030919
                 </p>

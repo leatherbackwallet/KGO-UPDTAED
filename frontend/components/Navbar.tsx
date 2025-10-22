@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import api from '../utils/api';
 
 // Cart Icon Component - Clean SVG
 const CartIcon = () => {
@@ -13,55 +12,21 @@ const CartIcon = () => {
   );
 };
 
-interface Category {
-  _id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  parentCategory?: {
-    _id: string;
-    name: string;
-    slug: string;
-  };
-  isActive: boolean;
-  sortOrder: number;
-}
 
 export default function Navbar() {
   const { user, logout, isLoading } = useAuth();
   const { cart } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
-    // Remove automatic categories fetch - will be loaded on demand
   }, []);
-
-  const fetchCategories = async () => {
-    if (categories.length > 0) return; // Already loaded
-    
-    try {
-      setCategoriesLoading(true);
-      const response = await api.get('/categories');
-      setCategories(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    } finally {
-      setCategoriesLoading(false);
-    }
-  };
-
-  const handleCategoriesClick = () => {
-    fetchCategories();
-  };
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <nav className="header">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white bg-opacity-5 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -80,16 +45,10 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/products" className="nav-link font-semibold">
+            <Link href="/products" className="text-gray-800 hover:text-gray-900 font-semibold transition-colors">
               Products
             </Link>
-            <Link href="/categories" className="nav-link" onClick={handleCategoriesClick}>
-              Categories
-            </Link>
-            <Link href="/content" className="nav-link">
-              Cultural Content
-            </Link>
-            <Link href="/about" className="nav-link">
+            <Link href="/about" className="text-gray-800 hover:text-gray-900 transition-colors">
               About
             </Link>
           </div>
@@ -97,7 +56,7 @@ export default function Navbar() {
           {/* Right side - Cart, User */}
           <div className="flex items-center space-x-4">
             {/* Cart */}
-            <Link href="/cart" className="relative flex items-center space-x-2 p-2 nav-link hover:bg-gray-100 rounded-lg transition-colors">
+            <Link href="/cart" className="relative flex items-center space-x-2 p-2 text-gray-800 hover:text-gray-900 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors">
               <CartIcon />
               <span className="text-sm font-medium">Cart</span>
               {cartItemCount > 0 && (
@@ -125,7 +84,7 @@ export default function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="flex items-center space-x-2 nav-link"
+                    className="flex items-center space-x-2 text-gray-800 hover:text-gray-900 transition-colors"
                   >
                     <div className="w-8 h-8 bg-kgo-red rounded-full flex items-center justify-center">
                       <span className="text-white text-sm font-medium">
@@ -161,7 +120,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <>
-                  <Link href="/login" className="text-gray-700 hover:text-purple-600 transition-colors">
+                  <Link href="/login" className="text-gray-800 hover:text-gray-900 transition-colors">
                     Login
                   </Link>
                   <Link href="/register" className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
@@ -174,7 +133,7 @@ export default function Navbar() {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-gray-700 hover:text-purple-600 transition-colors"
+              className="md:hidden p-2 text-gray-800 hover:text-gray-900 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -186,49 +145,15 @@ export default function Navbar() {
         {/* Mobile Navigation */}
         <div className="md:hidden">
           {isMenuOpen && (
-            <div className="border-t border-gray-200 py-4">
+            <div className="border-t border-white border-opacity-20 py-4">
               <div className="flex flex-col space-y-4">
                 {/* Main Navigation Links */}
-                <Link href="/products" className="text-gray-700 hover:text-purple-600 transition-colors font-semibold">
+                <Link href="/products" className="text-gray-800 hover:text-gray-900 transition-colors font-semibold">
                   Products
                 </Link>
-                <Link href="/content" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">
-                  Cultural Content
-                </Link>
-                <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">
+                <Link href="/about" className="text-gray-800 hover:text-gray-900 transition-colors font-medium">
                   About
                 </Link>
-                
-                {/* Categories Section */}
-                <div className="border-t border-gray-200 pt-4 mt-4">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">
-                    Categories
-                  </h3>
-                  {categoriesLoading ? (
-                    <div className="flex items-center justify-center py-4">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {categories.map((category) => (
-                        <Link
-                          key={category._id}
-                          href={`/items?category=${category._id}`}
-                          className="block text-gray-600 hover:text-purple-600 transition-colors py-1 pl-4 border-l-2 border-transparent hover:border-purple-300"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          {category.parentCategory 
-                            ? `${category.parentCategory.name} > ${category.name}`
-                            : category.name
-                          }
-                        </Link>
-                      ))}
-                      {categories.length === 0 && !categoriesLoading && (
-                        <p className="text-gray-500 text-sm py-2">No categories available</p>
-                      )}
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
           )}

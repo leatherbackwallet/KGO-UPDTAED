@@ -92,7 +92,14 @@ export default function TermsAndConditionsModal({
                 </p>
                 <p className="mb-3">
                   Orders are processed within 1-2 business days. You will receive a confirmation 
-                  email once your order is confirmed.
+                  email once your order is confirmed. For same day orders an emergency charge of 
+                  Rs:750/- is applicable as extra.
+                </p>
+                <p className="mb-3">
+                  If you want to remove any item from the pre-set gift combo and want to add your 
+                  own then choice is yours and any item of your choice can be added and delivered 
+                  by paying additional cost incurred if any by making a direct call or WhatsApp to 
+                  us at +91 8075 030 919 OR +1 (281) 723-8520
                 </p>
               </section>
 
@@ -103,36 +110,37 @@ export default function TermsAndConditionsModal({
                   methods including credit cards, debit cards, and digital wallets.
                 </p>
                 <p className="mb-3">
-                  All prices are in Indian Rupees (₹) and include applicable taxes unless 
-                  otherwise stated.
+                  All prices are in Indian Rupees (₹), including premium quality product cost, 
+                  customization and personal delivery charge and applicable taxes unless otherwise stated.
                 </p>
               </section>
 
               <section>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">3. Delivery and Shipping</h3>
                 <p className="mb-3">
-                  We deliver to select cities in Kerala. Delivery times may vary based on 
-                  location and product availability.
+                  We customize, make fresh purchases and do one-on-one personal premium delivery 
+                  of your gifts across Kerala. Delivery time and design of the items may vary 
+                  based on location and product availability without compromising quality, quantity 
+                  and timeliness of the occasion.
                 </p>
                 <p className="mb-3">
-                  Risk of loss and title for products purchased pass to you upon delivery to 
-                  the carrier.
+                  We undertake that we will try our level best to keep the surprise elements as 
+                  of your choice and Photos of your gifts will be shared without any fail. Videos 
+                  and photos of delivery are subject to the privacy and permission of the receiver.
                 </p>
                 <p className="mb-3">
-                  We are not responsible for delays caused by weather, natural disasters, 
-                  or other circumstances beyond our control.
+                  We are not responsible for delays caused by weather, natural disasters, or other 
+                  circumstances beyond our control.
                 </p>
               </section>
 
               <section>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">4. Returns and Refunds</h3>
                 <p className="mb-3">
-                  Returns are accepted within 7 days of delivery for unused items in original 
-                  packaging. Customized or perishable items are not eligible for returns.
-                </p>
-                <p className="mb-3">
-                  Refunds will be processed within 5-7 business days after we receive the 
-                  returned items.
+                  Since most of the items in the gift combos are customized with fresh items or 
+                  perishable items as of customer's choice and are not eligible for returns. 
+                  Refunds will be processed within 5-7 business days in case of any technical 
+                  errors after your payment is deducted but not reflected in our end.
                 </p>
               </section>
 
@@ -151,20 +159,10 @@ export default function TermsAndConditionsModal({
               <section>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">6. Limitation of Liability</h3>
                 <p className="mb-3">
-                  Our liability is limited to the purchase price of the products. We are not 
-                  liable for any indirect, incidental, or consequential damages.
-                </p>
-              </section>
-
-              <section>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">7. Contact Information</h3>
-                <p className="mb-3">
-                  For any questions regarding these terms, please contact us at:
-                </p>
-                <p className="mb-3">
-                  Email: support@keralagiftsonline.com<br />
-                  Phone: +91-XXXXXXXXXX<br />
-                  WhatsApp: +91-XXXXXXXXXX
+                  Our liability is limited to the purchase and delivery of the products. We are 
+                  not liable for any indirect, incidental, or consequential damages at users end. 
+                  We don't offer any guarantees or warranty unless the original product manufacturer 
+                  provides so.
                 </p>
               </section>
 

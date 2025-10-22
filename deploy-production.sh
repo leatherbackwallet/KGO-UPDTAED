@@ -20,7 +20,19 @@ set -e  # Exit on any error
 PROJECT_ID="onyourbehlf"
 API_SERVICE="api"
 API_URL="https://api-dot-${PROJECT_ID}.uc.r.appspot.com"
-TIMESTAMP=$(date +%Y%m%dt%H%M%S)
+
+# Parse command line arguments
+CUSTOM_VERSION=""
+if [[ "${1:-}" == "--name" ]] && [[ -n "${2:-}" ]]; then
+    CUSTOM_VERSION="$2"
+    TIMESTAMP="$2"
+    shift 2
+elif [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
+    # Help will be handled later
+    TIMESTAMP=$(date +%Y%m%dt%H%M%S)
+else
+    TIMESTAMP=$(date +%Y%m%dt%H%M%S)
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -41,7 +53,11 @@ print_header() {
     echo -e "${PURPLE}============================================================${NC}"
     echo -e "${CYAN}Project:${NC} $PROJECT_ID"
     echo -e "${CYAN}Service:${NC} $API_SERVICE"
-    echo -e "${CYAN}Timestamp:${NC} $TIMESTAMP"
+    if [ -n "$CUSTOM_VERSION" ]; then
+        echo -e "${CYAN}Version:${NC} $TIMESTAMP (custom: $CUSTOM_VERSION)"
+    else
+        echo -e "${CYAN}Version:${NC} $TIMESTAMP"
+    fi
     echo -e "${PURPLE}============================================================${NC}"
     echo ""
 }
@@ -487,7 +503,15 @@ main() {
 if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
     echo "KeralGiftsOnline Production Deployment Script"
     echo ""
-    echo "Usage: $0"
+    echo "Usage: $0 [--name VERSION_NAME]"
+    echo ""
+    echo "Options:"
+    echo "  --name VERSION_NAME    Deploy with a custom version name (e.g., 'sept30')"
+    echo "  --help, -h            Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0                    Deploy with timestamp version (default)"
+    echo "  $0 --name sept30      Deploy with custom version name 'sept30'"
     echo ""
     echo "This script performs a complete production deployment with:"
     echo "  • Environment and dependency validation"
@@ -507,3 +531,4 @@ fi
 
 # Run main function
 main "$@"
+

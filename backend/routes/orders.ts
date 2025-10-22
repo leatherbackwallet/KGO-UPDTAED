@@ -113,24 +113,20 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
         specialInstructions: address.additionalInstructions || address.specialInstructions || ''
       };
       
+      // Validate payment method BEFORE deducting stock
+      // Reject COD payment method in production
+      if ((paymentMethod === 'cod-test' || paymentMethod === 'cod') && process.env.NODE_ENV !== 'development') {
+        throw new Error('COD_NOT_AVAILABLE');
+      }
+      
       // Update product stock atomically within transaction
+      // Only deduct stock AFTER payment method validation to ensure proper rollback
       for (const update of productUpdates) {
         await Product.findByIdAndUpdate(
           update.productId,
           { $inc: { stock: -update.quantity } },
           { session }
         );
-      }
-      
-      // Reject COD payment method in production
-      if ((paymentMethod === 'cod-test' || paymentMethod === 'cod') && process.env.NODE_ENV !== 'development') {
-        return res.status(400).json({
-          success: false,
-          error: {
-            message: 'COD payment method is only available in development environment',
-            code: 'COD_NOT_AVAILABLE'
-          }
-        });
       }
       
       // Handle COD payment method (development only)
@@ -278,6 +274,16 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
       });
     }
     
+    if (err.message === 'COD_NOT_AVAILABLE') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: 'COD payment method is only available in development environment',
+          code: 'COD_NOT_AVAILABLE'
+        }
+      });
+    }
+    
     return res.status(500).json({ 
       success: false, 
       error: { message: 'Server error', code: 'SERVER_ERROR' } 
@@ -315,7 +321,11 @@ router.get('/my', auth, async (req: any, res) => {
         }
       })
       .sort({ createdAt: -1 });
-    return res.json(orders || []);
+    
+    return res.json({
+      success: true,
+      data: orders || []
+    });
   } catch (err) {
     console.error('Error fetching orders:', err);
     return res.status(500).json({ message: 'Server error' });
@@ -410,7 +420,11 @@ router.get('/', auth, requireRole('admin'), ensureDatabaseConnection, async (req
         }
       })
       .sort({ createdAt: -1 });
-    return res.json(orders || []);
+    
+    return res.json({
+      success: true,
+      data: orders || []
+    });
   } catch (err) {
     console.error('Error fetching orders:', err);
     return res.status(500).json({ message: 'Server error' });

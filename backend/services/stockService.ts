@@ -1,6 +1,41 @@
 /**
  * Stock Management Service
  * Handles atomic stock operations with proper locking to prevent overselling
+ * 
+ * ⚠️  KNOWN LIMITATION - RACE CONDITION IN DISTRIBUTED SYSTEMS:
+ * 
+ * This service uses an in-memory Map for stock reservations which has a critical limitation:
+ * - In-memory Map is NOT shared across multiple Node.js instances/servers
+ * - In load-balanced or scaled deployments, each server has its own Map
+ * - This can lead to RACE CONDITIONS where multiple servers reserve the same stock
+ * 
+ * EXAMPLE RACE CONDITION:
+ * 1. Product has 1 item in stock
+ * 2. Server A receives order for 1 item → reserves it in its local Map
+ * 3. Server B receives order for 1 item → checks stock, sees 1 available (doesn't know about Server A's reservation)
+ * 4. Both servers deduct stock → overselling occurs!
+ * 
+ * SOLUTION FOR PRODUCTION:
+ * Replace in-memory Map with Redis or MongoDB-based reservation tracking:
+ * 
+ * Option 1 - Redis (Recommended):
+ * - Use Redis SETNX for atomic reservation locks
+ * - Set TTL for automatic cleanup
+ * - Shared across all server instances
+ * 
+ * Option 2 - MongoDB:
+ * - Create a 'stock_reservations' collection
+ * - Use MongoDB transactions with locks
+ * - Add TTL index for automatic cleanup
+ * 
+ * CURRENT USE CASE:
+ * This implementation is acceptable for:
+ * - Single server deployments
+ * - Development/testing environments
+ * - Low traffic applications
+ * 
+ * ACTION REQUIRED:
+ * Before scaling to multiple servers, implement Redis-based reservation system.
  */
 
 import mongoose from 'mongoose';
@@ -22,6 +57,8 @@ interface StockCheckResult {
 }
 
 class StockService {
+  // ⚠️ WARNING: In-memory Map - NOT suitable for multi-server deployments!
+  // See file header comments for production solution
   private reservations: Map<string, StockReservation> = new Map();
   private readonly RESERVATION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 

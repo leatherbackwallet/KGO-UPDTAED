@@ -1,18 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 
-// Utility function to safely extract text (handles both old multilingual and new string formats)
-export const getMultilingualText = (text: string | { en: string; de?: string; ml?: string } | undefined): string => {
-  if (!text) return '';
-  
-  if (typeof text === 'string') return text;
-  
-  // Handle old multilingual format
-  if (typeof text === 'object') {
-    return text.en || text.de || text.ml || '';
-  }
-  
-  return '';
-};
 
 // Safe localStorage access
 const safeGetTokens = (): { accessToken: string; refreshToken: string } | null => {

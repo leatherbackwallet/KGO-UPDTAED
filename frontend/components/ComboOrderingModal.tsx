@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Product, ComboItem } from '../types/shared';
-import { getMultilingualText } from '../utils/api';
 import { 
   calculateComboPrice, 
   createComboItemConfigurations, 
@@ -98,7 +97,7 @@ const ComboOrderingModal: React.FC<ComboOrderingModalProps> = ({
           <div className="flex justify-between items-start mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
-                {getMultilingualText(product.name)}
+                {product.name}
               </h2>
               {product.isCombo && (
                 <p className="text-sm text-gray-600 mt-1">
@@ -117,7 +116,7 @@ const ComboOrderingModal: React.FC<ComboOrderingModalProps> = ({
           {/* Product Description */}
           <div className="mb-6">
             <p className="text-gray-700">
-              {getMultilingualText(product.description)}
+              {product.description}
             </p>
           </div>
 

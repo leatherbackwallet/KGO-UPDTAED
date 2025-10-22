@@ -1,5 +1,4 @@
 "use strict";
-// @ts-nocheck
 /**
  * Payments Routes - Payment processing and order management
  * Handles Razorpay integration and payment verification
@@ -9,7 +8,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const express_validator_1 = require("express-validator");
 const mongoose_1 = __importDefault(require("mongoose"));
 const payment_service_1 = __importDefault(require("../services/payment.service"));
 const index_1 = require("../models/index");
@@ -18,41 +16,19 @@ const auth_1 = require("../middleware/auth");
 const comboUtils_1 = require("../utils/comboUtils");
 const stockService_1 = __importDefault(require("../services/stockService"));
 const router = express_1.default.Router();
-const validatePaymentOrder = [
-    (0, express_validator_1.body)('products').isArray().withMessage('Products must be an array'),
-    (0, express_validator_1.body)('products.*.product').isMongoId().withMessage('Invalid product ID'),
-    (0, express_validator_1.body)('products.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
-    // Combo product validation
-    (0, express_validator_1.body)('products.*.isCombo').optional().isBoolean().withMessage('isCombo must be a boolean'),
-    (0, express_validator_1.body)('products.*.comboBasePrice').optional().isNumeric().withMessage('comboBasePrice must be a number'),
-    (0, express_validator_1.body)('products.*.comboItemConfigurations').optional().isArray().withMessage('comboItemConfigurations must be an array'),
-    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.name').optional().notEmpty().withMessage('Combo item name is required'),
-    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.unitPrice').optional().isNumeric().withMessage('Combo item unit price must be a number'),
-    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.quantity').optional().isNumeric().withMessage('Combo item quantity must be a number'),
-    (0, express_validator_1.body)('products.*.comboItemConfigurations.*.unit').optional().notEmpty().withMessage('Combo item unit is required'),
-    (0, express_validator_1.body)('recipientAddress').isObject().withMessage('Recipient address is required'),
-    (0, express_validator_1.body)('recipientAddress.name').notEmpty().withMessage('Recipient name is required'),
-    (0, express_validator_1.body)('recipientAddress.phone').notEmpty().withMessage('Recipient phone is required'),
-    (0, express_validator_1.body)('recipientAddress.address').isObject().withMessage('Address details are required'),
-    (0, express_validator_1.body)('recipientAddress.address.streetName').notEmpty().withMessage('Street name is required'),
-    (0, express_validator_1.body)('recipientAddress.address.postalCode').notEmpty().withMessage('Postal code is required'),
-    (0, express_validator_1.body)('recipientAddress.address.city').notEmpty().withMessage('City is required')
-];
-const validatePaymentVerification = [
-    (0, express_validator_1.body)('razorpay_order_id').notEmpty().withMessage('Razorpay order ID is required'),
-    (0, express_validator_1.body)('razorpay_payment_id').notEmpty().withMessage('Razorpay payment ID is required'),
-    (0, express_validator_1.body)('razorpay_signature').notEmpty().withMessage('Razorpay signature is required')
-];
-router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentOrder, async (req, res) => {
+// Validation removed for simplicity - basic validation handled in route logic
+router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     const session = await mongoose_1.default.startSession();
     try {
         await session.withTransaction(async () => {
             console.log('🔍 [Payment Route] Create order request received');
             console.log('🔍 [Payment Route] Request body:', JSON.stringify(req.body, null, 2));
-            const errors = (0, express_validator_1.validationResult)(req);
-            if (!errors.isEmpty()) {
-                console.log('❌ [Payment Route] Validation errors:', errors.array());
-                throw new Error('VALIDATION_ERROR');
+            // Basic validation - check required fields
+            if (!req.body.products || !Array.isArray(req.body.products) || req.body.products.length === 0) {
+                throw new Error('VALIDATION_ERROR: Products array is required');
+            }
+            if (!req.body.recipientAddress) {
+                throw new Error('VALIDATION_ERROR: Recipient address is required');
             }
             const { products, recipientAddress, orderNotes } = req.body;
             const userId = req.user.id;
@@ -194,14 +170,12 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
     catch (error) {
         console.error('Error creating payment order:', error);
         // Handle specific error types
-        if (error.message === 'VALIDATION_ERROR') {
-            const errors = (0, express_validator_1.validationResult)(req);
+        if (error.message.startsWith('VALIDATION_ERROR')) {
             res.status(400).json({
                 success: false,
                 error: {
-                    message: 'Validation failed',
-                    code: 'VALIDATION_ERROR',
-                    details: errors.array()
+                    message: error.message.replace('VALIDATION_ERROR: ', ''),
+                    code: 'VALIDATION_ERROR'
                 }
             });
             return;
@@ -251,81 +225,127 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, v
         await session.endSession();
     }
 });
-router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validatePaymentVerification, async (req, res) => {
+router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
+    const session = await mongoose_1.default.startSession();
     try {
-        const errors = (0, express_validator_1.validationResult)(req);
-        if (!errors.isEmpty()) {
-            res.status(400).json({
-                success: false,
-                error: {
-                    message: 'Validation failed',
-                    code: 'VALIDATION_ERROR',
-                    details: errors.array()
-                }
-            });
-            return;
-        }
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-        // Verify payment signature
-        const isValidSignature = payment_service_1.default.verifyPayment(razorpay_order_id, razorpay_payment_id, razorpay_signature);
-        if (!isValidSignature) {
-            res.status(400).json({
-                success: false,
-                error: {
-                    message: 'Invalid payment signature',
-                    code: 'INVALID_SIGNATURE'
-                }
-            });
-            return;
-        }
-        // Get detailed payment information from Razorpay
-        const paymentDetails = await payment_service_1.default.getPaymentDetails(razorpay_payment_id);
-        const orderDetails = await payment_service_1.default.getOrderDetails(razorpay_order_id);
-        // Extract comprehensive transaction details
-        const transactionData = {
-            orderStatus: 'payment_done', // Only set to payment_done after successful verification
-            paymentStatus: 'captured', // Set payment status to captured
-            razorpayPaymentId: razorpay_payment_id,
-            razorpaySignature: razorpay_signature,
-            paymentDate: new Date(),
-            paymentVerifiedAt: new Date(),
-            // Store detailed Razorpay information
-            razorpayPaymentDetails: paymentDetails,
-            razorpayOrderDetails: orderDetails,
-            // Additional tracking fields
-            transactionId: paymentDetails.id || razorpay_payment_id,
-            paymentMethod: paymentDetails.method || 'unknown',
-            paymentGateway: 'razorpay',
-            currency: paymentDetails.currency || 'INR',
-            amountPaid: paymentDetails.amount ? paymentDetails.amount / 100 : 0, // Convert from paise
-            amountRefunded: 0,
-            refundStatus: 'none',
-            webhookReceived: false,
-            webhookEvents: []
-        };
-        // Update order status with comprehensive payment verification
-        const order = await index_1.Order.findOneAndUpdate({ razorpayOrderId: razorpay_order_id }, transactionData, { new: true });
-        if (!order) {
-            res.status(404).json({
-                success: false,
-                error: {
-                    message: 'Order not found',
-                    code: 'ORDER_NOT_FOUND'
-                }
-            });
-            return;
-        }
-        // Update product stock
-        for (const item of order.orderItems) {
-            await index_1.Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
-        }
-        res.status(200).json({
-            success: true,
-            data: {
-                orderId: order._id,
-                status: 'confirmed',
-                message: 'Payment verified successfully'
+        await session.withTransaction(async () => {
+            // Basic validation - check required fields
+            if (!req.body.razorpay_order_id || !req.body.razorpay_payment_id || !req.body.razorpay_signature) {
+                res.status(400).json({
+                    success: false,
+                    error: {
+                        message: 'Missing required payment verification fields',
+                        code: 'VALIDATION_ERROR'
+                    }
+                });
+                return;
             }
+            const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+            // IDEMPOTENCY PROTECTION: Check if payment already verified
+            const existingOrder = await index_1.Order.findOne({
+                razorpayOrderId: razorpay_order_id,
+                paymentStatus: 'captured',
+                orderStatus: 'payment_done'
+            }).session(session);
+            if (existingOrder) {
+                res.status(200).json({
+                    success: true,
+                    data: {
+                        orderId: existingOrder._id,
+                        status: 'already_verified',
+                        message: 'Payment already verified',
+                        paymentStatus: existingOrder.paymentStatus,
+                        orderStatus: existingOrder.orderStatus
+                    }
+                });
+                return;
+            }
+            // Verify payment signature
+            const isValidSignature = payment_service_1.default.verifyPayment(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+            if (!isValidSignature) {
+                res.status(400).json({
+                    success: false,
+                    error: {
+                        message: 'Invalid payment signature',
+                        code: 'INVALID_SIGNATURE'
+                    }
+                });
+                return;
+            }
+            // Get detailed payment information from Razorpay
+            const paymentDetails = await payment_service_1.default.getPaymentDetails(razorpay_payment_id);
+            const orderDetails = await payment_service_1.default.getOrderDetails(razorpay_order_id);
+            // Extract comprehensive transaction details
+            const transactionData = {
+                orderStatus: 'payment_done', // Only set to payment_done after successful verification
+                paymentStatus: 'captured', // Set payment status to captured
+                razorpayPaymentId: razorpay_payment_id,
+                razorpaySignature: razorpay_signature,
+                paymentDate: new Date(),
+                paymentVerifiedAt: new Date(),
+                // Store detailed Razorpay information
+                razorpayPaymentDetails: paymentDetails,
+                razorpayOrderDetails: orderDetails,
+                // Additional tracking fields
+                transactionId: paymentDetails.id || razorpay_payment_id,
+                paymentMethod: paymentDetails.method || 'unknown',
+                paymentGateway: 'razorpay',
+                currency: paymentDetails.currency || 'INR',
+                amountPaid: paymentDetails.amount ? paymentDetails.amount / 100 : 0, // Convert from paise
+                amountRefunded: 0,
+                refundStatus: 'none',
+                webhookReceived: false,
+                webhookEvents: []
+            };
+            // ATOMIC UPDATE: Use findOneAndUpdate with session for transaction safety
+            const order = await index_1.Order.findOneAndUpdate({
+                razorpayOrderId: razorpay_order_id,
+                paymentStatus: { $ne: 'captured' } // Only update if not already captured
+            }, transactionData, {
+                new: true,
+                session: session,
+                runValidators: true
+            });
+            if (!order) {
+                // Check if order exists but already processed
+                const existingOrder = await index_1.Order.findOne({
+                    razorpayOrderId: razorpay_order_id
+                }).session(session);
+                if (existingOrder && existingOrder.paymentStatus === 'captured') {
+                    res.status(200).json({
+                        success: true,
+                        data: {
+                            orderId: existingOrder._id,
+                            status: 'already_verified',
+                            message: 'Payment already verified',
+                            paymentStatus: existingOrder.paymentStatus,
+                            orderStatus: existingOrder.orderStatus
+                        }
+                    });
+                    return;
+                }
+                res.status(404).json({
+                    success: false,
+                    error: {
+                        message: 'Order not found or already processed',
+                        code: 'ORDER_NOT_FOUND'
+                    }
+                });
+                return;
+            }
+            // NOTE: Stock was already deducted during reservation in /create-order
+            // DO NOT deduct stock again here to avoid double deduction
+            // Stock deduction happens in:
+            // 1. stockService.reserveStock() during /create-order
+            // 2. Webhook handlers for redundancy/verification
+            res.status(200).json({
+                success: true,
+                data: {
+                    orderId: order._id,
+                    status: 'confirmed',
+                    message: 'Payment verified successfully'
+                }
+            });
         });
     }
     catch (error) {
@@ -337,6 +357,120 @@ router.post('/verify', auth_1.auth, database_1.ensureDatabaseConnection, validat
                 code: 'PAYMENT_VERIFICATION_ERROR'
             }
         });
+    }
+    finally {
+        await session.endSession();
+    }
+});
+// Refund endpoint - Process refunds for captured payments
+router.post('/refund', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
+    const session = await mongoose_1.default.startSession();
+    try {
+        await session.withTransaction(async () => {
+            const { orderId, amount, reason } = req.body;
+            const userId = req.user.id;
+            const userRole = req.user.roleName;
+            // Validate input
+            if (!orderId) {
+                throw new Error('ORDER_ID_REQUIRED');
+            }
+            // Find order
+            const order = await index_1.Order.findById(orderId).session(session);
+            if (!order) {
+                throw new Error('ORDER_NOT_FOUND');
+            }
+            // Authorization check - only admin or order owner can request refund
+            if (userRole !== 'admin' && order.userId.toString() !== userId) {
+                throw new Error('UNAUTHORIZED');
+            }
+            // Validate payment status
+            if (order.paymentStatus !== 'captured') {
+                throw new Error('PAYMENT_NOT_CAPTURED');
+            }
+            if (!order.razorpayPaymentId) {
+                throw new Error('RAZORPAY_PAYMENT_ID_MISSING');
+            }
+            // Calculate refund amount
+            const refundAmount = amount || order.totalPrice;
+            const alreadyRefunded = order.amountRefunded || 0;
+            if (alreadyRefunded + refundAmount > (order.amountPaid || order.totalPrice || 0)) {
+                throw new Error('REFUND_EXCEEDS_PAYMENT');
+            }
+            // Call Razorpay refund API
+            console.log(`Processing refund for order ${orderId}: ₹${refundAmount}`);
+            const refund = await payment_service_1.default.refundPayment(order.razorpayPaymentId, refundAmount, { reason: reason || 'Customer requested refund', orderId: order.orderId });
+            // Calculate refund status
+            const totalRefunded = alreadyRefunded + refundAmount;
+            const refundStatus = totalRefunded >= (order.amountPaid || order.totalPrice || 0) ? 'full' : 'partial';
+            // Update order with refund details
+            await index_1.Order.findByIdAndUpdate(orderId, {
+                $set: {
+                    amountRefunded: totalRefunded,
+                    refundStatus: refundStatus,
+                    refundDetails: refund,
+                    orderStatus: refundStatus === 'full' ? 'cancelled' : order.orderStatus
+                }
+            }, { session });
+            // Restore stock if full refund
+            if (refundStatus === 'full') {
+                for (const item of order.orderItems) {
+                    await index_1.Product.findByIdAndUpdate(item.productId, { $inc: { stock: item.quantity } }, { session });
+                }
+                console.log(`Stock restored for order ${orderId} after full refund`);
+            }
+            res.status(200).json({
+                success: true,
+                data: {
+                    refund,
+                    refundAmount,
+                    totalRefunded,
+                    refundStatus,
+                    message: `Refund of ₹${refundAmount} processed successfully`
+                }
+            });
+        });
+    }
+    catch (error) {
+        console.error('Refund error:', error);
+        let errorMessage = 'Failed to process refund';
+        let errorCode = 'REFUND_ERROR';
+        if (error.message === 'ORDER_ID_REQUIRED') {
+            errorMessage = 'Order ID is required';
+            errorCode = 'ORDER_ID_REQUIRED';
+        }
+        else if (error.message === 'ORDER_NOT_FOUND') {
+            errorMessage = 'Order not found';
+            errorCode = 'ORDER_NOT_FOUND';
+        }
+        else if (error.message === 'UNAUTHORIZED') {
+            errorMessage = 'You are not authorized to refund this order';
+            errorCode = 'UNAUTHORIZED';
+        }
+        else if (error.message === 'PAYMENT_NOT_CAPTURED') {
+            errorMessage = 'Payment was not captured, cannot refund';
+            errorCode = 'PAYMENT_NOT_CAPTURED';
+        }
+        else if (error.message === 'RAZORPAY_PAYMENT_ID_MISSING') {
+            errorMessage = 'Razorpay payment ID is missing from order';
+            errorCode = 'RAZORPAY_PAYMENT_ID_MISSING';
+        }
+        else if (error.message === 'REFUND_EXCEEDS_PAYMENT') {
+            errorMessage = 'Refund amount exceeds payment amount';
+            errorCode = 'REFUND_EXCEEDS_PAYMENT';
+        }
+        else if (error.message) {
+            errorMessage = error.message;
+        }
+        res.status(400).json({
+            success: false,
+            error: {
+                message: errorMessage,
+                code: errorCode
+            }
+        });
+    }
+    finally {
+        await session.endSession();
     }
 });
 // New endpoint to check payment status without full verification
@@ -445,10 +579,17 @@ router.post('/check-status', auth_1.auth, database_1.ensureDatabaseConnection, a
         });
     }
 });
-// New endpoint for payment status polling
+// Payment status polling endpoint (optimized for client-side polling)
+// NOTE: This endpoint performs SHORT polling (single check) instead of LONG polling
+// to avoid blocking the server. Clients should poll this endpoint repeatedly with delays.
+// For production, consider implementing Server-Sent Events (SSE) or WebSockets for real-time updates.
 router.post('/poll-status', auth_1.auth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
-        const { razorpay_order_id, razorpay_payment_id, maxAttempts = 10, intervalMs = 2000 } = req.body;
+        const { razorpay_order_id, razorpay_payment_id, maxAttempts = 3, intervalMs = 1000 } = req.body;
+        // Enforce maximum timeout to prevent request blocking (max 5 seconds)
+        const MAX_TIMEOUT_MS = 5000;
+        const effectiveMaxAttempts = Math.min(maxAttempts, Math.floor(MAX_TIMEOUT_MS / intervalMs));
+        const effectiveInterval = Math.min(intervalMs, 2000); // Max 2 second intervals
         if (!razorpay_order_id && !razorpay_payment_id) {
             res.status(400).json({
                 success: false,
@@ -461,7 +602,7 @@ router.post('/poll-status', auth_1.auth, database_1.ensureDatabaseConnection, as
         }
         let attempts = 0;
         let order = null;
-        while (attempts < maxAttempts) {
+        while (attempts < effectiveMaxAttempts) {
             try {
                 // Find order
                 order = await index_1.Order.findOne({
@@ -534,15 +675,15 @@ router.post('/poll-status', auth_1.auth, database_1.ensureDatabaseConnection, as
                     }
                 }
                 attempts++;
-                if (attempts < maxAttempts) {
-                    await new Promise(resolve => setTimeout(resolve, intervalMs));
+                if (attempts < effectiveMaxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, effectiveInterval));
                 }
             }
             catch (error) {
                 console.error('Error in polling attempt:', error);
                 attempts++;
-                if (attempts < maxAttempts) {
-                    await new Promise(resolve => setTimeout(resolve, intervalMs));
+                if (attempts < effectiveMaxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, effectiveInterval));
                 }
             }
         }
@@ -572,53 +713,74 @@ router.post('/poll-status', auth_1.auth, database_1.ensureDatabaseConnection, as
 });
 // Webhook endpoint for Razorpay payment status updates
 router.post('/webhook', express_1.default.raw({ type: 'application/json' }), async (req, res) => {
+    const session = await mongoose_1.default.startSession();
     try {
-        const signature = req.headers['x-razorpay-signature'];
-        const body = req.body;
-        if (!signature) {
-            console.error('Missing Razorpay signature in webhook');
-            res.status(400).json({ success: false, error: 'Missing signature' });
-            return;
-        }
-        // Verify webhook signature
-        const isValidSignature = payment_service_1.default.verifyWebhookSignature(body.toString(), signature);
-        if (!isValidSignature) {
-            console.error('Invalid webhook signature');
-            res.status(400).json({ success: false, error: 'Invalid signature' });
-            return;
-        }
-        const event = JSON.parse(body.toString());
-        console.log('Razorpay webhook event:', event.event);
-        // Handle different webhook events
-        switch (event.event) {
-            case 'payment.captured':
-                await handlePaymentCaptured(event.payload.payment.entity);
-                break;
-            case 'payment.failed':
-                await handlePaymentFailed(event.payload.payment.entity);
-                break;
-            case 'order.paid':
-                await handleOrderPaid(event.payload.order.entity);
-                break;
-            default:
-                console.log('Unhandled webhook event:', event.event);
-        }
-        res.status(200).json({ success: true });
+        await session.withTransaction(async () => {
+            const signature = req.headers['x-razorpay-signature'];
+            const body = req.body;
+            if (!signature) {
+                console.error('Missing Razorpay signature in webhook');
+                res.status(400).json({ success: false, error: 'Missing signature' });
+                return;
+            }
+            // Verify webhook signature
+            const isValidSignature = payment_service_1.default.verifyWebhookSignature(body.toString(), signature);
+            if (!isValidSignature) {
+                console.error('Invalid webhook signature');
+                res.status(400).json({ success: false, error: 'Invalid signature' });
+                return;
+            }
+            const event = JSON.parse(body.toString());
+            console.log('Razorpay webhook event:', event.event);
+            // IDEMPOTENCY PROTECTION: Check if webhook already processed
+            const webhookId = `${event.event}_${event.payload.payment?.entity?.id || event.payload.order?.entity?.id}_${Date.now()}`;
+            const existingWebhook = await index_1.Order.findOne({
+                'webhookEvents.event': event.event,
+                'webhookEvents.timestamp': { $gte: new Date(Date.now() - 60000) } // Within last minute
+            }).session(session);
+            if (existingWebhook) {
+                console.log('Webhook already processed, skipping duplicate');
+                res.status(200).json({ success: true, message: 'Webhook already processed' });
+                return;
+            }
+            // Handle different webhook events
+            switch (event.event) {
+                case 'payment.captured':
+                    await handlePaymentCaptured(event.payload.payment.entity, session);
+                    break;
+                case 'payment.failed':
+                    await handlePaymentFailed(event.payload.payment.entity, session);
+                    break;
+                case 'order.paid':
+                    await handleOrderPaid(event.payload.order.entity, session);
+                    break;
+                default:
+                    console.log('Unhandled webhook event:', event.event);
+            }
+            res.status(200).json({ success: true });
+        });
     }
     catch (error) {
         console.error('Error processing webhook:', error);
         res.status(500).json({ success: false, error: 'Webhook processing failed' });
     }
+    finally {
+        await session.endSession();
+    }
 });
 // Helper function to handle payment captured event
-async function handlePaymentCaptured(payment) {
+async function handlePaymentCaptured(payment, session) {
     try {
         const webhookEvent = {
             event: 'payment.captured',
             timestamp: new Date(),
             data: payment
         };
-        const order = await index_1.Order.findOneAndUpdate({ razorpayPaymentId: payment.id }, {
+        // IDEMPOTENCY CHECK: Only update if not already captured
+        const order = await index_1.Order.findOneAndUpdate({
+            razorpayPaymentId: payment.id,
+            paymentStatus: { $ne: 'captured' } // Only update if not already captured
+        }, {
             $set: {
                 orderStatus: 'payment_done',
                 paymentStatus: 'captured',
@@ -634,14 +796,21 @@ async function handlePaymentCaptured(payment) {
             $push: {
                 webhookEvents: webhookEvent
             }
-        }, { new: true });
+        }, {
+            new: true,
+            session: session
+        });
         if (order) {
             console.log(`Payment captured for order: ${order._id}`);
             console.log(`Transaction ID: ${payment.id}, Amount: ₹${payment.amount ? payment.amount / 100 : 0}`);
-            // Update product stock
-            for (const item of order.orderItems) {
-                await index_1.Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
-            }
+            // NOTE: Stock was already deducted during reservation in /create-order
+            // DO NOT deduct stock again here to avoid double deduction
+            // Stock deduction happens in:
+            // 1. stockService.reserveStock() during /create-order
+            // 2. This webhook handler is for redundancy/verification only
+        }
+        else {
+            console.log(`Payment already processed for payment ID: ${payment.id}`);
         }
     }
     catch (error) {
@@ -649,14 +818,18 @@ async function handlePaymentCaptured(payment) {
     }
 }
 // Helper function to handle payment failed event
-async function handlePaymentFailed(payment) {
+async function handlePaymentFailed(payment, session) {
     try {
         const webhookEvent = {
             event: 'payment.failed',
             timestamp: new Date(),
             data: payment
         };
-        const order = await index_1.Order.findOneAndUpdate({ razorpayPaymentId: payment.id }, {
+        // IDEMPOTENCY CHECK: Only update if not already failed
+        const order = await index_1.Order.findOneAndUpdate({
+            razorpayPaymentId: payment.id,
+            paymentStatus: { $nin: ['failed', 'captured'] } // Only update if not already processed
+        }, {
             $set: {
                 orderStatus: 'cancelled',
                 paymentStatus: 'failed',
@@ -677,19 +850,19 @@ async function handlePaymentFailed(payment) {
             $push: {
                 webhookEvents: webhookEvent
             }
-        }, { new: true });
+        }, {
+            new: true,
+            session: session
+        });
         if (order) {
             console.log(`Payment failed for order: ${order._id}, Reason: ${payment.error_code || 'Unknown'}`);
             console.log(`Transaction ID: ${payment.id}, Error: ${payment.error_description || 'Unknown error'}`);
-            // Restore product stock if it was decremented
-            if (!order.stockRestored) {
-                for (const item of order.orderItems) {
-                    await index_1.Product.findByIdAndUpdate(item.productId, { $inc: { stock: item.quantity } });
-                }
-                // Mark stock as restored
-                await index_1.Order.findByIdAndUpdate(order._id, { stockRestored: true });
-                console.log(`Stock restored for failed order: ${order._id}`);
-            }
+            // NOTE: Stock was already deducted during reservation in /create-order
+            // Stock restoration should be handled by the stock service, not here
+            // This webhook handler is for status updates only
+        }
+        else {
+            console.log(`Payment already processed for payment ID: ${payment.id}`);
         }
     }
     catch (error) {
@@ -697,16 +870,26 @@ async function handlePaymentFailed(payment) {
     }
 }
 // Helper function to handle order paid event
-async function handleOrderPaid(order) {
+async function handleOrderPaid(order, session) {
     try {
-        const dbOrder = await index_1.Order.findOneAndUpdate({ razorpayOrderId: order.id }, {
+        // IDEMPOTENCY CHECK: Only update if not already paid
+        const dbOrder = await index_1.Order.findOneAndUpdate({
+            razorpayOrderId: order.id,
+            paymentStatus: { $ne: 'paid' } // Only update if not already paid
+        }, {
             status: 'confirmed',
             paymentStatus: 'paid',
             paymentDate: new Date(),
             razorpayOrderDetails: order
-        }, { new: true });
+        }, {
+            new: true,
+            session: session
+        });
         if (dbOrder) {
             console.log(`Order paid: ${dbOrder._id}`);
+        }
+        else {
+            console.log(`Order already processed for order ID: ${order.id}`);
         }
     }
     catch (error) {

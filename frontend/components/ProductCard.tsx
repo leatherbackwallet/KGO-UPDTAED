@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import WishlistButton from './WishlistButton';
-import { DEFAULT_PRODUCT_IMAGE, getProductImage } from '../utils/imageUtils';
-import { getMultilingualText } from '../utils/api';
+import { DEFAULT_PRODUCT_IMAGE, getProductImage, getOriginalImagePath } from '../utils/imageUtils';
 import { Product } from '../types/shared';
 import { useSmartImageCache } from '../hooks/useSmartImageCache';
 
@@ -46,7 +45,7 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
     
     addToCart({
       product: product._id,
-      name: getMultilingualText(product.name),
+      name: product.name,
       price: product.price || 0,
       image: getProductImage(product.images?.[0], product.slug),
       quantity: 1,
@@ -69,8 +68,8 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
       {/* Image Container */}
       <div className="relative overflow-hidden">
         {(!imageLoaded || isLoading) && (
-          <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
-            <div className="animate-pulse bg-gray-300 rounded w-full h-full"></div>
+          <div className="w-full max-h-48 bg-gray-200 flex items-center justify-center">
+            <div className="animate-pulse bg-gray-300 rounded w-full h-48"></div>
             {isCached && (
               <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
                 Cached
@@ -80,8 +79,8 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
         )}
         <img
           src={imageUrl}
-          alt={getMultilingualText(product.name)}
-          className={`w-full h-64 object-cover transition-all duration-300 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute'}`}
+          alt={product.name}
+          className={`w-full max-h-48 object-contain transition-all duration-300 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute'}`}
           onError={handleImageError}
           onLoad={() => setImageLoaded(true)}
           loading="lazy"
@@ -95,10 +94,10 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
             <button
               onClick={handleAddToCart}
               disabled={(product.stock || 0) === 0}
-              className="w-12 h-12 rounded-full bg-kgo-red flex items-center justify-center hover:bg-red-700 transition-all duration-200 hover:scale-110 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-10 h-10 rounded-full bg-kgo-red flex items-center justify-center hover:bg-red-700 transition-all duration-200 hover:scale-110 disabled:bg-gray-400 disabled:cursor-not-allowed"
               aria-label="Add to cart"
             >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
               </svg>
             </button>
@@ -130,15 +129,15 @@ export default function ProductCard({ product, onQuickView, onClick }: ProductCa
       </div>
 
       {/* Product Info */}
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-          {getMultilingualText(product.name)}
+      <div className="p-3">
+        <h3 className="text-base font-semibold text-gray-900 mb-1 line-clamp-2">
+          {product.name}
         </h3>
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-          {getMultilingualText(product.description)}
+        <p className="text-gray-600 text-xs mb-2 line-clamp-2">
+          {product.description}
         </p>
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-gray-900">
+          <span className="text-lg font-bold text-gray-900">
             ₹{product.price?.toFixed(2) || '0.00'}
           </span>
         </div>

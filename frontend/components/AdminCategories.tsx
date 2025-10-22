@@ -53,6 +53,8 @@ export default function AdminCategories() {
   const [showProductAssignment, setShowProductAssignment] = useState<Category | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [categoryProducts, setCategoryProducts] = useState<{[categoryId: string]: Product[]}>({});
+  const [loadingProducts, setLoadingProducts] = useState<{[categoryId: string]: boolean}>({});
   const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
     description: '',
@@ -71,14 +73,14 @@ export default function AdminCategories() {
     try {
       setLoading(true);
       setError(null);
-      // Add cache busting parameter to ensure fresh data
-      const response = await api.get(`/categories?includeInactive=true&_t=${Date.now()}`, {
+      // Use dedicated admin categories endpoint - always MongoDB
+      const response = await api.get(`/admin/categories?includeInactive=true&_t=${Date.now()}`, {
         headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
-      console.log('🔍 Fetched categories data:', response.data);
+      console.log('🔍 Fetched admin categories data from MongoDB:', response.data);
       setCategories(response.data.data || []);
     } catch (err: any) {
-      console.error('Error fetching categories:', err);
+      console.error('Error fetching admin categories:', err);
       setError('Failed to fetch categories');
     } finally {
       setLoading(false);
@@ -99,6 +101,27 @@ export default function AdminCategories() {
     }
   };
 
+  const fetchCategoryProducts = async (categoryId: string) => {
+    try {
+      setLoadingProducts(prev => ({ ...prev, [categoryId]: true }));
+      const response = await api.get(`/admin/categories/${categoryId}/products`, {
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
+      });
+      setCategoryProducts(prev => ({ 
+        ...prev, 
+        [categoryId]: response.data.data || [] 
+      }));
+    } catch (err: any) {
+      console.error('Error fetching category products:', err);
+      setCategoryProducts(prev => ({ 
+        ...prev, 
+        [categoryId]: [] 
+      }));
+    } finally {
+      setLoadingProducts(prev => ({ ...prev, [categoryId]: false }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -110,11 +133,11 @@ export default function AdminCategories() {
       };
 
       if (editingCategory) {
-        await api.put(`/categories/${editingCategory._id}`, payload, {
+        await api.put(`/admin/categories/${editingCategory._id}`, payload, {
           headers: { Authorization: `Bearer ${tokens?.accessToken}` }
         });
       } else {
-        await api.post('/categories', payload, {
+        await api.post('/admin/categories', payload, {
           headers: { Authorization: `Bearer ${tokens?.accessToken}` }
         });
       }
@@ -131,16 +154,16 @@ export default function AdminCategories() {
     try {
       setLoading(true);
       setError(null);
-      // Add multiple cache busting parameters to force fresh data
-      const response = await api.get(`/categories?includeInactive=true&_t=${Date.now()}&_refresh=${Math.random()}`, {
+      // Use dedicated admin categories endpoint - always MongoDB
+      const response = await api.get(`/admin/categories?includeInactive=true&_t=${Date.now()}&_refresh=${Math.random()}`, {
         headers: { 
           Authorization: `Bearer ${tokens?.accessToken}`
         }
       });
-      console.log('🔄 Refreshed categories data:', response.data);
+      console.log('🔄 Refreshed admin categories data from MongoDB:', response.data);
       setCategories(response.data.data || []);
     } catch (err: any) {
-      console.error('Error refreshing categories:', err);
+      console.error('Error refreshing admin categories:', err);
       setError('Failed to refresh categories');
     } finally {
       setLoading(false);
@@ -162,7 +185,7 @@ export default function AdminCategories() {
     if (!confirm(`Are you sure you want to delete "${category.name}"?`)) return;
 
     try {
-      await api.delete(`/categories/${category._id}`, {
+      await api.delete(`/admin/categories/${category._id}`, {
         headers: { Authorization: `Bearer ${tokens?.accessToken}` }
       });
       await fetchCategories();
@@ -174,7 +197,7 @@ export default function AdminCategories() {
 
   const handleToggleActive = async (category: Category) => {
     try {
-      await api.put(`/categories/${category._id}`, 
+      await api.put(`/admin/categories/${category._id}`, 
         { isActive: !category.isActive },
         { headers: { Authorization: `Bearer ${tokens?.accessToken}` } }
       );
@@ -189,13 +212,15 @@ export default function AdminCategories() {
     if (!showProductAssignment || selectedProducts.length === 0) return;
 
     try {
-      await api.put(`/categories/${showProductAssignment._id}/products`, 
+      await api.put(`/admin/categories/${showProductAssignment._id}/products`, 
         { productIds: selectedProducts },
         { headers: { Authorization: `Bearer ${tokens?.accessToken}` } }
       );
       setShowProductAssignment(null);
       setSelectedProducts([]);
       await fetchCategories();
+      // Refresh the category products for the assigned category
+      await fetchCategoryProducts(showProductAssignment._id);
     } catch (err: any) {
       console.error('Error assigning products:', err);
       setError(err.response?.data?.error?.message || 'Failed to assign products');
@@ -614,6 +639,9 @@ export default function AdminCategories() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                     Status
                   </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
+                    Products
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -632,6 +660,10 @@ export default function AdminCategories() {
                       }`}
                       onClick={() => {
                         setEditingCategory(isSelected ? null : category);
+                        // Load products for this category when selected
+                        if (!isSelected && !categoryProducts[category._id]) {
+                          fetchCategoryProducts(category._id);
+                        }
                       }}
                       title={isSelected ? 'Click to deselect' : 'Click to select this category'}
                     >
@@ -661,6 +693,34 @@ export default function AdminCategories() {
                         }`}>
                           {category.isActive ? 'Active' : 'Inactive'}
                         </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center space-x-2">
+                          {loadingProducts[category._id] ? (
+                            <div className="flex items-center text-sm text-gray-500">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500 mr-2"></div>
+                              Loading...
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm text-gray-600">
+                                {categoryProducts[category._id]?.length || 0} products
+                              </span>
+                              {categoryProducts[category._id] && categoryProducts[category._id].length > 0 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowProductAssignment(category);
+                                    setSelectedProducts(categoryProducts[category._id].map(p => p._id));
+                                  }}
+                                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                                >
+                                  View
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

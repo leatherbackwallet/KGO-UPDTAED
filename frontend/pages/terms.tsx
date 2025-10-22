@@ -15,16 +15,16 @@ export default function Terms() {
 
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-red-50">
         {/* Hero Section */}
-        <section className="relative py-20 bg-gradient-to-r from-kgo-green to-kgo-red text-white">
+        <section className="relative py-20 bg-gradient-to-r from-green-600 to-red-600 text-white shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
                 Terms & Conditions
               </h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-white drop-shadow-md">
                 Please read these terms carefully before using our platform
               </p>
-              <p className="text-sm opacity-90">
+              <p className="text-sm text-white opacity-95 drop-shadow-sm">
                 Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
@@ -38,266 +38,133 @@ export default function Terms() {
               
               {/* Introduction */}
               <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Introduction</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">Introduction</h2>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  Welcome to OnYourBehlf (Kerala Gifts Online). These Terms and Conditions ("Terms") govern your use of our website and services. By accessing or using our platform, you agree to be bound by these Terms.
+                  Please read and accept our terms and conditions to proceed with your order.
                 </p>
                 <p className="text-gray-600 leading-relaxed">
                   <strong>Business Information:</strong><br />
-                  Business Name: OnYourBehlf (Kerala Gifts Online)<br />
-                  Billing Label: OnYourBehlf - Kerala Gifts Online<br />
+                  Business Name: KGO (Kerala Gifts Online)<br />
+                  Billing Label: KGO - Kerala Gifts Online<br />
                   Contact: sales@keralagiftsonline.com<br />
-                  Phone: +91 8075030919
+                  Phone: +91 8075030919 OR +1 (281) 723-8520
                 </p>
               </div>
 
-              {/* Acceptance of Terms */}
+              {/* Order Processing */}
               <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">2. Acceptance of Terms</h2>
-                <p className="text-gray-600 leading-relaxed mb-4">
-                  By using our website, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree to these Terms, please do not use our services.
-                </p>
-                <p className="text-gray-600 leading-relaxed">
-                  We reserve the right to modify these Terms at any time. Changes will be effective immediately upon posting on our website. Your continued use of our services constitutes acceptance of any modifications.
-                </p>
-              </div>
-
-              {/* User Accounts */}
-              <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">3. User Accounts</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Order Processing</h2>
                 <div className="space-y-4">
                   <p className="text-gray-600 leading-relaxed">
-                    To place orders, you may need to create an account. You are responsible for:
+                    By placing an order, you agree to provide accurate and complete information. 
+                    We reserve the right to cancel or refuse any order at our discretion.
                   </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>Providing accurate and complete information</li>
-                    <li>Maintaining the security of your account credentials</li>
-                    <li>All activities that occur under your account</li>
-                    <li>Notifying us immediately of any unauthorized use</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Products and Services */}
-              <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">4. Products and Services</h2>
-                <div className="space-y-4">
                   <p className="text-gray-600 leading-relaxed">
-                    We offer authentic Kerala gifts and traditional products including:
+                    Orders are processed within 1-2 business days. You will receive a confirmation 
+                    email once your order is confirmed. For same day orders an emergency charge of 
+                    Rs:750/- is applicable as extra.
                   </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>Traditional Kerala spices and condiments</li>
-                    <li>Handcrafted items and artifacts</li>
-                    <li>Traditional snacks and sweets</li>
-                    <li>Combo gift packages</li>
-                    <li>Personalized gift services</li>
-                  </ul>
                   <p className="text-gray-600 leading-relaxed">
-                    Product descriptions, images, and prices are subject to change without notice. We strive for accuracy but cannot guarantee that all information is error-free.
+                    If you want to remove any item from the pre-set gift combo and want to add your 
+                    own then choice is yours and any item of your choice can be added and delivered 
+                    by paying additional cost incurred if any by making a direct call or WhatsApp to 
+                    us at +91 8075030919 OR +1 (281) 723-8520
                   </p>
                 </div>
               </div>
 
-              {/* Orders and Payment */}
+              {/* Payment Terms */}
               <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">5. Orders and Payment</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">2. Payment Terms</h2>
                 <div className="space-y-4">
                   <p className="text-gray-600 leading-relaxed">
-                    <strong>Order Process:</strong>
+                    Payment is required at the time of order placement. We accept various payment 
+                    methods including credit cards, debit cards, and digital wallets.
                   </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>All orders are subject to product availability</li>
-                    <li>We reserve the right to refuse or cancel any order</li>
-                    <li>Order confirmation will be sent via email</li>
-                    <li>Prices are in Indian Rupees (INR) unless otherwise specified</li>
-                  </ul>
-                  
                   <p className="text-gray-600 leading-relaxed">
-                    <strong>Payment Methods:</strong> We accept payments through Razorpay including:
-                  </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>Credit and Debit Cards</li>
-                    <li>UPI payments</li>
-                    <li>Net Banking</li>
-                    <li>Digital Wallets</li>
-                  </ul>
-                  
-                  <p className="text-gray-600 leading-relaxed">
-                    All payments are processed securely through Razorpay. We do not store your payment information on our servers.
-                  </p>
-                </div>
-              </div>
-
-              {/* Pricing and Taxes */}
-              <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">6. Pricing and Taxes</h2>
-                <div className="space-y-4">
-                  <p className="text-gray-600 leading-relaxed">
-                    <strong>Pricing Policy:</strong>
-                  </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>All prices include applicable taxes</li>
-                    <li>Shipping charges are calculated based on delivery location</li>
-                    <li>Prices are subject to change without prior notice</li>
-                    <li>Special offers and discounts are subject to terms and conditions</li>
-                  </ul>
-                  
-                  <p className="text-gray-600 leading-relaxed">
-                    <strong>Billing:</strong> All charges will appear on your statement as "OnYourBehlf - Kerala Gifts Online"
+                    All prices are in Indian Rupees (₹), including premium quality product cost, 
+                    customization and personal delivery charge and applicable taxes unless otherwise stated.
                   </p>
                 </div>
               </div>
 
               {/* Delivery and Shipping */}
               <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">7. Delivery and Shipping</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">3. Delivery and Shipping</h2>
                 <div className="space-y-4">
                   <p className="text-gray-600 leading-relaxed">
-                    <strong>Delivery Terms:</strong>
+                    We customize, make fresh purchases and do one-on-one personal premium delivery 
+                    of your gifts across Kerala. Delivery time and design of the items may vary 
+                    based on location and product availability without compromising quality, quantity 
+                    and timeliness of the occasion.
                   </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>Standard delivery: 24-48 hours within Kerala</li>
-                    <li>Other locations in India: 3-7 business days</li>
-                    <li>International delivery: 7-14 business days</li>
-                    <li>Delivery times are estimates and not guaranteed</li>
-                  </ul>
-                  
                   <p className="text-gray-600 leading-relaxed">
-                    <strong>Delivery Requirements:</strong>
+                    We undertake that we will try our level best to keep the surprise elements as 
+                    of your choice and Photos of your gifts will be shared without any fail. Videos 
+                    and photos of delivery are subject to the privacy and permission of the receiver.
                   </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>Valid delivery address must be provided</li>
-                    <li>Someone must be available to receive the package</li>
-                    <li>We are not responsible for delivery delays due to incorrect addresses</li>
-                    <li>Additional charges may apply for remote locations</li>
-                  </ul>
+                  <p className="text-gray-600 leading-relaxed">
+                    We are not responsible for delays caused by weather, natural disasters, or other 
+                    circumstances beyond our control.
+                  </p>
                 </div>
               </div>
 
               {/* Returns and Refunds */}
               <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">8. Returns and Refunds</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">4. Returns and Refunds</h2>
                 <div className="space-y-4">
                   <p className="text-gray-600 leading-relaxed">
-                    <strong>Return Policy:</strong>
+                    Since most of the items in the gift combos are customized with fresh items or 
+                    perishable items as of customer's choice and are not eligible for returns. 
+                    Refunds will be processed within 5-7 business days in case of any technical 
+                    errors after your payment is deducted but not reflected in our end.
                   </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>Returns must be initiated within 48 hours of delivery</li>
-                    <li>Products must be in original condition and packaging</li>
-                    <li>Perishable items cannot be returned</li>
-                    <li>Custom orders are non-returnable</li>
-                  </ul>
-                  
-                  <p className="text-gray-600 leading-relaxed">
-                    <strong>Refund Process:</strong>
-                  </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>Refunds will be processed within 5-7 business days</li>
-                    <li>Refunds will be issued to the original payment method</li>
-                    <li>Shipping charges are non-refundable unless the return is due to our error</li>
-                    <li>Contact us at sales@keralagiftsonline.com for return requests</li>
-                  </ul>
                 </div>
               </div>
 
-              {/* User Conduct */}
+              {/* Privacy and Data Protection */}
               <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">9. User Conduct</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">5. Privacy and Data Protection</h2>
                 <div className="space-y-4">
                   <p className="text-gray-600 leading-relaxed">
-                    You agree not to:
+                    We collect and process your personal information in accordance with our 
+                    Privacy Policy. Your data is used solely for order processing and customer service.
                   </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>Use our services for any unlawful purpose</li>
-                    <li>Interfere with the proper functioning of our website</li>
-                    <li>Attempt to gain unauthorized access to our systems</li>
-                    <li>Provide false or misleading information</li>
-                    <li>Violate any applicable laws or regulations</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Intellectual Property */}
-              <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">10. Intellectual Property</h2>
-                <div className="space-y-4">
                   <p className="text-gray-600 leading-relaxed">
-                    All content on our website, including text, images, logos, and software, is protected by copyright and other intellectual property laws. You may not:
+                    We do not sell or share your personal information with third parties without 
+                    your consent.
                   </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>Copy, modify, or distribute our content without permission</li>
-                    <li>Use our trademarks or logos without authorization</li>
-                    <li>Reverse engineer or attempt to extract source code</li>
-                    <li>Create derivative works based on our content</li>
-                  </ul>
                 </div>
               </div>
 
               {/* Limitation of Liability */}
               <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">11. Limitation of Liability</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">6. Limitation of Liability</h2>
                 <div className="space-y-4">
                   <p className="text-gray-600 leading-relaxed">
-                    To the maximum extent permitted by law, OnYourBehlf shall not be liable for:
-                  </p>
-                  <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                    <li>Indirect, incidental, or consequential damages</li>
-                    <li>Loss of profits, data, or business opportunities</li>
-                    <li>Damages resulting from third-party actions</li>
-                    <li>Force majeure events beyond our control</li>
-                  </ul>
-                  <p className="text-gray-600 leading-relaxed">
-                    Our total liability shall not exceed the amount paid by you for the specific product or service in question.
+                    Our liability is limited to the purchase and delivery of the products. We are 
+                    not liable for any indirect, incidental, or consequential damages at users end. 
+                    We don't offer any guarantees or warranty unless the original product manufacturer 
+                    provides so.
                   </p>
                 </div>
-              </div>
-
-              {/* Privacy */}
-              <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">12. Privacy</h2>
-                <p className="text-gray-600 leading-relaxed">
-                  Your privacy is important to us. Please review our Privacy Policy to understand how we collect, use, and protect your personal information.
-                </p>
-              </div>
-
-              {/* Governing Law */}
-              <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">13. Governing Law</h2>
-                <p className="text-gray-600 leading-relaxed">
-                  These Terms shall be governed by and construed in accordance with the laws of India. Any disputes arising from these Terms shall be subject to the exclusive jurisdiction of the courts in Kerala, India.
-                </p>
               </div>
 
               {/* Contact Information */}
               <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">14. Contact Information</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">Contact Information</h2>
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <p className="text-gray-600 leading-relaxed mb-4">
-                    If you have any questions about these Terms, please contact us:
+                    For any questions regarding these terms, please contact us:
                   </p>
                   <div className="space-y-2 text-gray-600">
-                    <p><strong>Email:</strong> sales@keralagiftsonline.com</p>
                     <p><strong>Phone:</strong> +91 8075030919</p>
+                    <p><strong>International:</strong> +1 (281) 723-8520</p>
                     <p><strong>WhatsApp:</strong> +91 8075030919</p>
-                    <p><strong>Business Hours:</strong> Monday-Friday 9:00 AM - 6:00 PM IST</p>
+                    <p><strong>Email:</strong> sales@keralagiftsonline.com</p>
                   </div>
                 </div>
-              </div>
-
-              {/* Severability */}
-              <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">15. Severability</h2>
-                <p className="text-gray-600 leading-relaxed">
-                  If any provision of these Terms is found to be invalid or unenforceable, the remaining provisions shall remain in full force and effect.
-                </p>
-              </div>
-
-              {/* Entire Agreement */}
-              <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">16. Entire Agreement</h2>
-                <p className="text-gray-600 leading-relaxed">
-                  These Terms, together with our Privacy Policy and other policies referenced herein, constitute the entire agreement between you and OnYourBehlf regarding your use of our services.
-                </p>
               </div>
 
             </div>
@@ -330,3 +197,4 @@ export async function getServerSideProps() {
     props: {},
   };
 }
+

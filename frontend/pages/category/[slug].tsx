@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
+import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import ProductCard from '../../components/ProductCard';
 import SEOHead from '../../components/SEOHead';
@@ -9,7 +10,6 @@ import Breadcrumb from '../../components/Breadcrumb';
 import { ProductSkeletonGrid } from '../../components/ProductSkeleton';
 import api from '../../utils/api';
 import { Product } from '../../types/shared';
-import { getMultilingualText } from '../../utils/api';
 
 interface Category {
   _id: string;
@@ -115,12 +115,12 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
           <div className="text-center">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Category Not Found</h1>
             <p className="text-gray-600 mb-6">The category you are looking for does not exist.</p>
-            <a 
+            <Link 
               href="/products" 
               className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
             >
               Browse All Products
-            </a>
+            </Link>
           </div>
         </div>
       </>
@@ -137,7 +137,7 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
         url={`https://keralagiftsonline.in/category/${category.slug}`}
         structuredData={seoData.structuredData}
         products={products.map(product => ({
-          name: getMultilingualText(product.name),
+          name: product.name,
           categories: product.categories?.map(cat => ({ name: cat })) || [],
           occasions: product.occasions?.map(occ => ({ name: occ })) || []
         }))}
@@ -181,7 +181,7 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
             <ProductSkeletonGrid count={12} />
           ) : products.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-12">
                 {products.map((product) => (
                   <ProductCard
                     key={product._id}
@@ -214,12 +214,12 @@ const CategoryPage: React.FC<CategoryPageProps> = ({
               <p className="text-gray-600 mb-6">
                 We're currently updating our {category.name.toLowerCase()} collection. Check back soon!
               </p>
-              <a 
+              <Link 
                 href="/products" 
                 className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
               >
                 Browse All Products
-              </a>
+              </Link>
             </div>
           )}
         </div>

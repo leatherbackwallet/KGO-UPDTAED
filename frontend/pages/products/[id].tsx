@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import Link from 'next/link';
 import api from '../../utils/api';
 import Navbar from '../../components/Navbar';
 import SEOHead from '../../components/SEOHead';
 import { getProductImage } from '../../utils/imageUtils';
-import { getMultilingualText } from '../../utils/api';
 import { generateKeywords } from '../../utils/seoKeywords';
 import { Product } from '../../types/shared';
 
@@ -50,7 +50,7 @@ const ProductDetailPage: React.FC = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h2>
           <p className="text-gray-600 mb-4">{error || 'The product you are looking for does not exist.'}</p>
-          <a href="/products" className="text-blue-600 hover:text-blue-800">Back to Products</a>
+          <Link href="/products" className="text-blue-600 hover:text-blue-800">Back to Products</Link>
         </div>
       </div>
     );
@@ -60,15 +60,15 @@ const ProductDetailPage: React.FC = () => {
     if (!product.category) return 'Uncategorized';
     if (typeof product.category === 'string') return product.category;
     if (product.category.name) {
-      return getMultilingualText(product.category.name);
+      return product.category.name;
     }
     return 'Uncategorized';
   };
 
   // Generate comprehensive product SEO data
   const generateProductSEO = () => {
-    const productName = getMultilingualText(product.name);
-    const productDescription = getMultilingualText(product.description);
+    const productName = product.name;
+    const productDescription = product.description;
     const categoryName = getCategoryName();
     
     const title = `${productName} - Premium Kerala Gift | KeralGiftsOnline`;
@@ -155,7 +155,7 @@ const ProductDetailPage: React.FC = () => {
         url={`https://keralagiftsonline.in/product/${product._id}`}
         structuredData={productSEO.structuredData}
         products={[{
-          name: getMultilingualText(product.name),
+          name: product.name,
           categories: product.category ? [{ name: getCategoryName() }] : [],
           occasions: product.occasions?.map(occ => ({ name: occ })) || []
         }]}
@@ -167,11 +167,11 @@ const ProductDetailPage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
               {/* Product Images */}
               <div className="space-y-4">
-                <div className="aspect-w-1 aspect-h-1 w-full">
+                <div className="w-full">
                   <img
                     src={getProductImage(product.images[selectedImage], product.slug)}
-                    alt={getMultilingualText(product.name)}
-                    className="w-full h-96 object-cover rounded-lg"
+                    alt={product.name}
+                    className="w-full max-h-96 object-contain rounded-lg"
                   />
                 </div>
                 
@@ -188,8 +188,8 @@ const ProductDetailPage: React.FC = () => {
                       >
                         <img
                           src={getProductImage(image, product.slug)}
-                          alt={`${getMultilingualText(product.name)} ${index + 1}`}
-                          className="w-full h-full object-cover"
+                          alt={`${product.name} ${index + 1}`}
+                          className="w-full h-full object-contain"
                         />
                       </button>
                     ))}
@@ -201,7 +201,7 @@ const ProductDetailPage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    {getMultilingualText(product.name)}
+                    {product.name}
                   </h1>
                   <p className="text-sm text-gray-500 mb-4">
                     Category: {getCategoryName()}
@@ -221,7 +221,7 @@ const ProductDetailPage: React.FC = () => {
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-2">Description</h2>
                   <p className="text-gray-600 leading-relaxed">
-                    {getMultilingualText(product.description)}
+                    {product.description}
                   </p>
                 </div>
 

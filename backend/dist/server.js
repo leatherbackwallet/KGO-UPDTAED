@@ -236,6 +236,7 @@ const subscriptions_1 = __importDefault(require("./routes/subscriptions"));
 const content_1 = __importDefault(require("./routes/content"));
 const products_1 = __importDefault(require("./routes/products"));
 const categories_json_1 = __importDefault(require("./routes/categories_json"));
+const adminCategories_1 = __importDefault(require("./routes/adminCategories"));
 const vendors_1 = __importDefault(require("./routes/vendors"));
 const users_1 = __importDefault(require("./routes/users"));
 const wishlist_1 = __importDefault(require("./routes/wishlist"));
@@ -331,6 +332,7 @@ app.use('/api/profile', rateLimit_1.apiLimiter, profile_1.default);
 // Use user-aware limiter for products instead of IP-based
 app.use('/api/products', rateLimit_1.userAwareLimiter, products_1.default);
 app.use('/api/categories', rateLimit_1.apiLimiter, categories_json_1.default);
+app.use('/api/admin/categories', rateLimit_1.apiLimiter, adminCategories_1.default);
 app.use('/api/vendors', rateLimit_1.apiLimiter, vendors_1.default);
 app.use('/api/orders', rateLimit_1.apiLimiter, orders_1.default);
 app.use('/api/payments', rateLimit_1.apiLimiter, payments_1.default);

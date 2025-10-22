@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import PasswordRequirements from '../components/PasswordRequirements';
@@ -144,9 +145,9 @@ export default function Login() {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <a href="/register" className="text-red-600 hover:text-red-700 font-medium">
+                <Link href="/register" className="text-red-600 hover:text-red-700 font-medium">
                   Sign up here
-                </a>
+                </Link>
               </p>
             </div>
           </div>

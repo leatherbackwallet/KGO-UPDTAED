@@ -101,19 +101,15 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                 },
                 specialInstructions: address.additionalInstructions || address.specialInstructions || ''
             };
-            // Update product stock atomically within transaction
-            for (const update of productUpdates) {
-                await index_1.Product.findByIdAndUpdate(update.productId, { $inc: { stock: -update.quantity } }, { session });
-            }
+            // Validate payment method BEFORE deducting stock
             // Reject COD payment method in production
             if ((paymentMethod === 'cod-test' || paymentMethod === 'cod') && process.env.NODE_ENV !== 'development') {
-                return res.status(400).json({
-                    success: false,
-                    error: {
-                        message: 'COD payment method is only available in development environment',
-                        code: 'COD_NOT_AVAILABLE'
-                    }
-                });
+                throw new Error('COD_NOT_AVAILABLE');
+            }
+            // Update product stock atomically within transaction
+            // Only deduct stock AFTER payment method validation to ensure proper rollback
+            for (const update of productUpdates) {
+                await index_1.Product.findByIdAndUpdate(update.productId, { $inc: { stock: -update.quantity } }, { session });
             }
             // Handle COD payment method (development only)
             if ((paymentMethod === 'cod-test' || paymentMethod === 'cod') && process.env.NODE_ENV === 'development') {
@@ -250,6 +246,15 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                 }
             });
         }
+        if (err.message === 'COD_NOT_AVAILABLE') {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    message: 'COD payment method is only available in development environment',
+                    code: 'COD_NOT_AVAILABLE'
+                }
+            });
+        }
         return res.status(500).json({
             success: false,
             error: { message: 'Server error', code: 'SERVER_ERROR' }
@@ -285,7 +290,10 @@ router.get('/my', auth_1.auth, async (req, res) => {
             }
         })
             .sort({ createdAt: -1 });
-        return res.json(orders || []);
+        return res.json({
+            success: true,
+            data: orders || []
+        });
     }
     catch (err) {
         console.error('Error fetching orders:', err);
@@ -375,7 +383,10 @@ router.get('/', auth_1.auth, (0, role_1.requireRole)('admin'), database_1.ensure
             }
         })
             .sort({ createdAt: -1 });
-        return res.json(orders || []);
+        return res.json({
+            success: true,
+            data: orders || []
+        });
     }
     catch (err) {
         console.error('Error fetching orders:', err);
