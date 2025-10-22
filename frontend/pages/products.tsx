@@ -13,6 +13,7 @@
 import React, { useState, useMemo } from 'react';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
+import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
@@ -129,6 +130,21 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
       </Head>
 
       <Navbar />
+
+      {/* Banner Section */}
+      <div className="w-full">
+        <div className="relative h-64 md:h-80 lg:h-96">
+          <Image
+            src="/images/products/Banner Generic.jpg"
+            alt="KGO Personalised Delivery - Premium Gifts & Traditional Products"
+            fill
+            className="object-cover"
+            priority
+          />
+          {/* Optional overlay for better text readability if needed */}
+          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+        </div>
+      </div>
 
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
