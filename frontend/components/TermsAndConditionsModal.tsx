@@ -99,7 +99,7 @@ export default function TermsAndConditionsModal({
                   If you want to remove any item from the pre-set gift combo and want to add your 
                   own then choice is yours and any item of your choice can be added and delivered 
                   by paying additional cost incurred if any by making a direct call or WhatsApp to 
-                  us at +91 9400 436 424 OR +1 (281) 723-8520
+                  us at +91 8075 030 919 OR +1 (281) 723-8520
                 </p>
               </section>
 

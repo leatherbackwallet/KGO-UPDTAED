@@ -46,7 +46,7 @@ export default function Refund() {
                   <strong>Business Information:</strong><br />
                   Business Name: KGO (Kerala Gifts Online)<br />
                   Contact: sales@keralagiftsonline.com<br />
-                  Phone: +91 9400 436 424 OR +1 (281) 723-8520
+                  Phone: +91 8075030919 OR +1 (281) 723-8520
                 </p>
               </div>
 
@@ -213,9 +213,9 @@ export default function Refund() {
                   </p>
                   <div className="space-y-2 text-gray-600">
                     <p><strong>Email:</strong> sales@keralagiftsonline.com</p>
-                    <p><strong>Phone:</strong> +91 9400 436 424</p>
+                    <p><strong>Phone:</strong> +91 8075030919</p>
                     <p><strong>International:</strong> +1 (281) 723-8520</p>
-                    <p><strong>WhatsApp:</strong> +91 9400 436 424</p>
+                    <p><strong>WhatsApp:</strong> +91 8075 030 919</p>
                     <p><strong>Business Hours:</strong> Monday-Friday 9:00 AM - 6:00 PM IST</p>
                   </div>
                   <p className="text-gray-600 leading-relaxed mt-4">

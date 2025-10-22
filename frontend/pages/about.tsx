@@ -281,7 +281,7 @@ export default function About() {
                       Orders are processed within 1-2 business days. You will receive a confirmation email once your order is confirmed. For same day orders an emergency charge of <span className="font-semibold text-kgo-red">Rs:750/-</span> is applicable as extra.
                     </p>
                     <p className="mb-2">
-                      If you want to remove any item from the pre-set gift combo and want to add your own, the choice is yours and any item of your choice can be added and delivered by paying additional cost incurred if any by making a direct call or WhatsApp to us at <a href="tel:+919400436424" className="text-kgo-green font-semibold underline">+91 9400 436 424</a> or <a href="tel:+12817238520" className="text-kgo-green font-semibold underline">+1 (281) 723-8520</a>.
+                      If you want to remove any item from the pre-set gift combo and want to add your own, the choice is yours and any item of your choice can be added and delivered by paying additional cost incurred if any by making a direct call or WhatsApp to us at <a href="tel:+918075030919" className="text-kgo-green font-semibold underline">+91 8075 030 919</a> or <a href="tel:+12817238520" className="text-kgo-green font-semibold underline">+1 (281) 723-8520</a>.
                     </p>
                   </div>
                   {/* 2. Payment Terms */}
@@ -345,7 +345,7 @@ export default function About() {
                         <span className="font-semibold">Phone:</span> <a href="tel:+918075030919" className="text-kgo-green underline">+91-8075 030 919</a>, <a href="tel:+12817238520" className="text-kgo-green underline">+1 (281) 723-8520</a>
                       </li>
                       <li>
-                        <span className="font-semibold">WhatsApp:</span> <a href="https://wa.me/919400436424" className="text-kgo-green underline">+91-9400 436 424</a>
+                        <span className="font-semibold">WhatsApp:</span> <a href="https://wa.me/918075030919" className="text-kgo-green underline">+91 8075 030 919</a>, <a href="https://wa.me/12817238520" className="text-kgo-green underline">+1 (281) 723-8520</a>
                       </li>
                     </ul>
                     <p className="text-sm text-gray-500 mt-2">
@@ -405,7 +405,7 @@ export default function About() {
                       </svg>
                     </div>
                     <div>                      <p className="font-semibold text-gray-900">WhatsApp</p>
-                      <p className="text-gray-600">+91 8075030919</p>
+                      <p className="text-gray-600">+91 8075 030 919</p>
                     </div>
                   </div>
 

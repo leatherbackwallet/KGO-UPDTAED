@@ -212,7 +212,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 For support and questions:
-- Email: support@keralagiftsonline.com
+- Email: sales@keralagiftsonline.com
 - Documentation: [docs.keralagiftsonline.com](https://docs.keralagiftsonline.com)
 - Issues: [GitHub Issues](https://github.com/keralagiftsonline/issues)
 
