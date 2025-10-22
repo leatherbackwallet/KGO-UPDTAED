@@ -74,7 +74,7 @@ const WhatsAppButton: React.FC<WhatsAppButtonProps> = React.memo(({
       }}
     >
       {/* WhatsApp Button */}
-      <div className={`bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 cursor-pointer group ${
+      <div className={`bg-green-500 bg-opacity-80 backdrop-blur-md hover:bg-opacity-90 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 cursor-pointer group border border-green-400 border-opacity-30 ${
         isLoading ? 'animate-pulse' : ''
       }`}>
         {/* Loading State or WhatsApp Icon */}
@@ -96,9 +96,9 @@ const WhatsAppButton: React.FC<WhatsAppButtonProps> = React.memo(({
       
       {/* Tooltip for larger screens */}
       <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 hidden lg:block">
-        <div className="bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+        <div className="bg-white bg-opacity-10 backdrop-blur-md text-white text-sm px-3 py-2 rounded-lg shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none border border-white border-opacity-20">
           {isLoading ? 'Opening WhatsApp...' : 'Chat with us on WhatsApp'}
-          <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
+          <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-white border-opacity-20"></div>
         </div>
       </div>
     </div>

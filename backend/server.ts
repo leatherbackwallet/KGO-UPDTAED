@@ -218,6 +218,7 @@ import contentRoutes from './routes/content';
 
 import productsRoutes from './routes/products';
 import categoriesRoutes from './routes/categories_json';
+import adminCategoriesRoutes from './routes/adminCategories';
 import vendorsRoutes from './routes/vendors';
 import usersRoutes from './routes/users';
 import wishlistRoutes from './routes/wishlist';
@@ -322,6 +323,7 @@ app.use('/api/profile', apiLimiter as any, profileRoutes);
 // Use user-aware limiter for products instead of IP-based
 app.use('/api/products', userAwareLimiter as any, productsRoutes);
 app.use('/api/categories', apiLimiter as any, categoriesRoutes);
+app.use('/api/admin/categories', apiLimiter as any, adminCategoriesRoutes);
 app.use('/api/vendors', apiLimiter as any, vendorsRoutes);
 app.use('/api/orders', apiLimiter as any, ordersRoutes);
 app.use('/api/payments', apiLimiter as any, paymentRoutes);
