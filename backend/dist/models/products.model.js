@@ -187,20 +187,55 @@ const productSchema = new mongoose_1.Schema({
     timestamps: true
 });
 // Generate slug from name before saving
+// OPTIMIZED: Uses single query instead of repeated queries in loop
 productSchema.pre('save', async function (next) {
     if (!this.slug && this.name) {
-        let baseSlug = this.name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '');
-        // Check if slug already exists and add suffix if needed
-        let slug = baseSlug;
-        let counter = 1;
-        while (await mongoose_1.default.model('Product').findOne({ slug, _id: { $ne: this._id } })) {
-            slug = `${baseSlug}-${counter}`;
-            counter++;
+        try {
+            let baseSlug = this.name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
+            // OPTIMIZED: Single query to find all existing slugs matching the pattern
+            // This prevents repeated database queries in a loop
+            // Escape special regex characters in baseSlug
+            const escapedBaseSlug = baseSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const existingSlugs = await mongoose_1.default.model('Product')
+                .find({
+                slug: { $regex: `^${escapedBaseSlug}(-\\d+)?$` },
+                _id: { $ne: this._id }
+            })
+                .select('slug')
+                .lean();
+            // Extract all counter values from existing slugs
+            const existingCounters = new Set();
+            const escapedBaseSlugForMatch = baseSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            existingSlugs.forEach((doc) => {
+                const match = doc.slug.match(new RegExp(`^${escapedBaseSlugForMatch}(?:-(\\d+))?$`));
+                if (match && match[1]) {
+                    existingCounters.add(parseInt(match[1], 10));
+                }
+                else if (doc.slug === baseSlug) {
+                    existingCounters.add(0); // Base slug exists
+                }
+            });
+            // Find the first available counter
+            let counter = 1;
+            while (existingCounters.has(counter)) {
+                counter++;
+            }
+            // Generate unique slug
+            this.slug = counter === 1 && !existingCounters.has(0)
+                ? baseSlug
+                : `${baseSlug}-${counter}`;
         }
-        this.slug = slug;
+        catch (error) {
+            // If query fails, fallback to base slug (will fail on duplicate key error)
+            console.warn('Slug generation query failed, using base slug:', error);
+            this.slug = this.name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
+        }
     }
     next();
 });
