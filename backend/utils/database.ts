@@ -108,6 +108,7 @@ mongoose.connection.on('reconnected', () => {
 });
 
 // Enhanced connection monitoring with detailed metrics
+// OPTIMIZED: Reduced frequency and removed collection enumeration to prevent blocking
 setInterval(() => {
   const connectionState = mongoose.connection.readyState;
   const states = {
@@ -118,12 +119,14 @@ setInterval(() => {
   };
 
   if (connectionState === 1) {
+    // OPTIMIZED: Removed collection enumeration to prevent database blocking
+    // Only log essential connection info without querying collections
     const stats = {
       readyState: states[connectionState],
       host: mongoose.connection.host,
       port: mongoose.connection.port,
       name: mongoose.connection.name,
-      collections: Object.keys(mongoose.connection.collections).length,
+      // Removed collections count to prevent blocking
       models: Object.keys(mongoose.connection.models).length
     };
     
@@ -131,9 +134,10 @@ setInterval(() => {
   } else {
     console.log(`⚠️ DB Status: ${states[connectionState]} (${connectionState})`);
   }
-}, 60000); // Check every minute
+}, 300000); // OPTIMIZED: Check every 5 minutes instead of every minute to reduce overhead
 
 // Enhanced connection pool monitoring with detailed metrics
+// OPTIMIZED: Reduced frequency and only log warnings/errors to prevent log spam
 setInterval(() => {
   if (mongoose.connection.readyState === 1) {
     const poolStats = {
@@ -151,8 +155,7 @@ setInterval(() => {
       poolStats.utilization = Math.round((poolStats.checkedOutConnections / poolStats.totalConnections) * 100);
     }
     
-    console.log(`🔗 MongoDB Pool Stats: ${JSON.stringify(poolStats)}`);
-    
+    // OPTIMIZED: Only log when there are issues, not on every check
     // Enhanced alerting with different severity levels
     if (poolStats.waitQueueSize > 20) {
       console.error(`🚨 CRITICAL: Very high wait queue size: ${poolStats.waitQueueSize} connections waiting`);
@@ -164,16 +167,15 @@ setInterval(() => {
       console.error(`🚨 CRITICAL: Very high connection usage: ${poolStats.utilization}% (${poolStats.checkedOutConnections}/${poolStats.totalConnections})`);
     } else if (poolStats.utilization > 75) {
       console.warn(`⚠️ WARNING: High connection usage: ${poolStats.utilization}% (${poolStats.checkedOutConnections}/${poolStats.totalConnections})`);
-    } else if (poolStats.utilization > 0) {
-      console.log(`📊 INFO: Connection usage: ${poolStats.utilization}% (${poolStats.checkedOutConnections}/${poolStats.totalConnections})`);
     }
+    // Removed normal info logging to reduce overhead
     
     // Log connection efficiency metrics
     if (poolStats.availableConnections === 0 && poolStats.waitQueueSize > 0) {
       console.warn(`⚠️ PERFORMANCE: No available connections, ${poolStats.waitQueueSize} requests queued`);
     }
   }
-}, 30000); // Check every 30 seconds
+}, 120000); // OPTIMIZED: Check every 2 minutes instead of every 30 seconds to reduce overhead
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
