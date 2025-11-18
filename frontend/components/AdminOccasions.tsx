@@ -112,16 +112,13 @@ export default function AdminOccasions() {
     sortOrder: 0
   });
 
-  useEffect(() => {
-    if (tokens?.accessToken) {
-      fetchOccasions();
-    }
-  }, [tokens]);
-
-  const fetchOccasions = async () => {
+  // Memoize fetch function to prevent infinite loops
+  const fetchOccasions = React.useCallback(async () => {
+    if (!tokens?.accessToken) return;
+    
     try {
       const response = await api.get('/occasions?includeInactive=true', {
-        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
+        headers: { Authorization: `Bearer ${tokens.accessToken}` }
       });
       setOccasions(response.data.data || []);
     } catch (err: any) {
@@ -130,7 +127,13 @@ export default function AdminOccasions() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tokens?.accessToken]);
+
+  useEffect(() => {
+    if (tokens?.accessToken) {
+      fetchOccasions();
+    }
+  }, [tokens?.accessToken, fetchOccasions]);
 
   const seedOccasions = async () => {
     try {

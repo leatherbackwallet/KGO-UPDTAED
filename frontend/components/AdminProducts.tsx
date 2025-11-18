@@ -122,6 +122,32 @@ const AdminProducts: React.FC = () => {
     return current >= startDate && current <= endDate;
   };
 
+  // Memoize fetch functions to prevent infinite loops
+  const fetchOccasions = React.useCallback(async () => {
+    if (!tokens?.accessToken) return;
+    
+    try {
+      const response = await api.get('/occasions', {
+        headers: { Authorization: `Bearer ${tokens.accessToken}` }
+      });
+      setOccasions(response.data.data || []);
+    } catch (err: any) {
+      console.error('Error fetching occasions:', err);
+      // Don't set localError for occasions as it's not critical
+    }
+  }, [tokens?.accessToken]);
+
+  const fetchCategories = React.useCallback(async () => {
+    try {
+      const response = await api.get('/categories');
+      const categoriesData = response.data?.data || response.data || [];
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+    } catch (err: any) {
+      console.error('Error fetching categories:', err);
+      setCategories([]); // Ensure categories is always an array
+    }
+  }, []);
+
   // Check authentication and admin role
   React.useEffect(() => {
     if (!user || !tokens?.accessToken) {
@@ -129,7 +155,7 @@ const AdminProducts: React.FC = () => {
       return;
     }
     
-    // Check if user can manage products
+    // Check if user can manage products (call function but don't include in deps)
     if (!canManageProducts()) {
       setLocalError('Access denied. Product management privileges required.');
       return;
@@ -137,7 +163,8 @@ const AdminProducts: React.FC = () => {
     
     fetchCategories();
     fetchOccasions();
-  }, [user, tokens, canManageProducts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, tokens?.accessToken, fetchCategories, fetchOccasions]);
 
   const clearCacheAndRefresh = async () => {
     try {
@@ -169,29 +196,6 @@ const AdminProducts: React.FC = () => {
 
   // Products are now loaded via the centralized hook
   // No need for separate fetchProducts function
-
-  const fetchOccasions = async () => {
-    try {
-      const response = await api.get('/occasions', {
-        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
-      });
-      setOccasions(response.data.data || []);
-    } catch (err: any) {
-      console.error('Error fetching occasions:', err);
-      // Don't set localError for occasions as it's not critical
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get('/categories');
-      const categoriesData = response.data?.data || response.data || [];
-      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
-    } catch (err: any) {
-      console.error('Error fetching categories:', err);
-      setCategories([]); // Ensure categories is always an array
-    }
-  };
 
   const handleEditProduct = (product: Product) => {
     // Editing product with combo fields

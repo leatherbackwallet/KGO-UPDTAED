@@ -62,20 +62,16 @@ export default function AdminCategories() {
     sortOrder: 0
   });
 
-  useEffect(() => {
-    if (tokens?.accessToken) {
-      fetchCategories();
-      fetchProducts();
-    }
-  }, [tokens]);
-
-  const fetchCategories = async () => {
+  // Memoize fetch functions to prevent infinite loops
+  const fetchCategories = React.useCallback(async () => {
+    if (!tokens?.accessToken) return;
+    
     try {
       setLoading(true);
       setError(null);
       // Use dedicated admin categories endpoint - always MongoDB
       const response = await api.get(`/admin/categories?includeInactive=true&_t=${Date.now()}`, {
-        headers: { Authorization: `Bearer ${tokens?.accessToken}` }
+        headers: { Authorization: `Bearer ${tokens.accessToken}` }
       });
       console.log('🔍 Fetched admin categories data from MongoDB:', response.data);
       setCategories(response.data.data || []);
@@ -85,9 +81,9 @@ export default function AdminCategories() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tokens?.accessToken]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = React.useCallback(async () => {
     try {
       const response = await api.get('/products', {
         params: {
@@ -99,7 +95,14 @@ export default function AdminCategories() {
     } catch (err: any) {
       console.error('Error fetching products:', err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (tokens?.accessToken) {
+      fetchCategories();
+      fetchProducts();
+    }
+  }, [tokens?.accessToken, fetchCategories, fetchProducts]);
 
   const fetchCategoryProducts = async (categoryId: string) => {
     try {
