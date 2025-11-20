@@ -3483,61 +3483,35 @@
 },
 {
   "_id": {
-    "$oid": "6917e9e7a19bf1f854da2691"
+    "$oid": "691ca5acaf69c89c9052878d"
   },
-  "name": "Christmas  Special Gift Hamper1",
-  "description": "Premium Plum Cake 1 Kg, Chocolates, Fresh Rose Bouquets and a Special Wish Card.",
+  "name": "Christmas Hamper 3",
+  "description": "Premium quality Plum Cake 1Kg ,Fresh Rose Bouquet , Chocolates , Wish Card, Red Wine- cane hamper",
   "categories": [
     {
-      "$oid": "68cd4a04d03e43bd6d816d72"
-    }
-  ],
-  "price": 3800,
-  "costPrice": 0,
-  "stock": 200,
-  "images": [],
-  "occasions": [
-    {
-      "$oid": "68cd4f097bfc22eb85a2f917"
-    }
-  ],
-  "vendors": [],
-  "isFeatured": false,
-  "isActive": true,
-  "isDeleted": false,
-  "isCombo": false,
-  "comboBasePrice": 0,
-  "comboItems": [],
-  "createdAt": {
-    "$date": "2025-11-15T02:48:07.333Z"
-  },
-  "updatedAt": {
-    "$date": "2025-11-15T02:48:07.333Z"
-  },
-  "slug": "christmas-special-gift-hamper1",
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "6917ee41a19bf1f854da2748"
-  },
-  "name": "Christmas  Special Gift Hamper2",
-  "description": "Premium Plum Cake 1 Kg, Ferrero Rocher 16 pcs box, Fresh Rose Bouquets and a Special Wish Card.",
-  "categories": [
-    {
-      "$oid": "68cd4a04d03e43bd6d816d72"
+      "$oid": "68f8ab5e78d033884432c3bd"
     },
     {
-      "$oid": "68d531c6620b280affb68783"
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
     }
   ],
-  "price": 4500,
+  "price": 5750,
   "costPrice": 0,
   "stock": 200,
-  "images": [],
+  "images": [
+    "keralagiftsonline/products/product-1763485093407-1956928",
+    "keralagiftsonline/products/product-1763626878804-712181162"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1763485093407-1956928",
   "occasions": [
     {
       "$oid": "68cd4f097bfc22eb85a2f917"
+    },
+    {
+      "$oid": "68d6514211a233954c608213"
     }
   ],
   "vendors": [],
@@ -3548,35 +3522,93 @@
   "comboBasePrice": 0,
   "comboItems": [],
   "createdAt": {
-    "$date": "2025-11-15T03:06:41.841Z"
+    "$date": "2025-11-18T16:58:20.461Z"
   },
   "updatedAt": {
-    "$date": "2025-11-15T03:06:41.841Z"
+    "$date": "2025-11-20T08:21:36.109Z"
   },
-  "slug": "christmas-special-gift-hamper2",
+  "slug": "premium-quality-plum-cake-1kg-fresh-rose-bouquet-chocolates-wish-card-red-wine-cane-hamper",
   "__v": 0
 },
 {
   "_id": {
-    "$oid": "691c779fa19bf1f854da2ed4"
+    "$oid": "691ca5edaf69c89c90528794"
   },
-  "name": "Premium quality Plum Cake 1Kg, Ferrero Rocher 16 pcz , Fire Sparkles 03 Packet, Fresh Rose Bouquet",
-  "description": "Premium quality Plum Cake 1Kg, Ferrero Rocher 16 pcz , Fire Sparkles 03 Packet, Fresh Rose Bouquet",
+  "name": "Christmas Hamper 2",
+  "description": "Premium quality Plum Cake 1Kg , Fire Sparkles Combos, Fresh Rose Bouquet , Chocolates, Cap and Red Wine , Wish Card- cane hamper",
   "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
     {
       "$oid": "68f8ab2f78d033884432c3a5"
     },
     {
-      "$oid": "68f8ab0378d033884432c3a1"
+      "$oid": "68f8ab3878d033884432c3a8"
+    },
+    {
+      "$oid": "68f8ab4378d033884432c3ac"
+    }
+  ],
+  "price": 6250,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1763485158923-638836973",
+    "keralagiftsonline/products/product-1763626833297-463209949"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1763485158923-638836973",
+  "occasions": [
+    {
+      "$oid": "68cd4f097bfc22eb85a2f917"
+    },
+    {
+      "$oid": "68d6514211a233954c608213"
+    }
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-11-18T16:59:25.538Z"
+  },
+  "updatedAt": {
+    "$date": "2025-11-20T08:20:35.734Z"
+  },
+  "slug": "premium-quality-plum-cake-1kg-fire-sparkles-combos-fresh-rose-bouquet-chocolates-cap-and-red-wine-wish-card-cane-hamper",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "691ed2e9af69c89c90528b98"
+  },
+  "name": "Christmas Hamper 1",
+  "description": "Premium quality Plum Cake 1Kg, Ferrero Rocher 16 pcz , Fire Sparkles 03 Packet, Fresh Rose Bouquet",
+  "categories": [
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
     }
   ],
   "price": 4950,
   "costPrice": 0,
   "stock": 200,
   "images": [
-    "keralagiftsonline/products/product-1763473304967-837862412"
+    "keralagiftsonline/products/product-1763627746169-463085321"
   ],
-  "defaultImage": "keralagiftsonline/products/product-1763473304967-837862412",
+  "defaultImage": "keralagiftsonline/products/product-1763627746169-463085321",
   "occasions": [
     {
       "$oid": "68cd4f097bfc22eb85a2f917"
@@ -3590,11 +3622,145 @@
   "comboBasePrice": 0,
   "comboItems": [],
   "createdAt": {
-    "$date": "2025-11-18T13:41:51.968Z"
+    "$date": "2025-11-20T08:35:53.047Z"
   },
   "updatedAt": {
-    "$date": "2025-11-18T13:41:51.968Z"
+    "$date": "2025-11-20T08:35:53.047Z"
   },
-  "slug": "premium-quality-plum-cake-1kg-ferrero-rocher-16-pcz-fire-sparkles-03-packet-fresh-rose-bouquet",
+  "slug": "christmas-hamper-1",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "691ed347af69c89c90528ba4"
+  },
+  "name": "Christmas Hamper4",
+  "description": "Premium quality Plum Cake 1Kg,  Chocolates, Fire Sparkles  combos , Fresh Rose Bouquet and Cap- Cane Hamper",
+  "categories": [
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
+    }
+  ],
+  "price": 5550,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1763627843387-285459139"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1763627843387-285459139",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-11-20T08:37:27.394Z"
+  },
+  "updatedAt": {
+    "$date": "2025-11-20T08:37:27.394Z"
+  },
+  "slug": "christmas-hamper4",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "691ed3bbaf69c89c90528bb1"
+  },
+  "name": "Christmas Hamper 5",
+  "description": "Premium quality Plum Cake 1Kg , , Fresh Rose Bouquet , Chocolates,  Wish Card",
+  "categories": [
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
+    }
+  ],
+  "price": 3950,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1763627954171-370864914"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1763627954171-370864914",
+  "occasions": [
+    {
+      "$oid": "68cd4f097bfc22eb85a2f917"
+    },
+    {
+      "$oid": "68d6514211a233954c608213"
+    }
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-11-20T08:39:23.567Z"
+  },
+  "updatedAt": {
+    "$date": "2025-11-20T08:39:23.567Z"
+  },
+  "slug": "christmas-hamper-5",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "691ed43faf69c89c90528bbf"
+  },
+  "name": "Christmas hamper6",
+  "description": "Premium quality Plum Cake 1Kg , Ferrero Rocher 16 pcs, Fresh Rose Bouquet ,Wish Card",
+  "categories": [
+    {
+      "$oid": "68cd4a04d03e43bd6d816d72"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
+    }
+  ],
+  "price": 4450,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1763628081632-891115779"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1763628081632-891115779",
+  "occasions": [
+    {
+      "$oid": "68d6514211a233954c608213"
+    }
+  ],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-11-20T08:41:35.526Z"
+  },
+  "updatedAt": {
+    "$date": "2025-11-20T08:41:35.526Z"
+  },
+  "slug": "christmas-hamper6",
   "__v": 0
 }]
