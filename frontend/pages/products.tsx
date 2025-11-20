@@ -17,6 +17,7 @@ import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
+import RandomProductCarousel from '../components/RandomProductCarousel';
 import { Product, Category } from '../types/shared';
 import { loadProductsFromJSON, loadCategoriesFromJSON } from '../utils/jsonDataTransformers';
 
@@ -30,7 +31,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('newest');
-  
+
   // Modal state
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showQuickView, setShowQuickView] = useState(false);
@@ -42,7 +43,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
     // Search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         (product.name || '').toLowerCase().includes(searchLower) ||
         (product.description || '').toLowerCase().includes(searchLower)
       );
@@ -53,15 +54,15 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
       const selectedCategoryObj = categories.find(cat => cat._id === selectedCategory);
       if (selectedCategoryObj) {
         const selectedCategoryName = selectedCategoryObj.name.toLowerCase();
-        
+
         filtered = filtered.filter(product => {
           // Since JSON products have empty categories arrays, we need to match by category name
           // Check if product name or description contains the category name
           const productName = (product.name || '').toLowerCase();
           const productDescription = (product.description || '').toLowerCase();
-          
-          return productName.includes(selectedCategoryName) || 
-                 productDescription.includes(selectedCategoryName);
+
+          return productName.includes(selectedCategoryName) ||
+            productDescription.includes(selectedCategoryName);
         });
       }
     }
@@ -76,13 +77,13 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
         filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
         break;
       case 'name':
-        filtered.sort((a, b) => 
+        filtered.sort((a, b) =>
           a.name.localeCompare(b.name)
         );
         break;
       case 'newest':
       default:
-        filtered.sort((a, b) => 
+        filtered.sort((a, b) =>
           new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
         );
         break;
@@ -146,14 +147,20 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
         </div>
       </div>
 
+      {/* Random Product Carousel */}
+      <RandomProductCarousel
+        allProducts={allProducts}
+        onProductClick={handleProductClick}
+      />
+
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          
+
 
           {/* Search and Filters */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
             <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-              
+
               {/* Search */}
               <div className="w-full lg:w-1/3 relative">
                 <div className="relative">
@@ -163,7 +170,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
-                  
+
                   {/* Search Input */}
                   <input
                     type="text"
@@ -172,7 +179,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                     onChange={handleSearchChange}
                     className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm hover:shadow-md"
                   />
-                  
+
                   {/* Clear Search Button */}
                   {searchTerm && (
                     <button
@@ -186,7 +193,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                     </button>
                   )}
                 </div>
-                
+
                 {/* Search Results Count */}
                 {searchTerm && (
                   <div className="mt-2 text-sm text-gray-600">
@@ -201,7 +208,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
 
               {/* Filters */}
               <div className="flex flex-wrap gap-3 items-center">
-                
+
                 {/* Category Filter */}
                 <select
                   value={selectedCategory}
@@ -301,7 +308,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
 export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async () => {
   try {
     console.log('📦 Loading products data from JSON files ONLY (no database connections)...');
-    
+
     // Load all data from JSON files in parallel with individual error handling
     const [productsResult, categoriesResult] = await Promise.allSettled([
       loadProductsFromJSON(),
@@ -330,7 +337,7 @@ export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async (
     };
   } catch (error) {
     console.error('❌ Critical error loading data from JSON files:', error);
-    
+
     // Return empty data on critical error
     return {
       props: {
