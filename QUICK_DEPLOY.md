@@ -23,7 +23,7 @@ gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
 
 ```bash
 # From project root - Deploy everything
-npm run deploy
+./deploy.sh
 
 # That's it! The script handles:
 # ✓ Validation

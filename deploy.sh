@@ -606,8 +606,62 @@ promote_services() {
     sleep 15
 }
 
+post_deployment_cleanup() {
+    print_step "13. Post-Deployment Cleanup"
+    
+    print_info "Ensuring only the new versions are serving..."
+    
+    if [ "$DEPLOY_FRONTEND_ONLY" = false ]; then
+        # Clean up backend versions
+        print_info "Checking backend versions..."
+        # Get all versions except the current one
+        OLD_API_VERSIONS=$(gcloud app versions list --service=$API_SERVICE --format="value(version.id)" --filter="version.id != $API_VERSION" 2>/dev/null || echo "")
+        
+        if [ -n "$OLD_API_VERSIONS" ]; then
+            print_info "Found old backend versions to delete:"
+            echo "$OLD_API_VERSIONS"
+            
+            for version in $OLD_API_VERSIONS; do
+                print_info "Deleting old backend version: $version"
+                # Try to delete, but don't fail the script if it fails (might be in use temporarily)
+                if ! gcloud app versions delete $version --service=$API_SERVICE --quiet 2>/dev/null; then
+                    print_warning "Could not delete version $version immediately (might be draining). You can delete it manually later."
+                else
+                    print_success "✓ Deleted old backend version: $version"
+                fi
+            done
+        else
+            print_success "✓ No old backend versions found"
+        fi
+    fi
+    
+    if [ "$DEPLOY_BACKEND_ONLY" = false ]; then
+        # Clean up frontend versions
+        print_info "Checking frontend versions..."
+        # Get all versions except the current one
+        OLD_FRONTEND_VERSIONS=$(gcloud app versions list --service=$FRONTEND_SERVICE --format="value(version.id)" --filter="version.id != $FRONTEND_VERSION" 2>/dev/null || echo "")
+        
+        if [ -n "$OLD_FRONTEND_VERSIONS" ]; then
+            print_info "Found old frontend versions to delete:"
+            echo "$OLD_FRONTEND_VERSIONS"
+            
+            for version in $OLD_FRONTEND_VERSIONS; do
+                print_info "Deleting old frontend version: $version"
+                # Try to delete, but don't fail the script if it fails
+                if ! gcloud app versions delete $version --service=$FRONTEND_SERVICE --quiet 2>/dev/null; then
+                    print_warning "Could not delete version $version immediately (might be draining). You can delete it manually later."
+                else
+                    print_success "✓ Deleted old frontend version: $version"
+                fi
+            done
+        else
+            print_success "✓ No old frontend versions found"
+        fi
+    fi
+}
+
 final_verification() {
-    print_step "13. Final Production Verification"
+    print_step "14. Final Production Verification"
     
     # Verify backend if deployed
     if [ "$DEPLOY_FRONTEND_ONLY" = false ]; then
@@ -636,8 +690,10 @@ final_verification() {
     fi
     
     # Show final service status
-    print_info "Final service status:"
-    gcloud app services list --format="table(service,versions[].id,versions[].traffic_split,versions[].serving_status)" 2>/dev/null || true
+    print_info "Final Service Status:"
+    echo -e "${CYAN}------------------------------------------------------------${NC}"
+    gcloud app versions list --format="table(service,version.id,traffic_split,serving_status,version.createTime)" 2>/dev/null || true
+    echo -e "${CYAN}------------------------------------------------------------${NC}"
 }
 
 # =============================================================================
@@ -683,6 +739,9 @@ main() {
     test_backend_endpoints
     test_frontend_backend_connectivity
     promote_services
+    # Post-deployment cleanup
+    post_deployment_cleanup
+    
     final_verification
     
     print_final

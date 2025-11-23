@@ -113,7 +113,7 @@ Use the provided deployment scripts for automated, validated deployments:
 
 ```bash
 # From project root directory
-./deploy-full-stack.sh
+./deploy.sh
 
 # Or using npm script
 npm run deploy
@@ -122,7 +122,7 @@ npm run deploy
 #### Deploy Only Backend
 
 ```bash
-./deploy-full-stack.sh --backend-only
+./deploy.sh --backend-only
 
 # Or
 npm run deploy:backend
@@ -131,7 +131,7 @@ npm run deploy:backend
 #### Deploy Only Frontend
 
 ```bash
-./deploy-full-stack.sh --frontend-only
+./deploy.sh --frontend-only
 
 # Or
 npm run deploy:frontend
@@ -140,7 +140,7 @@ npm run deploy:frontend
 #### Deploy with Custom Version Name
 
 ```bash
-./deploy-full-stack.sh --name v1.0.0
+./deploy.sh --name v1.0.0
 ```
 
 ### Option 2: Manual Deployment

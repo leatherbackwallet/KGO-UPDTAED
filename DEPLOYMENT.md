@@ -5,12 +5,12 @@
 Deploy to production with a single command:
 
 ```bash
-npm run deploy
+./deploy.sh
 ```
 
 ## 📋 What the Deployment Script Does
 
-The `deploy-production.sh` script is a comprehensive, bulletproof deployment solution that:
+The `deploy.sh` script is a comprehensive, bulletproof deployment solution that:
 
 ### ✅ **Validation Phase**
 - Validates environment and authentication
@@ -19,25 +19,30 @@ The `deploy-production.sh` script is a comprehensive, bulletproof deployment sol
 - Compiles TypeScript and checks for build errors
 - Runs linting (if configured)
 
-### 🧹 **Cleanup Phase**
-- Stops traffic to all existing versions
-- Deletes ALL old API versions
-- Ensures only the new version will serve traffic
+### 🧹 **Pre-Deployment Cleanup**
+- Stops traffic to old versions (if possible)
+- Prepares environment for new deployment
 
 ### 🚀 **Deployment Phase**
-- Deploys new version to Google App Engine
-- Waits for version to be ready
+- Deploys new backend and frontend versions to Google App Engine
+- Waits for versions to be ready
 - Tests all JSON data endpoints
-- Promotes version to production (100% traffic)
+- Promotes versions to production (100% traffic)
+
+### 🧹 **Post-Deployment Cleanup**
+- **Deletes ALL old versions** ensuring only the new one remains
+- Verifies clean state
 
 ### 🔍 **Verification Phase**
 - Verifies only one version is serving
 - Tests all production endpoints
 - Confirms JSON data is accessible
+- Displays final comprehensive status table
 
 ## 📊 Features
 
-- **Single Version Policy**: Only one API version serves at a time
+- **Single Version Policy**: Automatically cleans up old versions after successful deployment
+- **Full Stack**: Deploys both frontend and backend (or individually with flags)
 - **JSON Data Guarantee**: Ensures products, categories, and occasions are served from JSON files
 - **Build Validation**: Won't deploy if there are compilation or critical linting errors
 - **Health Checks**: Comprehensive endpoint testing before and after deployment
@@ -53,27 +58,32 @@ The `deploy-production.sh` script is a comprehensive, bulletproof deployment sol
 
 ## 📖 Usage
 
-### Deploy to Production
+### Deploy Full Stack (Recommended)
 ```bash
-npm run deploy
+./deploy.sh
+```
+
+### Deploy Backend Only
+```bash
+./deploy.sh --backend-only
+```
+
+### Deploy Frontend Only
+```bash
+./deploy.sh --frontend-only
 ```
 
 ### Get Help
 ```bash
-npm run deploy:help
-```
-
-### Manual Script Execution
-```bash
-./deploy-production.sh
-./deploy-production.sh --help
+./deploy.sh --help
 ```
 
 ## 🔧 Configuration
 
 The script is configured for:
 - **Project**: `onyourbehlf`
-- **Service**: `api`
+- **Backend Service**: `api`
+- **Frontend Service**: `default`
 - **JSON Files**: 
   - `backend/Products/keralagiftsonline.products.json`
   - `backend/Products/keralagiftsonline.categories.json`
@@ -81,10 +91,10 @@ The script is configured for:
 
 ## 🚨 Important Notes
 
-1. **Backup**: The script deletes ALL old versions. The deployment creates a new version with timestamp.
+1. **Backup**: The script deletes ALL old versions after successful deployment.
 2. **JSON Files**: Deployment will fail if JSON files are missing, invalid, or empty.
 3. **Build Errors**: Deployment will fail if TypeScript compilation fails.
-4. **Single Version**: Only one API version serves traffic at any time.
+4. **Single Version**: Only one version serves traffic at any time.
 5. **Health Checks**: Deployment verifies all endpoints work before promoting to production.
 
 ## 🔍 Troubleshooting
@@ -129,5 +139,5 @@ A successful deployment:
 
 ---
 
-**This is the ONLY deployment script for production. All other deployment methods have been removed.**
+**This is the ONLY deployment script for production.**
 
