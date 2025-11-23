@@ -10,7 +10,7 @@
  * - Occasions: /public/data/keralagiftsonline.occasions.json
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import Image from 'next/image';
@@ -35,6 +35,20 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
   // Modal state
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showQuickView, setShowQuickView] = useState(false);
+
+  // Banner state
+  const bannerImages = [
+    '/images/products/christmas_banner_1.png',
+    '/images/products/christmas_banner_2.png',
+    '/images/products/christmas_banner_3.png'
+  ];
+  const [currentBanner, setCurrentBanner] = useState(bannerImages[0]);
+
+  useEffect(() => {
+    // Randomly select a banner on mount to ensure rotation on refresh
+    const randomIndex = Math.floor(Math.random() * bannerImages.length);
+    setCurrentBanner(bannerImages[randomIndex]);
+  }, []);
 
   // Filter and sort products client-side
   const filteredProducts = useMemo(() => {
@@ -136,7 +150,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
       <div className="w-full">
         <div className="relative h-64 md:h-80 lg:h-96">
           <Image
-            src="/images/products/Banner Generic.jpg"
+            src={currentBanner}
             alt="KGO Personalised Delivery - Premium Gifts & Traditional Products"
             fill
             className="object-cover"
