@@ -20,8 +20,8 @@ export default function Admin() {
       return;
     }
 
-    // Redirect to new admin dashboard
-    router.push('/admin/dashboard');
+    // Redirect to admin orders page
+    router.push('/admin/orders');
   }, [user, canAccessAdmin, router]);
 
   // Show loading while redirecting

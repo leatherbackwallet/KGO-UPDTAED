@@ -33,14 +33,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
 
   // Admin navigation items
   const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', href: '/admin/dashboard', icon: '📊' },
     { id: 'products', label: 'Products', href: '/admin/products', icon: '📦' },
     { id: 'categories', label: 'Categories', href: '/admin/categories', icon: '📂' },
     { id: 'occasions', label: 'Occasions', href: '/admin/occasions', icon: '🎉' },
     { id: 'orders', label: 'Orders', href: '/admin/orders', icon: '📋' },
     { id: 'users', label: 'Users', href: '/admin/users', icon: '👥' },
-    { id: 'finance', label: 'Finance', href: '/admin/finance', icon: '💰' },
-    { id: 'returns', label: 'Returns', href: '/admin/returns', icon: '↩️' },
     { id: 'monitoring', label: 'Monitoring', href: '/admin/monitoring', icon: '📈' }
   ].filter(item => canAccessAdminTab(item.id));
 

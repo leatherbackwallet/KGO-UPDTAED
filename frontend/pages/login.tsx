@@ -51,7 +51,7 @@ export default function Login() {
             // Check if user is admin and redirect accordingly
             const userRole = data.data.user.roleName;
             if (userRole === 'admin') {
-              router.push('/admin/dashboard');
+              router.push('/admin/orders');
             } else {
               router.push('/');
             }

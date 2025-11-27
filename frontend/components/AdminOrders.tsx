@@ -466,7 +466,7 @@ const AdminOrders: React.FC = () => {
               <div className="flex justify-between items-center pt-2 mt-2 border-t border-gray-200">
                 <span className="text-gray-600">Total Revenue:</span>
                 <span className="font-bold text-green-700 text-lg">
-                  ₹{Array.isArray(orders) ? orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0).toFixed(2) : '0.00'}
+                  ₹{Array.isArray(orders) ? orders.filter(o => o.paymentStatus === 'captured').reduce((sum, o) => sum + (o.totalPrice || 0), 0).toFixed(2) : '0.00'}
                 </span>
               </div>
             </div>
