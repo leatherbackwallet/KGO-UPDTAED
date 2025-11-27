@@ -33,6 +33,12 @@ interface ShippingDetails {
   specialInstructions?: string;
 }
 
+interface SenderDetails {
+  senderName: string;
+  senderEmail: string;
+  senderPhone: string;
+}
+
 interface TransactionSummary {
   orderId: string;
   transactionId: string;
@@ -55,7 +61,7 @@ interface TransactionSummary {
 interface Order {
   _id: string;
   orderId: string;
-  userId: {
+  userId: string | {
     _id: string;
     firstName: string;
     lastName: string;
@@ -66,6 +72,7 @@ interface Order {
   totalPrice: number;
   orderStatus: string;
   shippingDetails: ShippingDetails;
+  senderDetails?: SenderDetails;
   statusHistory?: Array<{
     status: string;
     timestamp: Date;
@@ -333,16 +340,33 @@ const OrderConfirmationPage: React.FC = () => {
             </div>
           )}
 
-          {/* Delivery Address */}
+          {/* Sender Information */}
+          {order.senderDetails && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
+              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 className="text-lg font-semibold text-gray-900">Sender Information</h3>
+              </div>
+              <div className="px-6 py-4">
+                <div className="text-sm text-gray-900">
+                  <p className="font-semibold">{order.senderDetails.senderName}</p>
+                  <p>{order.senderDetails.senderEmail}</p>
+                  <p>{order.senderDetails.senderPhone}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Recipient Information */}
           {order.shippingDetails && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
               <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h3 className="text-lg font-semibold text-gray-900">Delivery Address</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Recipient Information</h3>
               </div>
               <div className="px-6 py-4">
                 <div className="text-sm text-gray-900">
                   <p className="font-semibold">{order.shippingDetails.recipientName}</p>
                   <p>{order.shippingDetails.recipientPhone}</p>
+                  <p className="mt-2 font-medium text-gray-700">Delivery Address:</p>
                   <p>
                     {order.shippingDetails.address.streetName} {order.shippingDetails.address.houseNumber}
                   </p>
@@ -361,6 +385,41 @@ const OrderConfirmationPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* User Details - Only for Registered Users (not guest users) */}
+          {(() => {
+            // Check if user is registered (not a guest) and narrow the type
+            if (typeof order.userId === 'object' && 
+                order.userId && 
+                order.userId._id && 
+                !order.userId._id.toString().startsWith('guest_')) {
+              // TypeScript now knows order.userId is an object with these properties
+              const user = order.userId;
+              
+              return (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
+                  <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h3 className="text-lg font-semibold text-gray-900">User Details</h3>
+                  </div>
+                  <div className="px-6 py-4">
+                    <div className="text-sm text-gray-900">
+                      <p>
+                        <span className="font-medium">Name:</span>{' '}
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p>
+                        <span className="font-medium">Email:</span> {user.email}
+                      </p>
+                      <p>
+                        <span className="font-medium">Phone:</span> {user.phone}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })()}
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

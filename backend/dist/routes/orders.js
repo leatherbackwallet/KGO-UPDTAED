@@ -29,15 +29,28 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                 throw new Error('MISSING_ADDRESS');
             }
             // Prepare sender details - use provided senderDetails or fall back to user info for authenticated users
-            const orderSenderDetails = senderDetails ? {
-                senderName: senderDetails.senderName,
-                senderEmail: senderDetails.senderEmail,
-                senderPhone: senderDetails.senderPhone
-            } : (req.user ? {
-                senderName: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim(),
-                senderEmail: req.user.email || '',
-                senderPhone: req.user.phone || ''
-            } : undefined);
+            // Sender details are REQUIRED - must be provided or derived from authenticated user
+            let orderSenderDetails;
+            if (senderDetails && senderDetails.senderName && senderDetails.senderEmail && senderDetails.senderPhone) {
+                // Use provided sender details
+                orderSenderDetails = {
+                    senderName: senderDetails.senderName.trim(),
+                    senderEmail: senderDetails.senderEmail.trim().toLowerCase(),
+                    senderPhone: senderDetails.senderPhone.trim()
+                };
+            }
+            else if (req.user && req.user.email && req.user.phone) {
+                // Fall back to authenticated user info
+                orderSenderDetails = {
+                    senderName: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || req.user.email.split('@')[0],
+                    senderEmail: req.user.email.trim().toLowerCase(),
+                    senderPhone: req.user.phone.trim()
+                };
+            }
+            else {
+                // Sender details are required - throw error if neither provided nor available from user
+                throw new Error('MISSING_SENDER_DETAILS');
+            }
             // Calculate total and prepare order items with stock validation
             let totalPrice = 0;
             const orderItems = [];
@@ -280,6 +293,15 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                 }
             });
         }
+        if (err.message === 'MISSING_SENDER_DETAILS') {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    message: 'Sender information (name, email, phone) is required',
+                    code: 'MISSING_SENDER_DETAILS'
+                }
+            });
+        }
         return res.status(500).json({
             success: false,
             error: { message: 'Server error', code: 'SERVER_ERROR' }
@@ -329,15 +351,33 @@ router.get('/my', auth_1.auth, async (req, res) => {
 router.get('/:orderId', optionalAuth_1.optionalAuth, database_1.ensureDatabaseConnection, async (req, res) => {
     try {
         const { orderId } = req.params;
-        const order = await index_1.Order.findById(orderId)
-            .populate('userId', 'firstName lastName email phone')
-            .populate('orderItems.productId', 'name description images categories price')
-            .lean();
-        if (!order) {
+        // First, get the order without populating userId to check if it's a guest user
+        const orderWithoutPopulate = await index_1.Order.findById(orderId).lean();
+        if (!orderWithoutPopulate) {
             return res.status(404).json({
                 success: false,
                 error: { message: 'Order not found', code: 'ORDER_NOT_FOUND' }
             });
+        }
+        // Check if userId is a string (guest user) or ObjectId (registered user)
+        const isGuestUser = typeof orderWithoutPopulate.userId === 'string' &&
+            orderWithoutPopulate.userId.startsWith('guest_');
+        // Conditionally populate userId only if it's an ObjectId (registered user)
+        let order;
+        if (isGuestUser) {
+            // For guest users, don't populate userId (it's a string)
+            order = await index_1.Order.findById(orderId)
+                .populate('orderItems.productId', 'name description images categories price')
+                .lean();
+            // Keep userId as string for guest users
+            order.userId = orderWithoutPopulate.userId;
+        }
+        else {
+            // For registered users, populate userId
+            order = await index_1.Order.findById(orderId)
+                .populate('userId', 'firstName lastName email phone')
+                .populate('orderItems.productId', 'name description images categories price')
+                .lean();
         }
         // Check if user can access this order (own order, admin, or guest with valid token)
         if (req.user) {

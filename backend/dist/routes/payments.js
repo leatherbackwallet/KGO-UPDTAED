@@ -32,9 +32,32 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, a
             }
             const { products, recipientAddress, senderDetails, orderNotes, requestedDeliveryDate } = req.body;
             const userId = req.user.id;
+            const user = req.user;
             console.log('🔍 [Payment Route] User ID:', userId);
             console.log('🔍 [Payment Route] Products:', products);
             console.log('🔍 [Payment Route] Sender Details:', senderDetails);
+            // Validate and prepare sender details - REQUIRED for all orders
+            let orderSenderDetails;
+            if (senderDetails && senderDetails.senderName && senderDetails.senderEmail && senderDetails.senderPhone) {
+                // Use provided sender details
+                orderSenderDetails = {
+                    senderName: senderDetails.senderName.trim(),
+                    senderEmail: senderDetails.senderEmail.trim().toLowerCase(),
+                    senderPhone: senderDetails.senderPhone.trim()
+                };
+            }
+            else if (user && user.email && user.phone) {
+                // Fall back to authenticated user info
+                orderSenderDetails = {
+                    senderName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0],
+                    senderEmail: user.email.trim().toLowerCase(),
+                    senderPhone: user.phone.trim()
+                };
+            }
+            else {
+                // Sender details are required - throw error if neither provided nor available from user
+                throw new Error('VALIDATION_ERROR: Sender information (name, email, phone) is required');
+            }
             // Transform products data for stock service (frontend sends 'product', stock service expects 'productId')
             const transformedProducts = products.map((item) => ({
                 productId: item.product, // Transform 'product' field to 'productId'
@@ -165,12 +188,8 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, a
                     address: recipientAddress.address,
                     specialInstructions: recipientAddress.additionalInstructions || recipientAddress.specialInstructions || ''
                 },
-                // Add sender details if provided
-                senderDetails: senderDetails ? {
-                    senderName: senderDetails.senderName,
-                    senderEmail: senderDetails.senderEmail,
-                    senderPhone: senderDetails.senderPhone
-                } : undefined,
+                // Sender details are REQUIRED - always saved
+                senderDetails: orderSenderDetails,
                 requestedDeliveryDate: deliveryDate
             });
             await order.save();

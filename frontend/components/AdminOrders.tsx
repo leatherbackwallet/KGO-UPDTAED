@@ -18,6 +18,12 @@ interface ShippingDetails {
   specialInstructions?: string;
 }
 
+interface SenderDetails {
+  senderName: string;
+  senderEmail: string;
+  senderPhone: string;
+}
+
 interface OrderItem {
   _id: string;
   productId: {
@@ -46,6 +52,7 @@ interface Order {
   totalPrice: number;
   orderStatus: string;
   shippingDetails: ShippingDetails;
+  senderDetails?: SenderDetails;
   statusHistory?: Array<{
     status: string;
     timestamp: Date;
@@ -999,6 +1006,27 @@ const AdminOrders: React.FC = () => {
                       </p>
                     </div>
                   </div>
+
+                  {/* Sender Information */}
+                  {selectedOrder.senderDetails && (
+                    <div className="bg-white p-5 rounded-lg border border-gray-200">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Sender Information</h4>
+                      <div className="space-y-2 text-sm text-gray-700">
+                        <p>
+                          <span className="font-medium">Name:</span>
+                          <span className="ml-2 text-gray-900">{selectedOrder.senderDetails.senderName || 'N/A'}</span>
+                        </p>
+                        <p>
+                          <span className="font-medium">Email:</span>
+                          <span className="ml-2 text-gray-900">{selectedOrder.senderDetails.senderEmail || 'N/A'}</span>
+                        </p>
+                        <p>
+                          <span className="font-medium">Phone:</span>
+                          <span className="ml-2 text-gray-900">{selectedOrder.senderDetails.senderPhone || 'N/A'}</span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Customer Information */}
                   <div className="bg-white p-5 rounded-lg border border-gray-200">
