@@ -24,7 +24,8 @@
     "noImplicitOverride": false,
     "allowUnusedLabels": true,
     "allowUnreachableCode": true,
-    "noEmitOnError": false
+    "noEmitOnError": false,
+    "typeRoots": ["./node_modules/@types"]
   },
   "include": [
     "**/*.ts",
