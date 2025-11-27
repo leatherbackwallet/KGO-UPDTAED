@@ -22,7 +22,7 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
   try {
     await session.withTransaction(async () => {
       
-      const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod, requestedDeliveryDate } = req.body;
+      const { products, recipientAddress, deliveryAddress, shippingAddress, senderDetails, paymentMethod, requestedDeliveryDate } = req.body;
       
       // Use recipientAddress if provided, otherwise fall back to other address formats
       const address = recipientAddress || deliveryAddress || shippingAddress;
@@ -30,6 +30,17 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
       if (!address) {
         throw new Error('MISSING_ADDRESS');
       }
+      
+      // Prepare sender details - use provided senderDetails or fall back to user info for authenticated users
+      const orderSenderDetails = senderDetails ? {
+        senderName: senderDetails.senderName,
+        senderEmail: senderDetails.senderEmail,
+        senderPhone: senderDetails.senderPhone
+      } : (req.user ? {
+        senderName: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim(),
+        senderEmail: req.user.email || '',
+        senderPhone: req.user.phone || ''
+      } : undefined);
       
       // Calculate total and prepare order items with stock validation
       let totalPrice = 0;
@@ -149,6 +160,7 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
           userId: req.user.id,
           requestedDeliveryDate: deliveryDate,
           shippingDetails,
+          senderDetails: orderSenderDetails,
           orderItems,
           totalPrice,
           orderStatus: 'payment_done', // COD orders are considered paid
@@ -200,6 +212,7 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
         userId: req.user.id,
         requestedDeliveryDate: deliveryDate,
         shippingDetails,
+        senderDetails: orderSenderDetails,
         orderItems,
         totalPrice,
         orderStatus: 'payment_done',

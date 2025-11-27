@@ -37,6 +37,12 @@ export interface IShippingDetails {
   specialInstructions?: string;
 }
 
+export interface ISenderDetails {
+  senderName: string;
+  senderEmail: string;
+  senderPhone: string;
+}
+
 export interface IStatusHistory {
   status: string;
   timestamp: Date;
@@ -49,6 +55,7 @@ export interface IOrder extends Document {
   userId: mongoose.Types.ObjectId | string; // Allow both ObjectId and string for guest users
   requestedDeliveryDate?: Date; // Make optional for guest users
   shippingDetails?: IShippingDetails; // Make optional for guest users
+  senderDetails?: ISenderDetails; // Sender information (person placing the order)
   orderItems: IOrderItem[];
   totalPrice?: number; // Make optional, will be calculated
   orderStatus: 'pending' | 'payment_done' | 'order_received' | 'collecting_items' | 'packing' | 'en_route' | 'delivered' | 'cancelled';
@@ -239,6 +246,25 @@ const shippingDetailsSchema = new Schema<IShippingDetails>({
   }
 });
 
+const senderDetailsSchema = new Schema<ISenderDetails>({
+  senderName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  senderEmail: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true
+  },
+  senderPhone: {
+    type: String,
+    required: true,
+    trim: true
+  }
+});
+
 const statusHistorySchema = new Schema<IStatusHistory>({
   status: {
     type: String,
@@ -274,6 +300,10 @@ const orderSchema = new Schema<IOrder>({
   shippingDetails: {
     type: shippingDetailsSchema,
     required: false // Make optional for guest users
+  },
+  senderDetails: {
+    type: senderDetailsSchema,
+    required: false // Make optional for backward compatibility
   },
   orderItems: [orderItemSchema],
   totalPrice: {

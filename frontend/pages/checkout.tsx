@@ -321,6 +321,11 @@ export default function Checkout() {
             })
           })),
           recipientAddress: createStandardRecipientAddress(selectedRecipientAddress, false),
+          senderDetails: {
+            senderName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '',
+            senderEmail: user?.email || '',
+            senderPhone: user?.phone || ''
+          },
           paymentMethod: authenticatedPaymentMethod,
           requestedDeliveryDate: deliveryDate
         }, {
@@ -367,6 +372,11 @@ export default function Checkout() {
               })
             })),
             recipientAddress: createStandardRecipientAddress(selectedRecipientAddress, false),
+            senderDetails: {
+              senderName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '',
+              senderEmail: user?.email || '',
+              senderPhone: user?.phone || ''
+            },
             requestedDeliveryDate: deliveryDate
           }, {
             headers: { Authorization: `Bearer ${tokens?.accessToken}` }
@@ -664,6 +674,11 @@ export default function Checkout() {
             })
           })),
           recipientAddress: createStandardRecipientAddress(guestData, true),
+          senderDetails: {
+            senderName: guestData.senderName,
+            senderEmail: guestData.senderEmail,
+            senderPhone: guestData.senderPhone
+          },
           paymentMethod: guestData.paymentMethod,
           requestedDeliveryDate: guestData.deliveryDate
         }, {
@@ -714,6 +729,11 @@ export default function Checkout() {
                 })
               })),
               recipientAddress: createStandardRecipientAddress(guestData, true),
+              senderDetails: {
+                senderName: guestData.senderName,
+                senderEmail: guestData.senderEmail,
+                senderPhone: guestData.senderPhone
+              },
               requestedDeliveryDate: guestData.deliveryDate
             }, {
               headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
