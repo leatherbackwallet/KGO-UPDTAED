@@ -103,6 +103,11 @@ const shippingDetailsSchema = new mongoose_1.Schema({
         required: true,
         trim: true
     },
+    recipientAlternativePhone: {
+        type: String,
+        required: false,
+        trim: true
+    },
     address: {
         streetName: {
             type: String,

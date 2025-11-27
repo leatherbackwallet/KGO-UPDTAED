@@ -1,0 +1,34 @@
+
+[0;35m============================================================[0m
+[0;35m🚀 KeralGiftsOnline Full-Stack Deployment[0m
+[0;35m============================================================[0m
+[0;36mProject:[0m onyourbehlf
+[0;36mAPI Service:[0m api
+[0;36mFrontend Service:[0m default
+[0;36mAPI Version:[0m api-20251127081229
+[0;36mFrontend Version:[0m 20251127081229
+[0;35m============================================================[0m
+
+
+[0;34m[STEP][0m 1. Environment Validation
+[0;34m────────────────────────────────────────────────────────────[0m
+[0;32m[SUCCESS][0m ✓ Project structure validated
+[0;32m[SUCCESS][0m ✓ Google Cloud SDK found
+[0;32m[SUCCESS][0m ✓ Google Cloud authentication verified
+[0;32m[SUCCESS][0m ✓ Project verified: onyourbehlf
+[0;32m[SUCCESS][0m ✓ Required tools available
+
+[0;34m[STEP][0m 2. JSON Files Validation
+[0;34m────────────────────────────────────────────────────────────[0m
+[0;32m[SUCCESS][0m ✓ Found: backend/Products/keralagiftsonline.products.json
+[0;32m[SUCCESS][0m ✓ Found: backend/Products/keralagiftsonline.categories.json
+[0;32m[SUCCESS][0m ✓ Found: backend/Products/keralagiftsonline.occasions.json
+[0;36m[INFO][0m Validating JSON syntax...
+[0;32m[SUCCESS][0m ✓ Valid JSON: backend/Products/keralagiftsonline.products.json (96740 bytes)
+[0;32m[SUCCESS][0m ✓ Valid JSON: backend/Products/keralagiftsonline.categories.json (3771 bytes)
+[0;32m[SUCCESS][0m ✓ Valid JSON: backend/Products/keralagiftsonline.occasions.json (1349 bytes)
+[0;32m[SUCCESS][0m ✓ All JSON files validated
+
+[0;34m[STEP][0m 3. Backend Build Validation
+[0;34m────────────────────────────────────────────────────────────[0m
+[0;36m[INFO][0m Installing/updating backend dependencies...

@@ -92,6 +92,7 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
             const shippingDetails = {
                 recipientName: address.name || `${req.user.firstName} ${req.user.lastName}`,
                 recipientPhone: address.phone || req.user.phone,
+                recipientAlternativePhone: address.alternativePhone || undefined,
                 address: {
                     streetName: address.address?.streetName || address.street || address.streetName,
                     houseNumber: address.address?.houseNumber || address.houseNumber || '',
@@ -497,6 +498,7 @@ router.put('/:id/recipient', auth_1.auth, database_1.ensureDatabaseConnection, a
         const shippingDetails = {
             recipientName: recipientAddress.name,
             recipientPhone: recipientAddress.phone,
+            recipientAlternativePhone: recipientAddress.alternativePhone || undefined,
             address: {
                 streetName: recipientAddress.address.streetName,
                 houseNumber: recipientAddress.address.houseNumber,

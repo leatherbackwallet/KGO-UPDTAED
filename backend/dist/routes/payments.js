@@ -160,6 +160,7 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, a
                 shippingDetails: {
                     recipientName: recipientAddress.name,
                     recipientPhone: recipientAddress.phone,
+                    recipientAlternativePhone: recipientAddress.alternativePhone || undefined,
                     address: recipientAddress.address
                 },
                 requestedDeliveryDate: deliveryDate
