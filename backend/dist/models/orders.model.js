@@ -140,6 +140,24 @@ const shippingDetailsSchema = new mongoose_1.Schema({
         trim: true
     }
 });
+const senderDetailsSchema = new mongoose_1.Schema({
+    senderName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    senderEmail: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true
+    },
+    senderPhone: {
+        type: String,
+        required: true,
+        trim: true
+    }
+});
 const statusHistorySchema = new mongoose_1.Schema({
     status: {
         type: String,
@@ -174,6 +192,10 @@ const orderSchema = new mongoose_1.Schema({
     shippingDetails: {
         type: shippingDetailsSchema,
         required: false // Make optional for guest users
+    },
+    senderDetails: {
+        type: senderDetailsSchema,
+        required: false // Make optional for backward compatibility
     },
     orderItems: [orderItemSchema],
     totalPrice: {

@@ -30,10 +30,11 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, a
             if (!req.body.recipientAddress) {
                 throw new Error('VALIDATION_ERROR: Recipient address is required');
             }
-            const { products, recipientAddress, orderNotes, requestedDeliveryDate } = req.body;
+            const { products, recipientAddress, senderDetails, orderNotes, requestedDeliveryDate } = req.body;
             const userId = req.user.id;
             console.log('🔍 [Payment Route] User ID:', userId);
             console.log('🔍 [Payment Route] Products:', products);
+            console.log('🔍 [Payment Route] Sender Details:', senderDetails);
             // Transform products data for stock service (frontend sends 'product', stock service expects 'productId')
             const transformedProducts = products.map((item) => ({
                 productId: item.product, // Transform 'product' field to 'productId'
@@ -161,8 +162,15 @@ router.post('/create-order', auth_1.auth, database_1.ensureDatabaseConnection, a
                     recipientName: recipientAddress.name,
                     recipientPhone: recipientAddress.phone,
                     recipientAlternativePhone: recipientAddress.alternativePhone || undefined,
-                    address: recipientAddress.address
+                    address: recipientAddress.address,
+                    specialInstructions: recipientAddress.additionalInstructions || recipientAddress.specialInstructions || ''
                 },
+                // Add sender details if provided
+                senderDetails: senderDetails ? {
+                    senderName: senderDetails.senderName,
+                    senderEmail: senderDetails.senderEmail,
+                    senderPhone: senderDetails.senderPhone
+                } : undefined,
                 requestedDeliveryDate: deliveryDate
             });
             await order.save();
