@@ -9,6 +9,7 @@ declare global {
         role?: string;
         [key: string]: any;
       };
+      sessionID?: string;
     }
     interface Multer {
       File: {
