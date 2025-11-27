@@ -6,6 +6,7 @@
 export interface StandardRecipientAddress {
   name: string;
   phone: string;
+  alternativePhone?: string; // Optional alternative phone number
   address: {
     streetName: string;
     houseNumber?: string;
@@ -22,6 +23,7 @@ export interface GuestFormData {
   senderPhone: string;
   recipientName: string;
   recipientPhone: string;
+  recipientAlternativePhone?: string; // Optional alternative phone number
   deliveryAddress: {
     street: string;
     houseNumber?: string;
@@ -55,6 +57,7 @@ export const mapGuestDataToRecipientAddress = (guestData: GuestFormData): Standa
   return {
     name: guestData.recipientName,
     phone: guestData.recipientPhone,
+    alternativePhone: guestData.recipientAlternativePhone || undefined,
     address: {
       streetName: guestData.deliveryAddress.street,
       houseNumber: guestData.deliveryAddress.houseNumber,

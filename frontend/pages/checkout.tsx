@@ -29,6 +29,7 @@ interface GuestFormData {
   // Recipient Information (Person receiving the gift)
   recipientName: string;
   recipientPhone: string;
+  recipientAlternativePhone?: string; // Optional alternative phone number
   deliveryAddress: {
     street: string;
     houseNumber: string;
@@ -39,6 +40,7 @@ interface GuestFormData {
   };
   specialInstructions?: string;
   paymentMethod: string;
+  deliveryDate?: string; // ISO date string for delivery date
 }
 
 // Removed LoginFormData and RegisterFormData - now using dedicated pages
@@ -180,6 +182,7 @@ export default function Checkout() {
     senderPhone: '',
     recipientName: '',
     recipientPhone: '',
+    recipientAlternativePhone: '',
     deliveryAddress: {
       street: '',
       houseNumber: '',
@@ -189,8 +192,12 @@ export default function Checkout() {
       country: 'India'
     },
     specialInstructions: '',
-    paymentMethod: 'razorpay'
+    paymentMethod: 'razorpay',
+    deliveryDate: ''
   });
+
+  // Delivery date state for authenticated users
+  const [deliveryDate, setDeliveryDate] = useState<string>('');
 
   // Removed loginData and registerData - now using dedicated pages
 
@@ -207,14 +214,39 @@ export default function Checkout() {
         }
       }));
     } else {
-      setGuestData(prev => ({
-        ...prev,
-        [fieldName]: value
-      }));
+      setGuestData(prev => {
+        const updatedData = {
+          ...prev,
+          [fieldName]: value
+        };
+        
+        // For phone fields, validate with all form data for cross-field validation
+        if (fieldName === 'senderPhone' || fieldName === 'recipientPhone') {
+          const allFormData = {
+            senderPhone: fieldName === 'senderPhone' ? value : prev.senderPhone,
+            recipientPhone: fieldName === 'recipientPhone' ? value : prev.recipientPhone,
+            senderName: prev.senderName,
+            senderEmail: prev.senderEmail,
+            recipientName: prev.recipientName
+          };
+          
+          // Validate the changed field
+          validateField(fieldName, value, allFormData);
+          
+          // Also validate the other phone field if it has a value
+          if (fieldName === 'senderPhone' && prev.recipientPhone) {
+            validateField('recipientPhone', prev.recipientPhone, allFormData);
+          } else if (fieldName === 'recipientPhone' && prev.senderPhone) {
+            validateField('senderPhone', prev.senderPhone, allFormData);
+          }
+        }
+        
+        return updatedData;
+      });
     }
 
-    // Only validate non-delivery address fields
-    if (!['street', 'houseNumber', 'city', 'state', 'zipCode'].includes(fieldName)) {
+    // Only validate non-delivery address fields (phone fields are validated above)
+    if (!['street', 'houseNumber', 'city', 'state', 'zipCode', 'senderPhone', 'recipientPhone'].includes(fieldName)) {
       validateField(fieldName, value);
     }
   };
@@ -266,6 +298,13 @@ export default function Checkout() {
       return;
     }
 
+    if (!deliveryDate) {
+      setError('Please select a preferred delivery date');
+      setLoading(false);
+      setIsProcessingPayment(false);
+      return;
+    }
+
     try {
       // Handle COD payment for authenticated users
       if (authenticatedPaymentMethod === 'cod-test' || authenticatedPaymentMethod === 'cod') {
@@ -282,7 +321,8 @@ export default function Checkout() {
             })
           })),
           recipientAddress: createStandardRecipientAddress(selectedRecipientAddress, false),
-          paymentMethod: authenticatedPaymentMethod
+          paymentMethod: authenticatedPaymentMethod,
+          requestedDeliveryDate: deliveryDate
         }, {
           headers: { Authorization: `Bearer ${tokens?.accessToken}` }
         });
@@ -326,7 +366,8 @@ export default function Checkout() {
                 comboItemConfigurations: item.comboItemConfigurations
               })
             })),
-            recipientAddress: createStandardRecipientAddress(selectedRecipientAddress, false)
+            recipientAddress: createStandardRecipientAddress(selectedRecipientAddress, false),
+            requestedDeliveryDate: deliveryDate
           }, {
             headers: { Authorization: `Bearer ${tokens?.accessToken}` }
           });
@@ -557,6 +598,13 @@ export default function Checkout() {
         setIsProcessingPayment(false);
         return;
       }
+
+      if (!guestData.deliveryDate || !guestData.deliveryDate.trim()) {
+        setError('Please select a preferred delivery date');
+        setLoading(false);
+        setIsProcessingPayment(false);
+        return;
+      }
       // Create guest user - transform data to match backend expectations
       const guestAuthData = {
         fullName: guestData.senderName,
@@ -616,7 +664,8 @@ export default function Checkout() {
             })
           })),
           recipientAddress: createStandardRecipientAddress(guestData, true),
-          paymentMethod: guestData.paymentMethod
+          paymentMethod: guestData.paymentMethod,
+          requestedDeliveryDate: guestData.deliveryDate
         }, {
           headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
         });
@@ -664,7 +713,8 @@ export default function Checkout() {
                   comboItemConfigurations: item.comboItemConfigurations
                 })
               })),
-              recipientAddress: createStandardRecipientAddress(guestData, true)
+              recipientAddress: createStandardRecipientAddress(guestData, true),
+              requestedDeliveryDate: guestData.deliveryDate
             }, {
               headers: { Authorization: `Bearer ${guestTokens.accessToken}` }
             }),
@@ -1273,6 +1323,24 @@ export default function Checkout() {
                 <form>
                   <div className="space-y-4">
                     <div>
+                      <label htmlFor="authenticatedDeliveryDate" className="block text-sm font-medium mb-1">
+                        Preferred Delivery Date
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <input
+                        id="authenticatedDeliveryDate"
+                        type="date"
+                        value={deliveryDate}
+                        onChange={(e) => setDeliveryDate(e.target.value)}
+                        min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]} // Minimum tomorrow
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Select your preferred delivery date. We'll do our best to deliver on this date.
+                      </p>
+                    </div>
+                    <div>
                       <label className="block text-sm font-medium mb-1">Payment Method</label>
                       <select 
                         value={authenticatedPaymentMethod}
@@ -1289,13 +1357,13 @@ export default function Checkout() {
                     
                     <button 
                       type="button" 
-                      disabled={loading || isProcessingPayment || !selectedRecipientAddress}
+                      disabled={loading || isProcessingPayment || !selectedRecipientAddress || !deliveryDate}
                       onClick={(e) => {
                         e.preventDefault();
                         handleAuthenticatedOrder(e);
                       }}
                       className={`w-full py-3 rounded-lg transition-colors ${
-                        !selectedRecipientAddress || loading || isProcessingPayment
+                        !selectedRecipientAddress || !deliveryDate || loading || isProcessingPayment
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                           : 'bg-blue-600 text-white hover:bg-blue-700'
                       }`}
@@ -1303,9 +1371,11 @@ export default function Checkout() {
                       {loading || isProcessingPayment ? 'Processing...' : 
                         !selectedRecipientAddress 
                           ? '📍 Select Address First' 
-                          : authenticatedPaymentMethod === 'cod' || authenticatedPaymentMethod === 'cod-test' 
-                            ? `Place COD Order - ₹${total.toFixed(2)}` 
-                            : `Pay ₹${total.toFixed(2)}`
+                          : !deliveryDate
+                            ? '📅 Select Delivery Date First'
+                            : authenticatedPaymentMethod === 'cod' || authenticatedPaymentMethod === 'cod-test' 
+                              ? `Place COD Order - ₹${total.toFixed(2)}` 
+                              : `Pay ₹${total.toFixed(2)}`
                       }
                     </button>
                   </div>
@@ -1418,6 +1488,24 @@ export default function Checkout() {
                           validationState={getFieldState('recipientPhone')}
                           autoComplete="tel"
                         />
+                        <div className="space-y-1">
+                          <label htmlFor="recipientAlternativePhone" className="block text-sm font-medium text-gray-700">
+                            Alternative Phone Number (Optional)
+                          </label>
+                          <input
+                            id="recipientAlternativePhone"
+                            type="tel"
+                            name="recipientAlternativePhone"
+                            value={guestData.recipientAlternativePhone || ''}
+                            onChange={(e) => handleFieldChange('recipientAlternativePhone', e.target.value)}
+                            placeholder="Enter alternative phone number (optional)"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            autoComplete="tel"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            An alternative contact number for the recipient (completely optional)
+                          </p>
+                        </div>
                       </div>
                     </div>
 
@@ -1523,6 +1611,25 @@ export default function Checkout() {
                             rows={3}
                             maxLength={500}
                           />
+                        </div>
+                        <div className="space-y-1">
+                          <label htmlFor="deliveryDate" className="block text-sm font-medium text-gray-700">
+                            Preferred Delivery Date
+                            <span className="text-red-500 ml-1">*</span>
+                          </label>
+                          <input
+                            id="deliveryDate"
+                            type="date"
+                            name="deliveryDate"
+                            value={guestData.deliveryDate || ''}
+                            onChange={(e) => handleFieldChange('deliveryDate', e.target.value)}
+                            min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]} // Minimum tomorrow
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            required
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Select your preferred delivery date. We'll do our best to deliver on this date.
+                          </p>
                         </div>
                       </div>
                     </div>

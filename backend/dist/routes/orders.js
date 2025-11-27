@@ -22,7 +22,7 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
     const session = await mongoose_1.default.startSession();
     try {
         await session.withTransaction(async () => {
-            const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod } = req.body;
+            const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod, requestedDeliveryDate } = req.body;
             // Use recipientAddress if provided, otherwise fall back to other address formats
             const address = recipientAddress || deliveryAddress || shippingAddress;
             if (!address) {
@@ -106,6 +106,18 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
             if ((paymentMethod === 'cod-test' || paymentMethod === 'cod') && process.env.NODE_ENV !== 'development') {
                 throw new Error('COD_NOT_AVAILABLE');
             }
+            // Parse requested delivery date or default to 7 days from now
+            let deliveryDate;
+            if (requestedDeliveryDate) {
+                deliveryDate = new Date(requestedDeliveryDate);
+                // Validate that the date is in the future
+                if (isNaN(deliveryDate.getTime()) || deliveryDate < new Date()) {
+                    deliveryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Default to 7 days from now
+                }
+            }
+            else {
+                deliveryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Default to 7 days from now
+            }
             // Update product stock atomically within transaction
             // Only deduct stock AFTER payment method validation to ensure proper rollback
             for (const update of productUpdates) {
@@ -116,7 +128,7 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
                 // Create COD order with specific status and payment details
                 const order = await index_1.Order.create([{
                         userId: req.user.id,
-                        requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+                        requestedDeliveryDate: deliveryDate,
                         shippingDetails,
                         orderItems,
                         totalPrice,
@@ -164,7 +176,7 @@ router.post('/', auth_1.auth, database_1.ensureDatabaseConnection, async (req, r
             // Create regular order (Razorpay)
             const order = await index_1.Order.create([{
                     userId: req.user.id,
-                    requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+                    requestedDeliveryDate: deliveryDate,
                     shippingDetails,
                     orderItems,
                     totalPrice,

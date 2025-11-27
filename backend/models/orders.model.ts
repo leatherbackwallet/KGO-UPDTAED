@@ -26,6 +26,7 @@ export interface IOrderItem {
 export interface IShippingDetails {
   recipientName: string;
   recipientPhone: string;
+  recipientAlternativePhone?: string; // Optional alternative phone number
   address: {
     streetName: string;
     houseNumber?: string;
@@ -198,6 +199,11 @@ const shippingDetailsSchema = new Schema<IShippingDetails>({
   recipientPhone: {
     type: String,
     required: true,
+    trim: true
+  },
+  recipientAlternativePhone: {
+    type: String,
+    required: false,
     trim: true
   },
   address: {

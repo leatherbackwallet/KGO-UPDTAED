@@ -22,7 +22,7 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
   try {
     await session.withTransaction(async () => {
       
-      const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod } = req.body;
+      const { products, recipientAddress, deliveryAddress, shippingAddress, paymentMethod, requestedDeliveryDate } = req.body;
       
       // Use recipientAddress if provided, otherwise fall back to other address formats
       const address = recipientAddress || deliveryAddress || shippingAddress;
@@ -103,6 +103,7 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
       const shippingDetails = {
         recipientName: address.name || `${req.user.firstName} ${req.user.lastName}`,
         recipientPhone: address.phone || req.user.phone,
+        recipientAlternativePhone: address.alternativePhone || undefined,
         address: {
           streetName: address.address?.streetName || address.street || address.streetName,
           houseNumber: address.address?.houseNumber || address.houseNumber || '',
@@ -117,6 +118,18 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
       // Reject COD payment method in production
       if ((paymentMethod === 'cod-test' || paymentMethod === 'cod') && process.env.NODE_ENV !== 'development') {
         throw new Error('COD_NOT_AVAILABLE');
+      }
+      
+      // Parse requested delivery date or default to 7 days from now
+      let deliveryDate: Date;
+      if (requestedDeliveryDate) {
+          deliveryDate = new Date(requestedDeliveryDate);
+          // Validate that the date is in the future
+          if (isNaN(deliveryDate.getTime()) || deliveryDate < new Date()) {
+              deliveryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Default to 7 days from now
+          }
+      } else {
+          deliveryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Default to 7 days from now
       }
       
       // Update product stock atomically within transaction
@@ -134,7 +147,7 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
         // Create COD order with specific status and payment details
         const order = await Order.create([{
           userId: req.user.id,
-          requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+          requestedDeliveryDate: deliveryDate,
           shippingDetails,
           orderItems,
           totalPrice,
@@ -185,7 +198,7 @@ router.post('/', auth, ensureDatabaseConnection, async (req: any, res) => {
       // Create regular order (Razorpay)
       const order = await Order.create([{
         userId: req.user.id,
-        requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        requestedDeliveryDate: deliveryDate,
         shippingDetails,
         orderItems,
         totalPrice,
@@ -535,6 +548,7 @@ router.put('/:id/recipient', auth, ensureDatabaseConnection, async (req: any, re
     const shippingDetails = {
       recipientName: recipientAddress.name,
       recipientPhone: recipientAddress.phone,
+      recipientAlternativePhone: recipientAddress.alternativePhone || undefined,
       address: {
         streetName: recipientAddress.address.streetName,
         houseNumber: recipientAddress.address.houseNumber,

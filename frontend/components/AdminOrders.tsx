@@ -110,6 +110,7 @@ interface Order {
     created_at?: number;
   };
   failureReason?: string;
+  requestedDeliveryDate?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -139,6 +140,7 @@ const generateOrdersCSV = (orders: Order[]): string => {
     'Razorpay Order ID',
     'Razorpay Payment ID',
     'Items',
+    'Requested Delivery Date',
     'Created At',
     'Updated At',
     'Failure Reason',
@@ -178,6 +180,7 @@ const generateOrdersCSV = (orders: Order[]): string => {
       order.razorpayOrderId || 'N/A',
       order.razorpayPaymentId || 'N/A',
       itemsSummary,
+      order.requestedDeliveryDate ? new Date(order.requestedDeliveryDate).toLocaleDateString() : 'N/A',
       order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A',
       order.updatedAt ? new Date(order.updatedAt).toLocaleString() : 'N/A',
       order.failureReason || 'N/A',
@@ -738,14 +741,17 @@ const AdminOrders: React.FC = () => {
                       Status
                     </th>
                     <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
-                      Date
+                      Order Date
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                      Delivery Date
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredOrders?.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
+                      <td colSpan={9} className="px-4 py-12 text-center text-gray-500">
                         <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -852,9 +858,40 @@ const AdminOrders: React.FC = () => {
                           {(order.orderStatus || 'unknown').replace(/_/g, ' ')}
                         </span>
                       </td>
-                      {/* Date Column */}
+                      {/* Order Date Column */}
                       <td className="px-4 py-4 text-sm text-gray-500 break-words align-top">
                         {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
+                      </td>
+                      {/* Delivery Date Column */}
+                      <td className="px-4 py-4 text-sm break-words align-top">
+                        {order.requestedDeliveryDate ? (
+                          <div>
+                            <div className="font-medium text-blue-700">
+                              {new Date(order.requestedDeliveryDate).toLocaleDateString()}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {(() => {
+                                const deliveryDate = new Date(order.requestedDeliveryDate);
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+                                deliveryDate.setHours(0, 0, 0, 0);
+                                const diffTime = deliveryDate.getTime() - today.getTime();
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                if (diffDays < 0) {
+                                  return `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''}`;
+                                } else if (diffDays === 0) {
+                                  return 'Today';
+                                } else if (diffDays === 1) {
+                                  return 'Tomorrow';
+                                } else {
+                                  return `In ${diffDays} days`;
+                                }
+                              })()}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 italic">Not set</span>
+                        )}
                       </td>
                     </tr>
                     ))
@@ -944,6 +981,14 @@ const AdminOrders: React.FC = () => {
                           {selectedOrder.paymentStatus || 'Unknown'}
                         </span>
                       </p>
+                      {selectedOrder.requestedDeliveryDate && (
+                        <p className="flex justify-between items-center pt-1 border-t border-blue-200">
+                          <span className="text-blue-700">Delivery Date:</span>
+                          <span className="font-medium text-blue-900">
+                            {new Date(selectedOrder.requestedDeliveryDate).toLocaleDateString()}
+                          </span>
+                        </p>
+                      )}
                       <p className="flex justify-between items-center">
                         <span className="text-blue-700">Customer:</span>
                         <span className="font-medium text-blue-900">{selectedOrder.shippingDetails?.recipientName || 'N/A'}</span>
@@ -996,6 +1041,40 @@ const AdminOrders: React.FC = () => {
                           {selectedOrder.shippingDetails?.address?.countryCode || 'N/A'}
                         </div>
                       </div>
+                      {selectedOrder.requestedDeliveryDate && (
+                        <div className="pt-2 border-t border-gray-200">
+                          <span className="font-medium">Preferred Delivery Date:</span>
+                          <div className="ml-2 mt-1">
+                            <div className="text-gray-900 font-semibold">
+                              {new Date(selectedOrder.requestedDeliveryDate).toLocaleDateString('en-US', { 
+                                weekday: 'long', 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                              })}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {(() => {
+                                const deliveryDate = new Date(selectedOrder.requestedDeliveryDate);
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+                                deliveryDate.setHours(0, 0, 0, 0);
+                                const diffTime = deliveryDate.getTime() - today.getTime();
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                if (diffDays < 0) {
+                                  return `⚠️ Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''}`;
+                                } else if (diffDays === 0) {
+                                  return '📅 Today';
+                                } else if (diffDays === 1) {
+                                  return '📅 Tomorrow';
+                                } else {
+                                  return `📅 In ${diffDays} days`;
+                                }
+                              })()}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       {selectedOrder.shippingDetails?.specialInstructions && (
                         <div>
                           <span className="font-medium">Special Instructions:</span>

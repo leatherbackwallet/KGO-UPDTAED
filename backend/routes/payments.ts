@@ -33,7 +33,7 @@ router.post('/create-order', auth, ensureDatabaseConnection, async (req: Request
                 throw new Error('VALIDATION_ERROR: Recipient address is required');
             }
 
-            const { products, recipientAddress, orderNotes } = req.body;
+            const { products, recipientAddress, orderNotes, requestedDeliveryDate } = req.body;
             const userId = (req as any).user.id;
             console.log('🔍 [Payment Route] User ID:', userId);
             console.log('🔍 [Payment Route] Products:', products);
@@ -156,6 +156,18 @@ router.post('/create-order', auth, ensureDatabaseConnection, async (req: Request
         // Create Razorpay order
         const razorpayOrder = await paymentService.createOrder(totalAmount, 'INR');
 
+        // Parse requested delivery date or default to 7 days from now
+        let deliveryDate: Date;
+        if (requestedDeliveryDate) {
+            deliveryDate = new Date(requestedDeliveryDate);
+            // Validate that the date is in the future
+            if (isNaN(deliveryDate.getTime()) || deliveryDate < new Date()) {
+                deliveryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Default to 7 days from now
+            }
+        } else {
+            deliveryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Default to 7 days from now
+        }
+
         // Create order in database with PENDING status
         const order = new Order({
             userId,
@@ -171,9 +183,10 @@ router.post('/create-order', auth, ensureDatabaseConnection, async (req: Request
             shippingDetails: {
                 recipientName: recipientAddress.name,
                 recipientPhone: recipientAddress.phone,
+                recipientAlternativePhone: recipientAddress.alternativePhone || undefined,
                 address: recipientAddress.address
             },
-            requestedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+            requestedDeliveryDate: deliveryDate
         });
 
         await order.save();

@@ -11,13 +11,33 @@ const crypto_1 = __importDefault(require("crypto"));
 const razorpay_1 = __importDefault(require("razorpay"));
 class PaymentService {
     constructor() {
+        this.razorpay = null;
+        this.initialized = false;
+        // Don't initialize in constructor - use lazy initialization
+    }
+    /**
+     * Lazy initialization of Razorpay
+     * Only initializes when actually needed
+     */
+    initialize() {
+        if (this.initialized) {
+            return;
+        }
         console.log('🔍 [Payment Service] Initializing Razorpay...');
         console.log('🔍 [Payment Service] Key ID:', process.env.RAZORPAY_KEY_ID);
         console.log('🔍 [Payment Service] Key Secret:', process.env.RAZORPAY_KEY_SECRET ? 'SET' : 'NOT SET');
         console.log('🔍 [Payment Service] Webhook Secret:', process.env.RAZORPAY_WEBHOOK_SECRET ? 'SET' : 'NOT SET');
         if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-            console.error('❌ [Payment Service] Missing Razorpay credentials');
-            throw new Error('Razorpay credentials not configured');
+            const isDevelopment = process.env.NODE_ENV === 'development';
+            if (isDevelopment) {
+                console.warn('⚠️  [Payment Service] Razorpay credentials not configured - payment features will be disabled in development');
+                this.initialized = true;
+                return;
+            }
+            else {
+                console.error('❌ [Payment Service] Missing Razorpay credentials');
+                throw new Error('Razorpay credentials not configured');
+            }
         }
         if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
             console.warn('⚠️  [Payment Service] RAZORPAY_WEBHOOK_SECRET not set - webhook signature verification will fail!');
@@ -27,12 +47,23 @@ class PaymentService {
             key_id: process.env.RAZORPAY_KEY_ID,
             key_secret: process.env.RAZORPAY_KEY_SECRET
         });
+        this.initialized = true;
         console.log('✅ [Payment Service] Razorpay initialized successfully');
+    }
+    /**
+     * Check if Razorpay is available
+     */
+    ensureInitialized() {
+        this.initialize();
+        if (!this.razorpay) {
+            throw new Error('Razorpay is not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.');
+        }
     }
     /**
      * Create a Razorpay order
      */
     async createOrder(amount, currency, receipt) {
+        this.ensureInitialized();
         try {
             console.log('🔍 [Payment Service] Creating Razorpay order...');
             console.log('🔍 [Payment Service] Amount:', amount);
@@ -70,6 +101,11 @@ class PaymentService {
      */
     verifyPayment(orderId, paymentId, signature) {
         try {
+            this.initialize();
+            if (!process.env.RAZORPAY_KEY_SECRET) {
+                console.warn('⚠️  [Payment Service] Cannot verify payment - RAZORPAY_KEY_SECRET not set');
+                return false;
+            }
             const body = orderId + '|' + paymentId;
             const expectedSignature = crypto_1.default
                 .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -87,6 +123,11 @@ class PaymentService {
      */
     verifyWebhookSignature(body, signature) {
         try {
+            this.initialize();
+            if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+                console.warn('⚠️  [Payment Service] Cannot verify webhook - RAZORPAY_WEBHOOK_SECRET not set');
+                return false;
+            }
             const expectedSignature = crypto_1.default
                 .createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET)
                 .update(body)
@@ -102,6 +143,7 @@ class PaymentService {
      * Get payment details
      */
     async getPaymentDetails(paymentId) {
+        this.ensureInitialized();
         try {
             const payment = await this.razorpay.payments.fetch(paymentId);
             return payment;
@@ -115,6 +157,7 @@ class PaymentService {
      * Get order details
      */
     async getOrderDetails(orderId) {
+        this.ensureInitialized();
         try {
             const order = await this.razorpay.orders.fetch(orderId);
             return order;
@@ -128,6 +171,7 @@ class PaymentService {
      * Capture payment
      */
     async capturePayment(paymentId, amount, currency) {
+        this.ensureInitialized();
         try {
             const capture = await this.razorpay.payments.capture(paymentId, amount * 100, currency);
             return capture;
@@ -141,6 +185,7 @@ class PaymentService {
      * Refund payment
      */
     async refundPayment(paymentId, amount, notes) {
+        this.ensureInitialized();
         try {
             const refundOptions = {
                 payment_id: paymentId,

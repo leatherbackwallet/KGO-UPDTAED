@@ -7,17 +7,37 @@ import crypto from 'crypto';
 import Razorpay from 'razorpay';
 
 class PaymentService {
-  private razorpay: Razorpay;
+  private razorpay: Razorpay | null = null;
+  private initialized: boolean = false;
 
   constructor() {
+    // Don't initialize in constructor - use lazy initialization
+  }
+
+  /**
+   * Lazy initialization of Razorpay
+   * Only initializes when actually needed
+   */
+  private initialize(): void {
+    if (this.initialized) {
+      return;
+    }
+
     console.log('🔍 [Payment Service] Initializing Razorpay...');
     console.log('🔍 [Payment Service] Key ID:', process.env.RAZORPAY_KEY_ID);
     console.log('🔍 [Payment Service] Key Secret:', process.env.RAZORPAY_KEY_SECRET ? 'SET' : 'NOT SET');
     console.log('🔍 [Payment Service] Webhook Secret:', process.env.RAZORPAY_WEBHOOK_SECRET ? 'SET' : 'NOT SET');
     
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-      console.error('❌ [Payment Service] Missing Razorpay credentials');
-      throw new Error('Razorpay credentials not configured');
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      if (isDevelopment) {
+        console.warn('⚠️  [Payment Service] Razorpay credentials not configured - payment features will be disabled in development');
+        this.initialized = true;
+        return;
+      } else {
+        console.error('❌ [Payment Service] Missing Razorpay credentials');
+        throw new Error('Razorpay credentials not configured');
+      }
     }
     
     if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
@@ -30,13 +50,26 @@ class PaymentService {
       key_secret: process.env.RAZORPAY_KEY_SECRET!
     });
     
+    this.initialized = true;
     console.log('✅ [Payment Service] Razorpay initialized successfully');
+  }
+
+  /**
+   * Check if Razorpay is available
+   */
+  private ensureInitialized(): void {
+    this.initialize();
+    if (!this.razorpay) {
+      throw new Error('Razorpay is not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.');
+    }
   }
 
   /**
    * Create a Razorpay order
    */
   async createOrder(amount: number, currency: string, receipt?: string): Promise<any> {
+    this.ensureInitialized();
+    
     try {
       console.log('🔍 [Payment Service] Creating Razorpay order...');
       console.log('🔍 [Payment Service] Amount:', amount);
@@ -59,7 +92,7 @@ class PaymentService {
       };
 
       console.log('🔍 [Payment Service] Order options:', options);
-      const order = await this.razorpay.orders.create(options);
+      const order = await this.razorpay!.orders.create(options);
       console.log('✅ [Payment Service] Order created successfully:', order.id);
       console.log('✅ [Payment Service] Order details:', JSON.stringify(order, null, 2));
       return order;
@@ -77,9 +110,15 @@ class PaymentService {
    */
   verifyPayment(orderId: string, paymentId: string, signature: string): boolean {
     try {
+      this.initialize();
+      if (!process.env.RAZORPAY_KEY_SECRET) {
+        console.warn('⚠️  [Payment Service] Cannot verify payment - RAZORPAY_KEY_SECRET not set');
+        return false;
+      }
+      
       const body = orderId + '|' + paymentId;
       const expectedSignature = crypto
-        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
         .update(body.toString())
         .digest('hex');
 
@@ -95,8 +134,14 @@ class PaymentService {
    */
   verifyWebhookSignature(body: string, signature: string): boolean {
     try {
+      this.initialize();
+      if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+        console.warn('⚠️  [Payment Service] Cannot verify webhook - RAZORPAY_WEBHOOK_SECRET not set');
+        return false;
+      }
+      
       const expectedSignature = crypto
-        .createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET!)
+        .createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET)
         .update(body)
         .digest('hex');
 
@@ -111,8 +156,10 @@ class PaymentService {
    * Get payment details
    */
   async getPaymentDetails(paymentId: string): Promise<any> {
+    this.ensureInitialized();
+    
     try {
-      const payment = await this.razorpay.payments.fetch(paymentId);
+      const payment = await this.razorpay!.payments.fetch(paymentId);
       return payment;
     } catch (error: any) {
       console.error('Error fetching payment details:', error);
@@ -124,8 +171,10 @@ class PaymentService {
    * Get order details
    */
   async getOrderDetails(orderId: string): Promise<any> {
+    this.ensureInitialized();
+    
     try {
-      const order = await this.razorpay.orders.fetch(orderId);
+      const order = await this.razorpay!.orders.fetch(orderId);
       return order;
     } catch (error: any) {
       console.error('Error fetching order details:', error);
@@ -137,8 +186,10 @@ class PaymentService {
    * Capture payment
    */
   async capturePayment(paymentId: string, amount: number, currency: string): Promise<any> {
+    this.ensureInitialized();
+    
     try {
-      const capture = await this.razorpay.payments.capture(paymentId, amount * 100, currency);
+      const capture = await this.razorpay!.payments.capture(paymentId, amount * 100, currency);
       return capture;
     } catch (error: any) {
       console.error('Error capturing payment:', error);
@@ -150,6 +201,8 @@ class PaymentService {
    * Refund payment
    */
   async refundPayment(paymentId: string, amount?: number, notes?: any): Promise<any> {
+    this.ensureInitialized();
+    
     try {
       const refundOptions: any = {
         payment_id: paymentId,
@@ -160,7 +213,7 @@ class PaymentService {
         refundOptions.amount = amount * 100; // Convert to paise
       }
 
-      const refund = await this.razorpay.payments.refund(paymentId, refundOptions);
+      const refund = await this.razorpay!.payments.refund(paymentId, refundOptions);
       return refund;
     } catch (error: any) {
       console.error('Error processing refund:', error);

@@ -22,7 +22,7 @@ export interface FormValidationState {
 
 export interface UseFormValidationReturn {
   validationState: FormValidationState;
-  validateField: (fieldName: string, value: string) => void;
+  validateField: (fieldName: string, value: string, allFormData?: Record<string, string>) => void;
   touchField: (fieldName: string) => void;
   isFormValid: boolean;
   getFieldState: (fieldName: string) => FieldValidationState;
@@ -43,7 +43,7 @@ export const useFormValidation = (): UseFormValidationReturn => {
   const [validationState, setValidationState] = useState<FormValidationState>({});
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
 
-  const validateField = useCallback((fieldName: string, value: string) => {
+  const validateField = useCallback((fieldName: string, value: string, allFormData?: Record<string, string>) => {
     const validationFn = validationFunctions[fieldName as keyof typeof validationFunctions];
     
     if (!validationFn) {
@@ -53,14 +53,40 @@ export const useFormValidation = (): UseFormValidationReturn => {
 
     const result = validationFn(value);
     const isTouched = touchedFields.has(fieldName);
+    
+    // Cross-field validation: Check if senderPhone and recipientPhone are different
+    let finalResult = result;
+    let finalErrorMessage = result.message;
+    
+    if ((fieldName === 'senderPhone' || fieldName === 'recipientPhone') && allFormData) {
+      const senderPhone = allFormData.senderPhone || '';
+      const recipientPhone = allFormData.recipientPhone || '';
+      
+      // Only check uniqueness if both fields have valid phone numbers
+      if (result.isValid && senderPhone && recipientPhone) {
+        const cleanSenderPhone = senderPhone.replace(/\D/g, '');
+        const cleanRecipientPhone = recipientPhone.replace(/\D/g, '');
+        
+        if (cleanSenderPhone === cleanRecipientPhone && cleanSenderPhone.length === 10) {
+          finalResult = {
+            isValid: false,
+            message: fieldName === 'senderPhone' 
+              ? 'Your phone number must be different from the recipient\'s phone number'
+              : 'Recipient\'s phone number must be different from your phone number',
+            type: 'error' as const
+          };
+          finalErrorMessage = finalResult.message;
+        }
+      }
+    }
 
     setValidationState(prev => ({
       ...prev,
       [fieldName]: {
-        isValid: result.isValid,
+        isValid: finalResult.isValid,
         isTouched,
-        errorMessage: result.message,
-        showError: isTouched && !result.isValid
+        errorMessage: finalErrorMessage,
+        showError: isTouched && !finalResult.isValid
       }
     }));
   }, [touchedFields]);
