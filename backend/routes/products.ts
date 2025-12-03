@@ -13,10 +13,8 @@ import { Product } from '../models/products.model';
 import { Category } from '../models/categories.model';
 import { ActivityLog } from '../models/activityLogs.model';
 import { ProductAttribute } from '../models/productAttributes.model';
-import { VendorProduct } from '../models/vendorProducts.model';
-import { Review } from '../models/reviews.model';
 import { Wishlist } from '../models/wishlists.model';
-import { Notification } from '../models/notifications.model';
+// Removed imports for deleted models: VendorProduct, Review, Notification
 import { auth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
 import { validate } from '../middleware/validation';

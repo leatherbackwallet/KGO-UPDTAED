@@ -8,7 +8,6 @@ import { hashPassword } from './utils/hash';
 import { ensureProductImagesDir } from './utils/fileUpload';
 import { connectToDatabase } from './utils/database';
 import { generalLimiter, authLimiter, apiLimiter, userAwareLimiter } from './middleware/rateLimit';
-import { connectionPoolOptimizer } from './services/ConnectionPoolOptimizer';
 import { logger, errorLogger } from './middleware/logger';
 
 // Load environment variables
@@ -211,30 +210,17 @@ import authRoutes from './routes/auth';
 import uploadRoutes from './routes/upload';
 import ordersRoutes from './routes/orders';
 import profileRoutes from './routes/profile';
-import personalizationRoutes from './routes/personalization';
-import analyticsRoutes from './routes/analytics';
-import subscriptionRoutes from './routes/subscriptions';
-import contentRoutes from './routes/content';
-
 import productsRoutes from './routes/products';
 import categoriesRoutes from './routes/categories_json';
 import adminCategoriesRoutes from './routes/adminCategories';
-import vendorsRoutes from './routes/vendors';
 import usersRoutes from './routes/users';
 import wishlistRoutes from './routes/wishlist';
 import cartRoutes from './routes/cart';
-import financeRoutes from './routes/finance';
-import hubsRoutes from './routes/hubs';
-import deliveryRunsRoutes from './routes/deliveryRuns';
-import returnsRoutes from './routes/returns';
 import healthRoutes from './routes/health';
 import imagesRoutes from './routes/images';
-import featureFlagsRoutes from './routes/featureFlags';
 import monitoringRoutes from './routes/monitoring';
 import occasionsRoutes from './routes/occasions_json';
-import occasionsSeedRoutes from './routes/occasions-seed';
 import paymentRoutes from './routes/payments';
-import notificationRoutes from './routes/notifications';
 
 // Apply health routes first (no rate limiting for health checks)
 app.use('/api/health', healthRoutes);
@@ -324,26 +310,14 @@ app.use('/api/profile', apiLimiter as any, profileRoutes);
 app.use('/api/products', userAwareLimiter as any, productsRoutes);
 app.use('/api/categories', apiLimiter as any, categoriesRoutes);
 app.use('/api/admin/categories', apiLimiter as any, adminCategoriesRoutes);
-app.use('/api/vendors', apiLimiter as any, vendorsRoutes);
 app.use('/api/orders', apiLimiter as any, ordersRoutes);
 app.use('/api/payments', apiLimiter as any, paymentRoutes);
 app.use('/api/users', apiLimiter as any, usersRoutes);
 app.use('/api/wishlist', apiLimiter as any, wishlistRoutes);
 app.use('/api/cart', apiLimiter as any, cartRoutes);
-app.use('/api/finance', apiLimiter as any, financeRoutes);
-app.use('/api/hubs', apiLimiter as any, hubsRoutes);
-app.use('/api/delivery-runs', apiLimiter as any, deliveryRunsRoutes);
-app.use('/api/returns', apiLimiter as any, returnsRoutes);
-app.use('/api/personalization', apiLimiter as any, personalizationRoutes);
-app.use('/api/analytics', apiLimiter as any, analyticsRoutes);
-app.use('/api/subscriptions', apiLimiter as any, subscriptionRoutes);
-app.use('/api/content', apiLimiter as any, contentRoutes);
 app.use('/api/images', apiLimiter as any, imagesRoutes);
-app.use('/api/feature-flags', apiLimiter as any, featureFlagsRoutes);
 app.use('/api/monitoring', apiLimiter as any, monitoringRoutes);
 app.use('/api/occasions', apiLimiter as any, occasionsRoutes);
-app.use('/api/occasions', apiLimiter as any, occasionsSeedRoutes);
-app.use('/api/notifications', apiLimiter as any, notificationRoutes);
 
 // CORS error handler middleware
 app.use((err: any, req: any, res: any, next: any) => {
@@ -379,17 +353,9 @@ app.use((err: any, req: any, res: any, next: any) => {
 app.use(errorLogger);
 
 // Start server
-// Connect to MongoDB with connection pool optimization
+// Connect to MongoDB
 connectToDatabase().then(async () => {
   console.log('✅ Database connected successfully');
-  
-  // Optimize connection pool to prevent timeouts
-  try {
-    await connectionPoolOptimizer.optimizeConnectionPool();
-    console.log('✅ Connection pool optimized for timeout prevention');
-  } catch (error) {
-    console.error('⚠️ Connection pool optimization failed:', error);
-  }
 }).catch((error) => {
   console.error('❌ Database connection failed:', error);
   process.exit(1);

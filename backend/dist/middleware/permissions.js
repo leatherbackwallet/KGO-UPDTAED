@@ -141,13 +141,11 @@ function getRolePermissions(roleName) {
             'users:read',
             'products:read', 'products:write',
             'orders:read', 'orders:write',
-            'categories:read', 'categories:write',
-            'analytics:read'
+            'categories:read', 'categories:write'
         ],
         vendor: [
             'products:read', 'products:write',
-            'orders:read', 'orders:write',
-            'analytics:read'
+            'orders:read', 'orders:write'
         ],
         customer: [
             'products:read',

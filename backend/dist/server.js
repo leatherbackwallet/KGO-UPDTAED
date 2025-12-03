@@ -46,7 +46,6 @@ const hash_1 = require("./utils/hash");
 const fileUpload_1 = require("./utils/fileUpload");
 const database_1 = require("./utils/database");
 const rateLimit_1 = require("./middleware/rateLimit");
-const ConnectionPoolOptimizer_1 = require("./services/ConnectionPoolOptimizer");
 const logger_1 = require("./middleware/logger");
 // Load environment variables
 dotenv_1.default.config();
@@ -230,29 +229,17 @@ const auth_1 = __importDefault(require("./routes/auth"));
 const upload_1 = __importDefault(require("./routes/upload"));
 const orders_1 = __importDefault(require("./routes/orders"));
 const profile_1 = __importDefault(require("./routes/profile"));
-const personalization_1 = __importDefault(require("./routes/personalization"));
-const analytics_1 = __importDefault(require("./routes/analytics"));
-const subscriptions_1 = __importDefault(require("./routes/subscriptions"));
-const content_1 = __importDefault(require("./routes/content"));
 const products_1 = __importDefault(require("./routes/products"));
 const categories_json_1 = __importDefault(require("./routes/categories_json"));
 const adminCategories_1 = __importDefault(require("./routes/adminCategories"));
-const vendors_1 = __importDefault(require("./routes/vendors"));
 const users_1 = __importDefault(require("./routes/users"));
 const wishlist_1 = __importDefault(require("./routes/wishlist"));
 const cart_1 = __importDefault(require("./routes/cart"));
-const finance_1 = __importDefault(require("./routes/finance"));
-const hubs_1 = __importDefault(require("./routes/hubs"));
-const deliveryRuns_1 = __importDefault(require("./routes/deliveryRuns"));
-const returns_1 = __importDefault(require("./routes/returns"));
 const health_1 = __importDefault(require("./routes/health"));
 const images_1 = __importDefault(require("./routes/images"));
-const featureFlags_1 = __importDefault(require("./routes/featureFlags"));
 const monitoring_1 = __importDefault(require("./routes/monitoring"));
 const occasions_json_1 = __importDefault(require("./routes/occasions_json"));
-const occasions_seed_1 = __importDefault(require("./routes/occasions-seed"));
 const payments_1 = __importDefault(require("./routes/payments"));
-const notifications_1 = __importDefault(require("./routes/notifications"));
 // Apply health routes first (no rate limiting for health checks)
 app.use('/api/health', health_1.default);
 // Cold start warmup endpoint - must be before rate limiting
@@ -333,26 +320,14 @@ app.use('/api/profile', rateLimit_1.apiLimiter, profile_1.default);
 app.use('/api/products', rateLimit_1.userAwareLimiter, products_1.default);
 app.use('/api/categories', rateLimit_1.apiLimiter, categories_json_1.default);
 app.use('/api/admin/categories', rateLimit_1.apiLimiter, adminCategories_1.default);
-app.use('/api/vendors', rateLimit_1.apiLimiter, vendors_1.default);
 app.use('/api/orders', rateLimit_1.apiLimiter, orders_1.default);
 app.use('/api/payments', rateLimit_1.apiLimiter, payments_1.default);
 app.use('/api/users', rateLimit_1.apiLimiter, users_1.default);
 app.use('/api/wishlist', rateLimit_1.apiLimiter, wishlist_1.default);
 app.use('/api/cart', rateLimit_1.apiLimiter, cart_1.default);
-app.use('/api/finance', rateLimit_1.apiLimiter, finance_1.default);
-app.use('/api/hubs', rateLimit_1.apiLimiter, hubs_1.default);
-app.use('/api/delivery-runs', rateLimit_1.apiLimiter, deliveryRuns_1.default);
-app.use('/api/returns', rateLimit_1.apiLimiter, returns_1.default);
-app.use('/api/personalization', rateLimit_1.apiLimiter, personalization_1.default);
-app.use('/api/analytics', rateLimit_1.apiLimiter, analytics_1.default);
-app.use('/api/subscriptions', rateLimit_1.apiLimiter, subscriptions_1.default);
-app.use('/api/content', rateLimit_1.apiLimiter, content_1.default);
 app.use('/api/images', rateLimit_1.apiLimiter, images_1.default);
-app.use('/api/feature-flags', rateLimit_1.apiLimiter, featureFlags_1.default);
 app.use('/api/monitoring', rateLimit_1.apiLimiter, monitoring_1.default);
 app.use('/api/occasions', rateLimit_1.apiLimiter, occasions_json_1.default);
-app.use('/api/occasions', rateLimit_1.apiLimiter, occasions_seed_1.default);
-app.use('/api/notifications', rateLimit_1.apiLimiter, notifications_1.default);
 // CORS error handler middleware
 app.use((err, req, res, next) => {
     if (err.message === 'Not allowed by CORS') {
@@ -383,17 +358,9 @@ app.use((err, req, res, next) => {
 // Error logging middleware
 app.use(logger_1.errorLogger);
 // Start server
-// Connect to MongoDB with connection pool optimization
+// Connect to MongoDB
 (0, database_1.connectToDatabase)().then(async () => {
     console.log('✅ Database connected successfully');
-    // Optimize connection pool to prevent timeouts
-    try {
-        await ConnectionPoolOptimizer_1.connectionPoolOptimizer.optimizeConnectionPool();
-        console.log('✅ Connection pool optimized for timeout prevention');
-    }
-    catch (error) {
-        console.error('⚠️ Connection pool optimization failed:', error);
-    }
 }).catch((error) => {
     console.error('❌ Database connection failed:', error);
     process.exit(1);

@@ -49,6 +49,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const products_model_1 = require("../models/products.model");
 const categories_model_1 = require("../models/categories.model");
 const activityLogs_model_1 = require("../models/activityLogs.model");
+// Removed imports for deleted models: VendorProduct, Review, Notification
 const auth_1 = require("../middleware/auth");
 const role_1 = require("../middleware/role");
 const cache_1 = require("../middleware/cache");

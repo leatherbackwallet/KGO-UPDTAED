@@ -240,23 +240,62 @@ router.post('/login', validation_1.sanitizeInput, (0, validation_1.validate)(val
                 error: { message: 'Please enter a valid email address', code: 'INVALID_EMAIL' }
             });
         }
-        // Find user with populated role
+        // Find user - first without filters to see if user exists at all
+        const userWithoutFilters = await index_1.User.findOne({ email: trimmedEmail })
+            .populate('roleId');
+        console.log('[LOGIN DEBUG] Searching for email:', trimmedEmail);
+        console.log('[LOGIN DEBUG] User found (without filters):', userWithoutFilters ? 'YES' : 'NO');
+        if (userWithoutFilters) {
+            console.log('[LOGIN DEBUG] User isActive:', userWithoutFilters.isActive);
+            console.log('[LOGIN DEBUG] User isDeleted:', userWithoutFilters.isDeleted);
+            console.log('[LOGIN DEBUG] User has password field:', !!userWithoutFilters.password);
+        }
+        // Find user with populated role (with filters)
         const user = await index_1.User.findOne({ email: trimmedEmail, isActive: true, isDeleted: false })
             .populate('roleId');
         if (!user) {
+            // More specific error message
+            if (userWithoutFilters) {
+                if (userWithoutFilters.isDeleted) {
+                    console.log('[LOGIN DEBUG] User exists but is deleted');
+                    return res.status(400).json({
+                        success: false,
+                        error: { message: 'Account has been deleted', code: 'ACCOUNT_DELETED' }
+                    });
+                }
+                if (!userWithoutFilters.isActive) {
+                    console.log('[LOGIN DEBUG] User exists but is inactive');
+                    return res.status(400).json({
+                        success: false,
+                        error: { message: 'Account is inactive', code: 'ACCOUNT_INACTIVE' }
+                    });
+                }
+            }
+            console.log('[LOGIN DEBUG] User not found in database');
             return res.status(400).json({
                 success: false,
                 error: { message: 'Invalid email or password', code: 'INVALID_CREDENTIALS' }
             });
         }
+        console.log('[LOGIN DEBUG] User found, verifying password...');
         // Verify password
+        if (!user.password) {
+            console.log('[LOGIN DEBUG] ERROR: User has no password field');
+            return res.status(500).json({
+                success: false,
+                error: { message: 'Account configuration error', code: 'ACCOUNT_ERROR' }
+            });
+        }
         const isMatch = await (0, hash_1.comparePassword)(password, user.password);
+        console.log('[LOGIN DEBUG] Password match:', isMatch);
         if (!isMatch) {
+            console.log('[LOGIN DEBUG] Password verification failed');
             return res.status(400).json({
                 success: false,
                 error: { message: 'Invalid email or password', code: 'INVALID_CREDENTIALS' }
             });
         }
+        console.log('[LOGIN DEBUG] Login successful for user:', user.email);
         // Generate token pair
         const tokenPair = (0, jwt_1.generateTokenPair)({
             id: user._id.toString(),

@@ -2,115 +2,57 @@
 /**
  * Notification Service - Handles notification creation and management
  * Provides utilities for creating system notifications for admin users
+ *
+ * NOTE: Notification model has been removed. This service is now a stub.
+ * TODO: Re-implement notifications if needed or remove this service entirely.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationService = void 0;
-const notifications_model_1 = require("../models/notifications.model");
-const users_model_1 = require("../models/users.model");
 class NotificationService {
     /**
      * Create a notification for a specific user
+     * STUB: Notification model removed, returns empty result
      */
     static async createNotification(data) {
-        try {
-            const notification = new notifications_model_1.Notification({
-                recipientId: data.recipientId,
-                title: data.title,
-                message: data.message,
-                link: data.link,
-                isRead: false
-            });
-            return await notification.save();
-        }
-        catch (error) {
-            console.error('Error creating notification:', error);
-            throw error;
-        }
+        console.log('[NotificationService] Stub: createNotification called (notifications disabled)');
+        return null;
     }
     /**
      * Create notifications for all admin users
+     * STUB: Notification model removed, returns empty array
      */
     static async createNotificationForAllAdmins(data) {
-        try {
-            // Find all admin users
-            const adminUsers = await users_model_1.User.find({
-                role: 'admin',
-                isDeleted: false
-            }).select('_id');
-            if (adminUsers.length === 0) {
-                console.log('No admin users found to notify');
-                return [];
-            }
-            // Create notifications for all admins
-            const notifications = await Promise.all(adminUsers.map(admin => this.createNotification({
-                ...data,
-                recipientId: admin._id.toString()
-            })));
-            console.log(`Created ${notifications.length} notifications for admin users`);
-            return notifications;
-        }
-        catch (error) {
-            console.error('Error creating notifications for all admins:', error);
-            throw error;
-        }
+        console.log('[NotificationService] Stub: createNotificationForAllAdmins called (notifications disabled)');
+        return [];
     }
     /**
      * Create a new order notification for all admins
+     * STUB: Notification model removed, returns empty array
      */
     static async createNewOrderNotification(orderData) {
-        try {
-            const title = 'New Order Received';
-            const message = `New order #${orderData.orderId} from ${orderData.customerName} for ₹${orderData.totalPrice.toFixed(2)}`;
-            const link = `/admin?tab=orders`;
-            return await this.createNotificationForAllAdmins({
-                title,
-                message,
-                link
-            });
-        }
-        catch (error) {
-            console.error('Error creating new order notification:', error);
-            throw error;
-        }
+        console.log('[NotificationService] Stub: createNewOrderNotification called (notifications disabled)');
+        return [];
     }
     /**
      * Get unread notifications count for a user
+     * STUB: Notification model removed, returns 0
      */
     static async getUnreadCount(userId) {
-        try {
-            return await notifications_model_1.Notification.countDocuments({
-                recipientId: userId,
-                isRead: false
-            });
-        }
-        catch (error) {
-            console.error('Error getting unread notifications count:', error);
-            throw error;
-        }
+        return 0;
     }
     /**
      * Mark notification as read
+     * STUB: Notification model removed, returns null
      */
     static async markAsRead(notificationId, userId) {
-        try {
-            return await notifications_model_1.Notification.findOneAndUpdate({ _id: notificationId, recipientId: userId }, { isRead: true }, { new: true });
-        }
-        catch (error) {
-            console.error('Error marking notification as read:', error);
-            throw error;
-        }
+        return null;
     }
     /**
      * Mark all notifications as read for a user
+     * STUB: Notification model removed, returns empty result
      */
     static async markAllAsRead(userId) {
-        try {
-            return await notifications_model_1.Notification.updateMany({ recipientId: userId, isRead: false }, { isRead: true });
-        }
-        catch (error) {
-            console.error('Error marking all notifications as read:', error);
-            throw error;
-        }
+        return { acknowledged: true, modifiedCount: 0 };
     }
 }
 exports.NotificationService = NotificationService;

@@ -58,15 +58,15 @@ liveness_check:
   success_threshold: 2  # Require 2 successes for stability
 
 automatic_scaling:
-  min_num_instances: 1  # Minimum required by App Engine
-  max_num_instances: 10
+  min_num_instances: 1  # Minimum required by App Engine Flexible
+  max_num_instances: 2  # Reduced for small catalog (~100 items)
   cool_down_period_sec: 300  # 5 minutes - prevents frequent scaling
   cpu_utilization:
-    target_utilization: 0.8  # Higher threshold for scaling
+    target_utilization: 0.9  # More aggressive threshold for cost optimization
 
 resources:
-  cpu: 2
-  memory_gb: 4
-  disk_size_gb: 10
+  cpu: 1  # Reduced from 2 for cost optimization
+  memory_gb: 2  # Reduced from 4GB for cost optimization
+  disk_size_gb: 5  # Reduced from 10GB for cost optimization
 
 # No handlers needed for flex environment
