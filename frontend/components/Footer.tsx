@@ -106,6 +106,9 @@ const Footer: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-600 text-sm mb-4 md:mb-0">
               © {currentYear} Kerala Gifts Online. All rights reserved.
+              <span className="ml-2 text-gray-500 text-xs">
+                v{process.env.NEXT_PUBLIC_APP_VERSION || '3.0.0'} | {process.env.NEXT_PUBLIC_GIT_BRANCH || 'unknown'}
+              </span>
             </div>
             <div className="flex flex-wrap gap-4 justify-center md:justify-end">
               <Link href="/contact" className="text-gray-600 hover:text-gray-800 text-sm transition-colors">

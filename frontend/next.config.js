@@ -1,4 +1,18 @@
 /** @type {import('next').NextConfig} */
+const { execSync } = require('child_process');
+
+// Get git branch name at build time
+function getGitBranch() {
+  try {
+    const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8' }).trim();
+    return branch || 'unknown';
+  } catch (error) {
+    return process.env.GIT_BRANCH || 'unknown';
+  }
+}
+
+const gitBranch = getGitBranch();
+
 const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
@@ -44,6 +58,7 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://api-dot-onyourbehlf.uc.r.appspot.com/api' : 'http://localhost:5001/api'),
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'KeralGiftsOnline',
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || '3.0.0',
+    NEXT_PUBLIC_GIT_BRANCH: process.env.NEXT_PUBLIC_GIT_BRANCH || gitBranch,
     NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS || 'false',
     NEXT_PUBLIC_ENABLE_DEBUG_MODE: process.env.NEXT_PUBLIC_ENABLE_DEBUG_MODE || 'true',
     NEXT_PUBLIC_WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+918075030919',
