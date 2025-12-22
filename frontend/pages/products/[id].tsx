@@ -27,7 +27,29 @@ const ProductDetailPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await api.get(`/products/${id}`);
-      setProduct(response.data.data || response.data);
+      const productData = response.data.data || response.data;
+
+      // Ensure product data is properly normalized to prevent React rendering errors
+      if (productData && typeof productData === 'object') {
+        // Normalize _id field
+        if (productData._id && typeof productData._id === 'object' && productData._id.$oid) {
+          productData._id = productData._id.$oid;
+        }
+
+        // Normalize categories field
+        if (productData.categories && Array.isArray(productData.categories)) {
+          productData.categories = productData.categories.map(cat =>
+            typeof cat === 'object' && cat.$oid ? cat.$oid : cat
+          );
+        }
+
+        // Normalize any other potential MongoDB objects
+        if (productData.category && typeof productData.category === 'object' && productData.category.$oid) {
+          productData.category = productData.category.$oid;
+        }
+      }
+
+      setProduct(productData);
     } catch (err: any) {
       console.error('Error fetching product:', err);
       setError(err.response?.data?.error?.message || 'Failed to fetch product');
@@ -59,7 +81,7 @@ const ProductDetailPage: React.FC = () => {
   const getCategoryName = () => {
     if (!product.category) return 'Uncategorized';
     if (typeof product.category === 'string') return product.category;
-    if (product.category.name) {
+    if (typeof product.category === 'object' && product.category.name) {
       return product.category.name;
     }
     return 'Uncategorized';

@@ -224,25 +224,29 @@ class JsonDataService {
    */
   private normalizeProduct(product: JsonProduct): Product {
     return {
-      _id: product._id.$oid,
+      _id: typeof product._id === 'string' ? product._id : product._id.$oid,
       name: product.name,
       description: product.description,
       slug: product.slug,
-      categories: product.categories?.map(cat => cat.$oid) || [],
+      categories: product.categories?.map(cat =>
+        typeof cat === 'string' ? cat : cat.$oid
+      ) || [],
       price: product.price,
       costPrice: product.costPrice,
       stock: product.stock,
       images: product.images,
       defaultImage: product.defaultImage,
       occasions: product.occasions || [],
-      vendors: product.vendors?.map(vendor => vendor.$oid) || [],
+      vendors: product.vendors?.map(vendor =>
+        typeof vendor === 'string' ? vendor : vendor.$oid
+      ) || [],
       isFeatured: product.isFeatured,
       isDeleted: product.isDeleted,
       isCombo: product.isCombo,
       comboBasePrice: product.comboBasePrice,
       comboItems: product.comboItems,
-      createdAt: product.createdAt.$date,
-      updatedAt: product.updatedAt.$date
+      createdAt: typeof product.createdAt === 'string' ? product.createdAt : product.createdAt.$date,
+      updatedAt: typeof product.updatedAt === 'string' ? product.updatedAt : product.updatedAt.$date
     };
   }
 
@@ -251,16 +255,17 @@ class JsonDataService {
    */
   private normalizeCategory(category: JsonCategory): Category {
     return {
-      _id: category._id.$oid,
+      _id: typeof category._id === 'string' ? category._id : category._id.$oid,
       name: category.name,
       slug: category.slug,
       description: category.description,
-      parentCategory: category.parentCategory?.$oid,
+      parentCategory: category.parentCategory ?
+        (typeof category.parentCategory === 'string' ? category.parentCategory : category.parentCategory.$oid) : undefined,
       sortOrder: category.sortOrder,
       isActive: category.isActive,
       isDeleted: category.isDeleted,
-      createdAt: category.createdAt.$date,
-      updatedAt: category.updatedAt.$date
+      createdAt: typeof category.createdAt === 'string' ? category.createdAt : category.createdAt.$date,
+      updatedAt: typeof category.updatedAt === 'string' ? category.updatedAt : category.updatedAt.$date
     };
   }
 
@@ -269,7 +274,7 @@ class JsonDataService {
    */
   private normalizeOccasion(occasion: JsonOccasion): Occasion {
     return {
-      _id: occasion._id.$oid,
+      _id: typeof occasion._id === 'string' ? occasion._id : occasion._id.$oid,
       name: occasion.name,
       slug: occasion.slug,
       description: occasion.description,
@@ -281,8 +286,8 @@ class JsonDataService {
       isActive: occasion.isActive,
       sortOrder: occasion.sortOrder,
       isDeleted: occasion.isDeleted,
-      createdAt: occasion.createdAt.$date,
-      updatedAt: occasion.updatedAt.$date
+      createdAt: typeof occasion.createdAt === 'string' ? occasion.createdAt : occasion.createdAt.$date,
+      updatedAt: typeof occasion.updatedAt === 'string' ? occasion.updatedAt : occasion.updatedAt.$date
     };
   }
 
