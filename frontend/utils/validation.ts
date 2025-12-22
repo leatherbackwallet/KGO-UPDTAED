@@ -129,8 +129,8 @@ export const validateFullName = (name: string): ValidationResult => {
   };
 };
 
-// Indian phone number validation
-export const validateIndianPhone = (phone: string): ValidationResult => {
+// Phone number validation
+export const validatePhone = (phone: string): ValidationResult => {
   if (!phone || phone.trim() === '') {
     return {
       isValid: false,
@@ -141,43 +141,20 @@ export const validateIndianPhone = (phone: string): ValidationResult => {
 
   // Remove all non-digit characters
   const cleanPhone = phone.replace(/\D/g, '');
-  
-  // Check if it's a valid Indian mobile number
-  if (cleanPhone.length === 10) {
-    // Check if it starts with valid Indian mobile prefixes
-    const validPrefixes = ['6', '7', '8', '9'];
-    if (validPrefixes.includes(cleanPhone[0])) {
-      return {
-        isValid: true,
-        message: 'Valid Indian mobile number',
-        type: 'success'
-      };
-    } else {
-      return {
-        isValid: false,
-        message: 'Indian mobile numbers must start with 6, 7, 8, or 9',
-        type: 'error'
-      };
-    }
-  }
 
-  // Check for international format with +91
-  if (cleanPhone.length === 12 && cleanPhone.startsWith('91')) {
-    const mobilePart = cleanPhone.substring(2);
-    const validPrefixes = ['6', '7', '8', '9'];
-    if (validPrefixes.includes(mobilePart[0])) {
-      return {
-        isValid: true,
-        message: 'Valid Indian mobile number',
-        type: 'success'
-      };
-    }
+  // Check if it's a valid phone number (10-12 digits)
+  if (cleanPhone.length >= 10 && cleanPhone.length <= 12) {
+    return {
+      isValid: true,
+      message: 'Valid phone number',
+      type: 'success'
+    };
   }
 
   if (cleanPhone.length < 10) {
     return {
       isValid: false,
-      message: 'Phone number is too short',
+      message: 'Phone number is too short (minimum 10 digits)',
       type: 'error'
     };
   }
@@ -185,14 +162,14 @@ export const validateIndianPhone = (phone: string): ValidationResult => {
   if (cleanPhone.length > 12) {
     return {
       isValid: false,
-      message: 'Phone number is too long',
+      message: 'Phone number is too long (maximum 12 digits)',
       type: 'error'
     };
   }
 
   return {
     isValid: false,
-    message: 'Please enter a valid 10-digit Indian mobile number',
+    message: 'Please enter a valid phone number (10-12 digits)',
     type: 'error'
   };
 };

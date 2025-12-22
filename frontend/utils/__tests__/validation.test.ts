@@ -6,7 +6,7 @@
 import {
   validateEmail,
   validateFullName,
-  validateIndianPhone,
+  validatePhone,
   validateIndianZipCode,
   validateAddress,
   validateCity,
@@ -94,17 +94,17 @@ describe('Validation Utilities', () => {
     });
   });
 
-  describe('validateIndianPhone', () => {
-    it('should validate correct Indian mobile numbers', () => {
+  describe('validatePhone', () => {
+    it('should validate correct phone numbers (10-12 digits)', () => {
       const validPhones = [
         '9876543210',
-        '9123456789',
-        '8765432109',
-        '7654321098'
+        '1234567890',
+        '11234567890',
+        '123456789012'
       ];
 
       validPhones.forEach(phone => {
-        const result = validateIndianPhone(phone);
+        const result = validatePhone(phone);
         expect(result.isValid).toBe(true);
         expect(result.type).toBe('success');
       });
@@ -113,14 +113,13 @@ describe('Validation Utilities', () => {
     it('should reject invalid phone numbers', () => {
       const invalidPhones = [
         '',
-        '1234567890', // starts with 1
-        '2345678901', // starts with 2
-        '987654321',  // too short
-        '98765432101' // too long
+        '123456789',   // too short (9 digits)
+        '1234567890123', // too long (13 digits)
+        'abc1234567'  // contains letters
       ];
 
       invalidPhones.forEach(phone => {
-        const result = validateIndianPhone(phone);
+        const result = validatePhone(phone);
         expect(result.isValid).toBe(false);
         expect(result.type).toBe('error');
       });

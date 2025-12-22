@@ -4,16 +4,16 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { 
-  validateEmail, 
-  validateFullName, 
-  validateIndianPhone, 
-  validateIndianZipCode, 
-  validateAddress, 
-  validateCity, 
-  validateState, 
+import {
+  validateEmail,
+  validateFullName,
+  validatePhone,
+  validateIndianZipCode,
+  validateAddress,
+  validateCity,
+  validateState,
   validateSpecialInstructions,
-  FieldValidationState 
+  FieldValidationState
 } from '../utils/validation';
 
 export interface FormValidationState {
@@ -33,9 +33,9 @@ export interface UseFormValidationReturn {
 const validationFunctions = {
   senderName: validateFullName,
   senderEmail: validateEmail,
-  senderPhone: validateIndianPhone,
+  senderPhone: validatePhone,
   recipientName: validateFullName,
-  recipientPhone: validateIndianPhone,
+  recipientPhone: validatePhone,
   specialInstructions: validateSpecialInstructions
 };
 

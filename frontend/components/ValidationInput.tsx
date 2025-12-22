@@ -181,7 +181,7 @@ const ValidationInput: React.FC<ValidationInputProps> = ({
           ) : name === 'senderEmail' ? (
             '💡 We\'ll use this to send order updates'
           ) : name === 'senderPhone' || name === 'recipientPhone' ? (
-            '💡 Enter 10-digit Indian mobile number'
+            '💡 Enter your phone number (10-12 digits)'
           ) : name === 'zipCode' ? (
             '💡 Enter 6-digit Indian postal code'
           ) : name === 'street' ? (
