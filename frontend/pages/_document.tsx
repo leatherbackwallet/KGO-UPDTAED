@@ -22,8 +22,8 @@ export default function Document() {
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://keralagiftsonline.in/" />
-        <meta property="og:title" content="KeralGiftsOnline - Premium Gifts & Traditional Products | Kerala's Best Online Gift Store" />
-        <meta property="og:description" content="Discover premium quality gifts, traditional Kerala products, and authentic items. Fast delivery across Kerala with advanced logistics. Shop for festivals, occasions & special moments." />
+        <meta property="og:title" content="KeralGiftsOnline - Premium Gifts & Delivery | Kerala Online Gift Store" />
+        <meta property="og:description" content="Premium gifts, baskets & personalised delivery across all Kerala districts. Customisable gifts, traditional products & fast delivery. Shop gifts online now!" />
         <meta property="og:image" content="https://keralagiftsonline.in/images/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -37,8 +37,8 @@ export default function Document() {
         <meta name="twitter:site" content="@keralgiftsonline" />
         <meta name="twitter:creator" content="@keralgiftsonline" />
         <meta name="twitter:url" content="https://keralagiftsonline.in/" />
-        <meta name="twitter:title" content="KeralGiftsOnline - Premium Gifts & Traditional Products | Kerala's Best Online Gift Store" />
-        <meta name="twitter:description" content="Discover premium quality gifts, traditional Kerala products, and authentic items. Fast delivery across Kerala with advanced logistics. Shop for festivals, occasions & special moments." />
+        <meta name="twitter:title" content="KeralGiftsOnline - Premium Gifts & Delivery | Kerala Online Gift Store" />
+        <meta name="twitter:description" content="Premium gifts, baskets & personalised delivery across all Kerala districts. Customisable gifts, traditional products & fast delivery. Shop gifts online now!" />
         <meta name="twitter:image" content="https://keralagiftsonline.in/images/og-image.jpg" />
         <meta name="twitter:image:alt" content="KeralGiftsOnline - Premium Gifts and Traditional Products" />
         
@@ -69,9 +69,8 @@ export default function Document() {
         <meta name="publisher" content="KeralGiftsOnline" />
         <meta name="copyright" content="© 2024 KeralGiftsOnline. All rights reserved." />
         
-        {/* Language and Content */}
-        <meta httpEquiv="content-language" content="en-US" />
-        <meta name="language" content="English" />
+        {/* Language and Content - Standardized to ISO format */}
+        <meta httpEquiv="content-language" content="en" />
         
         {/* Preconnect to external domains for performance */}
         <link rel="preconnect" href="https://res.cloudinary.com" />

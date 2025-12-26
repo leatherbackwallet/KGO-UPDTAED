@@ -10,14 +10,45 @@ export default function Home() {
     return {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": "KeralGiftsOnline - Premium Gifts & Traditional Products",
-      "description": "Kerala's premier online gift store offering traditional products and premium gifts with fast delivery across Kerala and worldwide",
+      "name": "KeralGiftsOnline - Premium Gifts & Delivery | Kerala Online Gift Store",
+      "description": "Premium gifts, baskets & personalised delivery across all Kerala districts. Customisable gifts, traditional products & fast delivery.",
       "url": "https://keralagiftsonline.in/",
+      "inLanguage": "en",
       "mainEntity": {
         "@type": "Organization",
         "name": "KeralGiftsOnline",
         "url": "https://keralagiftsonline.in",
-        "description": "Premium gift delivery service specializing in authentic Kerala products and traditional gifts"
+        "description": "Premium gift delivery service specializing in customisable gifts, personalised gifts, gift baskets, and traditional Kerala products with fast delivery across all districts of Kerala",
+        "areaServed": [
+          {
+            "@type": "State",
+            "name": "Kerala",
+            "containsPlace": [
+              {"@type": "City", "name": "Kochi"},
+              {"@type": "City", "name": "Thiruvananthapuram"},
+              {"@type": "City", "name": "Kozhikode"},
+              {"@type": "City", "name": "Thrissur"},
+              {"@type": "City", "name": "Kannur"},
+              {"@type": "City", "name": "Kollam"},
+              {"@type": "City", "name": "Palakkad"},
+              {"@type": "City", "name": "Malappuram"},
+              {"@type": "City", "name": "Alappuzha"},
+              {"@type": "City", "name": "Kottayam"},
+              {"@type": "City", "name": "Idukki"},
+              {"@type": "City", "name": "Wayanad"},
+              {"@type": "City", "name": "Kasaragod"},
+              {"@type": "City", "name": "Pathanamthitta"}
+            ]
+          }
+        ],
+        "makesOffer": {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Gift Delivery Service",
+            "description": "Premium gift delivery, personalised gifts, customisable gift baskets, and traditional Kerala products delivery across all districts"
+          }
+        }
       },
       "breadcrumb": {
         "@type": "BreadcrumbList",
@@ -36,8 +67,8 @@ export default function Home() {
   return (
     <>
       <SEOHead
-        title="KeralGiftsOnline - Premium Gifts & Traditional Products | Kerala's Best Online Gift Store"
-        description="Discover premium quality gifts, traditional Kerala products & authentic items. Fast delivery across Kerala with advanced logistics. Perfect for festivals, occasions & special moments. Shop now!"
+        title="KeralGiftsOnline - Premium Gifts & Delivery | Kerala Online Gift Store"
+        description="Premium gifts, baskets & personalised delivery across all Kerala districts. Customisable gifts, traditional products & fast delivery. Shop gifts online now!"
         url="https://keralagiftsonline.in/"
         type="website"
         isHomepage={true}
@@ -145,6 +176,224 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SEO-Rich Content Section */}
+        <section className="py-16 bg-white">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="prose prose-lg max-w-none">
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                We Deliver Gifts On Your Behalf - Premium Gift Delivery Service Across Kerala
+              </h2>
+              
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                <strong>KeralGiftsOnline</strong> is Kerala's premier online gift store specializing in premium gifts, 
+                customisable gifts, personalised gifts, and traditional Kerala products. We deliver gifts on your behalf 
+                with fast and reliable personal delivery service across all districts of Kerala, including Ernakulam, 
+                Thiruvananthapuram, Kozhikode, Thrissur, Kannur, Kollam, Palakkad, Malappuram, Alappuzha, Kottayam, 
+                Idukki, Wayanad, Kasaragod, and Pathanamthitta.
+              </p>
+
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                Our extensive collection includes gift baskets, combo gifts, cakes, flowers, traditional sweets, 
+                Kerala snacks, handicrafts, and customisable gift hampers perfect for birthdays, anniversaries, 
+                weddings, festivals like Onam and Diwali, and special occasions. Whether you need same-day delivery, 
+                express delivery, or scheduled personal delivery, we ensure your gifts reach your loved ones 
+                across Kerala with care and precision.
+              </p>
+
+              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
+                Traditional Kerala Gift Items & Authentic Products
+              </h3>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                Discover authentic traditional Kerala gift items including <Link href="/products" className="text-blue-600 hover:underline">Aranmula Val Kannadi</Link> 
+                (handcrafted mirrors with certificate), <Link href="/products" className="text-blue-600 hover:underline">authentic Kasavu Saree</Link> for gift delivery, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Kerala Mural Art gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Brass Nilavilakku</Link> for online purchase, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Kerala Nettoor Petti</Link> for gifting, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Kasavu Mundu and Saree combo</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> traditional Kerala jewelry</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Kerala temple jewelry</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> snake boat model gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Kathakali face wall hanging gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> coir handicraft gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> wooden elephant handicrafts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Kerala spices gift box</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Kerala Ayurvedic gift hampers</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> banana chips gift packs</Link>, 
+                and <Link href="/products" className="text-blue-600 hover:underline">traditional Kerala souvenirs</Link>. 
+                Buy Aranmula Val Kannadi online, purchase authentic Kasavu Saree, and explore our complete collection of traditional Kerala gift items.
+              </p>
+
+              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
+                Premium Gift Categories & Products
+              </h3>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                Explore our wide range of premium gifts including <Link href="/products" className="text-blue-600 hover:underline">combo gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> wedding gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> birthday gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> anniversary gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> festival gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> flowers and roses</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> cakes</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> chocolates</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> luxury gift hampers</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> premium gift hampers</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> fresh fruit baskets</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> dry fruit hampers</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> chocolate bouquets</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Ferrero Rocher gift boxes</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> orchid flower bouquets</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> mixed flower baskets</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> indoor plants</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> personalized photo frames</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> customized mugs</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> personalized cushions</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> personalized keychains</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> teddy bear and chocolate combos</Link>, 
+                and <Link href="/products" className="text-blue-600 hover:underline">traditional Kerala products</Link>. 
+                All our gifts can be personalised with custom greetings, gift wrapping, and special messages.
+              </p>
+
+              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
+                Cakes & Bakery Products
+              </h3>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                Order premium cakes with same-day cake delivery across Kerala. Choose from <Link href="/products" className="text-blue-600 hover:underline">red velvet cake</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Black Forest cake</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> eggless cake</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> sugar-free cake</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> photo cake</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> heart shape cake for anniversary</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Christmas plum cake</Link>, 
+                and <Link href="/products" className="text-blue-600 hover:underline">midnight cake delivery</Link>. 
+                We offer same-day cake delivery in Kerala, midnight cake delivery, and express cake delivery to all districts.
+              </p>
+
+              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
+                Delivery Across All Kerala Districts & Cities
+              </h3>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                We provide fast and reliable gift delivery service to all 14 districts of Kerala. Our personal delivery 
+                network covers major cities and towns including <Link href="/products" className="text-blue-600 hover:underline">online gift delivery in Kochi</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> send gifts to Trivandrum</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> cake delivery in Kozhikode</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> flower delivery in Thrissur</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> gift delivery in Alappuzha</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> same day gifts Kottayam</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> online cakes Palakkad</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> gift shop in Malappuram</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> send flowers to Kollam</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> midnight cake delivery Kannur</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> gift delivery in Idukki</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> gift delivery in Wayanad</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Pathanamthitta gift delivery</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Kasaragod online gift shop</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Ernakulam flower delivery same day</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Guruvayur gift delivery</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Perumbavoor cake delivery</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Angamaly gift shops</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Tirur gift delivery</Link>, 
+                and <Link href="/products" className="text-blue-600 hover:underline">Thalassery cake and flower delivery</Link>. 
+                Whether you're sending gifts within Kerala or from anywhere in the world, we ensure timely delivery with our advanced logistics network.
+              </p>
+
+              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
+                International Gift Delivery - Send Gifts to Kerala from Abroad
+              </h3>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                Our NRI gift delivery service makes it easy to <Link href="/products" className="text-blue-600 hover:underline">send gifts to Kerala from Dubai</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> gift delivery Kerala from USA</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> send Onam gifts from UK to Kerala</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> send birthday cake to Kerala from Australia</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> send gifts to Kerala from Canada</Link>, 
+                and from anywhere in the world. Perfect for <Link href="/products" className="text-blue-600 hover:underline">Kerala gifts online for parents</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> gifts for wife in Kerala from abroad</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> gifts for husband in Kerala</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> gifts for sister in Kerala</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> brother's birthday gift delivery</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> wedding gifts for cousins</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> traditional gifts for grandparents</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> best gifts for Malayali friends</Link>, 
+                and <Link href="/products" className="text-blue-600 hover:underline">surprise family in Kerala from abroad</Link>. 
+                We specialize in helping NRIs send thoughtful gifts to their loved ones in Kerala.
+              </p>
+
+              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
+                Occasion-Specific Gifts & Festival Hampers
+              </h3>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                Celebrate every occasion with our curated gift collections. Choose from <Link href="/products" className="text-blue-600 hover:underline">Onam gift hampers for family</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Vishu Kani kit online</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> birthday gift delivery in Kerala</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> wedding anniversary gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> engagement gifts for groom</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Valentine's Day gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Mother's Day gifts to Kerala</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Father's Day gift delivery</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Christmas plum cake delivery</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> New Year 2025 gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> housewarming gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> retirement gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> get well soon gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> sympathy flowers delivery</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> baby shower gift hampers</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Rakhi delivery in Kerala</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> Diwali sweets to Kerala</Link>, 
+                and <Link href="/products" className="text-blue-600 hover:underline">Eid gift hampers</Link>. 
+                We offer same-day delivery, midnight gift delivery, and surprise gift delivery options.
+              </p>
+
+              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
+                Customisable & Personalised Gifts
+              </h3>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                Make every gift special with our customisable gifts and personalised gift baskets. Choose from our 
+                extensive collection of gift hampers, gift baskets, and combo gifts that can be tailored to your 
+                preferences. Add custom greetings, select specific products, and create the perfect gift package 
+                for birthdays, anniversaries, weddings, festivals, or any special occasion. Our personalised delivery 
+                service ensures your gifts are presented beautifully and delivered with care. We offer <Link href="/products" className="text-blue-600 hover:underline">budget gifts under 1000</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> corporate gifts</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> bulk gifting</Link>, 
+                and <Link href="/products" className="text-blue-600 hover:underline">luxury gift hampers</Link>.
+              </p>
+
+              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
+                Special Delivery Services
+              </h3>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                We offer flexible delivery options to meet your needs. Choose from <Link href="/products" className="text-blue-600 hover:underline">same-day delivery</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> midnight gift delivery Kerala</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> surprise gift delivery</Link>, 
+                <Link href="/products" className="text-blue-600 hover:underline"> express delivery</Link>, 
+                and <Link href="/products" className="text-blue-600 hover:underline">scheduled personal delivery</Link>. 
+                Our advanced logistics network ensures your gifts reach on time, whether it's a last-minute birthday surprise 
+                or a carefully planned anniversary gift. We specialize in making every delivery special.
+              </p>
+
+              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
+                Why Choose KeralGiftsOnline?
+              </h3>
+              <ul className="list-disc list-inside text-gray-700 space-y-2 mb-4">
+                <li>Premium quality gifts and authentic Kerala products</li>
+                <li>Fast delivery across all Kerala districts</li>
+                <li>Personal delivery service with tracking</li>
+                <li>Customisable and personalised gift options</li>
+                <li>Same-day and express delivery available</li>
+                <li>Wide range of gift baskets and hampers</li>
+                <li>Traditional and modern gift collections</li>
+                <li>Secure online payment and easy ordering</li>
+              </ul>
+
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                Shop now for premium gifts, customisable gift baskets, and personalised delivery across Kerala. 
+                Browse our <Link href="/products" className="text-blue-600 hover:underline">complete product catalog</Link> 
+                to find the perfect gift for your loved ones. As Kerala's best online gift store, we offer the widest 
+                selection of traditional Kerala gift items, authentic products, and modern gift solutions. Need assistance? 
+                Contact our customer support team via WhatsApp for immediate help with your gift delivery needs.
+              </p>
             </div>
           </div>
         </section>

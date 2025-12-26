@@ -95,7 +95,6 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       {/* Additional Meta */}
       <meta name="author" content="KeralGiftsOnline" />
       <meta name="publisher" content="KeralGiftsOnline" />
-      <meta httpEquiv="content-language" content="en-US" />
       
       {/* Structured Data */}
       {structuredData && (

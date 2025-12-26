@@ -46,6 +46,11 @@ const nextConfig = {
         destination: '/products',
         permanent: true,
       },
+      {
+        source: '/gifts',
+        destination: '/products',
+        permanent: true,
+      },
     ];
   },
   
