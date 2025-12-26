@@ -220,7 +220,13 @@ body {
     .float-animation,
     .float-animation-delay-1,
     .float-animation-delay-2,
-    .float-animation-delay-3 {
+    .float-animation-delay-3,
+    .balloon-container,
+    .confetti-particle,
+    .firework-particle,
+    .rocket-launching,
+    .rocket-bursting,
+    .rocket-flame {
       animation: none;
       transform: none;
     }
@@ -314,6 +320,106 @@ body {
     50% {
       transform: translateY(-20px);
     }
+  }
+
+  /* Balloon floating animation - moves upward continuously */
+  @keyframes balloonFloat {
+    0% {
+      transform: translateY(0) translateX(0) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(-50vh) translateX(20px) rotate(5deg);
+    }
+    100% {
+      transform: translateY(-100vh) translateX(-10px) rotate(-5deg);
+      opacity: 0;
+    }
+  }
+
+  /* Rocket launch animation - moves from bottom to top */
+  @keyframes rocketLaunch {
+    0% {
+      transform: translateX(-50%) translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+    50% {
+      transform: translateX(-50%) translateY(var(--burst-translate-y)) rotate(2deg);
+    }
+    100% {
+      transform: translateX(-50%) translateY(var(--burst-translate-y)) rotate(0deg);
+      opacity: 1;
+    }
+  }
+
+  /* Rocket bursting scale animation */
+  @keyframes rocketBurst {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  /* Flame flicker animation */
+  @keyframes flameFlicker {
+    0% {
+      transform: translateX(-50%) scaleY(1) scaleX(1);
+      opacity: 0.9;
+    }
+    100% {
+      transform: translateX(-50%) scaleY(1.2) scaleX(1.1);
+      opacity: 1;
+    }
+  }
+
+  /* Fireworks burst animation - more dramatic and beautiful with trailing effect */
+  @keyframes fireworkBurst {
+    0% {
+      transform: translate(-50%, -50%) translate(0px, 0px) rotate(0deg) scale(1);
+      opacity: 1;
+      filter: brightness(1.5) blur(0px);
+    }
+    20% {
+      opacity: 1;
+      transform: translate(-50%, -50%) translate(calc(var(--end-x) * 0.2), calc(var(--end-y) * 0.2)) rotate(72deg) scale(1.3);
+      filter: brightness(1.8) blur(0.5px);
+    }
+    50% {
+      opacity: 1;
+      transform: translate(-50%, -50%) translate(calc(var(--end-x) * 0.6), calc(var(--end-y) * 0.6)) rotate(180deg) scale(1.1);
+      filter: brightness(1.2) blur(1px);
+    }
+    80% {
+      opacity: 0.7;
+      transform: translate(-50%, -50%) translate(calc(var(--end-x) * 0.9), calc(var(--end-y) * 0.9)) rotate(288deg) scale(0.6);
+      filter: brightness(0.8) blur(1.5px);
+    }
+    100% {
+      transform: translate(-50%, -50%) translate(var(--end-x), var(--end-y)) rotate(360deg) scale(0.2);
+      opacity: 0;
+      filter: brightness(0.5) blur(2px);
+    }
+  }
+
+  /* Rocket launching class */
+  .rocket-launching {
+    animation: rocketLaunch var(--launch-duration) ease-out forwards;
+  }
+
+  /* Rocket bursting class */
+  .rocket-bursting {
+    animation: rocketBurst 0.6s ease-out forwards;
   }
 
   @keyframes fadeIn {

@@ -3845,44 +3845,6 @@
 },
 {
   "_id": {
-    "$oid": "6947e500d0a636a0b2b7ee05"
-  },
-  "name": "Any Fresh Cream cake 1 Kg , 10 Dairy Milks",
-  "description": "Any Fresh Cream Cake 1 Kg , 10 Dairy Milks",
-  "categories": [
-    {
-      "$oid": "68f8ab0378d033884432c3a1"
-    },
-    {
-      "$oid": "68f8ab2f78d033884432c3a5"
-    },
-    {
-      "$oid": "68f8ab5e78d033884432c3bd"
-    }
-  ],
-  "price": 3300,
-  "costPrice": 0,
-  "stock": 200,
-  "images": [],
-  "occasions": [],
-  "vendors": [],
-  "isFeatured": false,
-  "isActive": true,
-  "isDeleted": false,
-  "isCombo": false,
-  "comboBasePrice": 0,
-  "comboItems": [],
-  "createdAt": {
-    "$date": "2025-12-21T12:16:00.796Z"
-  },
-  "updatedAt": {
-    "$date": "2025-12-21T12:16:00.796Z"
-  },
-  "slug": "any-fresh-cream-cake-1-kg-10-dairy-milks",
-  "__v": 0
-},
-{
-  "_id": {
     "$oid": "6947e54fd0a636a0b2b7ee0e"
   },
   "name": "White forest Cake 1 Kg ,  Red Rose Bouquet",
@@ -4518,4 +4480,1199 @@
   },
   "slug": "teddy-with-your-customized-message",
   "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e82b94334ca031e6a9a68"
+  },
+  "name": "Assorted Chocolate Basket.",
+  "description": "Assorted Chocolate Basket. Mixed Chocolates",
+  "categories": [
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab3878d033884432c3a8"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    }
+  ],
+  "price": 3248,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766752908771-738336941"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766752908771-738336941",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:42:33.575Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:42:33.575Z"
+  },
+  "slug": "assorted-chocolate-basket",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e82d54334ca031e6a9a71"
+  },
+  "name": "Basket of assorted Chocolates with Rose Bouquet",
+  "description": "Basket of assorted Chocolates with Rose Bouquet",
+  "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 3900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766755639743-359372059"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:43:01.272Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:27:23.694Z"
+  },
+  "slug": "basket-of-assorted-chocolates-with-rose-bouquet",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1766755639743-359372059"
+},
+{
+  "_id": {
+    "$oid": "694e83344334ca031e6a9a7a"
+  },
+  "name": "Choco Box  with small Teddy and a Fresh  Rose",
+  "description": "Choco Box  with small Teddy and a Fresh  Rose",
+  "categories": [
+    {
+      "$oid": "68f8ab4e78d033884432c3af"
+    },
+    {
+      "$oid": "68f8ab3878d033884432c3a8"
+    }
+  ],
+  "price": 1700,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766753073681-636241916"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766753073681-636241916",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:44:36.893Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:44:36.893Z"
+  },
+  "slug": "choco-box-with-small-teddy-and-a-fresh-rose",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e835f4334ca031e6a9a83"
+  },
+  "name": "Chocolate - Rose Box with RC Toy Car",
+  "description": "Choco Rose Box with RC Toy Car",
+  "categories": [
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 2200,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766753116323-645605101"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766753116323-645605101",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:45:19.570Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:45:19.570Z"
+  },
+  "slug": "chocolate-rose-box-with-rc-toy-car",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e83ad4334ca031e6a9a9b"
+  },
+  "name": "Chocolate 3 Layer Fountain with Large Fresh Rose Bouquet",
+  "description": "Chocolate 3 Layer Fountain with Large Fresh Rose Bouquet",
+  "categories": [
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    }
+  ],
+  "price": 5800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766753189952-499355639"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766753189952-499355639",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:46:37.393Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:46:37.393Z"
+  },
+  "slug": "chocolate-3-layer-fountain-with-large-fresh-rose-bouquet",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e842e4334ca031e6a9af6"
+  },
+  "name": "Chocolate Basket Hamper with Fresh Roses",
+  "description": "Chocolate Basket Hamper with Fresh Roses",
+  "categories": [
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
+    }
+  ],
+  "price": 3500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766753322900-666570155"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766753322900-666570155",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:48:46.289Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:48:46.289Z"
+  },
+  "slug": "chocolate-basket-hamper-with-fresh-roses",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e845d4334ca031e6a9afb"
+  },
+  "name": "Chocolate Bouquet",
+  "description": "Chocolate Bouquet",
+  "categories": [
+    {
+      "$oid": "68f8ab3878d033884432c3a8"
+    },
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab4e78d033884432c3af"
+    }
+  ],
+  "price": 2800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766753362910-339020433"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766753362910-339020433",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:49:33.972Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:49:33.972Z"
+  },
+  "slug": "chocolate-bouquet",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e84b94334ca031e6a9b00"
+  },
+  "name": "Chocolate Hamper with a Fast Track smart watch, Perfume and Roses",
+  "description": "Chocolate Hamper with a Fast Track smart watch, Perfume and Roses",
+  "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    },
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
+    }
+  ],
+  "price": 5400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766753451061-854794163"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766753451061-854794163",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:51:05.043Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:51:05.043Z"
+  },
+  "slug": "chocolate-hamper-with-a-fast-track-smart-watch-perfume-and-roses",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e84ea4334ca031e6a9b05"
+  },
+  "name": "Chocolate Hamper with an executive Diary and Parker Pen",
+  "description": "Chocolate Hamper with an executive Diary and Parker Pen",
+  "categories": [
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68f8ab3878d033884432c3a8"
+    },
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
+    }
+  ],
+  "price": 4800,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766753501118-335849387"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766753501118-335849387",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:51:54.167Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:51:54.167Z"
+  },
+  "slug": "chocolate-hamper-with-an-executive-diary-and-parker-pen",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e85424334ca031e6a9b0e"
+  },
+  "name": "Chocolate Hamper with Bellavita Perfume and Roses",
+  "description": "Chocolate Hamper with Bellavita Perfume and Mixed Fresh Roses",
+  "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    }
+  ],
+  "price": 3400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766753597220-649680753"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766753597220-649680753",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:53:22.689Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:53:22.689Z"
+  },
+  "slug": "chocolate-hamper-with-bellavita-perfume-and-roses",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e85da4334ca031e6a9b17"
+  },
+  "name": "Chocolate Hamper with Bellavita Perfume",
+  "description": "Chocolate Hamper with Bellavita Perfume",
+  "categories": [
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    }
+  ],
+  "price": 3100,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766753750394-534288583"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766753750394-534288583",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:55:54.963Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:55:54.963Z"
+  },
+  "slug": "chocolate-hamper-with-bellavita-perfume",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e86174334ca031e6a9b20"
+  },
+  "name": "Chocolate Hamper with Fast Track Smart watch and Rose Bouquet with Bellavita perfume.",
+  "description": "Chocolate Hamper with fast track Smart watch and Rose Bouquet with Bellavita perfume.",
+  "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    }
+  ],
+  "price": 5900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766753806318-138966447"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766753806318-138966447",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:56:55.579Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:56:55.579Z"
+  },
+  "slug": "chocolate-hamper-with-fast-track-smart-watch-and-rose-bouquet-with-bellavita-perfume",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e86ac4334ca031e6a9b29"
+  },
+  "name": "Chocolate Hamper with fast track Smart watch and Rose Bouquet",
+  "description": "Chocolate Hamper with fast-track Smart watch and Rose Bouquet",
+  "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    }
+  ],
+  "price": 5300,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766753959449-713872566"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766753959449-713872566",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T12:59:24.583Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T12:59:24.583Z"
+  },
+  "slug": "chocolate-hamper-with-fast-track-smart-watch-and-rose-bouquet",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e86e74334ca031e6a9b32"
+  },
+  "name": "Chocolate Hamper with Perfume and Rose Bouquet",
+  "description": "Chocolate Hamper with Perfume and Rose Bouquet",
+  "categories": [
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    }
+  ],
+  "price": 3400,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766755379223-506366646"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:00:23.701Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:23:05.928Z"
+  },
+  "slug": "chocolate-hamper-with-perfume-and-rose-bouquet",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1766755379223-506366646"
+},
+{
+  "_id": {
+    "$oid": "694e87224334ca031e6a9b3f"
+  },
+  "name": "Chocolate Hamper with Perfume, Teddy and Roses",
+  "description": "Chocolate Hamper with Perfume, Teddy and Roses",
+  "categories": [
+    {
+      "$oid": "68f8ab4e78d033884432c3af"
+    },
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
+    },
+    {
+      "$oid": "68cd4960d03e43bd6d816d5c"
+    }
+  ],
+  "price": 3600,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766754077326-473348661"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766754077326-473348661",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:01:22.258Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:01:22.258Z"
+  },
+  "slug": "chocolate-hamper-with-perfume-teddy-and-roses",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e87544334ca031e6a9b48"
+  },
+  "name": "Chocolate Hamper with RC Toy Car Roses and a Fresh cream Cake.",
+  "description": "Chocolate Hamper with RC Toy Car Roses and Fresh cream Cake.: (As of Choice)",
+  "categories": [
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68f8ab3878d033884432c3a8"
+    },
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    }
+  ],
+  "price": 5200,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766755263044-266300950"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:02:12.979Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:21:07.036Z"
+  },
+  "slug": "chocolate-hamper-with-rc-toy-car-roses-and-a-fresh-cream-cake",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1766755263044-266300950"
+},
+{
+  "_id": {
+    "$oid": "694e87ab4334ca031e6a9b71"
+  },
+  "name": "Chocolate Hamper with Rose Bouquet",
+  "description": "Chocolate Hamper with Rose Bouquet",
+  "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab4e78d033884432c3af"
+    },
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
+    }
+  ],
+  "price": 2900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766754205811-97367027"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766754205811-97367027",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:03:39.520Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:03:39.520Z"
+  },
+  "slug": "chocolate-hamper-with-rose-bouquet",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e87c84334ca031e6a9b76"
+  },
+  "name": "Chocolate Hamper with Roses ,Perfume and Fresh cream Cake.",
+  "description": "Chocolate Hamper with Roses ,Perfume and Fresh cream Cake.",
+  "categories": [
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
+    }
+  ],
+  "price": 5300,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766754244908-759245922"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766754244908-759245922",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:04:08.410Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:04:08.410Z"
+  },
+  "slug": "chocolate-hamper-with-roses-perfume-and-fresh-cream-cake",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e87e44334ca031e6a9b7b"
+  },
+  "name": "Chocolate Hamper with Roses and RC Toy Car",
+  "description": "Chocolate Hamper with Roses and RC Toy Car",
+  "categories": [
+    {
+      "$oid": "68f8ab3878d033884432c3a8"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    }
+  ],
+  "price": 3500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766755297513-537749515"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:04:36.947Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:21:42.164Z"
+  },
+  "slug": "chocolate-hamper-with-roses-and-rc-toy-car",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1766755297513-537749515"
+},
+{
+  "_id": {
+    "$oid": "694e88374334ca031e6a9b80"
+  },
+  "name": "Chocolate Hamper with Roses",
+  "description": "Chocolate Hamper with Roses",
+  "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68f8ab3878d033884432c3a8"
+    }
+  ],
+  "price": 4200,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766754346480-667055028"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766754346480-667055028",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:05:59.729Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:05:59.729Z"
+  },
+  "slug": "chocolate-hamper-with-roses",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e885c4334ca031e6a9b85"
+  },
+  "name": "Chocolate Hamper with Teddy and a Bellavita Perfume",
+  "description": "Chocolate Hamper with Teddy and a Bellavita Perfume",
+  "categories": [
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    }
+  ],
+  "price": 2900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766754393034-82419985"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766754393034-82419985",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:06:36.751Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:06:36.751Z"
+  },
+  "slug": "chocolate-hamper-with-teddy-and-a-bellavita-perfume",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e89374334ca031e6a9bc6"
+  },
+  "name": "Chocolate Hamper with Teddy, Fasttrack watch, Roses and perfume",
+  "description": "Chocolate Hamper with Teddy, Fasttrack watch, Roses and Perfume",
+  "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    }
+  ],
+  "price": 5600,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766754603713-583583143"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766754603713-583583143",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:10:15.337Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:10:15.337Z"
+  },
+  "slug": "chocolate-hamper-with-teddy-fasttrack-watch-roses-and-perfume-1",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e89c94334ca031e6a9be6"
+  },
+  "name": "Chocolate Hamper with Teddy, Roses and Fresh Cream Cake.",
+  "description": "Chocolate Hamper with Teddy, Roses and Fresh Cream Cake.",
+  "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    }
+  ],
+  "price": 5200,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766754750984-21144596"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766754750984-21144596",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:12:41.219Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:12:41.219Z"
+  },
+  "slug": "chocolate-hamper-with-teddy-roses-and-fresh-cream-cake",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e8a0f4334ca031e6a9bef"
+  },
+  "name": "Chocolate Hamper with Teddy",
+  "description": "Chocolate Hamper with Teddy",
+  "categories": [
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68f8ab5e78d033884432c3bd"
+    }
+  ],
+  "price": 2900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766754827187-659229538"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766754827187-659229538",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:13:51.032Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:13:51.032Z"
+  },
+  "slug": "chocolate-hamper-with-teddy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e8a364334ca031e6a9bf8"
+  },
+  "name": "Executive Diary-Parker pen hamper with 03 Red Roses and Special Message Card",
+  "description": "Executive Diary-Parker pen hamper with 03 Red Roses and Special Message Card",
+  "categories": [
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68f8ab3878d033884432c3a8"
+    },
+    {
+      "$oid": "68f8ab4378d033884432c3ac"
+    }
+  ],
+  "price": 2900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766754865885-675261856"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766754865885-675261856",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:14:30.930Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:14:30.930Z"
+  },
+  "slug": "executive-diary-parker-pen-hamper-with-03-red-roses-and-special-message-card",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e8ab14334ca031e6a9c01"
+  },
+  "name": "Hamper with an executive Diary -Parker Pen and a Perfume",
+  "description": "Hamper with an executive Diary -Parker Pen and a Perfume",
+  "categories": [
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68f8ab3878d033884432c3a8"
+    },
+    {
+      "$oid": "68f8ab4378d033884432c3ac"
+    }
+  ],
+  "price": 3600,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766754911789-923979868"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766754911789-923979868",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:16:33.558Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:16:33.558Z"
+  },
+  "slug": "hamper-with-an-executive-diary-parker-pen-and-a-perfume",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e8b074334ca031e6a9c0a"
+  },
+  "name": "Hamper with an executive Diary -Parker Pen and Dry Nuts mix packet",
+  "description": "Hamper with an executive Diary -Parker Pen and Dry Nuts mix packet",
+  "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    }
+  ],
+  "price": 2900,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766755074078-869193509"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766755074078-869193509",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:17:59.394Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:17:59.394Z"
+  },
+  "slug": "hamper-with-an-executive-diary-parker-pen-and-dry-nuts-mix-packet",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e8b394334ca031e6a9c13"
+  },
+  "name": "Hamper with an executive Diary -Parker Pen and Fast Track smart watch",
+  "description": "Hamper with an executive Diary -Parker Pen and Fast Track smart watch",
+  "categories": [
+    {
+      "$oid": "68d81a6d565cfbcb9ceda0ba"
+    },
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68f8ab3878d033884432c3a8"
+    },
+    {
+      "$oid": "68f8ab4378d033884432c3ac"
+    }
+  ],
+  "price": 5100,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766755118939-795255181"
+  ],
+  "defaultImage": "keralagiftsonline/products/product-1766755118939-795255181",
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:18:49.756Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:18:49.756Z"
+  },
+  "slug": "hamper-with-an-executive-diary-parker-pen-and-fast-track-smart-watch",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "694e8b674334ca031e6a9c1c"
+  },
+  "name": "Red Rose bouquet  with Bellavita Perfume",
+  "description": "Red Rose bouquet  with Bellavita Perfume",
+  "categories": [
+    {
+      "$oid": "68f8ab0378d033884432c3a1"
+    },
+    {
+      "$oid": "68f8ab2f78d033884432c3a5"
+    },
+    {
+      "$oid": "68f8ab3878d033884432c3a8"
+    }
+  ],
+  "price": 2500,
+  "costPrice": 0,
+  "stock": 200,
+  "images": [
+    "keralagiftsonline/products/product-1766755191193-137946392"
+  ],
+  "occasions": [],
+  "vendors": [],
+  "isFeatured": false,
+  "isActive": true,
+  "isDeleted": false,
+  "isCombo": false,
+  "comboBasePrice": 0,
+  "comboItems": [],
+  "createdAt": {
+    "$date": "2025-12-26T13:19:35.452Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-26T13:19:56.507Z"
+  },
+  "slug": "red-rose-bouquet-with-bellavita-perfume",
+  "__v": 0,
+  "defaultImage": "keralagiftsonline/products/product-1766755191193-137946392"
 }]
