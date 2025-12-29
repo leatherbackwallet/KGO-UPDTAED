@@ -616,11 +616,21 @@ html {
   @media (prefers-reduced-motion: reduce) {
     .animate-spin,
     .animate-pulse,
-    .shimmer {
+    .shimmer,
+    .animate-moving-light-1,
+    .animate-moving-light-2,
+    .animate-moving-light-3,
+    .animate-moving-light-4,
+    .animate-moving-light-5 {
       animation: none;
     }
     
-    .animate-spin {
+    .animate-spin,
+    .animate-moving-light-1,
+    .animate-moving-light-2,
+    .animate-moving-light-3,
+    .animate-moving-light-4,
+    .animate-moving-light-5 {
       transform: none;
     }
   }
@@ -638,6 +648,140 @@ html {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Moving light animations for background - moves across visible area */
+  @keyframes moveLight1 {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    25% {
+      transform: translate(30vw, -20vh) scale(1.2);
+    }
+    50% {
+      transform: translate(20vw, 30vh) scale(0.8);
+    }
+    75% {
+      transform: translate(-25vw, 15vh) scale(1.1);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+  }
+
+  @keyframes moveLight2 {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    20% {
+      transform: translate(-35vw, 25vh) scale(1.3);
+    }
+    40% {
+      transform: translate(40vw, -15vh) scale(0.9);
+    }
+    60% {
+      transform: translate(-20vw, -30vh) scale(1.15);
+    }
+    80% {
+      transform: translate(25vw, 20vh) scale(0.85);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+  }
+
+  @keyframes moveLight3 {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    30% {
+      transform: translate(35vw, 25vh) scale(1.25);
+    }
+    50% {
+      transform: translate(-30vw, -20vh) scale(0.9);
+    }
+    70% {
+      transform: translate(15vw, 35vh) scale(1.1);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+  }
+
+  @keyframes moveLight4 {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    25% {
+      transform: translate(-40vw, -25vh) scale(1.15);
+    }
+    50% {
+      transform: translate(30vw, 25vh) scale(0.95);
+    }
+    75% {
+      transform: translate(-15vw, 30vh) scale(1.2);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+  }
+
+  @keyframes moveLight5 {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    20% {
+      transform: translate(25vw, -35vh) scale(1.1);
+    }
+    40% {
+      transform: translate(-35vw, 20vh) scale(0.85);
+    }
+    60% {
+      transform: translate(20vw, 30vh) scale(1.3);
+    }
+    80% {
+      transform: translate(-25vw, -15vh) scale(0.9);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+  }
+
+  /* Pulsing glow animation combined with movement */
+  @keyframes pulseGlow {
+    0%, 100% {
+      opacity: 0.3;
+      filter: blur(60px);
+    }
+    50% {
+      opacity: 0.5;
+      filter: blur(80px);
+    }
+  }
+
+  .animate-moving-light-1 {
+    animation: moveLight1 20s ease-in-out infinite, pulseGlow 4s ease-in-out infinite;
+    will-change: transform, opacity, filter;
+  }
+
+  .animate-moving-light-2 {
+    animation: moveLight2 25s ease-in-out infinite, pulseGlow 5s ease-in-out infinite;
+    will-change: transform, opacity, filter;
+  }
+
+  .animate-moving-light-3 {
+    animation: moveLight3 22s ease-in-out infinite, pulseGlow 4.5s ease-in-out infinite;
+    will-change: transform, opacity, filter;
+  }
+
+  .animate-moving-light-4 {
+    animation: moveLight4 28s ease-in-out infinite, pulseGlow 5.5s ease-in-out infinite;
+    will-change: transform, opacity, filter;
+  }
+
+  .animate-moving-light-5 {
+    animation: moveLight5 24s ease-in-out infinite, pulseGlow 4.8s ease-in-out infinite;
+    will-change: transform, opacity, filter;
   }
 
   /* Print-specific styles for receipts */

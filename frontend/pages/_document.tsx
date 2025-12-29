@@ -22,8 +22,8 @@ export default function Document() {
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://keralagiftsonline.in/" />
-        <meta property="og:title" content="KeralGiftsOnline - Premium Gifts & Delivery | Kerala Online Gift Store" />
-        <meta property="og:description" content="Premium gifts, baskets & personalised delivery across all Kerala districts. Customisable gifts, traditional products & fast delivery. Shop gifts online now!" />
+        <meta property="og:title" content="KeralGiftsOnline - Personalized Gifts & Delivery Across All Kerala Districts" />
+        <meta property="og:description" content="Send personalized gifts across all 14 districts of Kerala - Kochi, Trivandrum, Kozhikode, Thrissur, Kannur, Kollam, Palakkad, Malappuram, Alappuzha, Kottayam, Idukki, Wayanad, Kasaragod, Pathanamthitta. Custom gifts for Onam, Vishu, Christmas, Valentine's Day, Anniversary, Independence Day, Republic Day, Father's Day, Mother's Day, Easter, Gandhi Jayanti. Same-day delivery, personalized gift hampers, traditional Kerala products." />
         <meta property="og:image" content="https://keralagiftsonline.in/images/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -37,8 +37,8 @@ export default function Document() {
         <meta name="twitter:site" content="@keralgiftsonline" />
         <meta name="twitter:creator" content="@keralgiftsonline" />
         <meta name="twitter:url" content="https://keralagiftsonline.in/" />
-        <meta name="twitter:title" content="KeralGiftsOnline - Premium Gifts & Delivery | Kerala Online Gift Store" />
-        <meta name="twitter:description" content="Premium gifts, baskets & personalised delivery across all Kerala districts. Customisable gifts, traditional products & fast delivery. Shop gifts online now!" />
+        <meta name="twitter:title" content="KeralGiftsOnline - Personalized Gifts & Delivery Across All Kerala Districts" />
+        <meta name="twitter:description" content="Send personalized gifts across all 14 districts of Kerala. Custom gifts for Onam, Vishu, Christmas, Valentine's Day, Anniversary, Independence Day, Republic Day, Father's Day, Mother's Day, Easter, Gandhi Jayanti. Same-day delivery, personalized gift hampers, traditional Kerala products." />
         <meta name="twitter:image" content="https://keralagiftsonline.in/images/og-image.jpg" />
         <meta name="twitter:image:alt" content="KeralGiftsOnline - Premium Gifts and Traditional Products" />
         
@@ -103,7 +103,7 @@ export default function Document() {
                 "width": 512,
                 "height": 512
               },
-              "description": "Premium quality gifts, traditional Kerala products, and authentic items with fast delivery across Kerala. Your trusted partner for festivals, occasions, and special moments.",
+              "description": "Personalized gift delivery across all 14 districts of Kerala - Kochi, Trivandrum, Kozhikode, Thrissur, Kannur, Kollam, Palakkad, Malappuram, Alappuzha, Kottayam, Idukki, Wayanad, Kasaragod, Pathanamthitta. Custom gifts for Onam, Vishu, Christmas, Valentine's Day, Anniversary, Independence Day, Republic Day, Father's Day, Mother's Day, Easter, Gandhi Jayanti. Same-day delivery, personalized gift hampers, traditional Kerala products.",
               "foundingDate": "2024",
               "address": {
                 "@type": "PostalAddress",

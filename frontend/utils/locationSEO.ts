@@ -7,99 +7,169 @@ export const KERALA_CITIES = [
     name: 'Kochi',
     slug: 'kochi',
     district: 'Ernakulam',
-    description: 'Commercial capital of Kerala',
-    keywords: ['kochi gifts', 'ernakulam gifts', 'cochin gifts delivery']
+    description: 'Commercial capital of Kerala - Fast gift delivery with personalized options',
+    keywords: [
+      'kochi gifts', 'ernakulam gifts', 'cochin gifts delivery', 'kochi gift delivery',
+      'kochi personalized gifts', 'kochi same day delivery', 'kochi express delivery',
+      'send gifts to kochi', 'kochi online gift shop', 'kochi gift hampers',
+      'kochi gift baskets', 'kochi custom gifts', 'kochi delivery service'
+    ]
   },
   {
     name: 'Thiruvananthapuram',
     slug: 'trivandrum',
     district: 'Thiruvananthapuram',
-    description: 'Capital city of Kerala',
-    keywords: ['trivandrum gifts', 'thiruvananthapuram gifts', 'tvm gifts delivery']
+    description: 'Capital city of Kerala - Premium gift delivery with customization',
+    keywords: [
+      'trivandrum gifts', 'thiruvananthapuram gifts', 'tvm gifts delivery',
+      'trivandrum gift delivery', 'trivandrum personalized gifts', 'trivandrum same day delivery',
+      'send gifts to trivandrum', 'trivandrum online gift shop', 'trivandrum gift hampers',
+      'trivandrum gift baskets', 'trivandrum custom gifts', 'trivandrum delivery service'
+    ]
   },
   {
     name: 'Kozhikode',
     slug: 'calicut',
     district: 'Kozhikode',
-    description: 'City of Spices in Kerala',
-    keywords: ['calicut gifts', 'kozhikode gifts', 'malabar gifts delivery']
+    description: 'City of Spices in Kerala - Traditional and personalized gift delivery',
+    keywords: [
+      'calicut gifts', 'kozhikode gifts', 'malabar gifts delivery', 'kozhikode gift delivery',
+      'kozhikode personalized gifts', 'kozhikode same day delivery', 'kozhikode express delivery',
+      'send gifts to kozhikode', 'calicut online gift shop', 'kozhikode gift hampers',
+      'kozhikode gift baskets', 'kozhikode custom gifts', 'kozhikode delivery service'
+    ]
   },
   {
     name: 'Thrissur',
     slug: 'thrissur',
     district: 'Thrissur',
-    description: 'Cultural capital of Kerala',
-    keywords: ['thrissur gifts', 'cultural city gifts', 'pooram gifts']
+    description: 'Cultural capital of Kerala - Festival gifts and personalized delivery',
+    keywords: [
+      'thrissur gifts', 'cultural city gifts', 'pooram gifts', 'thrissur gift delivery',
+      'thrissur personalized gifts', 'thrissur same day delivery', 'thrissur express delivery',
+      'send gifts to thrissur', 'thrissur online gift shop', 'thrissur gift hampers',
+      'thrissur gift baskets', 'thrissur custom gifts', 'thrissur delivery service'
+    ]
   },
   {
     name: 'Kannur',
     slug: 'kannur',
     district: 'Kannur',
-    description: 'Land of Looms and Lores',
-    keywords: ['kannur gifts', 'handloom gifts', 'theyyam gifts']
+    description: 'Land of Looms and Lores - Handloom and personalized gift delivery',
+    keywords: [
+      'kannur gifts', 'handloom gifts', 'theyyam gifts', 'kannur gift delivery',
+      'kannur personalized gifts', 'kannur same day delivery', 'kannur express delivery',
+      'send gifts to kannur', 'kannur online gift shop', 'kannur gift hampers',
+      'kannur gift baskets', 'kannur custom gifts', 'kannur delivery service'
+    ]
   },
   {
     name: 'Kollam',
     slug: 'kollam',
     district: 'Kollam',
-    description: 'Cashew capital of Kerala',
-    keywords: ['kollam gifts', 'cashew gifts', 'backwater gifts']
+    description: 'Cashew capital of Kerala - Premium gift delivery with personalization',
+    keywords: [
+      'kollam gifts', 'cashew gifts', 'backwater gifts', 'kollam gift delivery',
+      'kollam personalized gifts', 'kollam same day delivery', 'kollam express delivery',
+      'send gifts to kollam', 'kollam online gift shop', 'kollam gift hampers',
+      'kollam gift baskets', 'kollam custom gifts', 'kollam delivery service'
+    ]
   },
   {
     name: 'Palakkad',
     slug: 'palakkad',
     district: 'Palakkad',
-    description: 'Rice bowl of Kerala',
-    keywords: ['palakkad gifts', 'palghat gifts', 'rice bowl gifts']
+    description: 'Rice bowl of Kerala - Traditional and personalized gift delivery',
+    keywords: [
+      'palakkad gifts', 'palghat gifts', 'rice bowl gifts', 'palakkad gift delivery',
+      'palakkad personalized gifts', 'palakkad same day delivery', 'palakkad express delivery',
+      'send gifts to palakkad', 'palakkad online gift shop', 'palakkad gift hampers',
+      'palakkad gift baskets', 'palakkad custom gifts', 'palakkad delivery service'
+    ]
   },
   {
     name: 'Malappuram',
     slug: 'malappuram',
     district: 'Malappuram',
-    description: 'Land of Hills and Spices',
-    keywords: ['malappuram gifts', 'spice gifts', 'hill station gifts']
+    description: 'Land of Hills and Spices - Fast gift delivery with customization',
+    keywords: [
+      'malappuram gifts', 'spice gifts', 'hill station gifts', 'malappuram gift delivery',
+      'malappuram personalized gifts', 'malappuram same day delivery', 'malappuram express delivery',
+      'send gifts to malappuram', 'malappuram online gift shop', 'malappuram gift hampers',
+      'malappuram gift baskets', 'malappuram custom gifts', 'malappuram delivery service'
+    ]
   },
   {
     name: 'Alappuzha',
     slug: 'alleppey',
     district: 'Alappuzha',
-    description: 'Venice of the East',
-    keywords: ['alleppey gifts', 'alappuzha gifts', 'backwater gifts', 'venice east gifts']
+    description: 'Venice of the East - Backwater gift delivery with personalization',
+    keywords: [
+      'alleppey gifts', 'alappuzha gifts', 'backwater gifts', 'venice east gifts',
+      'alappuzha gift delivery', 'alappuzha personalized gifts', 'alappuzha same day delivery',
+      'send gifts to alappuzha', 'alleppey online gift shop', 'alappuzha gift hampers',
+      'alappuzha gift baskets', 'alappuzha custom gifts', 'alappuzha delivery service'
+    ]
   },
   {
     name: 'Kottayam',
     slug: 'kottayam',
     district: 'Kottayam',
-    description: 'Land of Letters, Latex and Lakes',
-    keywords: ['kottayam gifts', 'rubber gifts', 'literary gifts']
+    description: 'Land of Letters, Latex and Lakes - Premium personalized gift delivery',
+    keywords: [
+      'kottayam gifts', 'rubber gifts', 'literary gifts', 'kottayam gift delivery',
+      'kottayam personalized gifts', 'kottayam same day delivery', 'kottayam express delivery',
+      'send gifts to kottayam', 'kottayam online gift shop', 'kottayam gift hampers',
+      'kottayam gift baskets', 'kottayam custom gifts', 'kottayam delivery service'
+    ]
   },
   {
     name: 'Idukki',
     slug: 'idukki',
     district: 'Idukki',
-    description: 'Spice garden of Kerala',
-    keywords: ['idukki gifts', 'hill station gifts', 'spice garden gifts', 'munnar gifts']
+    description: 'Spice garden of Kerala - Hill station gift delivery with personalization',
+    keywords: [
+      'idukki gifts', 'hill station gifts', 'spice garden gifts', 'munnar gifts',
+      'idukki gift delivery', 'idukki personalized gifts', 'idukki same day delivery',
+      'send gifts to idukki', 'idukki online gift shop', 'idukki gift hampers',
+      'idukki gift baskets', 'idukki custom gifts', 'idukki delivery service', 'munnar gift delivery'
+    ]
   },
   {
     name: 'Wayanad',
     slug: 'wayanad',
     district: 'Wayanad',
-    description: 'Green paradise of Kerala',
-    keywords: ['wayanad gifts', 'green paradise gifts', 'tribal gifts', 'wildlife gifts']
+    description: 'Green paradise of Kerala - Eco-friendly and personalized gift delivery',
+    keywords: [
+      'wayanad gifts', 'green paradise gifts', 'tribal gifts', 'wildlife gifts',
+      'wayanad gift delivery', 'wayanad personalized gifts', 'wayanad same day delivery',
+      'send gifts to wayanad', 'wayanad online gift shop', 'wayanad gift hampers',
+      'wayanad gift baskets', 'wayanad custom gifts', 'wayanad delivery service'
+    ]
   },
   {
     name: 'Kasaragod',
     slug: 'kasaragod',
     district: 'Kasaragod',
-    description: 'Land of Forts and Beaches',
-    keywords: ['kasaragod gifts', 'fort gifts', 'beach gifts', 'bekal gifts']
+    description: 'Land of Forts and Beaches - Coastal gift delivery with personalization',
+    keywords: [
+      'kasaragod gifts', 'fort gifts', 'beach gifts', 'bekal gifts',
+      'kasaragod gift delivery', 'kasaragod personalized gifts', 'kasaragod same day delivery',
+      'send gifts to kasaragod', 'kasaragod online gift shop', 'kasaragod gift hampers',
+      'kasaragod gift baskets', 'kasaragod custom gifts', 'kasaragod delivery service'
+    ]
   },
   {
     name: 'Pathanamthitta',
     slug: 'pathanamthitta',
     district: 'Pathanamthitta',
-    description: 'Headquarters of Pilgrimage Tourism',
-    keywords: ['pathanamthitta gifts', 'pilgrimage gifts', 'sabarimala gifts']
+    description: 'Headquarters of Pilgrimage Tourism - Spiritual and personalized gift delivery',
+    keywords: [
+      'pathanamthitta gifts', 'pilgrimage gifts', 'sabarimala gifts',
+      'pathanamthitta gift delivery', 'pathanamthitta personalized gifts', 'pathanamthitta same day delivery',
+      'send gifts to pathanamthitta', 'pathanamthitta online gift shop', 'pathanamthitta gift hampers',
+      'pathanamthitta gift baskets', 'pathanamthitta custom gifts', 'pathanamthitta delivery service'
+    ]
   }
 ];
 

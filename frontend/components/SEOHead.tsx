@@ -22,8 +22,8 @@ interface SEOHeadProps {
 }
 
 const SEOHead: React.FC<SEOHeadProps> = ({
-  title = 'KeralGiftsOnline - Premium Gifts & Traditional Products | Kerala\'s Best Online Gift Store',
-  description = 'Discover premium quality gifts, traditional Kerala products & authentic items. Fast delivery across Kerala with advanced logistics. Perfect for festivals, occasions & special moments.',
+  title = 'KeralGiftsOnline - Personalized Gifts & Delivery Across All Kerala Districts | Online Gift Store',
+  description = 'Send personalized gifts across all 14 districts of Kerala - Kochi, Trivandrum, Kozhikode, Thrissur, Kannur, Kollam, Palakkad, Malappuram, Alappuzha, Kottayam, Idukki, Wayanad, Kasaragod, Pathanamthitta. Custom gifts for Onam, Vishu, Christmas, Valentine\'s Day, Anniversary, Independence Day, Republic Day, Father\'s Day, Mother\'s Day, Easter, Gandhi Jayanti. Same-day delivery, personalized gift hampers, traditional Kerala products.',
   keywords,
   image = 'https://keralagiftsonline.in/images/og-image.jpg',
   url,
