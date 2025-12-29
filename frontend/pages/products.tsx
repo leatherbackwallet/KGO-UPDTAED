@@ -36,7 +36,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [sortBy, setSortBy] = useState('newest');
+  const [sortBy, setSortBy] = useState('price-low');
 
   // Modal state
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -116,6 +116,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
     // Sort products
     switch (sortBy) {
       case 'price-low':
+      default:
         filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
         break;
       case 'price-high':
@@ -127,7 +128,6 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
         );
         break;
       case 'newest':
-      default:
         filtered.sort((a, b) =>
           new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
         );
@@ -154,7 +154,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('');
-    setSortBy('newest');
+    setSortBy('price-low');
   };
 
   const handleProductClick = (product: Product) => {
@@ -306,7 +306,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                 </select>
 
                 {/* Elegant Clear Filters */}
-                {(searchTerm || selectedCategory || sortBy !== 'newest') && (
+                {(searchTerm || selectedCategory || sortBy !== 'price-low') && (
                   <button
                     onClick={clearFilters}
                     className="px-5 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-semibold shadow-sm hover:shadow-md flex items-center gap-2 transform hover:scale-105"
