@@ -227,6 +227,18 @@ const nextConfig = {
             key: 'Vary',
             value: 'Accept-Encoding',
           },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type',
+          },
         ],
       },
       // Add specific headers for Cloudinary images

@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import Head from 'next/head';
+import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import SEOHead from '../components/SEOHead';
 import RandomProductCarousel from '../components/RandomProductCarousel';
@@ -11,6 +13,73 @@ interface HomeProps {
 }
 
 export default function Home({ products }: HomeProps) {
+  const [backgroundImageLoaded, setBackgroundImageLoaded] = useState(false);
+  const [backgroundImageError, setBackgroundImageError] = useState(false);
+  const [backgroundImageSrc, setBackgroundImageSrc] = useState('/images/products/Landing page/LandingPageBackground.png');
+
+  // Preload background image with error handling and CORS support
+  useEffect(() => {
+    const img = new Image();
+    // Encode the path to handle spaces in directory names
+    const imagePath = '/images/products/Landing page/LandingPageBackground.png';
+    const encodedPath = imagePath.replace(/ /g, '%20');
+    
+    // Set crossOrigin for CORS
+    img.crossOrigin = 'anonymous';
+    
+    img.onload = () => {
+      setBackgroundImageLoaded(true);
+      setBackgroundImageError(false);
+      setBackgroundImageSrc(imagePath);
+    };
+    
+    img.onerror = (error) => {
+      console.warn('Background image failed to load, trying fallback paths', error);
+      setBackgroundImageError(true);
+      setBackgroundImageLoaded(false);
+      
+      // Try alternative paths in order
+      const fallbackPaths = [
+        '/images/products/LandingPageBackground.png',
+        '/images/products/Landing%20page/LandingPageBackground.png',
+        encodedPath
+      ];
+      
+      let fallbackIndex = 0;
+      const tryFallback = () => {
+        if (fallbackIndex >= fallbackPaths.length) {
+          // All fallbacks failed, use gradient
+          console.warn('All background image paths failed, using gradient fallback');
+          setBackgroundImageLoaded(false);
+          return;
+        }
+        
+        const fallbackImg = new Image();
+        fallbackImg.crossOrigin = 'anonymous';
+        fallbackImg.onload = () => {
+          setBackgroundImageSrc(fallbackPaths[fallbackIndex]);
+          setBackgroundImageLoaded(true);
+          setBackgroundImageError(false);
+        };
+        fallbackImg.onerror = () => {
+          fallbackIndex++;
+          tryFallback();
+        };
+        fallbackImg.src = fallbackPaths[fallbackIndex];
+      };
+      
+      tryFallback();
+    };
+    
+    // Start loading with encoded path first
+    img.src = encodedPath;
+    
+    // Cleanup
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, []);
   // Generate enhanced homepage structured data
   const generateHomepageStructuredData = () => {
     return {
@@ -84,22 +153,49 @@ export default function Home({ products }: HomeProps) {
         isHomepage={true}
         structuredData={generateHomepageStructuredData()}
       />
+      
+      <Head>
+        {/* Preload background image for better performance and CORS support */}
+        <link
+          rel="preload"
+          as="image"
+          href="/images/products/Landing%20page/LandingPageBackground.png"
+          crossOrigin="anonymous"
+        />
+      </Head>
 
       <main className="min-h-screen">
         <Navbar />
         
         {/* Modern Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-          {/* Background with gradient overlay */}
+          {/* Background with gradient overlay - Robust image loading with CORS support */}
           <div 
-            className="absolute inset-0 z-0"
+            className="absolute inset-0 z-0 transition-opacity duration-1000"
             style={{
-              backgroundImage: 'url(/images/products/Landing page/LandingPageBackground.png)',
+              backgroundImage: backgroundImageLoaded 
+                ? `url("${backgroundImageSrc.replace(/ /g, '%20')}")` 
+                : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
+              backgroundRepeat: 'no-repeat',
+              backgroundAttachment: 'fixed',
+              opacity: backgroundImageLoaded ? 1 : 0.8,
+              willChange: 'opacity'
             }}
           >
+            {/* Fallback gradient background */}
+            {!backgroundImageLoaded && (
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
+                }}
+              />
+            )}
+            
+            
+            {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/80"></div>
           </div>
 
