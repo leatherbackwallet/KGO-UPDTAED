@@ -220,8 +220,10 @@ async function handleAdminProductsRequest(req, res) {
         // Calculate skip only for non-admin requests
         const skip = admin !== 'true' ? (Number(page) - 1) * Number(limit) : 0;
         // Determine sort order based on sort parameter
-        let sortOrder = { isFeatured: -1, createdAt: -1 }; // Default sort
-        switch (sort) {
+        // Default to price low to high if no sort specified
+        const effectiveSort = sort || 'price-low';
+        let sortOrder = { price: 1, createdAt: -1 }; // Default sort: price low to high
+        switch (effectiveSort) {
             case 'name':
                 sortOrder = { name: 1 }; // A-Z
                 break;
@@ -236,8 +238,7 @@ async function handleAdminProductsRequest(req, res) {
                 sortOrder = { price: -1, createdAt: -1 }; // High to Low, then newest
                 break;
             case 'newest':
-            default:
-                sortOrder = { isFeatured: -1, createdAt: -1 }; // Newest first (default)
+                sortOrder = { isFeatured: -1, createdAt: -1 }; // Newest first
                 break;
         }
         // Optimize: Select only needed fields for better performance

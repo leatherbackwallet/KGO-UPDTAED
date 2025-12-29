@@ -175,9 +175,10 @@ class JsonDataService {
                 p.description.toLowerCase().includes(searchTerm));
         }
         // Sort products
-        const sortBy = options.sort || 'newest';
+        const sortBy = options.sort || 'price-low';
         switch (sortBy) {
             case 'price-low':
+            default:
                 filteredProducts.sort((a, b) => a.price - b.price);
                 break;
             case 'price-high':
@@ -187,7 +188,6 @@ class JsonDataService {
                 filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
                 break;
             case 'newest':
-            default:
                 filteredProducts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
                 break;
         }
