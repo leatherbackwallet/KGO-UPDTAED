@@ -194,7 +194,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
             }}
           >
             {/* Elegant gradient overlay */}
-            <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
+            <div className="absolute right-0 bottom-0 w-full h-full bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
           </div>
           
           {/* Next Banner - slides in from left */}
@@ -211,7 +211,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
             }}
           >
             {/* Elegant gradient overlay */}
-            <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
+            <div className="absolute right-0 bottom-0 w-full h-full bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
           </div>
         </div>
       </div>
