@@ -13,7 +13,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
-import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
@@ -42,13 +41,48 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
     '/images/products/christmas_banner_2.png',
     '/images/products/christmas_banner_3.png'
   ];
-  const [currentBanner, setCurrentBanner] = useState(bannerImages[0]);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [nextBannerIndex, setNextBannerIndex] = useState(1);
+  const [isFading, setIsFading] = useState(false);
+
+  // Preload banner images for smoother transitions
+  useEffect(() => {
+    bannerImages.forEach((imageSrc) => {
+      const img = new Image();
+      img.src = imageSrc;
+    });
+  }, []);
 
   useEffect(() => {
     // Randomly select a banner on mount to ensure rotation on refresh
     const randomIndex = Math.floor(Math.random() * bannerImages.length);
-    setCurrentBanner(bannerImages[randomIndex]);
-  }, []);
+    setCurrentBannerIndex(randomIndex);
+    setNextBannerIndex((randomIndex + 1) % bannerImages.length);
+
+    let fadeTimeout: NodeJS.Timeout | null = null;
+
+    // Auto-rotate banners every 5 seconds
+    const interval = setInterval(() => {
+      setIsFading(true);
+      
+      // After fade completes, switch to next image
+      fadeTimeout = setTimeout(() => {
+        setCurrentBannerIndex((prevIndex) => {
+          const newIndex = (prevIndex + 1) % bannerImages.length;
+          setNextBannerIndex((newIndex + 1) % bannerImages.length);
+          return newIndex;
+        });
+        setIsFading(false);
+      }, 1000); // Match transition duration
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      if (fadeTimeout) {
+        clearTimeout(fadeTimeout);
+      }
+    };
+  }, [bannerImages.length]);
 
   // Filter and sort products client-side
   const filteredProducts = useMemo(() => {
@@ -148,16 +182,38 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
 
       {/* Banner Section */}
       <div className="w-full">
-        <div className="relative h-64 md:h-80 lg:h-96">
-          <Image
-            src={currentBanner}
-            alt="KGO Personalised Delivery - Premium Gifts & Traditional Products"
-            fill
-            className="object-cover"
-            priority
-          />
-          {/* Optional overlay for better text readability if needed */}
-          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+        <div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
+          {/* Current Banner */}
+          <div 
+            className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+            style={{
+              backgroundImage: `url(${bannerImages[currentBannerIndex]})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              opacity: isFading ? 0 : 1,
+              zIndex: 1
+            }}
+          >
+            {/* Optional overlay for better text readability if needed */}
+            <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+          </div>
+          
+          {/* Next Banner (for smooth transition) */}
+          <div 
+            className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+            style={{
+              backgroundImage: `url(${bannerImages[nextBannerIndex]})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              opacity: isFading ? 1 : 0,
+              zIndex: 2
+            }}
+          >
+            {/* Optional overlay for better text readability if needed */}
+            <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+          </div>
         </div>
       </div>
 

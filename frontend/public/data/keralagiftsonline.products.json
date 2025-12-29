@@ -4419,7 +4419,7 @@
       "$oid": "68f8ab0378d033884432c3a1"
     }
   ],
-  "price": 2749,
+  "price": 2750,
   "costPrice": 0,
   "stock": 200,
   "images": [
@@ -4438,7 +4438,7 @@
     "$date": "2025-12-22T06:14:35.193Z"
   },
   "updatedAt": {
-    "$date": "2025-12-22T06:14:35.193Z"
+    "$date": "2025-12-29T05:04:09.688Z"
   },
   "slug": "large-teddy-with-07-mixed-fresh-roses",
   "__v": 0

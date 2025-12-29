@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from './ProductCard';
 import { Product } from '../types/shared';
@@ -12,13 +12,35 @@ const RandomProductCarousel: React.FC<RandomProductCarouselProps> = ({ allProduc
     const [randomProducts, setRandomProducts] = useState<Product[]>([]);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
+    // Function to shuffle and select random products
+    const selectRandomProducts = useCallback(() => {
         if (allProducts.length > 0) {
             // Shuffle and pick 12
             const shuffled = [...allProducts].sort(() => 0.5 - Math.random());
             setRandomProducts(shuffled.slice(0, 12));
+            
+            // Reset scroll position to start when products change
+            if (scrollContainerRef.current) {
+                scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+            }
         }
     }, [allProducts]);
+
+    // Initial selection and when allProducts changes
+    useEffect(() => {
+        selectRandomProducts();
+    }, [selectRandomProducts]);
+
+    // Rotate products every 10 seconds
+    useEffect(() => {
+        if (allProducts.length === 0) return;
+
+        const rotationInterval = setInterval(() => {
+            selectRandomProducts();
+        }, 10000); // 10 seconds
+
+        return () => clearInterval(rotationInterval);
+    }, [selectRandomProducts, allProducts.length]);
 
     const scroll = (direction: 'left' | 'right') => {
         if (scrollContainerRef.current) {

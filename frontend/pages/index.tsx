@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import SEOHead from '../components/SEOHead';
 import Balloon from '../components/Balloon';
@@ -79,18 +78,15 @@ export default function Home() {
         <Navbar />
         
         {/* Hero Section */}
-        <section className="min-h-screen flex items-center justify-center relative pt-16 overflow-hidden">
-          {/* Background Image */}
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="/images/products/LandingPageBackground.png"
-              alt="Christmas Background"
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-          
+        <section 
+          className="min-h-screen flex items-center justify-center relative pt-16 overflow-hidden"
+          style={{
+            backgroundImage: 'url(/images/products/Landing page/LandingPageBackground.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
           {/* Subtle overlay for glassmorphic effect */}
           <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
 
