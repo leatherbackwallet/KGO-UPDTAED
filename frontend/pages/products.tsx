@@ -25,6 +25,13 @@ interface ProductsPageProps {
   categories: Category[];
 }
 
+// Banner images constant - defined outside component to avoid recreation
+const BANNER_IMAGES = [
+  '/images/products/christmas_banner_1.png',
+  '/images/products/christmas_banner_2.png',
+  '/images/products/christmas_banner_3.png'
+];
+
 const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, categories }) => {
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,18 +43,13 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
   const [showQuickView, setShowQuickView] = useState(false);
 
   // Banner state
-  const bannerImages = [
-    '/images/products/christmas_banner_1.png',
-    '/images/products/christmas_banner_2.png',
-    '/images/products/christmas_banner_3.png'
-  ];
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [nextBannerIndex, setNextBannerIndex] = useState(1);
-  const [isFading, setIsFading] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Preload banner images for smoother transitions
   useEffect(() => {
-    bannerImages.forEach((imageSrc) => {
+    BANNER_IMAGES.forEach((imageSrc) => {
       const img = new Image();
       img.src = imageSrc;
     });
@@ -55,34 +57,29 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
 
   useEffect(() => {
     // Randomly select a banner on mount to ensure rotation on refresh
-    const randomIndex = Math.floor(Math.random() * bannerImages.length);
+    const randomIndex = Math.floor(Math.random() * BANNER_IMAGES.length);
     setCurrentBannerIndex(randomIndex);
-    setNextBannerIndex((randomIndex + 1) % bannerImages.length);
+    setNextBannerIndex((randomIndex + 1) % BANNER_IMAGES.length);
 
-    let fadeTimeout: NodeJS.Timeout | null = null;
-
-    // Auto-rotate banners every 5 seconds
+    // Auto-rotate banners every 10 seconds
     const interval = setInterval(() => {
-      setIsFading(true);
+      setIsTransitioning(true);
       
-      // After fade completes, switch to next image
-      fadeTimeout = setTimeout(() => {
+      // After transition completes, update indices
+      setTimeout(() => {
         setCurrentBannerIndex((prevIndex) => {
-          const newIndex = (prevIndex + 1) % bannerImages.length;
-          setNextBannerIndex((newIndex + 1) % bannerImages.length);
+          const newIndex = (prevIndex + 1) % BANNER_IMAGES.length;
+          setNextBannerIndex((newIndex + 1) % BANNER_IMAGES.length);
           return newIndex;
         });
-        setIsFading(false);
+        setIsTransitioning(false);
       }, 1000); // Match transition duration
-    }, 5000);
+    }, 10000);
 
     return () => {
       clearInterval(interval);
-      if (fadeTimeout) {
-        clearTimeout(fadeTimeout);
-      }
     };
-  }, [bannerImages.length]);
+  }, []);
 
   // Filter and sort products client-side
   const filteredProducts = useMemo(() => {
@@ -183,32 +180,34 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
       {/* Banner Section */}
       <div className="w-full">
         <div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
-          {/* Current Banner */}
+          {/* Current Banner - slides out to left */}
           <div 
-            className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+            className="absolute inset-0 transition-all duration-1000 ease-in-out"
             style={{
-              backgroundImage: `url(${bannerImages[currentBannerIndex]})`,
+              backgroundImage: `url(${BANNER_IMAGES[currentBannerIndex]})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              opacity: isFading ? 0 : 1,
-              zIndex: 1
+              transform: isTransitioning ? 'translateX(-100%)' : 'translateX(0)',
+              opacity: isTransitioning ? 0 : 1,
+              zIndex: isTransitioning ? 1 : 2
             }}
           >
             {/* Optional overlay for better text readability if needed */}
             <div className="absolute inset-0 bg-black bg-opacity-20"></div>
           </div>
           
-          {/* Next Banner (for smooth transition) */}
+          {/* Next Banner - slides in from left */}
           <div 
-            className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+            className="absolute inset-0 transition-all duration-1000 ease-in-out"
             style={{
-              backgroundImage: `url(${bannerImages[nextBannerIndex]})`,
+              backgroundImage: `url(${BANNER_IMAGES[nextBannerIndex]})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              opacity: isFading ? 1 : 0,
-              zIndex: 2
+              transform: isTransitioning ? 'translateX(0)' : 'translateX(-100%)',
+              opacity: isTransitioning ? 1 : 0,
+              zIndex: isTransitioning ? 2 : 1
             }}
           >
             {/* Optional overlay for better text readability if needed */}
