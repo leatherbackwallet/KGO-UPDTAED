@@ -192,9 +192,11 @@ async function handleAdminProductsRequest(req: Request, res: Response): Promise<
     const skip = admin !== 'true' ? (Number(page) - 1) * Number(limit) : 0;
     
     // Determine sort order based on sort parameter
-    let sortOrder: any = { isFeatured: -1, createdAt: -1 }; // Default sort
+    // Default to price low to high if no sort specified
+    const effectiveSort = sort || 'price-low';
+    let sortOrder: any = { price: 1, createdAt: -1 }; // Default sort: price low to high
     
-    switch (sort) {
+    switch (effectiveSort) {
       case 'name':
         sortOrder = { name: 1 }; // A-Z
         break;
@@ -209,8 +211,7 @@ async function handleAdminProductsRequest(req: Request, res: Response): Promise<
         sortOrder = { price: -1, createdAt: -1 }; // High to Low, then newest
         break;
       case 'newest':
-      default:
-        sortOrder = { isFeatured: -1, createdAt: -1 }; // Newest first (default)
+        sortOrder = { isFeatured: -1, createdAt: -1 }; // Newest first
         break;
     }
     

@@ -1,6 +1,21 @@
 import { GetServerSideProps } from 'next';
 import { generateKeywords } from '../utils/seoKeywords';
 
+/**
+ * Escapes XML special characters to prevent parsing errors
+ * @param text - The text to escape
+ * @returns Escaped text safe for XML
+ */
+function escapeXml(text: string | null | undefined): string {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
 // Enhanced sitemap generation with comprehensive SEO
 function generateSiteMap(products: any[], categories: any[], occasions: any[] = []) {
   const baseUrl = 'https://keralagiftsonline.in';
@@ -57,13 +72,14 @@ function generateSiteMap(products: any[], categories: any[], occasions: any[] = 
      ${categories
        .map((category) => {
          const categoryName = typeof category.name === 'string' ? category.name : category.name?.en || 'Category';
+         const escapedCategoryName = escapeXml(categoryName);
          return `
        <url>
          <loc>${baseUrl}/products?category=${encodeURIComponent(category.slug || category._id)}</loc>
          <lastmod>${new Date().toISOString()}</lastmod>
          <changefreq>weekly</changefreq>
          <priority>0.8</priority>
-         <!-- SEO: ${categoryName} gifts, ${categoryName} kerala, traditional ${categoryName} -->
+         <!-- SEO: ${escapedCategoryName} gifts, ${escapedCategoryName} kerala, traditional ${escapedCategoryName} -->
        </url>`;
        })
        .join('')}
@@ -72,13 +88,14 @@ function generateSiteMap(products: any[], categories: any[], occasions: any[] = 
      ${occasions
        .map((occasion) => {
          const occasionName = typeof occasion.name === 'string' ? occasion.name : occasion.name?.en || 'Occasion';
+         const escapedOccasionName = escapeXml(occasionName);
          return `
        <url>
          <loc>${baseUrl}/products?occasions=${encodeURIComponent(occasion.slug || occasion._id)}</loc>
          <lastmod>${new Date().toISOString()}</lastmod>
          <changefreq>weekly</changefreq>
          <priority>0.7</priority>
-         <!-- SEO: ${occasionName} gifts kerala, ${occasionName} celebration gifts -->
+         <!-- SEO: ${escapedOccasionName} gifts kerala, ${escapedOccasionName} celebration gifts -->
        </url>`;
        })
        .join('')}
@@ -86,16 +103,24 @@ function generateSiteMap(products: any[], categories: any[], occasions: any[] = 
      <!-- Enhanced Product Pages with SEO Keywords -->
      ${products
        .map((product) => {
+         // Escape product name and description for XML
+         const productName = escapeXml(product.name);
+         const productDescription = escapeXml(product.description || `${product.name} - Premium Kerala gift with fast delivery`);
+         
          const images = product.images && product.images.length > 0 
-           ? product.images.slice(0, 5).map((img: string) => `
+           ? product.images.slice(0, 5).map((img: string) => {
+               // Encode image path for URL (encodeURI handles special characters)
+               const encodedImg = encodeURI(img);
+               return `
          <image:image>
-           <image:loc>${baseUrl}/images/${img}</image:loc>
-           <image:title>${product.name} - Kerala Traditional Gift</image:title>
-           <image:caption>${product.description || `${product.name} - Premium Kerala gift with fast delivery`}</image:caption>
-         </image:image>`).join('') 
+           <image:loc>${baseUrl}/images/${encodedImg}</image:loc>
+           <image:title>${productName} - Kerala Traditional Gift</image:title>
+           <image:caption>${productDescription}</image:caption>
+         </image:image>`;
+             }).join('') 
            : '';
 
-         // Generate product-specific keywords
+         // Generate product-specific keywords (escape for comments)
          const productKeywords = [
            product.name?.toLowerCase(),
            `${product.name?.toLowerCase()} kerala`,
@@ -114,6 +139,11 @@ function generateSiteMap(products: any[], categories: any[], occasions: any[] = 
            typeof occ === 'string' ? occ : 
            typeof occ.name === 'string' ? occ.name : occ.name?.en
          ).filter(Boolean).join(', ');
+         
+         // Escape all text content in comments
+         const escapedKeywords = escapeXml(productKeywords);
+         const escapedCategoryNames = escapeXml(categoryNames);
+         const escapedOccasionNames = escapeXml(occasionNames);
            
          return `
        <url>
@@ -121,9 +151,9 @@ function generateSiteMap(products: any[], categories: any[], occasions: any[] = 
          <lastmod>${product.updatedAt ? new Date(product.updatedAt).toISOString() : new Date().toISOString()}</lastmod>
          <changefreq>weekly</changefreq>
          <priority>0.7</priority>
-         <!-- SEO Keywords: ${productKeywords} -->
-         <!-- Categories: ${categoryNames} -->
-         <!-- Occasions: ${occasionNames} -->${images}
+         <!-- SEO Keywords: ${escapedKeywords} -->
+         <!-- Categories: ${escapedCategoryNames} -->
+         <!-- Occasions: ${escapedOccasionNames} -->${images}
        </url>`;
        })
        .join('')}

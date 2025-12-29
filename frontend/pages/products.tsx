@@ -299,10 +299,10 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                   onChange={handleSortChange}
                   className="form-input px-5 py-3 min-w-[200px] font-medium"
                 >
-                  <option value="newest">Newest First</option>
-                  <option value="name">Name A-Z</option>
                   <option value="price-low">Price: Low to High</option>
                   <option value="price-high">Price: High to Low</option>
+                  <option value="name">Name A-Z</option>
+                  <option value="newest">Newest First</option>
                 </select>
 
                 {/* Elegant Clear Filters */}
