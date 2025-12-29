@@ -2,19 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
-/* KeralaGiftsOnline Theme Colors */
+/* Elegant Design System - Refined Color Palette */
 :root {
+  /* Primary Brand Colors - Softer, More Sophisticated */
   --kgo-white: #ffffff;
-  --kgo-red: #dc2626;
-  --kgo-green: #059669;
-  --kgo-black: #111827;
-  --kgo-gray-light: #f9fafb;
-  --kgo-gray: #6b7280;
-  --kgo-red-light: #fef2f2;
-  --kgo-green-light: #f0fdf4;
-  --onam-green: #005933;
-  --onam-yellow: #fbbf24;
-  --onam-gold: #f59e0b;
+  --kgo-red: #e63946;
+  --kgo-red-dark: #c1121f;
+  --kgo-red-light: #ff6b7a;
+  --kgo-green: #06a77d;
+  --kgo-green-dark: #048a6a;
+  --kgo-green-light: #0dc9a0;
+  --kgo-black: #0a0a0a;
+  --kgo-gray-50: #fafafa;
+  --kgo-gray-100: #f5f5f5;
+  --kgo-gray-200: #e5e5e5;
+  --kgo-gray-300: #d4d4d4;
+  --kgo-gray-400: #a3a3a3;
+  --kgo-gray-500: #737373;
+  --kgo-gray-600: #525252;
+  --kgo-gray-700: #404040;
+  --kgo-gray-800: #262626;
+  --kgo-gray-900: #171717;
+  
+  /* Accent Colors */
+  --kgo-gold: #d4af37;
+  --kgo-gold-light: #f4d03f;
+  --kgo-purple: #6c5ce7;
+  --kgo-blue: #4a90e2;
+  
+  /* Semantic Colors */
+  --kgo-success: #10b981;
+  --kgo-warning: #f59e0b;
+  --kgo-error: #ef4444;
+  --kgo-info: #3b82f6;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
+  --gradient-secondary: linear-gradient(135deg, #06a77d 0%, #048a6a 100%);
+  --gradient-elegant: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-warm: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-cool: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  
+  /* Shadows - Elegant Depth */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-elegant: 0 20px 60px rgba(0, 0, 0, 0.15);
+  
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+  
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 /* Browser Compatibility Fixes */
@@ -29,10 +87,29 @@ html {
 
 body {
   background-color: var(--kgo-white);
-  color: var(--kgo-black);
+  color: var(--kgo-gray-900);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1;
+  font-kerning: normal;
+  letter-spacing: -0.01em;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection Styling */
+::selection {
+  background-color: rgba(230, 57, 70, 0.2);
+  color: var(--kgo-black);
+}
+
+::-moz-selection {
+  background-color: rgba(230, 57, 70, 0.2);
+  color: var(--kgo-black);
 }
 
 /* Fix for older browsers that don't support CSS Grid */
@@ -98,47 +175,103 @@ body {
 }
 
 @layer components {
-  /* Primary Button - Red theme */
+  /* Elegant Button Styles */
   .btn-primary {
-    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+    @apply bg-gradient-to-r from-[#e63946] to-[#c1121f] text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300;
   }
   
-  /* Secondary Button - Green theme */
+  .btn-primary:active {
+    @apply scale-95;
+  }
+  
   .btn-secondary {
-    @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+    @apply bg-gradient-to-r from-[#06a77d] to-[#048a6a] text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300;
   }
   
-  /* Outline Button */
   .btn-outline {
-    @apply border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+    @apply border-2 border-[#e63946] text-[#e63946] bg-transparent font-semibold py-3 px-6 rounded-xl hover:bg-[#e63946] hover:text-white transform hover:scale-105 transition-all duration-300;
   }
   
-  /* Card styling */
+  .btn-ghost {
+    @apply text-gray-700 hover:text-[#e63946] hover:bg-gray-50 font-medium py-2 px-4 rounded-lg transition-all duration-200;
+  }
+  
+  /* Elegant Card Styling */
   .card {
-    @apply bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+    @apply bg-white border border-gray-100 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1;
+  }
+  
+  .card-elegant {
+    @apply bg-white rounded-3xl shadow-elegant border border-gray-50 overflow-hidden;
+  }
+  
+  /* Glass Morphism Effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  }
+  
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   /* Header styling */
   .header {
-    @apply bg-white border-b border-gray-200 shadow-sm;
+    @apply bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm;
   }
   
   /* Navigation styling */
   .nav-link {
-    @apply text-gray-700 hover:text-red-600 transition-colors duration-200;
+    @apply text-gray-700 hover:text-[#e63946] font-medium transition-all duration-200 relative;
+  }
+  
+  .nav-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-[#e63946] transition-all duration-300;
+  }
+  
+  .nav-link:hover::after {
+    @apply w-full;
   }
   
   .nav-link-active {
-    @apply text-red-600 font-medium;
+    @apply text-[#e63946] font-semibold;
   }
   
-  /* Form styling */
+  .nav-link-active::after {
+    @apply w-full;
+  }
+  
+  /* Elegant Form Styling */
   .form-input {
-    @apply border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200;
+    @apply border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#e63946]/20 focus:border-[#e63946] transition-all duration-200 bg-white shadow-sm hover:shadow-md;
+  }
+  
+  .form-input:focus {
+    @apply outline-none;
   }
   
   .form-label {
-    @apply text-gray-700 font-medium mb-1;
+    @apply text-gray-700 font-semibold mb-2 block;
+  }
+  
+  /* Elegant Input Group */
+  .input-group {
+    @apply relative;
+  }
+  
+  .input-group-icon {
+    @apply absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400;
+  }
+  
+  .input-group .form-input {
+    @apply pl-12;
   }
   
   /* Status badges */
@@ -434,7 +567,23 @@ body {
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+  
+  /* Elegant fade-in with delay support */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
   }
 
   @keyframes shimmer {

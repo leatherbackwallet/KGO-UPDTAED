@@ -1,9 +1,16 @@
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import SEOHead from '../components/SEOHead';
-import Balloon from '../components/Balloon';
+import RandomProductCarousel from '../components/RandomProductCarousel';
+import { Product } from '../types/shared';
+import { loadProductsFromJSON } from '../utils/jsonDataTransformers';
+import { GetServerSideProps } from 'next';
 
-export default function Home() {
+interface HomeProps {
+  products: Product[];
+}
+
+export default function Home({ products }: HomeProps) {
   // Generate enhanced homepage structured data
   const generateHomepageStructuredData = () => {
     return {
@@ -63,6 +70,10 @@ export default function Home() {
     };
   };
 
+  const handleProductClick = (product: Product) => {
+    // This will be handled by the carousel component
+  };
+
   return (
     <>
       <SEOHead
@@ -77,325 +88,322 @@ export default function Home() {
       <main className="min-h-screen">
         <Navbar />
         
-        {/* Hero Section */}
-        <section 
-          className="min-h-screen flex items-center justify-center relative pt-16 overflow-hidden"
-          style={{
-            backgroundImage: 'url(/images/products/Landing page/LandingPageBackground.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          }}
-        >
-          {/* Subtle overlay for glassmorphic effect */}
-          <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
+        {/* Modern Hero Section */}
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+          {/* Background with gradient overlay */}
+          <div 
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: 'url(/images/products/Landing page/LandingPageBackground.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/80"></div>
+          </div>
 
-          {/* Floating Balloons */}
-          <Balloon left={10} delay={0} duration={15} color="#FF6B6B" size={0.8} />
-          <Balloon left={20} delay={2} duration={18} color="#4ECDC4" size={1} />
-          <Balloon left={30} delay={4} duration={16} color="#FFD700" size={0.9} />
-          <Balloon left={40} delay={1} duration={17} color="#FF6B9D" size={1.1} />
-          <Balloon left={50} delay={3} duration={19} color="#C7CEEA" size={0.85} />
-          <Balloon left={60} delay={5} duration={15} color="#FFE66D" size={1} />
-          <Balloon left={70} delay={1.5} duration={18} color="#FF6B6B" size={0.95} />
-          <Balloon left={80} delay={3.5} duration={16} color="#4ECDC4" size={1.05} />
-          <Balloon left={90} delay={2.5} duration={17} color="#FFD700" size={0.9} />
-          
-          <div className="text-center text-white px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto relative z-20">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              We deliver Gifts On your Behalf
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-white">
-              Premium quality gifts with fast delivery across Kerala
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link 
-                href="/products"
-                className="px-8 py-4 text-lg font-semibold text-white bg-white bg-opacity-20 backdrop-blur-md border border-white border-opacity-30 rounded-full hover:bg-opacity-30 transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                Shop Now
-              </Link>
-              <Link 
-                href="/products"
-                className="px-8 py-4 text-lg font-semibold text-white bg-white bg-opacity-10 backdrop-blur-md border border-white border-opacity-30 rounded-full hover:bg-opacity-20 transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                View Products
-              </Link>
+          {/* Animated background elements */}
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-kgo-red/30 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-kgo-green/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+            <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
+          </div>
+
+          {/* Hero Content */}
+          <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="space-y-8 animate-fade-in">
+              {/* Badge */}
+              <div className="inline-flex items-center px-6 py-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full mb-4">
+                <span className="text-white/90 text-sm font-semibold">✨ Premium Gift Delivery Service</span>
+              </div>
+
+              {/* Subheading */}
+              <p className="text-xl sm:text-2xl md:text-3xl text-gray-200 font-light max-w-3xl mx-auto leading-relaxed">
+                Premium quality gifts with fast delivery across all Kerala districts
+              </p>
+              <p className="text-lg sm:text-xl text-gray-300 font-light">
+                Bringing authentic Kerala culture to your doorstep
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
+                <Link 
+                  href="/products"
+                  className="group relative px-10 py-4 text-lg font-bold text-white bg-gradient-to-r from-kgo-red to-kgo-red-dark rounded-2xl hover:from-kgo-red-dark hover:to-kgo-red transition-all duration-300 shadow-2xl hover:shadow-glow transform hover:scale-105 overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center">
+                    Shop Now
+                    <svg className="ml-2 w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </Link>
+                <Link 
+                  href="/products"
+                  className="px-10 py-4 text-lg font-semibold text-white bg-white/10 backdrop-blur-xl border-2 border-white/30 rounded-2xl hover:bg-white/20 hover:border-white/50 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                >
+                  Explore Products
+                </Link>
+              </div>
+
+              {/* Trust Indicators */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-12 max-w-4xl mx-auto">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-white mb-2">14+</div>
+                  <div className="text-sm md:text-base text-gray-300">Kerala Districts</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-white mb-2">1000+</div>
+                  <div className="text-sm md:text-base text-gray-300">Happy Customers</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-white mb-2">24/7</div>
+                  <div className="text-sm md:text-base text-gray-300">Support Available</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-white mb-2">Same Day</div>
+                  <div className="text-sm md:text-base text-gray-300">Delivery</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Scroll Indicator */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
+            <svg className="w-6 h-6 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </div>
+        </section>
+
+        {/* Featured Products Carousel */}
+        {products.length > 0 && (
+          <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-12">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                  Featured Products
+                </h2>
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                  Discover our handpicked selection of premium gifts and traditional Kerala products
+                </p>
+              </div>
+              <RandomProductCarousel
+                allProducts={products}
+                onProductClick={handleProductClick}
+              />
+            </div>
+          </section>
+        )}
+
+        {/* Features Section */}
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Why Choose Us?
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                We make gift delivery simple, fast, and memorable
+              </p>
             </div>
 
-            {/* Emergency Delivery Notice */}
-            <div className="mt-8 max-w-2xl mx-auto">
-              <div className="bg-white bg-opacity-15 backdrop-blur-xl rounded-2xl p-6 border border-white border-opacity-25 shadow-2xl">
-                <div className="flex items-center justify-center space-x-4">
-                  <div className="flex-shrink-0">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium text-lg">
-                      Need Same Day or Emergency Delivery?
-                    </p>
-                    <p className="text-white text-opacity-80 text-sm mt-1">
-                      Contact our customer support team via WhatsApp for immediate assistance
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-4">
-                      {/* US Support Button */}
-                      <a 
-                        href="https://wa.me/12817238520" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-6 py-2 bg-white bg-opacity-20 backdrop-blur-md text-white rounded-xl font-medium hover:bg-opacity-30 transition-all duration-300 border border-white border-opacity-30 shadow-lg"
-                      >
-                        <span className="text-xl mr-2">🇺🇸</span>
-                        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
-                        </svg>
-                        <span className="text-sm">US Support</span>
-                      </a>
-                      
-                      {/* India Support Button */}
-                      <a 
-                        href="https://wa.me/918075030919" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-6 py-2 bg-white bg-opacity-20 backdrop-blur-md text-white rounded-xl font-medium hover:bg-opacity-30 transition-all duration-300 border border-white border-opacity-30 shadow-lg"
-                      >
-                        <span className="text-xl mr-2">🇮🇳</span>
-                        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
-                        </svg>
-                        <span className="text-sm">India Support</span>
-                      </a>
-                    </div>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {/* Feature 1 */}
+              <div className="group text-center p-8 rounded-3xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-kgo-red to-kgo-red-dark rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                 </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Fast Delivery</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Same-day and express delivery options available across all Kerala districts
+                </p>
+              </div>
+
+              {/* Feature 2 */}
+              <div className="group text-center p-8 rounded-3xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-kgo-green to-kgo-green-dark rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Premium Quality</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Handpicked authentic Kerala products and premium gift items
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="group text-center p-8 rounded-3xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Customizable</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Personalize your gifts with custom messages, wrapping, and more
+                </p>
+              </div>
+
+              {/* Feature 4 */}
+              <div className="group text-center p-8 rounded-3xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">24/7 Support</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Round-the-clock customer support via WhatsApp for all your needs
+                </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* SEO-Rich Content Section */}
-        <section className="py-16 bg-white">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="prose prose-lg max-w-none">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                We Deliver Gifts On Your Behalf - Premium Gift Delivery Service Across Kerala
+        {/* Service Areas Section */}
+        <section className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white relative overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 left-0 w-96 h-96 bg-kgo-red rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-kgo-green rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                Delivery Across All Kerala Districts
               </h2>
-              
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                <strong>KeralGiftsOnline</strong> is Kerala's premier online gift store specializing in premium gifts, 
-                customisable gifts, personalised gifts, and traditional Kerala products. We deliver gifts on your behalf 
-                with fast and reliable personal delivery service across all districts of Kerala, including Ernakulam, 
-                Thiruvananthapuram, Kozhikode, Thrissur, Kannur, Kollam, Palakkad, Malappuram, Alappuzha, Kottayam, 
-                Idukki, Wayanad, Kasaragod, and Pathanamthitta.
+              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                We deliver to all 14 districts of Kerala with fast and reliable service
               </p>
+            </div>
 
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Our extensive collection includes gift baskets, combo gifts, cakes, flowers, traditional sweets, 
-                Kerala snacks, handicrafts, and customisable gift hampers perfect for birthdays, anniversaries, 
-                weddings, festivals like Onam and Diwali, and special occasions. Whether you need same-day delivery, 
-                express delivery, or scheduled personal delivery, we ensure your gifts reach your loved ones 
-                across Kerala with care and precision.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
-                Traditional Kerala Gift Items & Authentic Products
-              </h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Discover authentic traditional Kerala gift items including <Link href="/products" className="text-blue-600 hover:underline">Aranmula Val Kannadi</Link> 
-                (handcrafted mirrors with certificate), <Link href="/products" className="text-blue-600 hover:underline">authentic Kasavu Saree</Link> for gift delivery, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Kerala Mural Art gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Brass Nilavilakku</Link> for online purchase, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Kerala Nettoor Petti</Link> for gifting, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Kasavu Mundu and Saree combo</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> traditional Kerala jewelry</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Kerala temple jewelry</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> snake boat model gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Kathakali face wall hanging gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> coir handicraft gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> wooden elephant handicrafts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Kerala spices gift box</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Kerala Ayurvedic gift hampers</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> banana chips gift packs</Link>, 
-                and <Link href="/products" className="text-blue-600 hover:underline">traditional Kerala souvenirs</Link>. 
-                Buy Aranmula Val Kannadi online, purchase authentic Kasavu Saree, and explore our complete collection of traditional Kerala gift items.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
-                Premium Gift Categories & Products
-              </h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Explore our wide range of premium gifts including <Link href="/products" className="text-blue-600 hover:underline">combo gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> wedding gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> birthday gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> anniversary gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> festival gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> flowers and roses</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> cakes</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> chocolates</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> luxury gift hampers</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> premium gift hampers</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> fresh fruit baskets</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> dry fruit hampers</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> chocolate bouquets</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Ferrero Rocher gift boxes</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> orchid flower bouquets</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> mixed flower baskets</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> indoor plants</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> personalized photo frames</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> customized mugs</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> personalized cushions</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> personalized keychains</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> teddy bear and chocolate combos</Link>, 
-                and <Link href="/products" className="text-blue-600 hover:underline">traditional Kerala products</Link>. 
-                All our gifts can be personalised with custom greetings, gift wrapping, and special messages.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
-                Cakes & Bakery Products
-              </h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Order premium cakes with same-day cake delivery across Kerala. Choose from <Link href="/products" className="text-blue-600 hover:underline">red velvet cake</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Black Forest cake</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> eggless cake</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> sugar-free cake</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> photo cake</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> heart shape cake for anniversary</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Christmas plum cake</Link>, 
-                and <Link href="/products" className="text-blue-600 hover:underline">midnight cake delivery</Link>. 
-                We offer same-day cake delivery in Kerala, midnight cake delivery, and express cake delivery to all districts.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
-                Delivery Across All Kerala Districts & Cities
-              </h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                We provide fast and reliable gift delivery service to all 14 districts of Kerala. Our personal delivery 
-                network covers major cities and towns including <Link href="/products" className="text-blue-600 hover:underline">online gift delivery in Kochi</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> send gifts to Trivandrum</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> cake delivery in Kozhikode</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> flower delivery in Thrissur</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> gift delivery in Alappuzha</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> same day gifts Kottayam</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> online cakes Palakkad</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> gift shop in Malappuram</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> send flowers to Kollam</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> midnight cake delivery Kannur</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> gift delivery in Idukki</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> gift delivery in Wayanad</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Pathanamthitta gift delivery</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Kasaragod online gift shop</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Ernakulam flower delivery same day</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Guruvayur gift delivery</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Perumbavoor cake delivery</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Angamaly gift shops</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Tirur gift delivery</Link>, 
-                and <Link href="/products" className="text-blue-600 hover:underline">Thalassery cake and flower delivery</Link>. 
-                Whether you're sending gifts within Kerala or from anywhere in the world, we ensure timely delivery with our advanced logistics network.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
-                International Gift Delivery - Send Gifts to Kerala from Abroad
-              </h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Our NRI gift delivery service makes it easy to <Link href="/products" className="text-blue-600 hover:underline">send gifts to Kerala from Dubai</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> gift delivery Kerala from USA</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> send Onam gifts from UK to Kerala</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> send birthday cake to Kerala from Australia</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> send gifts to Kerala from Canada</Link>, 
-                and from anywhere in the world. Perfect for <Link href="/products" className="text-blue-600 hover:underline">Kerala gifts online for parents</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> gifts for wife in Kerala from abroad</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> gifts for husband in Kerala</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> gifts for sister in Kerala</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> brother's birthday gift delivery</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> wedding gifts for cousins</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> traditional gifts for grandparents</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> best gifts for Malayali friends</Link>, 
-                and <Link href="/products" className="text-blue-600 hover:underline">surprise family in Kerala from abroad</Link>. 
-                We specialize in helping NRIs send thoughtful gifts to their loved ones in Kerala.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
-                Occasion-Specific Gifts & Festival Hampers
-              </h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Celebrate every occasion with our curated gift collections. Choose from <Link href="/products" className="text-blue-600 hover:underline">Onam gift hampers for family</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Vishu Kani kit online</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> birthday gift delivery in Kerala</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> wedding anniversary gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> engagement gifts for groom</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Valentine's Day gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Mother's Day gifts to Kerala</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Father's Day gift delivery</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Christmas plum cake delivery</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> New Year 2025 gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> housewarming gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> retirement gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> get well soon gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> sympathy flowers delivery</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> baby shower gift hampers</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Rakhi delivery in Kerala</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> Diwali sweets to Kerala</Link>, 
-                and <Link href="/products" className="text-blue-600 hover:underline">Eid gift hampers</Link>. 
-                We offer same-day delivery, midnight gift delivery, and surprise gift delivery options.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
-                Customisable & Personalised Gifts
-              </h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Make every gift special with our customisable gifts and personalised gift baskets. Choose from our 
-                extensive collection of gift hampers, gift baskets, and combo gifts that can be tailored to your 
-                preferences. Add custom greetings, select specific products, and create the perfect gift package 
-                for birthdays, anniversaries, weddings, festivals, or any special occasion. Our personalised delivery 
-                service ensures your gifts are presented beautifully and delivered with care. We offer <Link href="/products" className="text-blue-600 hover:underline">budget gifts under 1000</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> corporate gifts</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> bulk gifting</Link>, 
-                and <Link href="/products" className="text-blue-600 hover:underline">luxury gift hampers</Link>.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
-                Special Delivery Services
-              </h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                We offer flexible delivery options to meet your needs. Choose from <Link href="/products" className="text-blue-600 hover:underline">same-day delivery</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> midnight gift delivery Kerala</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> surprise gift delivery</Link>, 
-                <Link href="/products" className="text-blue-600 hover:underline"> express delivery</Link>, 
-                and <Link href="/products" className="text-blue-600 hover:underline">scheduled personal delivery</Link>. 
-                Our advanced logistics network ensures your gifts reach on time, whether it's a last-minute birthday surprise 
-                or a carefully planned anniversary gift. We specialize in making every delivery special.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">
-                Why Choose KeralGiftsOnline?
-              </h3>
-              <ul className="list-disc list-inside text-gray-700 space-y-2 mb-4">
-                <li>Premium quality gifts and authentic Kerala products</li>
-                <li>Fast delivery across all Kerala districts</li>
-                <li>Personal delivery service with tracking</li>
-                <li>Customisable and personalised gift options</li>
-                <li>Same-day and express delivery available</li>
-                <li>Wide range of gift baskets and hampers</li>
-                <li>Traditional and modern gift collections</li>
-                <li>Secure online payment and easy ordering</li>
-              </ul>
-
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Shop now for premium gifts, customisable gift baskets, and personalised delivery across Kerala. 
-                Browse our <Link href="/products" className="text-blue-600 hover:underline">complete product catalog</Link> 
-                to find the perfect gift for your loved ones. As Kerala's best online gift store, we offer the widest 
-                selection of traditional Kerala gift items, authentic products, and modern gift solutions. Need assistance? 
-                Contact our customer support team via WhatsApp for immediate help with your gift delivery needs.
-              </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+              {['Kochi', 'Trivandrum', 'Kozhikode', 'Thrissur', 'Kannur', 'Kollam', 'Palakkad', 
+                'Malappuram', 'Alappuzha', 'Kottayam', 'Idukki', 'Wayanad', 'Kasaragod', 'Pathanamthitta'].map((city, index) => (
+                <div 
+                  key={city}
+                  className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl text-center hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className="text-lg font-semibold">{city}</div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-      </main>
+        {/* CTA Section */}
+        <section className="py-20 bg-gradient-to-r from-kgo-red via-kgo-red-dark to-kgo-red text-white relative overflow-hidden">
+          {/* Background pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 left-0 w-full h-full" style={{
+              backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+              backgroundSize: '50px 50px'
+            }}></div>
+          </div>
 
+          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Ready to Send a Gift?
+            </h2>
+            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+              Browse our extensive collection of premium gifts and traditional Kerala products. 
+              Fast delivery guaranteed across all districts.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link 
+                href="/products"
+                className="px-10 py-4 text-lg font-bold text-kgo-red bg-white rounded-2xl hover:bg-gray-100 transition-all duration-300 shadow-2xl transform hover:scale-105"
+              >
+                Browse Products
+              </Link>
+              <a 
+                href="https://wa.me/918075030919" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-10 py-4 text-lg font-semibold text-white bg-white/20 backdrop-blur-xl border-2 border-white/30 rounded-2xl hover:bg-white/30 transition-all duration-300 shadow-xl transform hover:scale-105"
+              >
+                Contact Support
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Emergency Delivery Section */}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl border border-gray-100">
+              <div className="text-center mb-8">
+                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <h3 className="text-3xl font-bold text-gray-900 mb-3">
+                  Need Same Day or Emergency Delivery?
+                </h3>
+                <p className="text-lg text-gray-600 mb-8">
+                  Contact our customer support team via WhatsApp for immediate assistance
+                </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a 
+                  href="https://wa.me/12817238520" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-center px-8 py-4 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <span className="text-2xl mr-3">🇺🇸</span>
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
+                  </svg>
+                  <span>US Support</span>
+                </a>
+                
+                <a 
+                  href="https://wa.me/918075030919" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-center px-8 py-4 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <span className="text-2xl mr-3">🇮🇳</span>
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
+                  </svg>
+                  <span>India Support</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </>
   );
 }
+
+// Server-side rendering - load products from JSON
+export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
+  try {
+    const products = await loadProductsFromJSON();
+    return {
+      props: {
+        products: products || []
+      }
+    };
+  } catch (error) {
+    console.error('Error loading products:', error);
+    return {
+      props: {
+        products: []
+      }
+    };
+  }
+};

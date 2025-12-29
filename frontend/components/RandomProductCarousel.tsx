@@ -73,24 +73,27 @@ const RandomProductCarousel: React.FC<RandomProductCarouselProps> = ({ allProduc
     if (randomProducts.length === 0) return null;
 
     return (
-        <div className="w-full py-8 bg-white mb-8 border-b border-gray-100">
+        <div className="w-full py-12 bg-gradient-to-b from-white to-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Featured Picks</h2>
-                    <div className="flex gap-2">
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Featured Picks</h2>
+                        <p className="text-gray-600">Handpicked products just for you</p>
+                    </div>
+                    <div className="flex gap-3">
                         <button
                             onClick={() => scroll('left')}
-                            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                            className="p-3 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
                             aria-label="Previous slide"
                         >
-                            <ChevronLeft className="w-5 h-5 text-gray-600" />
+                            <ChevronLeft className="w-5 h-5 text-gray-700" />
                         </button>
                         <button
                             onClick={() => scroll('right')}
-                            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                            className="p-3 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
                             aria-label="Next slide"
                         >
-                            <ChevronRight className="w-5 h-5 text-gray-600" />
+                            <ChevronRight className="w-5 h-5 text-gray-700" />
                         </button>
                     </div>
                 </div>

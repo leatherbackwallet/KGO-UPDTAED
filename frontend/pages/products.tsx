@@ -177,12 +177,12 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
 
       <Navbar />
 
-      {/* Banner Section */}
-      <div className="w-full">
-        <div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
+      {/* Elegant Banner Section */}
+      <div className="w-full relative">
+        <div className="relative h-72 md:h-96 lg:h-[32rem] overflow-hidden rounded-b-3xl">
           {/* Current Banner - slides out to left */}
           <div 
-            className="absolute inset-0 transition-all duration-1000 ease-in-out"
+            className="absolute top-0 left-0 right-0 bottom-0 transition-all duration-1000 ease-in-out"
             style={{
               backgroundImage: `url(${BANNER_IMAGES[currentBannerIndex]})`,
               backgroundSize: 'cover',
@@ -193,13 +193,13 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
               zIndex: isTransitioning ? 1 : 2
             }}
           >
-            {/* Optional overlay for better text readability if needed */}
-            <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+            {/* Elegant gradient overlay */}
+            <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
           </div>
           
           {/* Next Banner - slides in from left */}
           <div 
-            className="absolute inset-0 transition-all duration-1000 ease-in-out"
+            className="absolute top-0 left-0 right-0 bottom-0 transition-all duration-1000 ease-in-out"
             style={{
               backgroundImage: `url(${BANNER_IMAGES[nextBannerIndex]})`,
               backgroundSize: 'cover',
@@ -210,8 +210,8 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
               zIndex: isTransitioning ? 2 : 1
             }}
           >
-            {/* Optional overlay for better text readability if needed */}
-            <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+            {/* Elegant gradient overlay */}
+            <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
           </div>
         </div>
       </div>
@@ -222,12 +222,12 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
         onProductClick={handleProductClick}
       />
 
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
 
-          {/* Search and Filters */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+          {/* Elegant Search and Filters */}
+          <div className="bg-white rounded-3xl shadow-elegant border border-gray-100 p-8 mb-10">
             <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
 
               {/* Search */}
@@ -240,13 +240,13 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                     </svg>
                   </div>
 
-                  {/* Search Input */}
+                  {/* Elegant Search Input */}
                   <input
                     type="text"
                     placeholder="Search products, categories, or descriptions..."
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm hover:shadow-md"
+                    className="form-input w-full pl-12 pr-12 py-4 text-lg"
                   />
 
                   {/* Clear Search Button */}
@@ -278,11 +278,11 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
               {/* Filters */}
               <div className="flex flex-wrap gap-3 items-center">
 
-                {/* Category Filter */}
+                {/* Elegant Category Filter */}
                 <select
                   value={selectedCategory}
                   onChange={handleCategoryChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm hover:shadow-md min-w-[160px]"
+                  className="form-input px-5 py-3 min-w-[180px] font-medium"
                 >
                   <option value="">All Categories</option>
                   {categories.map((category) => (
@@ -293,11 +293,11 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                 </select>
 
 
-                {/* Sort */}
+                {/* Elegant Sort */}
                 <select
                   value={sortBy}
                   onChange={handleSortChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm hover:shadow-md min-w-[180px]"
+                  className="form-input px-5 py-3 min-w-[200px] font-medium"
                 >
                   <option value="newest">Newest First</option>
                   <option value="name">Name A-Z</option>
@@ -305,13 +305,13 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
                   <option value="price-high">Price: High to Low</option>
                 </select>
 
-                {/* Clear Filters */}
+                {/* Elegant Clear Filters */}
                 {(searchTerm || selectedCategory || sortBy !== 'newest') && (
                   <button
                     onClick={clearFilters}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium shadow-sm hover:shadow-md flex items-center gap-2"
+                    className="px-5 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-semibold shadow-sm hover:shadow-md flex items-center gap-2 transform hover:scale-105"
                   >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                     Clear Filters
@@ -321,16 +321,21 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
             </div>
           </div>
 
-          {/* Results */}
-          <div className="mb-6">
-            <p className="text-gray-600">
-              Showing {filteredProducts.length} of {allProducts.length} products
-            </p>
+          {/* Elegant Results Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Our Products</h2>
+                <p className="text-gray-600 text-lg">
+                  Showing <span className="font-semibold text-kgo-red">{filteredProducts.length}</span> of <span className="font-semibold">{allProducts.length}</span> products
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Products Grid */}
+          {/* Elegant Products Grid */}
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {filteredProducts.map((product) => (
                 <ProductCard
                   key={product._id}
@@ -341,17 +346,17 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-center py-20">
+              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 mb-6">
+                <svg className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8l-4 4-4-4m0 0l-4 4-4-4" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-              <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">No products found</h3>
+              <p className="text-gray-600 mb-8 text-lg">Try adjusting your search or filter criteria</p>
               <button
                 onClick={clearFilters}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn-primary px-8 py-3"
               >
                 Clear All Filters
               </button>
