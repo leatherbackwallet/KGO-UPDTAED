@@ -157,9 +157,9 @@ validate_environment() {
     print_step "1. Environment Validation"
     
     # Check if we're in the right directory
-    if [ ! -f "app.yaml" ] || [ ! -f "frontend-app.yaml" ] || [ ! -d "backend" ] || [ ! -d "frontend" ]; then
+    if [ ! -f "backend/app.yaml" ] || [ ! -f "frontend-app.yaml" ] || [ ! -d "backend" ] || [ ! -d "frontend" ]; then
         print_error "Please run this script from the project root directory"
-        print_error "Required files: app.yaml, frontend-app.yaml, backend/, frontend/"
+        print_error "Required files: backend/app.yaml, frontend-app.yaml, backend/, frontend/"
         exit 1
     fi
     print_success "✓ Project structure validated"
@@ -379,12 +379,20 @@ deploy_backend() {
     
     print_step "6. Deploying Backend API Service"
     
-    print_info "Starting backend deployment to Google App Engine..."
+    print_info "Starting backend deployment to Google App Engine Standard..."
+    print_info "Using Standard environment (scales to zero, 80-90% cost reduction!)"
     print_info "This may take several minutes..."
+    
+    # Deploy from backend directory using Standard environment
+    # Standard environment requires app.yaml to be in the same directory as the code
+    cd backend
     
     # Deploy backend without promoting
     DEPLOY_OUTPUT=$(gcloud app deploy app.yaml --version=$API_VERSION --quiet --no-promote 2>&1)
     DEPLOY_EXIT_CODE=$?
+    
+    # Return to root directory
+    cd ..
     
     if [ $DEPLOY_EXIT_CODE -ne 0 ]; then
         print_error "Backend deployment failed!"
@@ -394,6 +402,7 @@ deploy_backend() {
     
     print_success "✓ Backend API deployed: $API_VERSION"
     print_info "API Version URL: https://$API_VERSION-dot-$API_SERVICE-dot-$PROJECT_ID.uc.r.appspot.com"
+    print_info "💰 Cost savings: Standard environment scales to zero (no cost when idle)"
 }
 
 deploy_frontend() {
