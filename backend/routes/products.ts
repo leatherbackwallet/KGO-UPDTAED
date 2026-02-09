@@ -299,7 +299,8 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
  */
 async function handlePublicSingleProductRequest(req: Request, res: Response): Promise<void> {
   try {
-    const product = await jsonDataService.getProductById(req.params.id);
+    const id = typeof req.params.id === 'string' ? req.params.id : (req.params.id?.[0] ?? '');
+    const product = await jsonDataService.getProductById(id);
 
     if (!product) {
       res.status(404).json({ success: false, error: 'Product not found' });

@@ -205,7 +205,8 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
  */
 async function handlePublicSingleOccasionRequest(req: Request, res: Response): Promise<void> {
   try {
-    const occasion = await jsonDataService.getOccasionById(req.params.id);
+    const id = typeof req.params.id === 'string' ? req.params.id : (req.params.id?.[0] ?? '');
+    const occasion = await jsonDataService.getOccasionById(id);
 
     if (!occasion) {
       res.status(404).json({ success: false, error: 'Occasion not found' });

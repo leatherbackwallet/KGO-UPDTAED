@@ -178,7 +178,8 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
  */
 async function handlePublicSingleCategoryRequest(req: Request, res: Response): Promise<void> {
   try {
-    const category = await jsonDataService.getCategoryById(req.params.id);
+    const id = typeof req.params.id === 'string' ? req.params.id : (req.params.id?.[0] ?? '');
+    const category = await jsonDataService.getCategoryById(id);
 
     if (!category) {
       res.status(404).json({ success: false, error: 'Category not found' });

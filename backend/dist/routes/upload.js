@@ -105,7 +105,7 @@ router.post('/product-image-direct', auth_1.auth, (0, role_1.requireRole)('admin
 // Delete uploaded image from Cloudinary
 router.delete('/product-image/:public_id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
-        const { public_id } = req.params;
+        const public_id = typeof req.params.public_id === 'string' ? req.params.public_id : (req.params.public_id?.[0] ?? '');
         if (!public_id) {
             return res.status(400).json({
                 success: false,
@@ -169,7 +169,7 @@ router.get('/product-images', auth_1.auth, (0, role_1.requireRole)('admin'), asy
 // Get image metadata from Cloudinary
 router.get('/product-image/:public_id', auth_1.auth, (0, role_1.requireRole)('admin'), async (req, res) => {
     try {
-        const { public_id } = req.params;
+        const public_id = typeof req.params.public_id === 'string' ? req.params.public_id : (req.params.public_id?.[0] ?? '');
         if (!public_id) {
             return res.status(400).json({
                 success: false,

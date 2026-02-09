@@ -422,7 +422,7 @@ router.put('/addresses/:index', auth, async (req: AuthenticatedRequest, res) => 
       });
     }
 
-    const { index } = req.params;
+    const index = typeof req.params.index === 'string' ? req.params.index : (req.params.index?.[0] ?? '');
     if (!index) {
       return res.status(400).json({
         success: false,
@@ -519,7 +519,7 @@ router.delete('/addresses/:index', auth, async (req: AuthenticatedRequest, res) 
       });
     }
 
-    const { index } = req.params;
+    const index = typeof req.params.index === 'string' ? req.params.index : (req.params.index?.[0] ?? '');
     if (!index) {
       return res.status(400).json({
         success: false,
@@ -578,7 +578,7 @@ router.put('/addresses/:index/default', auth, async (req: AuthenticatedRequest, 
       });
     }
 
-    const { index } = req.params;
+    const index = typeof req.params.index === 'string' ? req.params.index : (req.params.index?.[0] ?? '');
     if (!index) {
       return res.status(400).json({
         success: false,

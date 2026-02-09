@@ -365,7 +365,7 @@ router.put('/addresses/:index', auth_1.auth, async (req, res) => {
                 error: { message: 'User not authenticated', code: 'NOT_AUTHENTICATED' }
             });
         }
-        const { index } = req.params;
+        const index = typeof req.params.index === 'string' ? req.params.index : (req.params.index?.[0] ?? '');
         if (!index) {
             return res.status(400).json({
                 success: false,
@@ -443,7 +443,7 @@ router.delete('/addresses/:index', auth_1.auth, async (req, res) => {
                 error: { message: 'User not authenticated', code: 'NOT_AUTHENTICATED' }
             });
         }
-        const { index } = req.params;
+        const index = typeof req.params.index === 'string' ? req.params.index : (req.params.index?.[0] ?? '');
         if (!index) {
             return res.status(400).json({
                 success: false,
@@ -495,7 +495,7 @@ router.put('/addresses/:index/default', auth_1.auth, async (req, res) => {
                 error: { message: 'User not authenticated', code: 'NOT_AUTHENTICATED' }
             });
         }
-        const { index } = req.params;
+        const index = typeof req.params.index === 'string' ? req.params.index : (req.params.index?.[0] ?? '');
         if (!index) {
             return res.status(400).json({
                 success: false,

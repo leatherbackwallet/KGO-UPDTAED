@@ -94,7 +94,7 @@ router.post('/add', optionalAuth, async (req: Request, res: Response): Promise<v
 // Remove item from cart (supports both authenticated and guest users)
 router.delete('/remove/:productId', optionalAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { productId } = req.params;
+    const productId = typeof req.params.productId === 'string' ? req.params.productId : (req.params.productId?.[0] ?? '');
     
     if (!productId) {
       res.status(400).json({
@@ -134,7 +134,7 @@ router.delete('/remove/:productId', optionalAuth, async (req: Request, res: Resp
 // Update item quantity in cart (supports both authenticated and guest users)
 router.put('/update/:productId', optionalAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { productId } = req.params;
+    const productId = typeof req.params.productId === 'string' ? req.params.productId : (req.params.productId?.[0] ?? '');
     const { quantity } = req.body;
     
     if (!productId) {
