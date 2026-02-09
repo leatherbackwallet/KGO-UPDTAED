@@ -167,6 +167,18 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
     setSelectedProduct(null);
   };
 
+  /** Navigate banner to a specific slide by dot click; keeps auto-rotation intact. */
+  const handleBannerDotClick = (targetIndex: number) => {
+    if (isTransitioning || targetIndex === currentBannerIndex) return;
+    setNextBannerIndex(targetIndex);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentBannerIndex(targetIndex);
+      setNextBannerIndex((targetIndex + 1) % BANNER_IMAGES.length);
+      setIsTransitioning(false);
+    }, 1000);
+  };
+
   return (
     <>
       <Head>
@@ -212,6 +224,25 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products: allProducts, cate
           >
             {/* Elegant gradient overlay */}
             <div className="absolute right-0 bottom-0 w-full h-full bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
+          </div>
+
+          {/* Banner dot indicators - click to go to slide, rotation continues */}
+          <div className="absolute bottom-6 left-0 right-0 z-10 flex justify-center gap-2" aria-label="Banner slide navigation">
+            {BANNER_IMAGES.map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => handleBannerDotClick(index)}
+                disabled={isTransitioning}
+                aria-label={`Go to slide ${index + 1}`}
+                aria-current={index === currentBannerIndex}
+                className={`rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
+                  index === currentBannerIndex
+                    ? 'h-3 w-3 bg-white shadow-md'
+                    : 'h-2 w-2 bg-white/60 hover:bg-white/80'
+                }`}
+              />
+            ))}
           </div>
         </div>
       </div>
