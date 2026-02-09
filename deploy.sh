@@ -157,9 +157,9 @@ validate_environment() {
     print_step "1. Environment Validation"
     
     # Check if we're in the right directory
-    if [ ! -f "backend/app.yaml" ] || [ ! -f "frontend-app.yaml" ] || [ ! -d "backend" ] || [ ! -d "frontend" ]; then
+    if [ ! -f "backend/app.yaml" ] || [ ! -f "frontend/app.yaml" ] || [ ! -d "backend" ] || [ ! -d "frontend" ]; then
         print_error "Please run this script from the project root directory"
-        print_error "Required files: backend/app.yaml, frontend-app.yaml, backend/, frontend/"
+        print_error "Required files: backend/app.yaml, frontend/app.yaml, backend/, frontend/"
         exit 1
     fi
     print_success "✓ Project structure validated"
@@ -413,12 +413,14 @@ deploy_frontend() {
     
     print_step "7. Deploying Frontend Service"
     
-    print_info "Starting frontend deployment to Google App Engine..."
+    print_info "Starting frontend deployment (Standard, from frontend/)..."
     print_info "This may take several minutes..."
     
-    # Deploy frontend without promoting
-    DEPLOY_OUTPUT=$(gcloud app deploy frontend-app.yaml --version=$FRONTEND_VERSION --quiet --no-promote 2>&1)
+    # Deploy from frontend/ using Standard-only app.yaml (cost-optimized)
+    cd frontend
+    DEPLOY_OUTPUT=$(gcloud app deploy app.yaml --version=$FRONTEND_VERSION --quiet --no-promote 2>&1)
     DEPLOY_EXIT_CODE=$?
+    cd ..
     
     if [ $DEPLOY_EXIT_CODE -ne 0 ]; then
         print_error "Frontend deployment failed!"

@@ -1,0 +1,15 @@
+# Do not upload these when deploying from frontend/
+node_modules/
+.git
+.gitignore
+.env
+.env.*
+*.log
+.next
+out/
+coverage/
+.nyc_output/
+.vscode/
+.idea/
+*.md
+!README.md
