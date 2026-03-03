@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — KeralGiftsOnline</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/x-icon" href="/KGO-UPDTAED/favicon.ico">
+  <link rel="icon" type="image/svg+xml" href="/KGO-UPDTAED/favicon.svg">
+  <link rel="stylesheet" href="/KGO-UPDTAED/css/base.css">
+  <link rel="stylesheet" href="/KGO-UPDTAED/css/components.css">
+  <link rel="stylesheet" href="/KGO-UPDTAED/css/checkout.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="container navbar__inner">
+    <a href="/KGO-UPDTAED/" class="navbar__logo">
+      <img src="/KGO-UPDTAED/images/logo.png" alt="KeralGiftsOnline" onerror="this.style.display='none'">
+      <span class="navbar__logo-text">
+        KeralGifts<span style="color:var(--color-gold)">Online</span>
+        <span class="navbar__logo-sub">Secure Checkout</span>
+      </span>
+    </a>
+    <div class="navbar__actions">
+      <button class="navbar__hamburger" id="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="navbar__mobile-menu" id="mobile-menu">
+  <a href="/KGO-UPDTAED/"              class="navbar__link">Home</a>
+  <a href="/KGO-UPDTAED/products.html" class="navbar__link">All Gifts</a>
+</div>
+
+<!-- PAGE HEADER -->
+<header class="checkout-header">
+  <h1>Secure Checkout</h1>
+  <p>Fill in delivery details — you'll be redirected to Razorpay to complete payment</p>
+</header>
+
+<main>
+  <div class="container checkout-layout">
+
+    <!-- LEFT: ORDER FORM -->
+    <div>
+      <form id="checkout-form" novalidate>
+
+        <!-- Section 1: Your details -->
+        <div class="checkout-form-card">
+          <div class="form-section">
+            <div class="form-section__title">
+              <span class="form-section__step">1</span>
+              <h3>Your Details</h3>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="senderName">Your Name <span class="required">*</span></label>
+                <input class="form-input" type="text" id="senderName" name="senderName"
+                       placeholder="Your full name" autocomplete="name">
+                <span class="form-error" id="senderName-error" style="display:none"></span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="senderPhone">Mobile Number <span class="required">*</span></label>
+                <input class="form-input" type="tel" id="senderPhone" name="senderPhone"
+                       placeholder="10-digit mobile number" autocomplete="tel" maxlength="10" inputmode="numeric">
+                <span class="form-error" id="senderPhone-error" style="display:none"></span>
+              </div>
+            </div>
+            <div class="form-group" style="margin-top:var(--space-4)">
+              <label class="form-label" for="senderEmail">Email Address <span class="required">*</span></label>
+              <input class="form-input" type="email" id="senderEmail" name="senderEmail"
+                     placeholder="you@example.com" autocomplete="email">
+              <span class="form-hint">Your order confirmation will be sent here</span>
+              <span class="form-error" id="senderEmail-error" style="display:none"></span>
+            </div>
+          </div>
+
+          <!-- Section 2: Delivery details -->
+          <div class="form-section">
+            <div class="form-section__title">
+              <span class="form-section__step">2</span>
+              <h3>Delivery Details</h3>
+            </div>
+            <div class="form-group" style="margin-bottom:var(--space-4)">
+              <label class="form-label" for="recipientName">Recipient Name <span class="required">*</span></label>
+              <input class="form-input" type="text" id="recipientName" name="recipientName"
+                     placeholder="Who is this gift for?">
+              <span class="form-error" id="recipientName-error" style="display:none"></span>
+            </div>
+            <div class="form-group" style="margin-bottom:var(--space-4)">
+              <label class="form-label" for="deliveryAddress">Delivery Address <span class="required">*</span></label>
+              <textarea class="form-textarea" id="deliveryAddress" name="deliveryAddress"
+                        placeholder="House / flat number, street, landmark…" rows="3"
+                        autocomplete="street-address"></textarea>
+              <span class="form-error" id="deliveryAddress-error" style="display:none"></span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="deliveryCity">City <span class="required">*</span></label>
+                <input class="form-input" type="text" id="deliveryCity" name="deliveryCity"
+                       placeholder="e.g. Kochi, Trivandrum" autocomplete="address-level2">
+                <span class="form-error" id="deliveryCity-error" style="display:none"></span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="deliveryPincode">Pincode <span class="required">*</span></label>
+                <input class="form-input" type="text" id="deliveryPincode" name="deliveryPincode"
+                       placeholder="6-digit pincode" maxlength="6" inputmode="numeric" autocomplete="postal-code">
+                <span class="form-error" id="deliveryPincode-error" style="display:none"></span>
+              </div>
+            </div>
+            <div class="form-group" style="margin-top:var(--space-4)">
+              <label class="form-label" for="deliveryDate">Preferred Delivery Date <span class="required">*</span></label>
+              <input class="form-input" type="date" id="deliveryDate" name="deliveryDate">
+              <span class="form-hint">We'll do our best to deliver on or before this date</span>
+              <span class="form-error" id="deliveryDate-error" style="display:none"></span>
+            </div>
+          </div>
+
+          <!-- Section 3: Gift message -->
+          <div class="form-section">
+            <div class="form-section__title">
+              <span class="form-section__step">3</span>
+              <h3>Gift Message <span style="font-weight:400;color:var(--color-text-muted);font-size:0.85rem">(optional)</span></h3>
+            </div>
+            <div class="form-group" style="margin-bottom:var(--space-4)">
+              <label class="form-label" for="giftMessage">Message on the card</label>
+              <textarea class="form-textarea" id="giftMessage" name="giftMessage"
+                        placeholder="e.g. Happy Birthday! Wishing you all the joy in the world 🎂"
+                        rows="3" maxlength="200"></textarea>
+              <span class="form-hint">Max 200 characters</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="specialNote">Special Instructions</label>
+              <textarea class="form-textarea" id="specialNote" name="specialNote"
+                        placeholder="e.g. Please deliver in the morning. Do not ring bell."
+                        rows="2" maxlength="300"></textarea>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="checkout-submit">
+            <p class="checkout-submit__note">
+              🔒 A secure Razorpay payment window will open — no redirect
+            </p>
+            <button type="submit" class="btn btn-primary btn-full" id="submit-btn">
+              Proceed to Payment →
+            </button>
+            <div class="checkout-loading" id="checkout-loading" style="margin-top:var(--space-4)">
+              <div class="spinner" style="margin:0 auto var(--space-2)"></div>
+              <p style="font-size:0.88rem;color:var(--color-text-muted)">Redirecting to payment page…</p>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- RIGHT: ORDER SUMMARY -->
+    <div>
+      <div class="order-summary-card">
+        <div class="order-summary-card__header">
+          <h3>Order Summary</h3>
+        </div>
+        <div id="order-summary">
+          <div class="spinner" style="margin:2rem auto"></div>
+        </div>
+      </div>
+
+      <!-- Trust badges -->
+      <div style="margin-top:var(--space-5);display:flex;flex-direction:column;gap:var(--space-3)">
+        <div style="display:flex;align-items:center;gap:var(--space-3);font-size:0.84rem;color:var(--color-text-muted)">
+          <span style="font-size:1.3rem">🔒</span>
+          <span>All payments secured by Razorpay — India's most trusted payment gateway</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:var(--space-3);font-size:0.84rem;color:var(--color-text-muted)">
+          <span style="font-size:1.3rem">📦</span>
+          <span>Same-day delivery available on orders placed before 2 PM</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:var(--space-3);font-size:0.84rem;color:var(--color-text-muted)">
+          <span style="font-size:1.3rem">💬</span>
+          <span>Need help? <a href="https://wa.me/918075030919" target="_blank" rel="noopener" style="color:var(--color-primary)">Chat on WhatsApp</a></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="/KGO-UPDTAED/js/config.js"></script>
+<script src="/KGO-UPDTAED/js/utils.js"></script>
+<script src="/KGO-UPDTAED/js/products.js"></script>
+<script src="/KGO-UPDTAED/js/checkout.js"></script>
+</body>
+</html>

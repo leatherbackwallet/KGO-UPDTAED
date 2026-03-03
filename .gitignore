@@ -1,4 +1,15 @@
-node_modules
+# Dependencies (old stack remnants)
+node_modules/
 
-# Sensitive documentation with credentials
+# Sensitive files
 MASTER.md
+*.env
+*.env.local
+*.env.production
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Logs
+*.log
