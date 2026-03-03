@@ -137,13 +137,14 @@ async function getAllCategories() {
  * @param {string}   opts.query      - free-text search
  * @param {string}   opts.occasion   - occasion key (e.g. "BIRTHDAY")
  * @param {string}   opts.category   - category key (e.g. "cakes")
+ * @param {string}   opts.sort       - "price-asc" | "price-desc" | ""
  * @param {number}   opts.minPrice
  * @param {number}   opts.maxPrice
  * @param {number}   opts.page       - 1-indexed
  * @param {number}   opts.perPage
  */
 async function filterProducts(opts = {}) {
-  const { query = '', occasion = '', category = '', page = 1, perPage = CONFIG.PRODUCTS_PER_PAGE } = opts;
+  const { query = '', occasion = '', category = '', sort = '', page = 1, perPage = CONFIG.PRODUCTS_PER_PAGE } = opts;
   let products = await loadProducts();
 
   if (query.trim()) {
@@ -164,6 +165,12 @@ async function filterProducts(opts = {}) {
 
   if (category) {
     products = products.filter(p => p.categoryKey === category);
+  }
+
+  if (sort === 'price-asc') {
+    products = products.slice().sort((a, b) => a.price - b.price);
+  } else if (sort === 'price-desc') {
+    products = products.slice().sort((a, b) => b.price - a.price);
   }
 
   const total   = products.length;

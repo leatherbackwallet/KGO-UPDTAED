@@ -58,6 +58,14 @@
 
     <div class="catalog-toolbar__filters">
       <div class="filter-group">
+        <label class="filter-group__label" for="filter-sort">Sort by</label>
+        <select class="filter-select" id="filter-sort" aria-label="Sort by price">
+          <option value="">Default</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+        </select>
+      </div>
+      <div class="filter-group">
         <label class="filter-group__label" for="filter-occasion">Occasion</label>
         <select class="filter-select" id="filter-occasion" aria-label="Filter by occasion">
           <option value="">All Occasions</option>

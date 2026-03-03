@@ -1,6 +1,6 @@
 /* Products catalog page — filtering, search, pagination */
 
-let currentFilters = { query: '', occasion: '', category: '', page: 1 };
+let currentFilters = { query: '', occasion: '', category: '', sort: '', page: 1 };
 
 document.addEventListener('DOMContentLoaded', async () => {
   initMobileMenu();
@@ -19,6 +19,7 @@ function readFiltersFromUrl() {
     query:    getParam('q')        || '',
     occasion: getParam('occasion') || '',
     category: getParam('category') || '',
+    sort:     getParam('sort')     || '',
     page:     parseInt(getParam('page') || '1', 10),
   };
 }
@@ -49,11 +50,13 @@ async function populateFilterDropdowns() {
 
 function syncFilterUI() {
   const searchInput     = document.getElementById('search-input');
+  const sortSelect      = document.getElementById('filter-sort');
   const occasionSelect  = document.getElementById('filter-occasion');
   const categorySelect  = document.getElementById('filter-category');
   const clearSearchBtn  = document.getElementById('search-clear');
 
   if (searchInput)    searchInput.value    = currentFilters.query;
+  if (sortSelect)     sortSelect.value     = currentFilters.sort;
   if (occasionSelect) occasionSelect.value = currentFilters.occasion;
   if (categorySelect) categorySelect.value = currentFilters.category;
 
@@ -148,7 +151,7 @@ window.removeFilterTag = function(index) {
 };
 
 window.clearAllFilters = function() {
-  currentFilters = { query: '', occasion: '', category: '', page: 1 };
+  currentFilters = { query: '', occasion: '', category: '', sort: '', page: 1 };
   syncFilterUI();
   renderPage();
 };
@@ -195,6 +198,7 @@ function updateUrl() {
   if (currentFilters.query)    params.set('q',        currentFilters.query);
   if (currentFilters.occasion) params.set('occasion', currentFilters.occasion);
   if (currentFilters.category) params.set('category', currentFilters.category);
+  if (currentFilters.sort)     params.set('sort',     currentFilters.sort);
   if (currentFilters.page > 1) params.set('page',     currentFilters.page);
   const qs = params.toString();
   history.replaceState({}, '', `./products.html${qs ? '?' + qs : ''}`);
@@ -204,6 +208,7 @@ function updateUrl() {
 
 function attachFilterListeners() {
   const searchInput    = document.getElementById('search-input');
+  const sortSelect     = document.getElementById('filter-sort');
   const occasionSelect = document.getElementById('filter-occasion');
   const categorySelect = document.getElementById('filter-category');
   const clearSearchBtn = document.getElementById('search-clear');
@@ -224,6 +229,14 @@ function attachFilterListeners() {
       currentFilters.query = '';
       currentFilters.page  = 1;
       clearSearchBtn.style.display = 'none';
+      renderPage();
+    });
+  }
+
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      currentFilters.sort = e.target.value;
+      currentFilters.page = 1;
       renderPage();
     });
   }
