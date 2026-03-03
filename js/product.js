@@ -41,7 +41,7 @@ function renderError(msg) {
     <div class="empty-state" style="grid-column:1/-1">
       <div class="empty-state__icon">😕</div>
       <h3>${escapeHtml(msg)}</h3>
-      <a href="/KGO-UPDTAED/products.html" class="btn btn-primary">Browse Products</a>
+      <a href="./products.html" class="btn btn-primary">Browse Products</a>
     </div>
   `;
 }
@@ -60,7 +60,7 @@ function renderBreadcrumb(product) {
   el.innerHTML = `
     <a href="/">Home</a>
     <span class="breadcrumb__sep">›</span>
-    <a href="/KGO-UPDTAED/products.html">Products</a>
+    <a href="./products.html">Products</a>
     <span class="breadcrumb__sep">›</span>
     <span class="breadcrumb__current">${escapeHtml(product.name)}</span>
   `;
@@ -126,7 +126,7 @@ function renderInfo(product) {
     return `<span class="filter-pill">${meta.emoji} ${meta.label}</span>`;
   }).join('');
 
-  const buyBtn = `<a href="/KGO-UPDTAED/checkout.html?slug=${encodeURIComponent(product.slug)}" class="btn btn-primary btn-lg">Buy Now — ${formatPrice(product.price)}</a>`;
+  const buyBtn = `<a href="./checkout.html?slug=${encodeURIComponent(product.slug)}" class="btn btn-primary btn-lg">Buy Now — ${formatPrice(product.price)}</a>`;
 
   infoEl.innerHTML = `
     <div class="product-info__badges">
@@ -174,7 +174,6 @@ function renderInfo(product) {
       <div class="product-cta__trust">
         <span class="product-cta__trust-item">✅ Genuine products</span>
         <span class="product-cta__trust-item">🔒 Secure payment</span>
-        <span class="product-cta__trust-item">📦 Same-day delivery</span>
       </div>
     </div>
   `;

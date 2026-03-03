@@ -21,9 +21,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 /* ─── ORDER SUMMARY SIDEBAR ─── */
 
-function renderOrderSummary(product) {
+const URGENT_DELIVERY_CHARGE = 500;
+
+function renderOrderSummary(product, urgentDelivery = false) {
   const el = document.getElementById('order-summary');
   if (!el) return;
+
+  const deliveryCost = urgentDelivery ? URGENT_DELIVERY_CHARGE : 0;
+  const total = product.price + deliveryCost;
+  const deliveryLabel = urgentDelivery ? 'Urgent delivery' : 'Delivery';
+  const deliveryValue = urgentDelivery
+    ? `₹${URGENT_DELIVERY_CHARGE.toLocaleString('en-IN')}`
+    : '<span style="color:var(--color-success);font-weight:600">Free</span>';
 
   el.innerHTML = `
     <div class="order-summary-card__product">
@@ -45,12 +54,12 @@ function renderOrderSummary(product) {
         <span>₹${product.price.toLocaleString('en-IN')}</span>
       </div>
       <div class="order-summary-row">
-        <span>Delivery</span>
-        <span style="color:var(--color-success);font-weight:600">Free</span>
+        <span>${deliveryLabel}</span>
+        <span>${deliveryValue}</span>
       </div>
       <div class="order-summary-row total">
         <span>Total</span>
-        <span>₹${product.price.toLocaleString('en-IN')}</span>
+        <span>₹${total.toLocaleString('en-IN')}</span>
       </div>
     </div>
     <div class="order-summary-card__secure">
@@ -71,10 +80,13 @@ const VALIDATORS = {
   deliveryPincode:  v => /^\d{6}$/.test(v.trim()) || 'Enter a valid 6-digit pincode',
   deliveryDate:     v => {
     if (!v) return 'Select a delivery date';
-    const d = new Date(v);
+    const isUrgent = document.getElementById('urgentDelivery')?.checked === true;
+    if (isUrgent) return true;
+    const d = new Date(v + 'T00:00:00');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return d >= today || 'Delivery date cannot be in the past';
+    if (d.getTime() <= today.getTime()) return 'Delivery is only available from the next day onwards (not same day)';
+    return true;
   },
 };
 
@@ -112,9 +124,33 @@ function attachFormListeners(product) {
     el.addEventListener('input', () => clearFieldError(name));
   });
 
-  const dateInput = document.getElementById('deliveryDate');
-  if (dateInput) {
-    dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
+  function setDeliveryDateMin(urgent) {
+    const dateInput = document.getElementById('deliveryDate');
+    if (!dateInput) return;
+    const today = new Date();
+    if (urgent) {
+      dateInput.setAttribute('min', today.toISOString().split('T')[0]);
+    } else {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      dateInput.setAttribute('min', tomorrow.toISOString().split('T')[0]);
+    }
+  }
+
+  setDeliveryDateMin(false);
+
+  const urgentCheckbox = document.getElementById('urgentDelivery');
+  const urgentNotice = document.getElementById('urgent-whatsapp-notice');
+  if (urgentCheckbox) {
+    urgentCheckbox.addEventListener('change', () => {
+      const checked = urgentCheckbox.checked;
+      if (urgentNotice) urgentNotice.style.display = checked ? 'block' : 'none';
+      setDeliveryDateMin(checked);
+      renderOrderSummary(product, checked);
+      const err = validateField('deliveryDate', document.getElementById('deliveryDate')?.value);
+      if (err) showFieldError('deliveryDate', err);
+      else clearFieldError('deliveryDate');
+    });
   }
 
   const form = document.getElementById('checkout-form');
@@ -156,10 +192,14 @@ function handleSubmit(product) {
 /* ─── COLLECT FORM VALUES ─── */
 
 function collectFormValues(product) {
+  const urgentDelivery = document.getElementById('urgentDelivery')?.checked ?? false;
+  const deliveryCharge = urgentDelivery ? URGENT_DELIVERY_CHARGE : 0;
   return {
     productName:     product.name,
     productSlug:     product.slug,
     productPrice:    product.price,
+    urgentDelivery,
+    deliveryCharge,
     senderName:      document.getElementById('senderName').value.trim(),
     senderPhone:     document.getElementById('senderPhone').value.trim(),
     senderEmail:     document.getElementById('senderEmail').value.trim(),
@@ -185,9 +225,11 @@ function openRazorpay(product, order) {
   const submitBtn = document.getElementById('submit-btn');
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Opening payment…'; }
 
+  const totalAmount = product.price + (order.urgentDelivery ? URGENT_DELIVERY_CHARGE : 0);
+
   const options = {
     key:         CONFIG.RAZORPAY_KEY_ID,
-    amount:      product.price * 100,  // Razorpay expects paise
+    amount:      totalAmount * 100,  // Razorpay expects paise
     currency:    'INR',
     name:        CONFIG.SITE_NAME,
     description: product.name,
@@ -201,11 +243,12 @@ function openRazorpay(product, order) {
 
     // Notes are stored on the Razorpay transaction and visible in the dashboard
     notes: {
-      recipient:     order.recipientName,
-      address:       `${order.deliveryAddress}, ${order.deliveryCity} - ${order.deliveryPincode}`,
-      delivery_date: order.deliveryDate,
-      gift_message:  order.giftMessage || '',
-      product:       product.name,
+      recipient:       order.recipientName,
+      address:         `${order.deliveryAddress}, ${order.deliveryCity} - ${order.deliveryPincode}`,
+      delivery_date:   order.deliveryDate,
+      urgent_delivery: order.urgentDelivery ? 'yes' : 'no',
+      gift_message:    order.giftMessage || '',
+      product:         product.name,
     },
 
     theme: { color: '#c0392b' },
@@ -217,7 +260,7 @@ function openRazorpay(product, order) {
       saved.paymentId = response.razorpay_payment_id;
       sessionSave('pendingOrder', saved);
 
-      window.location.href = '/KGO-UPDTAED/success.html';
+      window.location.href = './success.html';
     },
 
     modal: {
@@ -245,5 +288,5 @@ function openRazorpay(product, order) {
 
 function redirectToProducts(msg) {
   showToast(msg, 'error');
-  setTimeout(() => { window.location.href = '/KGO-UPDTAED/products.html'; }, 1500);
+  setTimeout(() => { window.location.href = './products.html'; }, 1500);
 }

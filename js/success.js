@@ -52,7 +52,7 @@ function renderSuccess(order) {
     </div>
 
     <div class="success-actions">
-      <a href="/KGO-UPDTAED/products.html" class="btn btn-outline">Continue Shopping</a>
+      <a href="./products.html" class="btn btn-outline">Continue Shopping</a>
       <a href="https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi! I just placed an order for ' + order.productName + '. Payment ID: ' + (order.paymentId || 'pending'))}"
          target="_blank" rel="noopener"
          class="btn btn-whatsapp">
@@ -82,7 +82,7 @@ function renderNoOrder() {
       <h3>No recent order found</h3>
       <p>If you just completed a payment, please contact us on WhatsApp with your Payment ID.</p>
       <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1rem">
-        <a href="/KGO-UPDTAED/products.html" class="btn btn-outline">Browse Products</a>
+        <a href="./products.html" class="btn btn-outline">Browse Products</a>
         <a href="https://wa.me/${CONFIG.WHATSAPP_NUMBER}" target="_blank" rel="noopener" class="btn btn-whatsapp">WhatsApp Us</a>
       </div>
     </div>

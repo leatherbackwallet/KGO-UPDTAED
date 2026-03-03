@@ -8,8 +8,7 @@
   z-index: 200;
   height: var(--navbar-h);
   background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .navbar__inner {
@@ -84,15 +83,17 @@
   background: #25d366;
   color: #fff;
   padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-full);
-  font-size: 0.85rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
   font-weight: 600;
-  transition: background var(--transition-fast), transform var(--transition-fast);
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 1px 3px rgba(37, 211, 102, 0.25);
 }
 
 .navbar__whatsapp:hover {
   background: #1ebe57;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.35);
 }
 
 .navbar__whatsapp svg { width: 18px; height: 18px; }
@@ -476,19 +477,31 @@
 
 .search-bar input {
   width: 100%;
-  padding: var(--space-3) var(--space-4) var(--space-3) 2.8rem;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-full);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  padding-left: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
   background: var(--color-surface);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
+  font-weight: 500;
   color: var(--color-text);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   outline: none;
 }
 
+.search-bar input::placeholder {
+  color: var(--color-text-light);
+  font-weight: 400;
+}
+
+.search-bar input:hover {
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
 .search-bar input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(192,57,43,.12);
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12);
 }
 
 .search-bar__icon {

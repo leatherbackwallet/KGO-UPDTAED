@@ -93,6 +93,21 @@ async function getFeaturedProducts(limit = 8) {
 }
 
 /**
+ * Get a random sample of products (up to `limit`).
+ * Uses Fisher–Yates shuffle for unbiased sampling.
+ */
+async function getRandomProducts(limit = 5) {
+  const products = await loadProducts();
+  if (products.length <= limit) return products.slice();
+  const shuffled = products.slice();
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, limit);
+}
+
+/**
  * Get all unique occasions present in the catalogue.
  */
 async function getAllOccasions() {

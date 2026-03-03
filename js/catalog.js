@@ -197,7 +197,7 @@ function updateUrl() {
   if (currentFilters.category) params.set('category', currentFilters.category);
   if (currentFilters.page > 1) params.set('page',     currentFilters.page);
   const qs = params.toString();
-  history.replaceState({}, '', `/KGO-UPDTAED/products.html${qs ? '?' + qs : ''}`);
+  history.replaceState({}, '', `./products.html${qs ? '?' + qs : ''}`);
 }
 
 /* ─── FILTER EVENT LISTENERS ─── */

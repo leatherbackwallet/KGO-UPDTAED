@@ -20,7 +20,7 @@ const CONFIG = Object.freeze({
   CLOUDINARY_LARGE:      'w_1200,h_1200,c_fill,q_auto,f_auto',
 
   // Data
-  PRODUCTS_JSON:    '/KGO-UPDTAED/data/keralagiftsonline.products.json',
+  PRODUCTS_JSON:    './data/keralagiftsonline.products.json',
 
   // Catalog pagination
   PRODUCTS_PER_PAGE: 24,

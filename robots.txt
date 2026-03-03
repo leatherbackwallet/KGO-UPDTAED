@@ -1,0 +1,18 @@
+# KeralGiftsOnline — robots.txt for https://keralagiftsonline.in
+# Allow all crawlers to index public pages
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /products.html
+Allow: /product.html
+
+# Do not crawl checkout, success, or utility pages
+Disallow: /checkout.html
+Disallow: /success.html
+Disallow: /404.html
+
+# Sitemap location (helps search engines discover all URLs)
+Sitemap: https://keralagiftsonline.in/sitemap.xml
+
+# Crawl-delay is not standard; most bots ignore it. Omitted for Google/Bing.
