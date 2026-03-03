@@ -175,11 +175,15 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .catalog-toolbar__search {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 200px;
   max-width: 400px;
 }
@@ -188,8 +192,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  flex-wrap: wrap;
-  flex: 1;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .catalog-toolbar__count {
@@ -207,6 +211,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  flex-shrink: 0;
 }
 
 .filter-group__label {
@@ -322,6 +327,6 @@
 
 @media (max-width: 768px) {
   .catalog-toolbar__inner { gap: var(--space-3); }
-  .catalog-toolbar__search { max-width: 100%; }
+  .catalog-toolbar__search { min-width: 160px; max-width: none; }
   .filter-group__label { display: none; }
 }

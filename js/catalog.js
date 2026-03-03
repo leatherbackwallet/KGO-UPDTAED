@@ -69,7 +69,6 @@ function syncFilterUI() {
 
 async function renderPage() {
   const container   = document.getElementById('product-grid');
-  const countEl     = document.getElementById('results-count');
   const paginationEl = document.getElementById('pagination');
   const activeFiltersEl = document.getElementById('active-filters');
 
@@ -78,12 +77,6 @@ async function renderPage() {
   renderSkeletons(container);
 
   const result = await filterProducts(currentFilters);
-
-  if (countEl) {
-    countEl.textContent = result.total === 0
-      ? 'No products found'
-      : `${result.total} product${result.total !== 1 ? 's' : ''}`;
-  }
 
   renderActiveFilterTags(activeFiltersEl);
 
