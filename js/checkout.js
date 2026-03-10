@@ -30,7 +30,7 @@ function renderOrderSummary(product, urgentDelivery = false) {
 
   const deliveryCost = urgentDelivery ? URGENT_DELIVERY_CHARGE : 0;
   const total = product.price + deliveryCost;
-  const deliveryLabel = urgentDelivery ? 'Urgent delivery' : 'Delivery';
+  const deliveryLabel = urgentDelivery ? 'Urgent/same day delivery' : 'Delivery';
   const deliveryValue = '<span style="color:var(--color-success);font-weight:600">Free</span>';
 
   el.innerHTML = `
@@ -87,7 +87,7 @@ const VALIDATORS = {
     today.setHours(0, 0, 0, 0);
     const minDate = new Date(today);
     minDate.setDate(minDate.getDate() + 2);
-    if (d.getTime() < minDate.getTime()) return 'Standard delivery requires at least 48 hours. Choose a date at least 2 days from today, or use Urgent delivery.';
+    if (d.getTime() < minDate.getTime()) return 'Standard delivery requires at least 48 hours. Choose a date at least 2 days from today, or use Urgent/same day delivery.';
     return true;
   },
 };
@@ -143,9 +143,19 @@ function attachFormListeners(product) {
 
   const urgentCheckbox = document.getElementById('urgentDelivery');
   const urgentNotice = document.getElementById('urgent-whatsapp-notice');
+  const submitBtn = document.getElementById('submit-btn');
+  const submitNoteUrgent = document.getElementById('submit-note-urgent');
+
+  function setPaymentButtonState(isUrgent) {
+    if (submitBtn) submitBtn.disabled = isUrgent;
+    if (submitNoteUrgent) submitNoteUrgent.style.display = isUrgent ? 'block' : 'none';
+  }
+
   if (urgentCheckbox) {
+    setPaymentButtonState(urgentCheckbox.checked);
     urgentCheckbox.addEventListener('change', () => {
       const checked = urgentCheckbox.checked;
+      setPaymentButtonState(checked);
       if (urgentNotice) urgentNotice.style.display = checked ? 'block' : 'none';
       setDeliveryDateMin(checked);
       renderOrderSummary(product, checked);
@@ -175,6 +185,11 @@ function attachFormListeners(product) {
 /* ─── FORM SUBMIT — OPEN RAZORPAY MODAL ─── */
 
 function handleSubmit(product) {
+  if (document.getElementById('urgentDelivery')?.checked === true) {
+    showToast('For urgent/same day delivery, please use the WhatsApp button above.', 'info');
+    return;
+  }
+
   // Validate all fields first
   let hasErrors = false;
   Object.keys(VALIDATORS).forEach(name => {

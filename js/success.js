@@ -38,7 +38,7 @@ function renderSuccess(order) {
 
   const totalAmount = getTotalAmount(order);
   const deliveryCharge = order.urgentDelivery ? (order.deliveryCharge || 0) : 0;
-  const deliveryLabel = order.urgentDelivery ? 'Urgent delivery' : 'Delivery';
+  const deliveryLabel = order.urgentDelivery ? 'Urgent/same day delivery' : 'Delivery';
   const deliveryValue = order.urgentDelivery
     ? ((order.deliveryCharge && order.deliveryCharge > 0) ? formatPrice(order.deliveryCharge) : 'Free')
     : 'Free';
@@ -131,7 +131,7 @@ async function sendMerchantEmail(order) {
     return;
   }
 
-  const emailBody = buildEmailBody(order);
+  const emailBody = buildEmailBodyHtml(order);
   const payload = buildMerchantEmailPayload(order, emailBody);
 
   // Use MERCHANT_ACCESS_KEYS if set (one key per To recipient); otherwise fallback to single WEB3FORMS_KEY
@@ -197,48 +197,92 @@ function buildMerchantEmailPayload(order, emailBody) {
   };
 }
 
-function buildEmailBody(order) {
-  const totalAmount = getTotalAmount(order);
+/* HTML email: section and row helpers (inline styles for email clients) */
+function emailSection(title, rows) {
   return `
-NEW ORDER RECEIVED — ${CONFIG.SITE_NAME}
-${'='.repeat(50)}
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:16px;background:#f6f6f6;border-radius:8px;overflow:hidden;">
+  <tr><td style="padding:12px 16px;background:#e8e8e8;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#333;">${escapeHtml(title)}</td></tr>
+  <tr><td style="padding:12px 16px;font-family:Arial,sans-serif;font-size:14px;color:#444;line-height:1.6;">${rows}</td></tr>
+</table>`;
+}
+function emailRow(label, value) {
+  return `<div style="margin-bottom:8px;"><span style="color:#666;">${escapeHtml(label)}:</span> <strong style="color:#222;">${escapeHtml(String(value || '—'))}</strong></div>`;
+}
 
-ORDER DETAILS
-  Product:        ${order.productName}
-  Description:    ${order.productDescription || '(none)'}
-  Product Slug:   ${order.productSlug || '—'}
-  Subtotal:       ₹${(order.productPrice || 0).toLocaleString('en-IN')}
-  Delivery:       ${order.urgentDelivery ? `₹${(order.deliveryCharge || 0).toLocaleString('en-IN')} (Urgent)` : 'Free'}
-  Total:          ₹${totalAmount.toLocaleString('en-IN')}
-  Razorpay ID:    ${order.paymentId || 'Pending confirmation'}
-  Ordered At:     ${formatDate(order.orderedAt)}
+function buildEmailBodyHtml(order) {
+  const totalAmount = getTotalAmount(order);
+  const deliveryText = order.urgentDelivery ? `₹${(order.deliveryCharge || 0).toLocaleString('en-IN')} (Urgent)` : 'Free';
+  return `
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#eee;font-family:Arial,sans-serif;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#eee;"><tr><td style="padding:24px 16px;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+  <tr><td style="padding:24px 24px 16px;background:linear-gradient(135deg,#c0392b 0%,#a93226 100%);color:#fff;font-size:20px;font-weight:700;text-align:center;">New order received — ${escapeHtml(CONFIG.SITE_NAME)}</td></tr>
+  <tr><td style="padding:20px 24px;">
+${emailSection('Order details', [
+  emailRow('Product', order.productName),
+  emailRow('Description', order.productDescription || '—'),
+  emailRow('Subtotal', '₹' + (order.productPrice || 0).toLocaleString('en-IN')),
+  emailRow('Delivery', deliveryText),
+  emailRow('Total', '₹' + totalAmount.toLocaleString('en-IN')),
+  emailRow('Razorpay payment ID', order.paymentId || 'Pending'),
+  emailRow('Ordered at', formatDate(order.orderedAt)),
+].join(''))}
+${emailSection('Customer (order placed by)', [
+  emailRow('Name', order.senderName),
+  emailRow('Phone', order.senderPhone),
+  emailRow('Email', order.senderEmail),
+].join(''))}
+${emailSection('Delivery (recipient & address)', [
+  emailRow('Recipient name', order.recipientName),
+  emailRow('Recipient phone', order.recipientPhone || '—'),
+  emailRow('Address', order.deliveryAddress),
+  emailRow('City', order.deliveryCity),
+  emailRow('Pincode', order.deliveryPincode),
+  emailRow('Preferred date', formatDate(order.deliveryDate)),
+  emailRow('Urgent delivery', order.urgentDelivery ? 'Yes' : 'No'),
+].join(''))}
+${emailSection('Gift message', escapeHtml(order.giftMessage || '—'))}
+${emailSection('Special instructions', escapeHtml(order.specialNote || '—'))}
+  </td></tr>
+  <tr><td style="padding:12px 24px;background:#f9f9f9;font-size:12px;color:#888;text-align:center;">${escapeHtml(CONFIG.SITE_NAME)} · Order notification</td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+}
 
-CUSTOMER (Order placed by — all details from form)
-  Customer Name:   ${order.senderName}
-  Customer Phone:  ${order.senderPhone}
-  Customer Email:  ${order.senderEmail}
-
-DELIVERY DETAILS (Recipient & address from form)
-  Recipient Name:   ${order.recipientName}
-  Recipient Phone:  ${order.recipientPhone || '—'}
-  Address:          ${order.deliveryAddress}
-  City:             ${order.deliveryCity}
-  Pincode:          ${order.deliveryPincode}
-  Preferred Date:   ${formatDate(order.deliveryDate)}
-  Urgent Delivery:  ${order.urgentDelivery ? 'Yes' : 'No'}
-
-GIFT MESSAGE (from form)
-  ${order.giftMessage || '(none)'}
-
-SPECIAL INSTRUCTIONS (from form)
-  ${order.specialNote || '(none)'}
-
-${'='.repeat(50)}
-`.trim();
+function buildCustomerSuccessEmailHtml(order) {
+  const siteName = escapeHtml(CONFIG.SITE_NAME);
+  const name = escapeHtml(order.senderName);
+  const product = escapeHtml(order.productName);
+  const recipient = escapeHtml(order.recipientName);
+  const date = escapeHtml(formatDate(order.deliveryDate));
+  return `
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#eee;font-family:Arial,sans-serif;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#eee;"><tr><td style="padding:32px 16px;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:480px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1);">
+  <tr><td style="padding:28px 24px;background:linear-gradient(135deg,#2ecc71 0%,#27ae60 100%);color:#fff;font-size:22px;font-weight:700;text-align:center;">😊 Wonderful! We have received your order</td></tr>
+  <tr><td style="padding:24px;">
+    <p style="margin:0 0 16px;font-size:16px;color:#333;line-height:1.6;">Hi ${name},</p>
+    <p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.6;">Thank you for your purchase. Your gift will be delivered to <strong>${recipient}</strong> as per your chosen date (<strong>${date}</strong>). We will confirm delivery via WhatsApp or phone.</p>
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f8f9fa;border-radius:8px;margin:16px 0;">
+      <tr><td style="padding:16px;font-size:14px;color:#555;">
+        <strong style="color:#333;">Order summary</strong><br>
+        ${product}
+      </td></tr>
+    </table>
+    <p style="margin:16px 0 0;font-size:14px;color:#666;">If you have any questions, reply to this email or contact us on WhatsApp.</p>
+  </td></tr>
+  <tr><td style="padding:16px 24px;background:#f5f5f5;font-size:12px;color:#888;text-align:center;">${siteName} · Gifts delivered across Kerala</td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
 }
 
 /* ─── CUSTOMER CONFIRMATION EMAIL via EmailJS ───
  * Customer-friendly only: smiley, welcoming text. No Razorpay or internal details.
+ * In EmailJS template: use {{{ body_html }}} (triple braces) to render the HTML.
  */
 
 function sendCustomerEmail(order) {
@@ -266,6 +310,7 @@ function sendCustomerEmail(order) {
     product_name:   order.productName,
     recipient_name: order.recipientName,
     delivery_date:  formatDate(order.deliveryDate),
+    body_html:      buildCustomerSuccessEmailHtml(order),
   };
 
   try {

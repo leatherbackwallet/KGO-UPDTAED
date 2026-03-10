@@ -163,6 +163,62 @@
 
 /* ───────────────────────────── SUBMIT AREA ───────────────────────────── */
 
+/* Urgent/same day delivery option — noticeable callout */
+.urgent-delivery-option {
+  margin-top: var(--space-5);
+}
+
+.urgent-delivery-option__box {
+  padding: var(--space-4) var(--space-5);
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.12) 0%, rgba(255, 193, 7, 0.08) 100%);
+  border: 1px solid rgba(255, 152, 0, 0.35);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.08);
+}
+
+.urgent-delivery-option__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.urgent-delivery-option__input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.urgent-delivery-option__icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.urgent-delivery-option__text {
+  flex: 1;
+}
+
+.urgent-delivery-option__tagline {
+  margin: var(--space-3) 0 0;
+  padding-left: calc(20px + var(--space-3));
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+@media (max-width: 480px) {
+  .urgent-delivery-option__tagline {
+    padding-left: 0;
+  }
+}
+
+/* ───────────────────────────── SUBMIT AREA ───────────────────────────── */
+
 .checkout-submit {
   padding: var(--space-6);
   background: var(--color-bg-alt);

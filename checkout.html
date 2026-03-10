@@ -121,11 +121,15 @@
               <span class="form-hint">Standard delivery: minimum 48 hours. Choose a date at least 2 days from today.</span>
               <span class="form-error" id="deliveryDate-error" style="display:none"></span>
             </div>
-            <div class="form-group" style="margin-top:var(--space-3)">
-              <label class="checkbox-label" style="display:flex;align-items:center;gap:var(--space-2);cursor:pointer;">
-                <input type="checkbox" id="urgentDelivery" name="urgentDelivery" value="1" style="width:auto;">
-                <span>Urgent delivery</span>
-              </label>
+            <div class="form-group urgent-delivery-option" style="margin-top:var(--space-4)">
+              <div class="urgent-delivery-option__box">
+                <label class="urgent-delivery-option__label" for="urgentDelivery">
+                  <input type="checkbox" id="urgentDelivery" name="urgentDelivery" value="1" class="urgent-delivery-option__input">
+                  <span class="urgent-delivery-option__icon" aria-hidden="true">⚡</span>
+                  <span class="urgent-delivery-option__text">Urgent/same day delivery</span>
+                </label>
+                <p class="urgent-delivery-option__tagline">Need it today? Contact us via WhatsApp — we’ll confirm and send your order details.</p>
+              </div>
               <div id="urgent-whatsapp-notice" class="urgent-whatsapp-notice" style="display:none;margin-top:var(--space-3);padding:var(--space-4);background:linear-gradient(135deg, rgba(37,211,102,.08) 0%, rgba(37,211,102,.04) 100%);border:1px solid rgba(37,211,102,.25);border-radius:var(--radius-md);">
                 <p class="urgent-whatsapp-notice__intro" style="margin:0 0 var(--space-3);font-weight:600;color:var(--color-text);">
                   Need it sooner? Contact us on WhatsApp — we’ll send your order details to our team.
@@ -134,13 +138,11 @@
                   Fill the form above, then tap the button below. A message with “I’m interested in this product but I need immediate delivery” and your full order details will open in WhatsApp.
                 </p>
                 <a href="#" id="urgent-whatsapp-btn" class="btn btn-whatsapp" style="display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);background:#25D366;color:#fff;border-radius:var(--radius-md);font-weight:600;text-decoration:none;border:none;cursor:pointer;">
-                  <span aria-hidden="true">💬</span> Contact on WhatsApp for urgent delivery
+                  <span aria-hidden="true">💬</span> Contact on WhatsApp for urgent/same day delivery
                 </a>
               </div>
             </div>
           </div>
-
-          <!-- Section 3: Gift message -->
           <div class="form-section">
             <div class="form-section__title">
               <span class="form-section__step">3</span>
@@ -165,6 +167,9 @@
           <div class="checkout-submit">
             <p class="checkout-submit__note">
               🔒 A secure Razorpay payment window will open — no redirect
+            </p>
+            <p id="submit-note-urgent" class="checkout-submit__note" style="display:none;color:var(--color-text-muted);">
+              For urgent/same day delivery, use the WhatsApp option above.
             </p>
             <button type="submit" class="btn btn-primary btn-full" id="submit-btn">
               Proceed to Payment →
@@ -198,7 +203,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:var(--space-3);font-size:0.84rem;color:var(--color-text-muted)">
           <span style="font-size:1.3rem">📦</span>
-          <span>Delivery across Kerala. Urgent delivery option at checkout.</span>
+          <span>Delivery across Kerala. Urgent/same day delivery option at checkout.</span>
         </div>
         <div style="display:flex;align-items:center;gap:var(--space-3);font-size:0.84rem;color:var(--color-text-muted)">
           <span style="font-size:1.3rem">💬</span>

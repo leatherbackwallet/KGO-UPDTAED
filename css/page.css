@@ -1,0 +1,233 @@
+/**
+ * Page styles for static content pages: Contact, About (Terms), etc.
+ * Uses site variables from base.css and components from components.css.
+ */
+
+/* ─── Page hero strip ─── */
+.page-hero {
+  background: linear-gradient(135deg, var(--color-bg-alt) 0%, var(--color-bg) 100%);
+  border-bottom: 1px solid var(--color-border);
+  padding-block: var(--space-10) var(--space-8);
+}
+
+.page-hero .container {
+  max-width: 720px;
+}
+
+.page-hero h1 {
+  margin-bottom: var(--space-3);
+}
+
+.page-hero p {
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  margin-bottom: 0;
+}
+
+/* ─── Content section ─── */
+.page-section {
+  padding-block: var(--space-10);
+}
+
+.page-section:nth-child(even) {
+  background: var(--color-bg-alt);
+}
+
+.page-section__title {
+  font-size: 1.25rem;
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--color-gold);
+  display: inline-block;
+}
+
+/* ─── Info cards (business info, contact blocks) ─── */
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-6);
+}
+
+.info-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast);
+}
+
+.info-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.info-card__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.info-card__value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.info-card__value a {
+  color: var(--color-primary);
+  transition: color var(--transition-fast);
+}
+
+.info-card__value a:hover {
+  color: var(--color-primary-dark);
+}
+
+/* ─── FAQ accordion ─── */
+.faq-list {
+  max-width: 720px;
+}
+
+.faq-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.faq-item:last-child {
+  margin-bottom: 0;
+}
+
+.faq-item__question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.faq-item__question:hover {
+  background: var(--color-bg-alt);
+  color: var(--color-primary);
+}
+
+.faq-item__question::after {
+  content: '';
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b6b6b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat center;
+  background-size: contain;
+  transition: transform var(--transition-normal);
+}
+
+.faq-item.is-open .faq-item__question::after {
+  transform: rotate(180deg);
+}
+
+.faq-item__answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-normal);
+}
+
+.faq-item__answer-inner {
+  padding: 0 var(--space-5) var(--space-5);
+  padding-top: 0;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+}
+
+.faq-item.is-open .faq-item__answer {
+  max-height: 400px;
+}
+
+/* ─── Terms / legal content ─── */
+.terms-content {
+  max-width: 720px;
+}
+
+.terms-content h2 {
+  font-size: 1.2rem;
+  margin-top: var(--space-10);
+  margin-bottom: var(--space-4);
+  color: var(--color-text);
+}
+
+.terms-content h2:first-child {
+  margin-top: 0;
+}
+
+.terms-content p,
+.terms-content ul {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+  line-height: 1.75;
+}
+
+.terms-content ul {
+  padding-left: var(--space-6);
+  list-style: disc;
+}
+
+.terms-content li {
+  margin-bottom: var(--space-2);
+}
+
+.terms-content .note-box {
+  background: var(--color-bg-alt);
+  border-left: 4px solid var(--color-gold);
+  padding: var(--space-4) var(--space-5);
+  margin: var(--space-6) 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+/* ─── Contact CTA block ─── */
+.contact-cta {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  text-align: center;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.contact-cta h3 {
+  margin-bottom: var(--space-3);
+}
+
+.contact-cta p {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-5);
+}
+
+.contact-cta .btn {
+  margin-right: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .page-hero { padding-block: var(--space-8) var(--space-6); }
+  .page-section { padding-block: var(--space-8); }
+  .info-cards { grid-template-columns: 1fr; }
+  .faq-item__question { padding: var(--space-3) var(--space-4); }
+  .faq-item__answer-inner { padding: 0 var(--space-4) var(--space-4); }
+}
