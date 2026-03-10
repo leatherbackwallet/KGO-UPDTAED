@@ -19,6 +19,12 @@ const CONFIG = Object.freeze({
   // Razorpay — public key only (safe to expose). Get from Razorpay Dashboard → Settings → API Keys
   RAZORPAY_KEY_ID:  'rzp_live_RJUs4PJL0Hctlv',
 
+  // EmailJS — customer confirmation/cancellation emails. Get keys at https://emailjs.com
+  EMAILJS_PUBLIC_KEY:         'YOUR_EMAILJS_PUBLIC_KEY',
+  EMAILJS_SERVICE_ID:         'YOUR_EMAILJS_SERVICE_ID',
+  EMAILJS_TEMPLATE_CONFIRMED: 'YOUR_TEMPLATE_ID',
+  EMAILJS_TEMPLATE_CANCELLED: 'YOUR_TEMPLATE_ID',
+
   // Cloudinary
   CLOUDINARY_BASE:  'https://res.cloudinary.com/deojqbepy/image/upload',
   CLOUDINARY_TRANSFORMS: 'w_600,h_600,c_fill,q_auto,f_auto',

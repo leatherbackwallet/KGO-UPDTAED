@@ -267,10 +267,11 @@ function openRazorpay(product, order) {
 
     modal: {
       ondismiss: function() {
-        if (submitBtn) {
-          submitBtn.disabled    = false;
-          submitBtn.textContent = 'Proceed to Payment →';
-        }
+        const saved = sessionLoad('pendingOrder') || {};
+        saved.status = 'cancelled';
+        saved.errorReason = 'Payment window was closed';
+        sessionSave('pendingOrder', saved);
+        window.location.href = './cancelled.html';
       },
     },
   };
@@ -278,11 +279,11 @@ function openRazorpay(product, order) {
   const rzp = new Razorpay(options);
 
   rzp.on('payment.failed', function(response) {
-    showToast('Payment failed: ' + (response.error?.description || 'Unknown error'), 'error');
-    if (submitBtn) {
-      submitBtn.disabled    = false;
-      submitBtn.textContent = 'Proceed to Payment →';
-    }
+    const saved = sessionLoad('pendingOrder') || {};
+    saved.status = 'failed';
+    saved.errorReason = response.error?.description || 'Payment could not be completed';
+    sessionSave('pendingOrder', saved);
+    window.location.href = './cancelled.html';
   });
 
   rzp.open();

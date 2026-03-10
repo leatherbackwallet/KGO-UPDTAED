@@ -1,7 +1,7 @@
 /*
  * Post-payment success page.
  * Reads order data from sessionStorage + Razorpay callback URL params.
- * Sends a notification email to the merchant via Web3Forms.
+ * Sends notification emails to the merchant (Web3Forms) and customer (EmailJS).
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderSuccess(order);
   sendMerchantEmail(order);
+  sendCustomerEmail(order);
 
   // Clear the pending order from storage after processing
   sessionClear('pendingOrder');
@@ -26,13 +27,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ─── RENDER SUCCESS ─── */
 
+function getTotalAmount(order) {
+  const delivery = order.urgentDelivery ? (order.deliveryCharge || 0) : 0;
+  return (order.productPrice || 0) + delivery;
+}
+
 function renderSuccess(order) {
   const container = document.getElementById('success-content');
   if (!container) return;
 
+  const totalAmount = getTotalAmount(order);
+  const deliveryCharge = order.urgentDelivery ? (order.deliveryCharge || 0) : 0;
+  const deliveryLabel = order.urgentDelivery ? 'Urgent delivery' : 'Delivery';
+  const deliveryValue = order.urgentDelivery
+    ? formatPrice(order.deliveryCharge || 0)
+    : 'Free';
+
   container.innerHTML = `
     <div class="success-icon">🎉</div>
-    <h1>Order Placed!</h1>
+    <h1>Payment Successful</h1>
     <p class="subtitle">
       Thank you, <strong>${escapeHtml(order.senderName)}</strong>!
       Your order has been received. We'll confirm your delivery via WhatsApp or phone shortly.
@@ -41,13 +54,32 @@ function renderSuccess(order) {
     <div class="success-order-card">
       <div class="success-order-card__header">Order Details</div>
       <div class="success-order-card__body">
-        ${row('Product',         order.productName)}
-        ${row('Amount Paid',     formatPrice(order.productPrice))}
-        ${row('Payment ID',      order.paymentId || '—')}
-        ${row('Deliver To',      order.recipientName)}
-        ${row('Delivery Address',order.deliveryAddress + ', ' + order.deliveryCity + ' — ' + order.deliveryPincode)}
-        ${row('Delivery Date',   formatDate(order.deliveryDate))}
+        ${row('Product',           order.productName)}
+        ${row('Subtotal',           formatPrice(order.productPrice))}
+        ${row(deliveryLabel,        deliveryValue)}
+        ${row('Total Paid',         formatPrice(totalAmount))}
+        ${row('Payment ID',         order.paymentId || '—')}
+        ${row('Ordered At',         formatDate(order.orderedAt))}
+      </div>
+    </div>
+
+    <div class="success-order-card">
+      <div class="success-order-card__header">Your Details</div>
+      <div class="success-order-card__body">
+        ${row('Name',               order.senderName)}
+        ${row('Phone',               order.senderPhone)}
+        ${row('Email',              order.senderEmail)}
+      </div>
+    </div>
+
+    <div class="success-order-card">
+      <div class="success-order-card__header">Delivery Details</div>
+      <div class="success-order-card__body">
+        ${row('Deliver To',          order.recipientName)}
+        ${row('Address',            order.deliveryAddress + ', ' + order.deliveryCity + ' — ' + order.deliveryPincode)}
+        ${row('Delivery Date',       formatDate(order.deliveryDate))}
         ${order.giftMessage ? row('Gift Message', order.giftMessage) : ''}
+        ${order.specialNote ? row('Special Instructions', order.specialNote) : ''}
       </div>
     </div>
 
@@ -180,4 +212,47 @@ SPECIAL INSTRUCTIONS
 Ordered at: ${formatDate(order.orderedAt)}
 ${'='.repeat(50)}
 `.trim();
+}
+
+/* ─── CUSTOMER CONFIRMATION EMAIL via EmailJS ─── */
+
+function sendCustomerEmail(order) {
+  const publicKey = CONFIG.EMAILJS_PUBLIC_KEY;
+  const serviceId = CONFIG.EMAILJS_SERVICE_ID;
+  const templateId = CONFIG.EMAILJS_TEMPLATE_CONFIRMED;
+
+  if (!publicKey || publicKey === 'YOUR_EMAILJS_PUBLIC_KEY' ||
+      !serviceId || serviceId === 'YOUR_EMAILJS_SERVICE_ID' ||
+      !templateId || templateId === 'YOUR_TEMPLATE_ID') {
+    console.warn('EmailJS not configured. Skipping customer confirmation email.');
+    return;
+  }
+
+  if (typeof emailjs === 'undefined') {
+    console.warn('EmailJS SDK not loaded. Skipping customer confirmation email.');
+    return;
+  }
+
+  const deliveryAddress = [order.deliveryAddress, order.deliveryCity, order.deliveryPincode].filter(Boolean).join(', ');
+
+  const templateParams = {
+    to_email:        order.senderEmail,
+    to_name:         order.senderName,
+    product_name:   order.productName,
+    amount:          formatPrice(getTotalAmount(order)),
+    payment_id:     order.paymentId || '—',
+    recipient_name: order.recipientName,
+    delivery_address: deliveryAddress,
+    delivery_date:   formatDate(order.deliveryDate),
+    gift_message:   order.giftMessage || '—',
+  };
+
+  try {
+    emailjs.init(publicKey);
+    emailjs.send(serviceId, templateId, templateParams).catch((err) => {
+      console.error('Failed to send customer confirmation email:', err);
+    });
+  } catch (err) {
+    console.error('Failed to send customer confirmation email:', err);
+  }
 }
