@@ -158,7 +158,7 @@ function renderInfo(product) {
 
     <div class="product-cta">
       <p class="product-cta__note">
-        🚚 Delivered same day or as per your selected date
+        🚚 Delivery in 48+ hours, or choose Urgent delivery at checkout.
       </p>
       <div class="product-cta__buttons">
         ${buyBtn}
@@ -208,7 +208,7 @@ function updatePageMeta(product) {
   if (metaDesc) {
     metaDesc.setAttribute('content', product.description
       ? product.description.slice(0, 155)
-      : `Buy ${product.name} online in Kerala. ${formatPrice(product.price)}. Same-day delivery.`
+      : `Buy ${product.name} online in Kerala. ${formatPrice(product.price)}. Delivery in 48 hours. Urgent delivery available.`
     );
   }
 }

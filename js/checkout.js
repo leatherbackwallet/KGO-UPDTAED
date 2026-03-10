@@ -85,7 +85,9 @@ const VALIDATORS = {
     const d = new Date(v + 'T00:00:00');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (d.getTime() <= today.getTime()) return 'Delivery is only available from the next day onwards (not same day)';
+    const minDate = new Date(today);
+    minDate.setDate(minDate.getDate() + 2);
+    if (d.getTime() < minDate.getTime()) return 'Standard delivery requires at least 48 hours. Choose a date at least 2 days from today, or use Urgent delivery.';
     return true;
   },
 };
@@ -131,9 +133,9 @@ function attachFormListeners(product) {
     if (urgent) {
       dateInput.setAttribute('min', today.toISOString().split('T')[0]);
     } else {
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      dateInput.setAttribute('min', tomorrow.toISOString().split('T')[0]);
+      const minDate = new Date(today);
+      minDate.setDate(minDate.getDate() + 2);
+      dateInput.setAttribute('min', minDate.toISOString().split('T')[0]);
     }
   }
 

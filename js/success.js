@@ -92,48 +92,61 @@ function renderNoOrder() {
 /* ─── MERCHANT EMAIL NOTIFICATION via Web3Forms ─── */
 
 async function sendMerchantEmail(order) {
-  if (!CONFIG.WEB3FORMS_KEY || CONFIG.WEB3FORMS_KEY === 'YOUR_WEB3FORMS_ACCESS_KEY') {
-    console.warn('Web3Forms key not configured. Skipping merchant email.');
+  const keys = CONFIG.MERCHANT_ACCESS_KEYS || [];
+  if (keys.length === 0 && (!CONFIG.WEB3FORMS_KEY || CONFIG.WEB3FORMS_KEY === 'YOUR_WEB3FORMS_ACCESS_KEY')) {
+    console.warn('Web3Forms key(s) not configured. Skipping merchant email.');
     return;
   }
 
   const emailBody = buildEmailBody(order);
+  const payload = buildMerchantEmailPayload(order, emailBody);
+
+  // Use MERCHANT_ACCESS_KEYS if set (one key per To recipient); otherwise fallback to single WEB3FORMS_KEY
+  const accessKeys = keys.filter(Boolean).length
+    ? keys.filter(Boolean)
+    : [CONFIG.WEB3FORMS_KEY];
 
   try {
-    const res = await fetch('https://api.web3forms.com/submit', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        access_key:  CONFIG.WEB3FORMS_KEY,
-        subject:     `New Order: ${order.productName} — ₹${order.productPrice.toLocaleString('en-IN')}`,
-        from_name:   CONFIG.SITE_NAME,
-        to:          CONFIG.MERCHANT_EMAIL,
-        message:     emailBody,
-        // Structured fields — appear as a table in the email
-        'Product':          order.productName,
-        'Price':            `₹${order.productPrice.toLocaleString('en-IN')}`,
-        'Payment ID':       order.paymentId || 'Pending',
-        'Sender Name':      order.senderName,
-        'Sender Phone':     order.senderPhone,
-        'Sender Email':     order.senderEmail,
-        'Recipient Name':   order.recipientName,
-        'Delivery Address': order.deliveryAddress,
-        'City':             order.deliveryCity,
-        'Pincode':          order.deliveryPincode,
-        'Delivery Date':    formatDate(order.deliveryDate),
-        'Gift Message':     order.giftMessage || '—',
-        'Special Note':     order.specialNote || '—',
-        'Ordered At':       formatDate(order.orderedAt),
-      }),
-    });
+    const requests = accessKeys.map((key) =>
+      fetch('https://api.web3forms.com/submit', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, access_key: key }),
+      })
+    );
 
-    const data = await res.json();
-    if (!data.success) {
-      console.error('Web3Forms error:', data.message);
+    const results = await Promise.all(requests);
+    for (let i = 0; i < results.length; i++) {
+      const data = await results[i].json();
+      if (!data.success) {
+        console.error('Web3Forms error:', data.message, `(recipient ${i + 1})`);
+      }
     }
   } catch (err) {
     console.error('Failed to send merchant email:', err);
   }
+}
+
+function buildMerchantEmailPayload(order, emailBody) {
+  return {
+    subject:     `New Order: ${order.productName} — ₹${order.productPrice.toLocaleString('en-IN')}`,
+    from_name:   CONFIG.SITE_NAME,
+    message:     emailBody,
+    'Product':          order.productName,
+    'Price':            `₹${order.productPrice.toLocaleString('en-IN')}`,
+    'Payment ID':       order.paymentId || 'Pending',
+    'Sender Name':      order.senderName,
+    'Sender Phone':     order.senderPhone,
+    'Sender Email':     order.senderEmail,
+    'Recipient Name':   order.recipientName,
+    'Delivery Address': order.deliveryAddress,
+    'City':             order.deliveryCity,
+    'Pincode':          order.deliveryPincode,
+    'Delivery Date':    formatDate(order.deliveryDate),
+    'Gift Message':     order.giftMessage || '—',
+    'Special Note':     order.specialNote || '—',
+    'Ordered At':       formatDate(order.orderedAt),
+  };
 }
 
 function buildEmailBody(order) {

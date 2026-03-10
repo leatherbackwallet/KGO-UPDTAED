@@ -7,6 +7,12 @@ const CONFIG = Object.freeze({
   WHATSAPP_NUMBER:  '918075030919',  // without +, for wa.me links
   MERCHANT_EMAIL:   'sales@keralagiftsonline.com',
 
+  // All recipients get the order email as "To" (no CC). Create one Web3Forms access key per email at web3forms.com and list in same order as MERCHANT_EMAILS.
+  MERCHANT_EMAILS:  ['sales@keralagiftsonline.com', 'robin.joseph742@gmail.com', 'sreekuttan59@gmail.com'],
+  MERCHANT_ACCESS_KEYS: [
+    'd58444e8-db52-446c-adab-7da5185a2015', // sales@keralagiftsonline.com — add keys for robin & sreekuttan when ready
+  ],
+
   // Web3Forms — get free key at https://web3forms.com (enter sales@keralagiftsonline.com)
   WEB3FORMS_KEY:    'd58444e8-db52-446c-adab-7da5185a2015',
 
