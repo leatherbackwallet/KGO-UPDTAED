@@ -102,30 +102,32 @@ function buildCancelEmailBody(order) {
 PAYMENT ${(order.status || 'cancelled').toUpperCase()} — ${CONFIG.SITE_NAME}
 ${'='.repeat(50)}
 
-PRODUCT
-  Name:        ${order.productName}
-  Description: ${order.productDescription || '(none)'}
-  Amount:      ₹${totalAmount.toLocaleString('en-IN')}
-Status:      ${order.status || 'cancelled'}
-Reason:      ${order.errorReason || 'Not completed'}
+ORDER DETAILS
+  Product:        ${order.productName}
+  Description:    ${order.productDescription || '(none)'}
+  Product Slug:   ${order.productSlug || '—'}
+  Amount:         ₹${totalAmount.toLocaleString('en-IN')}
+  Status:         ${order.status || 'cancelled'}
+  Reason:         ${order.errorReason || 'Not completed'}
 
-SENDER (Customer)
-  Name:   ${order.senderName}
-  Phone:  ${order.senderPhone}
-  Email:  ${order.senderEmail}
+CUSTOMER (Order placed by — all details from form)
+  Customer Name:   ${order.senderName}
+  Customer Phone:  ${order.senderPhone}
+  Customer Email:  ${order.senderEmail}
 
-DELIVERY DETAILS
-  Recipient:        ${order.recipientName}
+DELIVERY DETAILS (Recipient & address from form)
+  Recipient Name:   ${order.recipientName}
   Recipient Phone:  ${order.recipientPhone || '—'}
   Address:          ${order.deliveryAddress}, ${order.deliveryCity} — ${order.deliveryPincode}
-  Requested Date:   ${typeof formatDate === 'function' ? formatDate(order.deliveryDate) : order.deliveryDate}
+  Preferred Date:   ${typeof formatDate === 'function' ? formatDate(order.deliveryDate) : order.deliveryDate}
   Urgent Delivery:  ${order.urgentDelivery ? 'Yes' : 'No'}
 
-GIFT MESSAGE
+GIFT MESSAGE (from form)
   ${order.giftMessage || '(none)'}
 
-SPECIAL INSTRUCTIONS
+SPECIAL INSTRUCTIONS (from form)
   ${order.specialNote || '(none)'}
+
 ${'='.repeat(50)}
 `.trim();
 }
