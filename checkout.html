@@ -88,6 +88,13 @@
               <span class="form-error" id="recipientName-error" style="display:none"></span>
             </div>
             <div class="form-group" style="margin-bottom:var(--space-4)">
+              <label class="form-label" for="recipientPhone">Recipient Phone Number <span class="required">*</span></label>
+              <input class="form-input" type="tel" id="recipientPhone" name="recipientPhone"
+                     placeholder="10-digit mobile number" maxlength="10" inputmode="numeric">
+              <span class="form-hint">For delivery coordination</span>
+              <span class="form-error" id="recipientPhone-error" style="display:none"></span>
+            </div>
+            <div class="form-group" style="margin-bottom:var(--space-4)">
               <label class="form-label" for="deliveryAddress">Delivery Address <span class="required">*</span></label>
               <textarea class="form-textarea" id="deliveryAddress" name="deliveryAddress"
                         placeholder="House / flat number, street, landmark…" rows="3"
@@ -117,11 +124,19 @@
             <div class="form-group" style="margin-top:var(--space-3)">
               <label class="checkbox-label" style="display:flex;align-items:center;gap:var(--space-2);cursor:pointer;">
                 <input type="checkbox" id="urgentDelivery" name="urgentDelivery" value="1" style="width:auto;">
-                <span>Urgent delivery <strong>+₹500</strong></span>
+                <span>Urgent delivery</span>
               </label>
-              <p id="urgent-whatsapp-notice" class="form-hint" style="display:none;margin-top:var(--space-2);padding:var(--space-3);background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.2);border-radius:var(--radius-md);">
-                For urgent delivery, please <a href="https://wa.me/918075030919" target="_blank" rel="noopener" style="color:var(--color-primary);font-weight:600;">contact us on WhatsApp</a> to confirm if we can deliver on your chosen date.
-              </p>
+              <div id="urgent-whatsapp-notice" class="urgent-whatsapp-notice" style="display:none;margin-top:var(--space-3);padding:var(--space-4);background:linear-gradient(135deg, rgba(37,211,102,.08) 0%, rgba(37,211,102,.04) 100%);border:1px solid rgba(37,211,102,.25);border-radius:var(--radius-md);">
+                <p class="urgent-whatsapp-notice__intro" style="margin:0 0 var(--space-3);font-weight:600;color:var(--color-text);">
+                  Need it sooner? Contact us on WhatsApp — we’ll send your order details to our team.
+                </p>
+                <p class="urgent-whatsapp-notice__hint" style="margin:0 0 var(--space-3);font-size:0.9rem;color:var(--color-text-muted);">
+                  Fill the form above, then tap the button below. A message with “I’m interested in this product but I need immediate delivery” and your full order details will open in WhatsApp.
+                </p>
+                <a href="#" id="urgent-whatsapp-btn" class="btn btn-whatsapp" style="display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);background:#25D366;color:#fff;border-radius:var(--radius-md);font-weight:600;text-decoration:none;border:none;cursor:pointer;">
+                  <span aria-hidden="true">💬</span> Contact on WhatsApp for urgent delivery
+                </a>
+              </div>
             </div>
           </div>
 

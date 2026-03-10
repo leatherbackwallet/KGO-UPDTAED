@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 /* ─── ORDER SUMMARY SIDEBAR ─── */
 
-const URGENT_DELIVERY_CHARGE = 500;
+/** Urgent delivery is free; no extra charge. Kept for backward compatibility with saved orders. */
+const URGENT_DELIVERY_CHARGE = 0;
 
 function renderOrderSummary(product, urgentDelivery = false) {
   const el = document.getElementById('order-summary');
@@ -30,9 +31,7 @@ function renderOrderSummary(product, urgentDelivery = false) {
   const deliveryCost = urgentDelivery ? URGENT_DELIVERY_CHARGE : 0;
   const total = product.price + deliveryCost;
   const deliveryLabel = urgentDelivery ? 'Urgent delivery' : 'Delivery';
-  const deliveryValue = urgentDelivery
-    ? `₹${URGENT_DELIVERY_CHARGE.toLocaleString('en-IN')}`
-    : '<span style="color:var(--color-success);font-weight:600">Free</span>';
+  const deliveryValue = '<span style="color:var(--color-success);font-weight:600">Free</span>';
 
   el.innerHTML = `
     <div class="order-summary-card__product">
@@ -75,6 +74,7 @@ const VALIDATORS = {
   senderPhone:      v => /^[6-9]\d{9}$/.test(v.trim()) || 'Enter a valid 10-digit Indian mobile number',
   senderEmail:      v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) || 'Enter a valid email address',
   recipientName:    v => v.trim().length >= 2  || 'Enter the recipient\'s name',
+  recipientPhone:  v => /^[6-9]\d{9}$/.test(v.trim()) || 'Enter a valid 10-digit recipient mobile number',
   deliveryAddress:  v => v.trim().length >= 10 || 'Enter a complete delivery address',
   deliveryCity:     v => v.trim().length >= 2  || 'Enter the city',
   deliveryPincode:  v => /^\d{6}$/.test(v.trim()) || 'Enter a valid 6-digit pincode',
@@ -155,6 +155,14 @@ function attachFormListeners(product) {
     });
   }
 
+  const urgentWhatsAppBtn = document.getElementById('urgent-whatsapp-btn');
+  if (urgentWhatsAppBtn) {
+    urgentWhatsAppBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openUrgentDeliveryWhatsApp(product);
+    });
+  }
+
   const form = document.getElementById('checkout-form');
   if (form) {
     form.addEventListener('submit', (e) => {
@@ -194,18 +202,19 @@ function handleSubmit(product) {
 /* ─── COLLECT FORM VALUES ─── */
 
 function collectFormValues(product) {
-  const urgentDelivery = document.getElementById('urgentDelivery')?.checked ?? false;
   const deliveryCharge = urgentDelivery ? URGENT_DELIVERY_CHARGE : 0;
   return {
     productName:     product.name,
     productSlug:     product.slug,
     productPrice:    product.price,
+    productDescription: (product.description || '').trim(),
     urgentDelivery,
     deliveryCharge,
     senderName:      document.getElementById('senderName').value.trim(),
     senderPhone:     document.getElementById('senderPhone').value.trim(),
     senderEmail:     document.getElementById('senderEmail').value.trim(),
     recipientName:   document.getElementById('recipientName').value.trim(),
+    recipientPhone:  document.getElementById('recipientPhone').value.trim(),
     deliveryAddress: document.getElementById('deliveryAddress').value.trim(),
     deliveryCity:    document.getElementById('deliveryCity').value.trim(),
     deliveryPincode: document.getElementById('deliveryPincode').value.trim(),
@@ -246,6 +255,7 @@ function openRazorpay(product, order) {
     // Notes are stored on the Razorpay transaction and visible in the dashboard
     notes: {
       recipient:       order.recipientName,
+      recipient_phone: order.recipientPhone || '',
       address:         `${order.deliveryAddress}, ${order.deliveryCity} - ${order.deliveryPincode}`,
       delivery_date:   order.deliveryDate,
       urgent_delivery: order.urgentDelivery ? 'yes' : 'no',
@@ -292,4 +302,66 @@ function openRazorpay(product, order) {
 function redirectToProducts(msg) {
   showToast(msg, 'error');
   setTimeout(() => { window.location.href = './products.html'; }, 1500);
+}
+
+/* ─── URGENT DELIVERY — WHATSAPP MESSAGE TO ADMIN ─── */
+
+/**
+ * Builds a presentable WhatsApp message for urgent delivery: user intro + order details.
+ * Uses current form values so admin receives full context when customer clicks the CTA.
+ */
+function buildUrgentWhatsAppMessage(product) {
+  const g = (id) => (document.getElementById(id) && document.getElementById(id).value) ? document.getElementById(id).value.trim() : '';
+  const senderName = g('senderName');
+  const senderPhone = g('senderPhone');
+  const senderEmail = g('senderEmail');
+  const recipientName = g('recipientName');
+  const recipientPhone = g('recipientPhone');
+  const deliveryAddress = g('deliveryAddress');
+  const deliveryCity = g('deliveryCity');
+  const deliveryPincode = g('deliveryPincode');
+  const deliveryDate = g('deliveryDate');
+  const giftMessage = g('giftMessage');
+  const specialNote = g('specialNote');
+
+  const formatDate = (d) => {
+    if (!d) return '—';
+    const [y, m, day] = d.split('-');
+    return `${day}/${m}/${y}`;
+  };
+
+  const lines = [
+    'Hi, I am interested in this product but I need immediate delivery.',
+    '',
+    '——— ORDER DETAILS ———',
+    `Product: ${product.name}`,
+    `Price: ₹${product.price.toLocaleString('en-IN')}`,
+    '',
+    '——— MY DETAILS ———',
+    `Name: ${senderName || '—'}`,
+    `Phone: ${senderPhone || '—'}`,
+    `Email: ${senderEmail || '—'}`,
+    '',
+    '——— DELIVERY ———',
+    `Recipient: ${recipientName || '—'}`,
+    `Recipient Phone: ${recipientPhone || '—'}`,
+    `Address: ${deliveryAddress || '—'}`,
+    `City: ${deliveryCity || '—'}`,
+    `Pincode: ${deliveryPincode || '—'}`,
+    `Preferred Date: ${formatDate(deliveryDate)}`,
+  ];
+
+  if (giftMessage) lines.push('', 'Gift Message: ' + giftMessage);
+  if (specialNote) lines.push('', 'Special Instructions: ' + specialNote);
+
+  return lines.join('\n');
+}
+
+/**
+ * Opens WhatsApp to admin (CONFIG.WHATSAPP_NUMBER) with pre-filled urgent delivery message.
+ */
+function openUrgentDeliveryWhatsApp(product) {
+  const message = buildUrgentWhatsAppMessage(product);
+  const url = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank', 'noopener,noreferrer');
 }

@@ -40,7 +40,7 @@ function renderSuccess(order) {
   const deliveryCharge = order.urgentDelivery ? (order.deliveryCharge || 0) : 0;
   const deliveryLabel = order.urgentDelivery ? 'Urgent delivery' : 'Delivery';
   const deliveryValue = order.urgentDelivery
-    ? formatPrice(order.deliveryCharge || 0)
+    ? ((order.deliveryCharge && order.deliveryCharge > 0) ? formatPrice(order.deliveryCharge) : 'Free')
     : 'Free';
 
   container.innerHTML = `
@@ -76,6 +76,7 @@ function renderSuccess(order) {
       <div class="success-order-card__header">Delivery Details</div>
       <div class="success-order-card__body">
         ${row('Deliver To',          order.recipientName)}
+        ${order.recipientPhone ? row('Recipient Phone', order.recipientPhone) : ''}
         ${row('Address',            order.deliveryAddress + ', ' + order.deliveryCity + ' — ' + order.deliveryPincode)}
         ${row('Delivery Date',       formatDate(order.deliveryDate))}
         ${order.giftMessage ? row('Gift Message', order.giftMessage) : ''}
@@ -160,48 +161,63 @@ async function sendMerchantEmail(order) {
 }
 
 function buildMerchantEmailPayload(order, emailBody) {
+  const totalAmount = getTotalAmount(order);
   return {
-    subject:     `New Order: ${order.productName} — ₹${order.productPrice.toLocaleString('en-IN')}`,
+    subject:     `New Order: ${order.productName} — ₹${totalAmount.toLocaleString('en-IN')}`,
     from_name:   CONFIG.SITE_NAME,
     message:     emailBody,
-    'Product':          order.productName,
-    'Price':            `₹${order.productPrice.toLocaleString('en-IN')}`,
-    'Payment ID':       order.paymentId || 'Pending',
-    'Sender Name':      order.senderName,
-    'Sender Phone':     order.senderPhone,
-    'Sender Email':     order.senderEmail,
-    'Recipient Name':   order.recipientName,
-    'Delivery Address': order.deliveryAddress,
-    'City':             order.deliveryCity,
-    'Pincode':          order.deliveryPincode,
-    'Delivery Date':    formatDate(order.deliveryDate),
-    'Gift Message':     order.giftMessage || '—',
-    'Special Note':     order.specialNote || '—',
-    'Ordered At':       formatDate(order.orderedAt),
+    'Product':            order.productName,
+    'Product Description': order.productDescription || '—',
+    'Subtotal':           `₹${(order.productPrice || 0).toLocaleString('en-IN')}`,
+    'Delivery Charge':    order.urgentDelivery ? `₹${(order.deliveryCharge || 0).toLocaleString('en-IN')}` : 'Free',
+    'Total':              `₹${totalAmount.toLocaleString('en-IN')}`,
+    'Razorpay Payment ID': order.paymentId || '—',
+    'Order ID':           order.paymentId || '—',
+    'Sender Name':        order.senderName,
+    'Sender Phone':       order.senderPhone,
+    'Sender Email':       order.senderEmail,
+    'Recipient Name':     order.recipientName,
+    'Recipient Phone':    order.recipientPhone || '—',
+    'Delivery Address':   order.deliveryAddress,
+    'City':               order.deliveryCity,
+    'Pincode':            order.deliveryPincode,
+    'Delivery Date':      formatDate(order.deliveryDate),
+    'Urgent Delivery':    order.urgentDelivery ? 'Yes' : 'No',
+    'Gift Message':       order.giftMessage || '—',
+    'Special Note':       order.specialNote || '—',
+    'Ordered At':         formatDate(order.orderedAt),
   };
 }
 
 function buildEmailBody(order) {
+  const totalAmount = getTotalAmount(order);
   return `
 NEW ORDER RECEIVED — ${CONFIG.SITE_NAME}
 ${'='.repeat(50)}
 
 PRODUCT
-  Name:       ${order.productName}
-  Price:      ₹${order.productPrice.toLocaleString('en-IN')}
-  Payment ID: ${order.paymentId || 'Pending confirmation'}
+  Name:        ${order.productName}
+  Description: ${order.productDescription || '(none)'}
+  Subtotal:    ₹${(order.productPrice || 0).toLocaleString('en-IN')}
+  Delivery:    ${order.urgentDelivery ? `₹${(order.deliveryCharge || 0).toLocaleString('en-IN')} (Urgent)` : 'Free'}
+  Total:       ₹${totalAmount.toLocaleString('en-IN')}
+
+RAZORPAY / ORDER ID
+  Payment ID:  ${order.paymentId || 'Pending confirmation'}
 
 SENDER (Customer)
-  Name:  ${order.senderName}
-  Phone: ${order.senderPhone}
-  Email: ${order.senderEmail}
+  Name:   ${order.senderName}
+  Phone:  ${order.senderPhone}
+  Email:  ${order.senderEmail}
 
 DELIVERY DETAILS
-  Recipient:       ${order.recipientName}
-  Address:         ${order.deliveryAddress}
-  City:            ${order.deliveryCity}
-  Pincode:         ${order.deliveryPincode}
-  Requested Date:  ${formatDate(order.deliveryDate)}
+  Recipient:        ${order.recipientName}
+  Recipient Phone:  ${order.recipientPhone || '—'}
+  Address:          ${order.deliveryAddress}
+  City:             ${order.deliveryCity}
+  Pincode:          ${order.deliveryPincode}
+  Requested Date:   ${formatDate(order.deliveryDate)}
+  Urgent Delivery:  ${order.urgentDelivery ? 'Yes' : 'No'}
 
 GIFT MESSAGE
   ${order.giftMessage || '(none)'}
@@ -214,7 +230,9 @@ ${'='.repeat(50)}
 `.trim();
 }
 
-/* ─── CUSTOMER CONFIRMATION EMAIL via EmailJS ─── */
+/* ─── CUSTOMER CONFIRMATION EMAIL via EmailJS ───
+ * Customer-friendly only: smiley, welcoming text. No Razorpay or internal details.
+ */
 
 function sendCustomerEmail(order) {
   const publicKey = CONFIG.EMAILJS_PUBLIC_KEY;
@@ -233,18 +251,14 @@ function sendCustomerEmail(order) {
     return;
   }
 
-  const deliveryAddress = [order.deliveryAddress, order.deliveryCity, order.deliveryPincode].filter(Boolean).join(', ');
-
   const templateParams = {
     to_email:        order.senderEmail,
     to_name:         order.senderName,
+    greeting:        'Wonderful! We have received your order 😊',
+    body_text:       'Thank you for your purchase. Your gift will be delivered to the recipient as per your chosen date. We will confirm delivery via WhatsApp or phone.',
     product_name:   order.productName,
-    amount:          formatPrice(getTotalAmount(order)),
-    payment_id:     order.paymentId || '—',
     recipient_name: order.recipientName,
-    delivery_address: deliveryAddress,
-    delivery_date:   formatDate(order.deliveryDate),
-    gift_message:   order.giftMessage || '—',
+    delivery_date:  formatDate(order.deliveryDate),
   };
 
   try {

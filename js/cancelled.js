@@ -45,11 +45,11 @@ function renderCancelled(order) {
   const isFailed = order.status === 'failed';
 
   container.innerHTML = `
-    <div class="success-icon" style="background:var(--color-error, #c0392b);color:#fff;">✕</div>
+    <div class="success-icon" style="background:var(--color-error, #c0392b);color:#fff;">😔</div>
     <h1>${isFailed ? 'Payment Failed' : 'Payment Cancelled'}</h1>
     <p class="subtitle">
-      ${escapeHtml(order.senderName || 'Customer')}, your payment was not completed.
-      ${order.errorReason ? `<br><strong>Reason:</strong> ${escapeHtml(order.errorReason)}` : ''}
+      ${escapeHtml(order.senderName || 'Customer')}, we could not complete your payment.
+      <br>No amount has been charged. You can try again or contact us if you need help.
     </p>
 
     <div class="success-order-card">
@@ -97,23 +97,35 @@ function renderNoOrder() {
 /* ─── MERCHANT CANCELLATION EMAIL via Web3Forms ─── */
 
 function buildCancelEmailBody(order) {
+  const totalAmount = getTotalAmount(order);
   return `
 PAYMENT ${(order.status || 'cancelled').toUpperCase()} — ${CONFIG.SITE_NAME}
 ${'='.repeat(50)}
 
-Product:     ${order.productName}
-Amount:      ₹${(order.productPrice || 0).toLocaleString('en-IN')}
+PRODUCT
+  Name:        ${order.productName}
+  Description: ${order.productDescription || '(none)'}
+  Amount:      ₹${totalAmount.toLocaleString('en-IN')}
 Status:      ${order.status || 'cancelled'}
 Reason:      ${order.errorReason || 'Not completed'}
 
 SENDER (Customer)
-  Name:  ${order.senderName}
-  Phone: ${order.senderPhone}
-  Email: ${order.senderEmail}
+  Name:   ${order.senderName}
+  Phone:  ${order.senderPhone}
+  Email:  ${order.senderEmail}
 
-Recipient:   ${order.recipientName}
-Address:     ${order.deliveryAddress}, ${order.deliveryCity} — ${order.deliveryPincode}
-Requested:   ${typeof formatDate === 'function' ? formatDate(order.deliveryDate) : order.deliveryDate}
+DELIVERY DETAILS
+  Recipient:        ${order.recipientName}
+  Recipient Phone:  ${order.recipientPhone || '—'}
+  Address:          ${order.deliveryAddress}, ${order.deliveryCity} — ${order.deliveryPincode}
+  Requested Date:   ${typeof formatDate === 'function' ? formatDate(order.deliveryDate) : order.deliveryDate}
+  Urgent Delivery:  ${order.urgentDelivery ? 'Yes' : 'No'}
+
+GIFT MESSAGE
+  ${order.giftMessage || '(none)'}
+
+SPECIAL INSTRUCTIONS
+  ${order.specialNote || '(none)'}
 ${'='.repeat(50)}
 `.trim();
 }
@@ -125,7 +137,8 @@ async function sendMerchantCancelEmail(order) {
   }
 
   const emailBody = buildCancelEmailBody(order);
-  const subject = `Payment ${(order.status || 'cancelled').toUpperCase()}: ${order.productName} — ₹${(order.productPrice || 0).toLocaleString('en-IN')}`;
+  const totalAmount = getTotalAmount(order);
+  const subject = `Payment ${(order.status || 'cancelled').toUpperCase()}: ${order.productName} — ₹${totalAmount.toLocaleString('en-IN')}`;
   const payload = {
     subject,
     from_name: CONFIG.SITE_NAME,
@@ -148,7 +161,9 @@ async function sendMerchantCancelEmail(order) {
   }
 }
 
-/* ─── CUSTOMER CANCELLATION EMAIL via EmailJS ─── */
+/* ─── CUSTOMER CANCELLATION EMAIL via EmailJS ───
+ * Customer-friendly only: sad smiley, reassuring text. No Razorpay or internal error details.
+ */
 
 function sendCustomerCancelEmail(order) {
   const publicKey = CONFIG.EMAILJS_PUBLIC_KEY;
@@ -166,12 +181,12 @@ function sendCustomerCancelEmail(order) {
   const retryLink = getRetryLink(order);
 
   const templateParams = {
-    to_email:     order.senderEmail,
-    to_name:      order.senderName,
-    product_name: order.productName,
-    amount:       formatPrice(getTotalAmount(order)),
-    error_reason: order.errorReason || 'Payment was not completed',
-    retry_link:   retryLink,
+    to_email:        order.senderEmail,
+    to_name:         order.senderName,
+    greeting:         'Oh, there was a problem with your purchase 😔',
+    body_text:        'We could not complete your payment. No amount has been charged. You can try again whenever you are ready, or contact us if you need help.',
+    product_name:    order.productName,
+    retry_link:      retryLink,
   };
 
   try {
