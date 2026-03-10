@@ -166,26 +166,34 @@ function buildMerchantEmailPayload(order, emailBody) {
     subject:     `New Order: ${order.productName} — ₹${totalAmount.toLocaleString('en-IN')}`,
     from_name:   CONFIG.SITE_NAME,
     message:     emailBody,
-    'Product':            order.productName,
+    // Order details
+    'Product':             order.productName,
     'Product Description': order.productDescription || '—',
-    'Subtotal':           `₹${(order.productPrice || 0).toLocaleString('en-IN')}`,
-    'Delivery Charge':    order.urgentDelivery ? `₹${(order.deliveryCharge || 0).toLocaleString('en-IN')}` : 'Free',
-    'Total':              `₹${totalAmount.toLocaleString('en-IN')}`,
+    'Product Slug':       order.productSlug || '—',
+    'Subtotal':            `₹${(order.productPrice || 0).toLocaleString('en-IN')}`,
+    'Delivery Charge':     order.urgentDelivery ? `₹${(order.deliveryCharge || 0).toLocaleString('en-IN')}` : 'Free',
+    'Total':               `₹${totalAmount.toLocaleString('en-IN')}`,
     'Razorpay Payment ID': order.paymentId || '—',
-    'Order ID':           order.paymentId || '—',
-    'Sender Name':        order.senderName,
-    'Sender Phone':       order.senderPhone,
+    'Order ID':            order.paymentId || '—',
+    'Ordered At':          formatDate(order.orderedAt),
+    // Customer (everything from "Your Details")
+    'Customer Name':       order.senderName,
+    'Customer Phone':      order.senderPhone,
+    'Customer Email':      order.senderEmail,
+    'Sender Name':         order.senderName,
+    'Sender Phone':        order.senderPhone,
     'Sender Email':       order.senderEmail,
-    'Recipient Name':     order.recipientName,
-    'Recipient Phone':    order.recipientPhone || '—',
-    'Delivery Address':   order.deliveryAddress,
-    'City':               order.deliveryCity,
-    'Pincode':            order.deliveryPincode,
-    'Delivery Date':      formatDate(order.deliveryDate),
-    'Urgent Delivery':    order.urgentDelivery ? 'Yes' : 'No',
-    'Gift Message':       order.giftMessage || '—',
+    // Delivery (everything from "Delivery Details")
+    'Recipient Name':      order.recipientName,
+    'Recipient Phone':     order.recipientPhone || '—',
+    'Delivery Address':    order.deliveryAddress,
+    'City':                order.deliveryCity,
+    'Pincode':             order.deliveryPincode,
+    'Delivery Date':       formatDate(order.deliveryDate),
+    'Urgent Delivery':     order.urgentDelivery ? 'Yes' : 'No',
+    // Gift message section
+    'Gift Message':        order.giftMessage || '—',
     'Special Note':       order.specialNote || '—',
-    'Ordered At':         formatDate(order.orderedAt),
   };
 }
 
@@ -195,37 +203,36 @@ function buildEmailBody(order) {
 NEW ORDER RECEIVED — ${CONFIG.SITE_NAME}
 ${'='.repeat(50)}
 
-PRODUCT
-  Name:        ${order.productName}
-  Description: ${order.productDescription || '(none)'}
-  Subtotal:    ₹${(order.productPrice || 0).toLocaleString('en-IN')}
-  Delivery:    ${order.urgentDelivery ? `₹${(order.deliveryCharge || 0).toLocaleString('en-IN')} (Urgent)` : 'Free'}
-  Total:       ₹${totalAmount.toLocaleString('en-IN')}
+ORDER DETAILS
+  Product:        ${order.productName}
+  Description:    ${order.productDescription || '(none)'}
+  Product Slug:   ${order.productSlug || '—'}
+  Subtotal:       ₹${(order.productPrice || 0).toLocaleString('en-IN')}
+  Delivery:       ${order.urgentDelivery ? `₹${(order.deliveryCharge || 0).toLocaleString('en-IN')} (Urgent)` : 'Free'}
+  Total:          ₹${totalAmount.toLocaleString('en-IN')}
+  Razorpay ID:    ${order.paymentId || 'Pending confirmation'}
+  Ordered At:     ${formatDate(order.orderedAt)}
 
-RAZORPAY / ORDER ID
-  Payment ID:  ${order.paymentId || 'Pending confirmation'}
+CUSTOMER (Order placed by — all details from form)
+  Customer Name:   ${order.senderName}
+  Customer Phone:  ${order.senderPhone}
+  Customer Email:  ${order.senderEmail}
 
-SENDER (Customer)
-  Name:   ${order.senderName}
-  Phone:  ${order.senderPhone}
-  Email:  ${order.senderEmail}
-
-DELIVERY DETAILS
-  Recipient:        ${order.recipientName}
+DELIVERY DETAILS (Recipient & address from form)
+  Recipient Name:   ${order.recipientName}
   Recipient Phone:  ${order.recipientPhone || '—'}
   Address:          ${order.deliveryAddress}
   City:             ${order.deliveryCity}
   Pincode:          ${order.deliveryPincode}
-  Requested Date:   ${formatDate(order.deliveryDate)}
+  Preferred Date:   ${formatDate(order.deliveryDate)}
   Urgent Delivery:  ${order.urgentDelivery ? 'Yes' : 'No'}
 
-GIFT MESSAGE
+GIFT MESSAGE (from form)
   ${order.giftMessage || '(none)'}
 
-SPECIAL INSTRUCTIONS
+SPECIAL INSTRUCTIONS (from form)
   ${order.specialNote || '(none)'}
 
-Ordered at: ${formatDate(order.orderedAt)}
 ${'='.repeat(50)}
 `.trim();
 }
