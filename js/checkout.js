@@ -91,8 +91,10 @@ const VALIDATORS = {
   senderEmail:      v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) || 'Enter a valid email address',
   recipientName:    v => v.trim().length >= 2  || 'Enter the recipient\'s name',
   recipientPhone:  v => /^[6-9]\d{9}$/.test(v.trim()) || 'Enter a valid 10-digit recipient mobile number',
-  deliveryAddress:  v => v.trim().length >= 10 || 'Enter a complete delivery address',
-  deliveryCity:     v => v.trim().length >= 2  || 'Enter the city',
+  deliveryHouseName:  v => v.trim().length >= 2  || 'Enter the house name / flat number',
+  deliveryStreetName: v => v.trim().length >= 2  || 'Enter the street name',
+  deliveryLandmark:   v => v.trim().length >= 2  || 'Enter a landmark to help locate the address',
+  deliveryCity:       v => v.trim().length >= 2  || 'Enter the city',
   deliveryPincode:  v => /^\d{6}$/.test(v.trim()) || 'Enter a valid 6-digit pincode',
   deliveryDate:     v => {
     if (!v) return 'Select a delivery date';
@@ -244,10 +246,13 @@ function collectFormValues(product) {
     senderName:      document.getElementById('senderName').value.trim(),
     senderPhone:     document.getElementById('senderPhone').value.trim(),
     senderEmail:     document.getElementById('senderEmail').value.trim(),
-    recipientName:   document.getElementById('recipientName').value.trim(),
-    recipientPhone:  document.getElementById('recipientPhone').value.trim(),
-    deliveryAddress: document.getElementById('deliveryAddress').value.trim(),
-    deliveryCity:    document.getElementById('deliveryCity').value.trim(),
+    recipientName:      document.getElementById('recipientName').value.trim(),
+    recipientPhone:     document.getElementById('recipientPhone').value.trim(),
+    recipientPhoneAlt:  (document.getElementById('recipientPhoneAlt')?.value || '').trim(),
+    deliveryHouseName:  document.getElementById('deliveryHouseName').value.trim(),
+    deliveryStreetName: document.getElementById('deliveryStreetName').value.trim(),
+    deliveryLandmark:   document.getElementById('deliveryLandmark').value.trim(),
+    deliveryCity:       document.getElementById('deliveryCity').value.trim(),
     deliveryPincode: document.getElementById('deliveryPincode').value.trim(),
     deliveryDate:    document.getElementById('deliveryDate').value,
     giftMessage:     (document.getElementById('giftMessage')?.value  || '').trim(),
@@ -287,7 +292,8 @@ function openRazorpay(product, order) {
     notes: {
       recipient:       order.recipientName,
       recipient_phone: order.recipientPhone || '',
-      address:         `${order.deliveryAddress}, ${order.deliveryCity} - ${order.deliveryPincode}`,
+      recipient_phone_alt: order.recipientPhoneAlt || '',
+      address:         `${(order.deliveryHouseName || '')}, ${(order.deliveryStreetName || '')}, ${(order.deliveryLandmark || '')}, ${order.deliveryCity} - ${order.deliveryPincode}`,
       delivery_date:   order.deliveryDate,
       urgent_delivery: order.urgentDelivery ? 'yes' : 'no',
       gift_message:    order.giftMessage || '',
@@ -348,7 +354,10 @@ function buildUrgentWhatsAppMessage(product) {
   const senderEmail = g('senderEmail');
   const recipientName = g('recipientName');
   const recipientPhone = g('recipientPhone');
-  const deliveryAddress = g('deliveryAddress');
+  const recipientPhoneAlt = g('recipientPhoneAlt');
+  const deliveryHouseName = g('deliveryHouseName');
+  const deliveryStreetName = g('deliveryStreetName');
+  const deliveryLandmark = g('deliveryLandmark');
   const deliveryCity = g('deliveryCity');
   const deliveryPincode = g('deliveryPincode');
   const deliveryDate = g('deliveryDate');
@@ -376,7 +385,10 @@ function buildUrgentWhatsAppMessage(product) {
     '——— DELIVERY ———',
     `Recipient: ${recipientName || '—'}`,
     `Recipient Phone: ${recipientPhone || '—'}`,
-    `Address: ${deliveryAddress || '—'}`,
+    `Alt. Phone: ${recipientPhoneAlt || '—'}`,
+    `House Name: ${deliveryHouseName || '—'}`,
+    `Street Name: ${deliveryStreetName || '—'}`,
+    `Landmark: ${deliveryLandmark || '—'}`,
     `City: ${deliveryCity || '—'}`,
     `Pincode: ${deliveryPincode || '—'}`,
     `Preferred Date: ${formatDate(deliveryDate)}`,

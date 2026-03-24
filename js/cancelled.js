@@ -132,7 +132,12 @@ ${emailSectionCancel('Customer (order placed by)', [
 ${emailSectionCancel('Delivery (recipient & address)', [
   emailRowCancel('Recipient name', order.recipientName),
   emailRowCancel('Recipient phone', order.recipientPhone || '—'),
-  emailRowCancel('Address', order.deliveryAddress + ', ' + order.deliveryCity + ' — ' + order.deliveryPincode),
+  emailRowCancel('Alternative phone', order.recipientPhoneAlt || '—'),
+  emailRowCancel('House name', order.deliveryHouseName || order.deliveryAddress || '—'),
+  emailRowCancel('Street name', order.deliveryStreetName || '—'),
+  emailRowCancel('Landmark', order.deliveryLandmark || '—'),
+  emailRowCancel('City', order.deliveryCity),
+  emailRowCancel('Pincode', order.deliveryPincode),
   emailRowCancel('Preferred date', typeof formatDate === 'function' ? formatDate(order.deliveryDate) : order.deliveryDate),
   emailRowCancel('Urgent delivery', order.urgentDelivery ? 'Yes' : 'No'),
 ].join(''))}
@@ -167,7 +172,12 @@ CUSTOMER (Order placed by — all details from form)
 DELIVERY DETAILS (Recipient & address from form)
   Recipient Name:   ${order.recipientName}
   Recipient Phone:  ${order.recipientPhone || '—'}
-  Address:          ${order.deliveryAddress}, ${order.deliveryCity} — ${order.deliveryPincode}
+  Alternative Phone: ${order.recipientPhoneAlt || '—'}
+  House name:      ${order.deliveryHouseName || order.deliveryAddress || '—'}
+  Street name:     ${order.deliveryStreetName || '—'}
+  Landmark:        ${order.deliveryLandmark || '—'}
+  City:            ${order.deliveryCity}
+  Pincode:         ${order.deliveryPincode}
   Preferred Date:   ${typeof formatDate === 'function' ? formatDate(order.deliveryDate) : order.deliveryDate}
   Urgent Delivery:  ${order.urgentDelivery ? 'Yes' : 'No'}
 

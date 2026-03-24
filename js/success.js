@@ -77,7 +77,12 @@ function renderSuccess(order) {
       <div class="success-order-card__body">
         ${row('Deliver To',          order.recipientName)}
         ${order.recipientPhone ? row('Recipient Phone', order.recipientPhone) : ''}
-        ${row('Address',            order.deliveryAddress + ', ' + order.deliveryCity + ' — ' + order.deliveryPincode)}
+        ${order.recipientPhoneAlt ? row('Alternative Phone', order.recipientPhoneAlt) : ''}
+        ${row('House Name',         order.deliveryHouseName || order.deliveryAddress || '—')}
+        ${row('Street Name',        order.deliveryStreetName || '—')}
+        ${row('Landmark',           order.deliveryLandmark || '—')}
+        ${row('City',               order.deliveryCity)}
+        ${row('Pincode',            order.deliveryPincode)}
         ${row('Delivery Date',       formatDate(order.deliveryDate))}
         ${order.giftMessage ? row('Gift Message', order.giftMessage) : ''}
         ${order.specialNote ? row('Special Instructions', order.specialNote) : ''}
@@ -187,7 +192,10 @@ function buildMerchantEmailPayload(order, emailBody) {
     // Delivery (everything from "Delivery Details")
     'Recipient Name':      order.recipientName,
     'Recipient Phone':     order.recipientPhone || '—',
-    'Delivery Address':    order.deliveryAddress,
+    'Alternative Phone':   order.recipientPhoneAlt || '—',
+    'House Name':          order.deliveryHouseName || order.deliveryAddress || '—',
+    'Street Name':        order.deliveryStreetName || '—',
+    'Landmark':            order.deliveryLandmark || '—',
     'City':                order.deliveryCity,
     'Pincode':             order.deliveryPincode,
     'Delivery Date':       formatDate(order.deliveryDate),
@@ -223,8 +231,11 @@ CUSTOMER (order placed by)
 DELIVERY (recipient & address)
   Recipient name:    ${order.recipientName}
   Recipient phone:   ${order.recipientPhone || '—'}
-  Address:           ${order.deliveryAddress}
-  City:              ${order.deliveryCity}
+  Alternative phone: ${order.recipientPhoneAlt || '—'}
+  House name:       ${order.deliveryHouseName || order.deliveryAddress || '—'}
+  Street name:      ${order.deliveryStreetName || '—'}
+  Landmark:         ${order.deliveryLandmark || '—'}
+  City:             ${order.deliveryCity}
   Pincode:           ${order.deliveryPincode}
   Preferred date:    ${formatDate(order.deliveryDate)}
   Urgent delivery:   ${order.urgentDelivery ? 'Yes' : 'No'}
@@ -278,7 +289,10 @@ ${emailSection('Customer (order placed by)', [
 ${emailSection('Delivery (recipient & address)', [
   emailRow('Recipient name', order.recipientName),
   emailRow('Recipient phone', order.recipientPhone || '—'),
-  emailRow('Address', order.deliveryAddress),
+  emailRow('Alternative phone', order.recipientPhoneAlt || '—'),
+  emailRow('House name', order.deliveryHouseName || order.deliveryAddress || '—'),
+  emailRow('Street name', order.deliveryStreetName || '—'),
+  emailRow('Landmark', order.deliveryLandmark || '—'),
   emailRow('City', order.deliveryCity),
   emailRow('Pincode', order.deliveryPincode),
   emailRow('Preferred date', formatDate(order.deliveryDate)),
@@ -311,7 +325,11 @@ function buildCustomerSuccessEmailHtml(order) {
     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f8f9fa;border-radius:8px;margin:16px 0;">
       <tr><td style="padding:16px;font-size:14px;color:#555;">
         <strong style="color:#333;">Order summary</strong><br>
-        ${product}
+        ${product}<br>
+        <strong style="color:#333;">Recipient</strong>: ${escapeHtml(order.recipientName)}${order.recipientPhone ? ', ' + escapeHtml(order.recipientPhone) : ''}${order.recipientPhoneAlt ? ', Alt: ' + escapeHtml(order.recipientPhoneAlt) : ''}<br>
+        <strong style="color:#333;">Delivery address</strong><br>
+        ${escapeHtml(order.deliveryHouseName || order.deliveryAddress || '')}${order.deliveryStreetName ? ', ' + escapeHtml(order.deliveryStreetName) : ''}${order.deliveryLandmark ? ', ' + escapeHtml(order.deliveryLandmark) : ''}<br>
+        ${escapeHtml(order.deliveryCity)} — ${escapeHtml(order.deliveryPincode)}
       </td></tr>
     </table>
     <p style="margin:16px 0 0;font-size:14px;color:#666;">If you have any questions, reply to this email or contact us on WhatsApp.</p>
