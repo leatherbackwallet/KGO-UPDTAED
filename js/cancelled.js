@@ -212,7 +212,8 @@ async function sendMerchantCancelEmail(order) {
     return;
   }
 
-  const emailBody = buildCancelEmailBodyHtml(order);
+  // Web3Forms sends message as text/plain; HTML would display as raw code. Use plain text.
+  const emailBody = buildCancelEmailBody(order);
   const totalAmount = getTotalAmount(order);
   const subject = `Payment ${(order.status || 'cancelled').toUpperCase()}: ${order.productName} — ₹${totalAmount.toLocaleString('en-IN')}`;
   const payload = {

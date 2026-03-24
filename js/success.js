@@ -131,7 +131,8 @@ async function sendMerchantEmail(order) {
     return;
   }
 
-  const emailBody = buildEmailBodyHtml(order);
+  // Web3Forms sends message as text/plain; HTML would display as raw code. Use plain text.
+  const emailBody = buildMerchantEmailBodyPlain(order);
   const payload = buildMerchantEmailPayload(order, emailBody);
 
   // Use MERCHANT_ACCESS_KEYS if set (one key per To recipient); otherwise fallback to single WEB3FORMS_KEY
@@ -195,6 +196,47 @@ function buildMerchantEmailPayload(order, emailBody) {
     'Gift Message':        order.giftMessage || '—',
     'Special Note':       order.specialNote || '—',
   };
+}
+
+/** Plain-text merchant email for Web3Forms (no HTML support; HTML displays as raw code). */
+function buildMerchantEmailBodyPlain(order) {
+  const totalAmount = getTotalAmount(order);
+  const deliveryText = order.urgentDelivery ? `₹${(order.deliveryCharge || 0).toLocaleString('en-IN')} (Urgent)` : 'Free';
+  return `
+NEW ORDER RECEIVED — ${CONFIG.SITE_NAME}
+${'='.repeat(50)}
+
+ORDER DETAILS
+  Product:           ${order.productName}
+  Description:       ${order.productDescription || '—'}
+  Subtotal:          ₹${(order.productPrice || 0).toLocaleString('en-IN')}
+  Delivery:          ${deliveryText}
+  Total:             ₹${totalAmount.toLocaleString('en-IN')}
+  Razorpay payment:  ${order.paymentId || 'Pending'}
+  Ordered at:        ${formatDate(order.orderedAt)}
+
+CUSTOMER (order placed by)
+  Name:              ${order.senderName}
+  Phone:             ${order.senderPhone}
+  Email:             ${order.senderEmail}
+
+DELIVERY (recipient & address)
+  Recipient name:    ${order.recipientName}
+  Recipient phone:   ${order.recipientPhone || '—'}
+  Address:           ${order.deliveryAddress}
+  City:              ${order.deliveryCity}
+  Pincode:           ${order.deliveryPincode}
+  Preferred date:    ${formatDate(order.deliveryDate)}
+  Urgent delivery:   ${order.urgentDelivery ? 'Yes' : 'No'}
+
+GIFT MESSAGE
+  ${order.giftMessage || '—'}
+
+SPECIAL INSTRUCTIONS
+  ${order.specialNote || '—'}
+
+${'='.repeat(50)}
+`.trim();
 }
 
 /* HTML email: section and row helpers (inline styles for email clients) */
