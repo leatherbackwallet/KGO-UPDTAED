@@ -3,8 +3,24 @@
 document.addEventListener('DOMContentLoaded', async () => {
   initMobileMenu();
 
-  const slug = getParam('slug');
+  // Read slug: ?slug=, then #hash, then sessionStorage (server may strip URL params)
+  let slug = getParam('slug');
+  if (!slug && location.hash) {
+    try {
+      slug = decodeURIComponent(location.hash.replace(/^#/, ''));
+    } catch (_) {}
+  }
   if (!slug) {
+    const stored = sessionLoad('lastCheckoutSlug');
+    if (stored && typeof stored === 'string' && stored.trim()) {
+      slug = stored.trim();
+      try {
+        sessionStorage.removeItem('lastCheckoutSlug');
+        history.replaceState({}, '', `${location.pathname}?slug=${encodeURIComponent(slug)}${location.hash || ''}`);
+      } catch (_) {}
+    }
+  }
+  if (!slug || String(slug).trim() === '') {
     redirectToProducts('No product selected.');
     return;
   }
