@@ -329,7 +329,7 @@
   "description": "Special Plum Cake 1 Kg with Red Roses, Photo printed Mug with Framed Photo",
   "slug": "special-plum-cake-1-kg-with-red-roses-photo-printed-mug-with-framed-photo",
   "categories": [],
-  "price": 5200,
+  "price": 5750,
   "costPrice": 0,
   "stock": 200,
   "images": [
@@ -575,7 +575,7 @@
   "description": "1 KG Black Forest with Mixed Fresh Roses with Customised greetings",
   "slug": "black-forest-with-mixed-fresh-rose-bouquets",
   "categories": [],
-  "price": 4900,
+  "price": 3900,
   "costPrice": 0,
   "stock": 200,
   "images": [
@@ -832,7 +832,7 @@
   "description": "Lucky Bamboo with Ferrero Rocher Box 16 Pcs and Greetings",
   "slug": "lucky-bamboo-with-ferrero-rocher-chocolates-and-greetings",
   "categories": [],
-  "price": 4100,
+  "price": 3100,
   "costPrice": 0,
   "stock": 200,
   "images": [
@@ -861,7 +861,7 @@
   "description": "Special Plum Cake 1 Kg with a Fresh Red Roses Bouquet and Ferrero Rocher",
   "slug": "special-plum-cake-1-kg-with-a-fresh-red-roses-bouquet-and-ferrero-rocher",
   "categories": [],
-  "price": 5100,
+  "price": 4400,
   "costPrice": 0,
   "stock": 200,
   "images": [
@@ -1520,7 +1520,7 @@
   "description": "Black Forest Cake-1 Kg with Fresh Red Roses Bouquet and Chocolates.",
   "slug": "black-forest-cake-with-red-roses-bouquet-and-chocolates",
   "categories": [],
-  "price": 5100,
+  "price": 4400,
   "costPrice": 0,
   "stock": 200,
   "images": [
@@ -2215,7 +2215,7 @@
   "description": "White forest Cake 1 Kg with a Fresh Red Rose Bouquet and Chocolates",
   "slug": "white-forest-cake-with-a-fresh-red-rose-bouquet-and-chocolates",
   "categories": [],
-  "price": 5100,
+  "price": 4400,
   "costPrice": 0,
   "stock": 200,
   "images": [
@@ -3819,7 +3819,7 @@
       "$oid": "68f8ab0378d033884432c3a1"
     }
   ],
-  "price": 3800,
+  "price": 4200,
   "costPrice": 0,
   "stock": 200,
   "images": [
@@ -3995,7 +3995,7 @@
       "$oid": "68cd4a04d03e43bd6d816d72"
     }
   ],
-  "price": 3700,
+  "price": 3900,
   "costPrice": 0,
   "stock": 200,
   "images": [
