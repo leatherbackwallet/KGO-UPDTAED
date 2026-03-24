@@ -4,9 +4,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   initMobileMenu();
   highlightActiveNav();
 
-  const slug = getParam('slug');
+  // Read slug: ?slug=, then #hash, then sessionStorage (in case server strips URL params)
+  let slug = getParam('slug');
+  if (!slug && location.hash) {
+    try {
+      slug = decodeURIComponent(location.hash.replace(/^#/, ''));
+    } catch (_) {}
+  }
   if (!slug) {
+    const stored = sessionLoad('lastProductSlug');
+    if (stored && typeof stored === 'string' && stored.trim()) {
+      slug = stored.trim();
+      try {
+        sessionStorage.removeItem('lastProductSlug');
+        history.replaceState({}, '', `${location.pathname}?slug=${encodeURIComponent(slug)}${location.hash || ''}`);
+      } catch (_) {}
+    }
+  }
+  if (!slug || String(slug).trim() === '') {
     renderError('No product specified.');
+    const el = document.getElementById('breadcrumb');
+    if (el) el.innerHTML = '<a href="/">Home</a><span class="breadcrumb__sep">›</span><a href="./products.html">Products</a><span class="breadcrumb__sep">›</span><span class="breadcrumb__current">Product</span>';
     return;
   }
 
@@ -21,6 +39,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderProductDetail(product);
   renderRelatedProducts(product);
   updatePageMeta(product);
+
+  // Save slug before checkout navigation (in case server strips URL params)
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-checkout-slug]');
+    if (a) sessionSave('lastCheckoutSlug', a.dataset.checkoutSlug);
+  });
 });
 
 /* ─── LOADING STATE ─── */
@@ -126,7 +150,9 @@ function renderInfo(product) {
     return `<span class="filter-pill">${meta.emoji} ${meta.label}</span>`;
   }).join('');
 
-  const buyBtn = `<a href="./checkout.html?slug=${encodeURIComponent(product.slug)}" class="btn btn-primary btn-lg">Buy Now — ${formatPrice(product.price)}</a>`;
+  // Use ?slug= and #hash so slug survives server redirects that strip query params
+  const slugEnc = encodeURIComponent(product.slug);
+  const buyBtn = `<a href="./checkout.html?slug=${slugEnc}#${slugEnc}" class="btn btn-primary btn-lg" data-checkout-slug="${escapeHtml(product.slug)}">Buy Now — ${formatPrice(product.price)}</a>`;
 
   infoEl.innerHTML = `
     <div class="product-info__badges">

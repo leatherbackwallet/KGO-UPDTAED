@@ -11,6 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
   renderHomeCarousel();
   renderFeaturedProducts();
   renderCategoryBanners();
+  // Save slug before navigation so product/checkout pages can use it if URL params get stripped by server
+  document.addEventListener('click', (e) => {
+    const productLink = e.target.closest('a[data-product-slug]');
+    const checkoutLink = e.target.closest('a[data-checkout-slug]');
+    if (productLink) sessionSave('lastProductSlug', productLink.dataset.productSlug);
+    if (checkoutLink) sessionSave('lastCheckoutSlug', checkoutLink.dataset.checkoutSlug);
+  });
 });
 
 /* ─── HOME CAROUSEL (Picked for you) ─── */
@@ -192,17 +199,19 @@ async function renderCategoryBanners() {
 function renderProductCard(product) {
   const price    = formatPrice(product.price);
   const imgSrc   = getImageUrl(product.primaryImage, 'medium');
-  const detailUrl = `./product.html?slug=${encodeURIComponent(product.slug)}`;
+  // Use both ?slug= and #slug so slug survives server redirects that strip query params (e.g. /product.html?slug=x → /product)
+  const detailUrl = `./product.html?slug=${encodeURIComponent(product.slug)}#${encodeURIComponent(product.slug)}`;
   const occasionTags = product.occasions.slice(0, 3).map(o => {
     const meta = getOccasionMeta(o);
     return `<span class="product-card__occasion-tag">${meta.emoji} ${meta.label}</span>`;
   }).join('');
 
-  const buyBtn = `<a href="./checkout.html?slug=${encodeURIComponent(product.slug)}" class="btn btn-primary btn-sm product-card__buy">Buy Now</a>`;
+  const checkoutUrl = `./checkout.html?slug=${encodeURIComponent(product.slug)}#${encodeURIComponent(product.slug)}`;
+  const buyBtn = `<a href="${checkoutUrl}" class="btn btn-primary btn-sm product-card__buy" data-checkout-slug="${escapeHtml(product.slug)}">Buy Now</a>`;
 
   return `
     <div class="product-card">
-      <a href="${detailUrl}" class="product-card__image-wrap">
+      <a href="${detailUrl}" class="product-card__image-wrap" data-product-slug="${escapeHtml(product.slug)}">
         <img
           src="${imgSrc}"
           alt="${escapeHtml(product.name)}"
@@ -212,7 +221,7 @@ function renderProductCard(product) {
         ${product.isFeatured ? '<div class="product-card__badges"><span class="badge badge-gold">Featured</span></div>' : ''}
       </a>
       <div class="product-card__body">
-        <a href="${detailUrl}" class="product-card__name">${escapeHtml(product.name)}</a>
+        <a href="${detailUrl}" class="product-card__name" data-product-slug="${escapeHtml(product.slug)}">${escapeHtml(product.name)}</a>
         <div class="product-card__occasions">${occasionTags}</div>
         <div class="product-card__footer">
           <span class="product-card__price"><span class="currency">₹</span>${product.price.toLocaleString('en-IN')}</span>
